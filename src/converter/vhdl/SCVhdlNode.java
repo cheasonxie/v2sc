@@ -11,17 +11,6 @@ import parser.vhdl.VhdlTokenConstants;
 import converter.SCSymbol;
 import converter.SCTreeNode;
 
-class NameType
-{
-    String name = "";
-    String type = "";
-    String[] typeRange = null;
-    String dir = "";
-    String[] range = new String[3];
-    String value = "";
-    String lineComment = "";
-}
-
 public class SCVhdlNode extends SCTreeNode 
     implements SCVhdlConstants, VhdlASTConstants, VhdlTokenConstants
 {
@@ -997,7 +986,10 @@ class SCVhdlArchitecture_declarative_part extends SCVhdlNode {
     public String postToString() {
         String ret = "";
         for(int i = 0; i < itemList.size(); i++) {
-            ret += "\r\n" + itemList.get(i).postToString();
+            ret += itemList.get(i).postToString();
+            if(i < itemList.size() - 1) {
+                ret += "\r\n";
+            }
         }
         return ret;
     }
@@ -1050,7 +1042,10 @@ class SCVhdlArchitecture_statement_part extends SCVhdlNode {
     public String postToString() {
         String ret = "";
         for(int i = 0; i < itemList.size(); i++) {
-            ret += "\r\n" + itemList.get(i).postToString();
+            ret += itemList.get(i).postToString();
+            if(i < itemList.size() - 1) {
+                ret += "\r\n";
+            }
         }
         return ret;
     }
@@ -1843,13 +1838,40 @@ class SCVhdlBlock_specification extends SCVhdlNode {
  *   </ul> <b>end</b> <b>block</b> [ <i>block_</i>label ] ; </ul>
  */
 class SCVhdlBlock_statement extends SCVhdlNode {
+    SCVhdlNode header = null;
+    SCVhdlNode declarative_part = null;
+    SCVhdlNode statement_part = null;
     public SCVhdlBlock_statement(SCVhdlNode p, ASTNode node) {
         super(p, node);
         assert(node.getId() == ASTBLOCK_STATEMENT);
+        for(int i = 0; i < node.getChildrenNum(); i++) {
+            ASTNode c = (ASTNode)node.getChild(i);
+            switch(c.getId())
+            {
+            case ASTBLOCK_HEADER:
+                header = new SCVhdlBlock_header(this, c);
+                break;
+            case ASTBLOCK_DECLARATIVE_PART:
+                declarative_part = new SCVhdlBlock_declarative_part(this, c);
+                break;
+            case ASTBLOCK_STATEMENT_PART:
+                statement_part = new SCVhdlBlock_statement_part(this, c);
+                break;
+            default:
+                break;
+            }
+        }
     }
 
     public String postToString() {
-        return "";
+        String ret = "";
+        String tab = intent(level+1);
+        ret += intent() + "{";
+        ret += tab + header.postToString() + "\r\n";
+        ret += tab + declarative_part.postToString() + "\r\n";
+        ret += tab + statement_part.postToString() + "\r\n";
+        ret += intent() + "}";
+        return ret;
     }
 }
 
@@ -1858,13 +1880,26 @@ class SCVhdlBlock_statement extends SCVhdlNode {
  *   <dd> { architecture_statement }
  */
 class SCVhdlBlock_statement_part extends SCVhdlNode {
+    ArrayList<SCVhdlNode> items = new ArrayList<SCVhdlNode>();
     public SCVhdlBlock_statement_part(SCVhdlNode p, ASTNode node) {
         super(p, node);
         assert(node.getId() == ASTBLOCK_STATEMENT_PART);
+        for(int i = 0; i < node.getChildrenNum(); i++) {
+            ASTNode c = (ASTNode)node.getChild(i);
+            SCVhdlNode item = new SCVhdlArchitecture_statement(this, c);
+            items.add(item);
+        }
     }
 
     public String postToString() {
-        return "";
+        String ret = "";
+        for(int i = 0; i < items.size(); i++) {
+            ret += items.get(i).postToString();
+            if(i < items.size() - 1) {
+                ret += "\r\n";
+            }
+        }
+        return ret;
     }
 }
 
@@ -1873,12 +1908,33 @@ class SCVhdlBlock_statement_part extends SCVhdlNode {
  *   <dd> <b>quantity</b> [ across_aspect ] [ through_aspect ] terminal_aspect ;
  */
 class SCVhdlBranch_quantity_declaration extends SCVhdlNode {
+    SCVhdlNode across = null;
+    SCVhdlNode through = null;
+    SCVhdlNode terminal = null;
     public SCVhdlBranch_quantity_declaration(SCVhdlNode p, ASTNode node) {
         super(p, node);
         assert(node.getId() == ASTBRANCH_QUANTITY_DECLARATION);
+        for(int i = 0; i < node.getChildrenNum(); i++) {
+            ASTNode c = (ASTNode)node.getChild(i);
+            switch(c.getId())
+            {
+            case ASTACROSS_ASPECT:
+                across = new SCVhdlAcross_aspect(this, c);
+                break;
+            case ASTTHROUGH_ASPECT:
+                through = new SCVhdlThrough_aspect(this, c);
+                break;
+            case ASTTERMINAL_ASPECT:
+                terminal = new SCVhdlTerminal_aspect(this, c);
+                break;
+            default:
+                break;
+            }
+        }
     }
 
     public String postToString() {
+        error();
         return "";
     }
 }
@@ -1888,12 +1944,33 @@ class SCVhdlBranch_quantity_declaration extends SCVhdlNode {
  *   <dd> [ break_selector_clause ] <i>quantity_</i>name => expression
  */
 class SCVhdlBreak_element extends SCVhdlNode {
+    SCVhdlNode selector = null;
+    SCVhdlNode name = null;
+    SCVhdlNode expression = null;
     public SCVhdlBreak_element(SCVhdlNode p, ASTNode node) {
         super(p, node);
         assert(node.getId() == ASTBREAK_ELEMENT);
+        for(int i = 0; i < node.getChildrenNum(); i++) {
+            ASTNode c = (ASTNode)node.getChild(i);
+            switch(c.getId())
+            {
+            case ASTBREAK_SELECTOR_CLAUSE:
+                selector = new SCVhdlBreak_selector_clause(this, c);
+                break;
+            case ASTNAME:
+                name = new SCVhdlName(this, c);
+                break;
+            case ASTEXPRESSION:
+                expression = new SCVhdlExpression(this, c);
+                break;
+            default:
+                break;
+            }
+        }
     }
 
     public String postToString() {
+        error();
         return "";
     }
 }
@@ -1903,12 +1980,20 @@ class SCVhdlBreak_element extends SCVhdlNode {
  *   <dd> break_element { , break_element }
  */
 class SCVhdlBreak_list extends SCVhdlNode {
+    ArrayList<SCVhdlNode> elements = new ArrayList<SCVhdlNode>();
     public SCVhdlBreak_list(SCVhdlNode p, ASTNode node) {
         super(p, node);
         assert(node.getId() == ASTBREAK_LIST);
+        for(int i = 0; i < node.getChildrenNum(); i++) {
+            ASTNode c = (ASTNode)node.getChild(i);
+            assert(c.getId() == ASTBREAK_ELEMENT);
+            SCVhdlNode ele = new SCVhdlBreak_element(this, c);
+            elements.add(ele);
+        }
     }
 
     public String postToString() {
+        error();
         return "";
     }
 }
@@ -1918,12 +2003,25 @@ class SCVhdlBreak_list extends SCVhdlNode {
  *   <dd> <b>for</b> <i>quantity_</i>name <b>use</b>
  */
 class SCVhdlBreak_selector_clause extends SCVhdlNode {
+    SCVhdlName name = null;
     public SCVhdlBreak_selector_clause(SCVhdlNode p, ASTNode node) {
         super(p, node);
         assert(node.getId() == ASTBREAK_SELECTOR_CLAUSE);
+        for(int i = 0; i < node.getChildrenNum(); i++) {
+            ASTNode c = (ASTNode)node.getChild(i);
+            switch(c.getId())
+            {
+            case ASTNAME:
+                name = new SCVhdlName(this, c);
+                break;
+            default:
+                break;
+            }
+        }        
     }
 
     public String postToString() {
+        error();
         return "";
     }
 }
@@ -1955,7 +2053,7 @@ class SCVhdlBreak_statement extends SCVhdlNode {
     }
 
     public String postToString() {
-        warning("break statement not support");
+        error();
         return "";
     }
 }
@@ -2218,9 +2316,29 @@ class SCVhdlChoices extends SCVhdlNode {
  *   </ul> <b>end</b> <b>for</b> ;
  */
 class SCVhdlComponent_configuration extends SCVhdlNode {
+    SCVhdlNode spec = null;
+    SCVhdlNode binding = null;
+    SCVhdlNode block = null;
     public SCVhdlComponent_configuration(SCVhdlNode p, ASTNode node) {
         super(p, node);
         assert(node.getId() == ASTCOMPONENT_CONFIGURATION);
+        for(int i = 0; i < node.getChildrenNum(); i++) {
+            ASTNode c = (ASTNode)node.getChild(i);
+            switch(c.getId())
+            {
+            case ASTCOMPONENT_SPECIFICATION:
+                spec = new SCVhdlComponent_specification(this, c);
+                break;
+            case ASTBINDING_INDICATION:
+                binding = new SCVhdlBinding_indication(this, c);
+                break;
+            case ASTSEQUENCE_OF_STATEMENTS:
+                block = new SCVhdlBlock_configuration(this, c);
+                break;
+            default:
+                break;
+            }
+        }
     }
 
     public String postToString() {
