@@ -4948,9 +4948,27 @@ class SCVhdlLogical_name extends SCVhdlNode {
  *   <dd> logical_name { , logical_name }
  */
 class SCVhdlLogical_name_list extends SCVhdlNode {
+    ArrayList<SCVhdlNode> names = new ArrayList<SCVhdlNode>();
     public SCVhdlLogical_name_list(SCVhdlNode p, ASTNode node) {
         super(p, node);
         assert(node.getId() == ASTLOGICAL_NAME_LIST);
+        for(int i = 0; i < node.getChildrenNum(); i++) {
+            ASTNode c = (ASTNode)node.getChild(i);
+            SCVhdlNode newNode = null;
+            switch(c.getId())
+            {
+            case ASTIDENTIFIER:
+                newNode = new SCVhdlLogical_name(this, c);
+                names.add(newNode);
+                break;
+            default:
+                break;
+            }
+        }
+    }
+    
+    public ArrayList<SCVhdlNode> getNames() {
+        return names;
     }
 
     public String postToString() {
@@ -5394,9 +5412,29 @@ class SCVhdlPackage_body_declarative_part extends SCVhdlNode {
  *   </ul> <b>end</b> [ <b>package</b> ] [ <i>package_</i>simple_name ] ;
  */
 class SCVhdlPackage_declaration extends SCVhdlNode {
+    SCVhdlNode identifier = null;
+    SCVhdlNode declarative_part = null;
     public SCVhdlPackage_declaration(SCVhdlNode p, ASTNode node) {
         super(p, node);
         assert(node.getId() == ASTPACKAGE_DECLARATION);
+        for(int i = 0; i < node.getChildrenNum(); i++) {
+            ASTNode c = (ASTNode)node.getChild(i);
+            switch(c.getId())
+            {
+            case ASTIDENTIFIER:
+                identifier = new SCVhdlIdentifier(this, c);
+                break;
+            case ASTPACKAGE_DECLARATIVE_PART:
+                declarative_part = new SCVhdlPackage_declarative_part(this, c);
+                break;
+            default:
+                break;
+            }
+        }
+    }
+    
+    public String getName() {
+        return identifier.postToString();
     }
 
     public String postToString() {
@@ -5426,13 +5464,73 @@ class SCVhdlPackage_declaration extends SCVhdlNode {
  *   <br> | terminal_declaration
  */
 class SCVhdlPackage_declarative_item extends SCVhdlNode {
+    SCVhdlNode item = null;
     public SCVhdlPackage_declarative_item(SCVhdlNode p, ASTNode node) {
         super(p, node);
         //assert(node.getId() == ASTPACKAGE_DECLARATIVE_ITEM);
+        switch(node.getId())
+        {
+        case ASTSUBPROGRAM_DECLARATION:
+            item = new SCVhdlSubprogram_declaration(this, node);
+            break;
+        case ASTTYPE_DECLARATION:
+            item = new SCVhdlType_declaration(this, node);
+            break;
+        case ASTSUBTYPE_DECLARATION:
+            item = new SCVhdlSubtype_declaration(this, node);
+            break;
+        case ASTCONSTANT_DECLARATION:
+            item = new SCVhdlConstant_declaration(this, node);
+            break;
+        case ASTSIGNAL_DECLARATION:
+            item = new SCVhdlSignal_declaration(this, node);
+            break;
+        case ASTVARIABLE_DECLARATION:
+            item = new SCVhdlVariable_declaration(this, node);
+            break;
+        case ASTFILE_DECLARATION:
+            item = new SCVhdlFile_declaration(this, node);
+            break;
+        case ASTALIAS_DECLARATION:
+            item = new SCVhdlAlias_declaration(this, node);
+            break;
+        case ASTCOMPONENT_DECLARATION:
+            item = new SCVhdlComponent_declaration(this, node);
+            break;
+        case ASTATTRIBUTE_DECLARATION:
+            item = new SCVhdlAttribute_declaration(this, node);
+            break;
+        case ASTATTRIBUTE_SPECIFICATION:
+            item = new SCVhdlAttribute_specification(this, node);
+            break;
+        case ASTDISCONNECTION_SPECIFICATION:
+            item = new SCVhdlDisconnection_specification(this, node);
+            break;
+        case ASTUSE_CLAUSE:
+            item = new SCVhdlUse_clause(this, node);
+            break;
+        case ASTGROUP_TEMPLATE_DECLARATION:
+            item = new SCVhdlGroup_template_declaration(this, node);
+            break;
+        case ASTGROUP_DECLARATION:
+            item = new SCVhdlGroup_declaration(this, node);
+            break;
+        case ASTNATURE_DECLARATION:
+            item = new SCVhdlNature_declaration(this, node);
+            break;
+        case ASTSUBNATURE_DECLARATION:
+            item = new SCVhdlSubnature_declaration(this, node);
+            break;
+        case ASTTERMINAL_DECLARATION:
+            item = new SCVhdlTerminal_declaration(this, node);
+            break;
+        default:
+            break;
+        }
     }
 
     public String postToString() {
-        return "";
+        return item.postToString();
     }
 }
 
@@ -7761,13 +7859,28 @@ class SCVhdlUnconstrained_nature_definition extends SCVhdlNode {
  *   <dd> <b>use</b> selected_name { , selected_name } ;
  */
 class SCVhdlUse_clause extends SCVhdlNode {
+    ArrayList<SCVhdlNode> names = new ArrayList<SCVhdlNode>();
     public SCVhdlUse_clause(SCVhdlNode p, ASTNode node) {
         super(p, node);
         assert(node.getId() == ASTUSE_CLAUSE);
+        for(int i = 0; i < node.getChildrenNum(); i++) {
+            ASTNode c = (ASTNode)node.getChild(i);
+            SCVhdlNode newNode = null;
+            switch(c.getId())
+            {
+            case ASTSELECTED_NAME:
+                newNode = new SCVhdlSelected_name(this, c);
+                names.add(newNode);
+                break;
+            default:
+                break;
+            }
+        }
     }
 
     public String postToString() {
-        return "";
+        String ret = "";
+        return ret;
     }
 }
 
