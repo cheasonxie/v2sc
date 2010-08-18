@@ -15,8 +15,8 @@ public class hdl2SystemC
         try
         {
             hdlConverter conv = null;
-            //String path = "ahbctrl.vhd";
-            String path = "apbuart.vhd";
+            String path = "ahbctrl.vhd";
+            //String path = "apbuart.vhd";
             //String path = "ac97_top.v";
             if(args.length > 1)
                 path = args[1];

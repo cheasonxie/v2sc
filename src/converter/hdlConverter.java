@@ -11,7 +11,7 @@ import java.util.ArrayList;
 
 import parser.ParserException;
 
-public class hdlConverter implements SCTreeConstants
+public abstract class hdlConverter implements SCTreeConstants
 {
     static public final int T_NONE = 0;
     static public final int T_VHDL = 1;
@@ -111,16 +111,10 @@ public class hdlConverter implements SCTreeConstants
         m_targetFileBuff = new PrintStream(file);
     }
     
-    public void convertFile(String srcPath, String dstPath) 
-        throws ParserException, FileNotFoundException, IOException
-    {
-    }
+    public abstract void convertFile(String srcPath, String dstPath) 
+        throws ParserException, FileNotFoundException, IOException;
     
-    public void convertDir(String srcDir) throws ParserException, IOException
-    {        
-    }
+    public abstract void convertDir(String srcDir) throws ParserException, IOException;
     
-    public void parseLibSymbols(String srcDir) throws ParserException, IOException
-    {
-    }
+    public abstract void parseLibSymbols(String srcDir) throws ParserException, IOException;
 }

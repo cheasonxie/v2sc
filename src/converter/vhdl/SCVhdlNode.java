@@ -4833,15 +4833,20 @@ class SCVhdlLabel extends SCVhdlNode {
  *   <dd> <b>library</b> logical_name_list ;
  */
 class SCVhdlLibrary_clause extends SCVhdlNode {
-    SCVhdlNode logical_name_list = null;
+    SCVhdlLogical_name_list logical_name_list = null;
     public SCVhdlLibrary_clause(SCVhdlNode p, ASTNode node) {
         super(p, node);
         assert(node.getId() == ASTLIBRARY_CLAUSE);
         logical_name_list = new SCVhdlLogical_name_list(this, (ASTNode)node.getChild(0));
     }
+    
+    public ArrayList<SCVhdlNode> getNames() {
+        return logical_name_list.getNames();
+    } 
 
     public String postToString() {
-        return logical_name_list.postToString() + ";";
+        return "";
+        //return logical_name_list.postToString() + ";";
     }
 }
 
@@ -5119,6 +5124,16 @@ class SCVhdlName extends SCVhdlNode {
         default:
             break;
         }
+    }
+    
+    public ArrayList<String> getNameSegments() {
+        ArrayList<String> segments = new ArrayList<String>();
+        if(item instanceof SCVhdlSelected_name) {
+            segments.addAll(((SCVhdlSelected_name)item).getNameSegments());
+        }else {
+            segments.add(item.postToString());
+        }
+        return segments;
     }
 
     public String postToString() {
@@ -5731,13 +5746,36 @@ class SCVhdlPort_map_aspect extends SCVhdlNode {
  *   <br> | function_call
  */
 class SCVhdlPrefix extends SCVhdlNode {
+    SCVhdlNode item = null;
     public SCVhdlPrefix(SCVhdlNode p, ASTNode node) {
         super(p, node);
         assert(node.getId() == ASTPREFIX);
+        ASTNode c = (ASTNode)node.getChild(0);
+        switch(c.getId())
+        {
+        case ASTNAME:
+            item = new SCVhdlName(this, c);
+            break;
+        case ASTFUNCTION_CALL:
+            item = new SCVhdlFunction_call(this, c);
+            break;
+        default:
+            break;
+        }
+    }
+    
+    public ArrayList<String> getNameSegments() {
+        ArrayList<String> segments = new ArrayList<String>();
+        if(item instanceof SCVhdlName) {
+            segments.addAll(((SCVhdlName)item).getNameSegments());
+        }else {
+            segments.add(item.postToString());
+        }
+        return segments;
     }
 
     public String postToString() {
-        return "";
+        return item.postToString();
     }
 }
 
@@ -6526,6 +6564,13 @@ class SCVhdlSelected_name extends SCVhdlNode {
                 break;
             }
         }
+    }
+    
+    public ArrayList<String> getNameSegments() {
+        ArrayList<String> segments = new ArrayList<String>();
+        segments.addAll(prefix.getNameSegments());
+        segments.add(suffix.postToString());
+        return segments;
     }
 
     public String postToString() {
@@ -7561,13 +7606,29 @@ class SCVhdlSubtype_indication extends SCVhdlNode {
  *   <br> | <b>all</b>
  */
 class SCVhdlSuffix extends SCVhdlNode {
+    SCVhdlNode item = null;
     public SCVhdlSuffix(SCVhdlNode p, ASTNode node) {
         super(p, node);
         assert(node.getId() == ASTSUFFIX);
+        ASTNode c = (ASTNode)node.getChild(0);
+        switch(c.getId())
+        {
+        case ASTIDENTIFIER:
+            item = new SCVhdlSimple_name(this, c);
+            break;
+        case ASTOPERATOR_SYMBOL:
+            item = new SCVhdlOperator_symbol(this, c);
+            break;
+        case ASTVOID:
+            item = new SCVhdlToken(this, c);
+            break;
+        default:
+            break;
+        }
     }
 
     public String postToString() {
-        return "";
+        return item.postToString();
     }
 }
 
@@ -7859,13 +7920,20 @@ class SCVhdlUnconstrained_nature_definition extends SCVhdlNode {
  *   <dd> <b>use</b> selected_name { , selected_name } ;
  */
 class SCVhdlUse_clause extends SCVhdlNode {
-    ArrayList<SCVhdlNode> names = new ArrayList<SCVhdlNode>();
+    static final String IEEE = "ieee";
+    static final String STD_LOGIC_1164 = "std_logic_1164";
+    static final String STD = "std";
+    static final String TEXTIO = "textio";
+    static final String WORK = "work";
+    
+    ArrayList<SCVhdlSelected_name> names = new ArrayList<SCVhdlSelected_name>();
+    
     public SCVhdlUse_clause(SCVhdlNode p, ASTNode node) {
         super(p, node);
         assert(node.getId() == ASTUSE_CLAUSE);
         for(int i = 0; i < node.getChildrenNum(); i++) {
             ASTNode c = (ASTNode)node.getChild(i);
-            SCVhdlNode newNode = null;
+            SCVhdlSelected_name newNode = null;
             switch(c.getId())
             {
             case ASTSELECTED_NAME:
@@ -7880,6 +7948,31 @@ class SCVhdlUse_clause extends SCVhdlNode {
 
     public String postToString() {
         String ret = "";
+        for(int i = 0; i < names.size(); i++) {
+            ArrayList<String> segs = names.get(i).getNameSegments();
+            if(segs.size() == 0 || segs.get(0).equalsIgnoreCase(IEEE) 
+                    || segs.get(0).equalsIgnoreCase(STD)) {
+                //TODO do something
+                continue;
+            }
+            
+            String tmp = "#include \"";
+            for(int j = 0; j < segs.size(); j++) {
+                String seg = segs.get(j);
+                if(seg.equalsIgnoreCase(WORK)) { continue; }
+                tmp += seg;
+                if(j == segs.size()-1 || 
+                    (j == segs.size()-2 && seg.equalsIgnoreCase(tokenImage[ALL])))
+                    tmp += ".h\"";
+                else
+                    tmp += "/";
+            }
+            
+            ret += tmp;
+            if(i < names.size() - 1) {
+                ret += "\r\n";
+            }
+        }
         return ret;
     }
 }
