@@ -27,7 +27,6 @@ public class Vhdl extends hdlConverter implements VhdlASTConstants {
         m_targetFileBuff.println("\r\n#include <systemc.h>");
 
         ASTNode designFile = parser.design_file();
-        printTree(designFile, 0, srcPath);
         SCVhdlNode rootNode = new SCVhdlNode(null, designFile);
         m_targetFileBuff.println(rootNode);
     }
@@ -81,6 +80,7 @@ public class Vhdl extends hdlConverter implements VhdlASTConstants {
             System.out.println("index:" + i);
             String path = list.getFile(i);
             try {
+                System.out.println("file:" + path);
                 VhdlParser parser = new VhdlParser(new FileReader(path));
                 ASTNode designFile;
                 designFile = parser.design_file();

@@ -105,7 +105,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
                 break;
             }
             
-            Token tmp, tmp1 = null;
+            Token tmp, tmp1 = null, tmp2 = null;
             int tmpKind = -1;
             switch(token.kind)
             {
@@ -117,10 +117,21 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
             case ARCHITECTURE:
             case ENTITY:
             case PACKAGE:
-            case PROCEDURE:
-            case FUNCTION:
                 tmp1 = findTokenInBlock(nextToken, END, to);
                 nextToken = tm.getNextToken(tmp1); // ignore block
+                break;
+                
+            case PROCEDURE:
+            case FUNCTION:
+                tmp1 = findTokenInBlock(nextToken, IS, to);
+                tmp2 = findTokenInBlock(nextToken, SEMICOLON, to);
+                if((tmp1 != null && tmp2 != null && checkLateComming(tmp2, tmp1))
+                        || (tmp1 != null && tmp2 == null)) {
+                    tmp1 = findTokenInBlock(nextToken, END, to);    // is subprogram body
+                    nextToken = tm.getNextToken(tmp1); // ignore block
+                }else {
+                    nextToken = tm.getNextToken(tmp2); // is subprogram declaration
+                }
                 break;
                 
             case FOR:
@@ -4399,7 +4410,9 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         consumeToken(IS);
         package_declarative_part(node, endToken);
         consumeToken(END);
-        consumeToken(PACKAGE);
+        if(tm.getNextTokenKind() == PACKAGE) {
+            consumeToken(PACKAGE);
+        }
         if(tm.getNextTokenKind() == identifier) {
             Token t1 = ((ASTNode)node.getChild(0)).getFirstToken();
             Token t2 = tm.toNextToken();
@@ -6267,7 +6280,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
     void subprogram_declaration(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTSUBPROGRAM_DECLARATION);
         openNodeScope(node);
-        endToken = findToken(SEMICOLON, endToken);
+        endToken = findTokenInBlock(SEMICOLON, endToken);
         subprogram_specification(p, endToken);
         consumeToken(SEMICOLON);
         closeNodeScope(node);
