@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import common.printFileAndLineNumber;
 
-import parser.INode;
+import parser.IASTNode;
 import parser.vhdl.ASTNode;
 import parser.vhdl.VhdlASTConstants;
 import parser.vhdl.VhdlTokenConstants;
@@ -589,7 +589,7 @@ class SCVhdlAcross_aspect extends SCVhdlNode {
         assert(node.getId() == ASTACROSS_ASPECT);
         int i;
         for(i = 0; i < node.getChildrenNum(); i++) {
-            INode c = node.getChild(i);
+            IASTNode c = node.getChild(i);
             int id = c.getId();
             switch(id)
             {
@@ -752,7 +752,7 @@ class SCVhdlAggregate extends SCVhdlNode {
         super(p, node);
         assert(node.getId() == ASTAGGREGATE);
         for(int i = 0; i < node.getChildrenNum(); i++) {
-            INode c = node.getChild(i);
+            IASTNode c = node.getChild(i);
             SCVhdlNode n = new SCVhdlElement_association(this, (ASTNode)c);
             elementList.add(n);
         }
@@ -8018,13 +8018,47 @@ class SCVhdlVariable_assignment_statement extends SCVhdlNode {
  *   <dd> [ <b>shared</b> ] <b>variable</b> identifier_list : subtype_indication [ := expression ] ;
  */
 class SCVhdlVariable_declaration extends SCVhdlNode {
+    SCVhdlIdentifier_list identifier_list = null;
+    SCVhdlSubtype_indication subtype_indication = null;
+    SCVhdlExpression expression = null;
     public SCVhdlVariable_declaration(SCVhdlNode p, ASTNode node) {
         super(p, node);
         assert(node.getId() == ASTVARIABLE_DECLARATION);
+        for(int i = 0; i < node.getChildrenNum(); i++) {
+            ASTNode c = (ASTNode)node.getChild(i);
+            switch(c.getId())
+            {
+            case ASTIDENTIFIER_LIST:
+                identifier_list = new SCVhdlIdentifier_list(this, c);
+                break;
+            case ASTSUBTYPE_INDICATION:
+                subtype_indication = new SCVhdlSubtype_indication(this, c);
+                break;
+            case ASTEXPRESSION:
+                expression = new SCVhdlExpression(this, c);
+                break;
+            default:
+                break;
+            }
+        }
     }
 
     public String postToString() {
-        return "";
+        String ret = intent();
+        ret += subtype_indication.postToString();
+        
+        ArrayList<SCVhdlNode> items = identifier_list.getItems();
+        for(int i = 0; i < items.size(); i++) {
+            ret += " " + items.get(i).postToString();
+            if(expression != null) {
+                ret += " " + expression.postToString();
+            }
+            if(i < items.size() - 1) {
+                ret += ",";
+            }
+        }
+        ret += ";";
+        return ret;
     }
 }
 

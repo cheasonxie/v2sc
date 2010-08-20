@@ -8,9 +8,9 @@ import java.io.IOException;
 import converter.CommentBlock;
 import converter.SCFileNode;
 
-public class vhdlFileNode extends SCFileNode
+public class VhdlFileNode extends SCFileNode
 {
-    public vhdlFileNode(String srcPath)
+    public VhdlFileNode(String srcPath)
     {
         super(srcPath);
     }

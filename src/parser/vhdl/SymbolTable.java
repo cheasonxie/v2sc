@@ -16,7 +16,7 @@ public class SymbolTable
      * Hierarchie of symbol tables is stored using this variable. The upper
      * symbol table is the enclosing architecture, entity, ... scope.
      */
-    SymbolTable upper_symtab = null;
+    SymbolTable parentTable = null;
     
     /**
      * arraylist, where the symbols are stored.
@@ -25,7 +25,7 @@ public class SymbolTable
     
     public SymbolTable() {}
     public SymbolTable(SymbolTable upsym) {
-        upper_symtab = upsym;
+        parentTable = upsym;
     }
 
     /**
@@ -44,14 +44,14 @@ public class SymbolTable
             if (identifier.compareTo(symbols.get(i).name) == 0)
                 return symbols.get(i);
         }
-        return upper_symtab.getSymbol(identifier);
+        return parentTable.getSymbol(identifier);
     }
     
-    public SymbolTable getUpperSymbolTable() {
-        return upper_symtab;
+    public SymbolTable getParentTable() {
+        return parentTable;
     }
     
-    public void setUpperSymbolTable(SymbolTable sym) {
-        upper_symtab = sym;
+    public void setParentTable(SymbolTable sym) {
+        parentTable = sym;
     }
 }

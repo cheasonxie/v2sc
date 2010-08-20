@@ -2,16 +2,17 @@ package converter;
 
 import java.util.ArrayList;
 
-public class LibEntry
+public class LibEntry extends ArrayList<SCSymbol>
 {
+    private static final long serialVersionUID = 1L;
+    
     String filePath = "";
-    ArrayList<SCSymbol> symbols = new ArrayList<SCSymbol>();
-    String packageName = "";
+    String name = "";
     
     public LibEntry(String path, String name)
     {
         filePath = path;
-        packageName = name;
+        this.name = name;
     }
     
     public String getFilePath()
@@ -19,22 +20,17 @@ public class LibEntry
         return filePath;
     }
     
-    public String getPackageName()
+    public String getName()
     {
-        return packageName;
+        return name;
     }
     
-    public void addSymbol(SCSymbol s)
+    public SCSymbol get(String name)
     {
-        symbols.add(s);
-    }
-    
-    public SCSymbol getSymbol(String name)
-    {
-        for(int i = 0; i < symbols.size(); i++)
+        for(int i = 0; i < size(); i++)
         {
-            if(symbols.get(i).name.equalsIgnoreCase(name))
-                return symbols.get(i);
+            if(get(i).name.equalsIgnoreCase(name))
+                return get(i);
         }
         return null;
     }

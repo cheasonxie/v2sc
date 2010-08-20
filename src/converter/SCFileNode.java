@@ -7,6 +7,8 @@ import java.util.ArrayList;
  */
 public abstract class SCFileNode extends SCTreeNode
 {
+    private static final long serialVersionUID = 5271941380644784303L;
+    
     public ArrayList<String> useLibNameArray = new ArrayList<String>();
     protected String curFilePath = "";
     protected ArrayList<CommentBlock> comments = new ArrayList<CommentBlock>();

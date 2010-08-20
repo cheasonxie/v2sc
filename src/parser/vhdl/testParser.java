@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Stack;
 
-import parser.INode;
+import parser.IASTNode;
 import parser.ParserException;
 
 public class testParser implements VhdlASTConstants
@@ -34,15 +34,15 @@ public class testParser implements VhdlASTConstants
         debugStreamOut = new PrintStream(file);
     }    
    
-    protected void printTreeNode(INode node)
+    protected void printTreeNode(IASTNode node)
     {
         assert(debugStreamOut != null);
         
         int i;
         Stack<Character> stack = new Stack<Character>();
         
-        INode parent = node.getParent();
-        INode grandParent = null;
+        IASTNode parent = node.getParent();
+        IASTNode grandParent = null;
         if(parent != null)
         {
             stack.push('йд');
@@ -128,8 +128,8 @@ public class testParser implements VhdlASTConstants
         try {
             String dir = System.getProperty("user.dir");
             VhdlParser parser = new VhdlParser(
-                    //new BufferedReader(new FileReader(dir + "\\ahbctrl.vhd")));            
-                    new BufferedReader(new FileReader(dir + "\\apbuart.vhd")));            
+                    new BufferedReader(new FileReader(dir + "\\ahbctrl.vhd")));            
+                    //new BufferedReader(new FileReader(dir + "\\apbuart.vhd")));            
             ASTNode designFile = parser.design_file();
             testParser vhdl = new testParser();
             vhdl.initDebugStream("b.txt");

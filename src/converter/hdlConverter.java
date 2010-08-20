@@ -8,8 +8,11 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.Reader;
 import java.util.ArrayList;
+import java.util.Stack;
 
+import parser.IASTNode;
 import parser.ParserException;
+import parser.vhdl.ASTNode;
 
 public abstract class hdlConverter implements SCTreeConstants
 {
@@ -28,7 +31,7 @@ public abstract class hdlConverter implements SCTreeConstants
     {
         for(int i = 0; i < libSymbols.size(); i++)
         {
-            if(libSymbols.get(i).getSymbol(name) != null)
+            if(libSymbols.get(i).get(name) != null)
                 return true; 
         }
         return false;
@@ -39,7 +42,7 @@ public abstract class hdlConverter implements SCTreeConstants
         int ret = SC_INVALID_TYPE;
         for(int i = 0; i < libSymbols.size(); i++)
         {
-            SCSymbol sym = libSymbols.get(i).getSymbol(name);
+            SCSymbol sym = libSymbols.get(i).get(name);
             if(sym != null)
             {
                 ret = sym.type;
@@ -56,7 +59,7 @@ public abstract class hdlConverter implements SCTreeConstants
         
         for(i = 0; i < libSymbols.size(); i++)
         {
-            ret = libSymbols.get(i).getSymbol(symName);
+            ret = libSymbols.get(i).get(symName);
             if(ret != null)
                 return ret;
         }
@@ -72,14 +75,14 @@ public abstract class hdlConverter implements SCTreeConstants
         // find libentry
         for(i = 0; i < libSymbols.size(); i++)
         {
-            if(libSymbols.get(i).packageName.equalsIgnoreCase(libName))
+            if(libSymbols.get(i).name.equalsIgnoreCase(libName))
                 break;
         }
         
         // if libentry found, find symbol
         if(i < libSymbols.size())
         {
-            return libSymbols.get(i).getSymbol(symName);
+            return libSymbols.get(i).get(symName);
         }
         return ret;
     }
@@ -112,9 +115,107 @@ public abstract class hdlConverter implements SCTreeConstants
     }
     
     public abstract void convertFile(String srcPath, String dstPath) 
-        throws ParserException, FileNotFoundException, IOException;
+                throws ParserException, FileNotFoundException, IOException;    
+    public abstract void convertDir(String srcDir);    
+    public abstract void parseLibSymbols(String srcDir);
     
-    public abstract void convertDir(String srcDir) throws ParserException, IOException;
     
-    public abstract void parseLibSymbols(String srcDir) throws ParserException, IOException;
+    
+    /////////////////////////////////////////////////////////
+    ////////////////// for debug ////////////////////////////
+    /////////////////////////////////////////////////////////
+    protected final boolean debugOut = true;
+    protected PrintStream debugStreamOut = null;
+    protected void initDebugStream(String path) throws IOException
+    {
+        if(!debugOut)
+            return;
+        
+        int index1;
+        path.replace('\\', '/');
+        index1 = path.lastIndexOf('.');
+        if(index1 < 0)
+            return;
+
+        File file = new File(path.substring(0, index1) + ".txt");
+        if(file.exists())
+            file.delete();
+        file.createNewFile();
+        debugStreamOut = new PrintStream(file);
+    }
+    
+    protected void printTree(ASTNode node, int level, String srcPath)
+    {
+        if(!debugOut || node == null) {
+            return;
+        }
+        
+        if(debugStreamOut == null) {
+            try {
+                initDebugStream(srcPath);
+            }catch(IOException e) {
+                return;
+            }
+        }
+
+        printTreeNode(node);           
+        debugStreamOut.println(level + "=" + node.toString() + ": "
+                    + "<<" + node.getFirstToken().image + ">>");
+        
+        for(int i = 0; i < node.getChildrenNum(); i++)
+        {
+            printTree((ASTNode)node.getChild(i), level+1, srcPath);
+        }
+    }
+    
+    protected void printTreeNode(IASTNode node)
+    {
+        int i;
+        Stack<Character> stack = new Stack<Character>();
+        
+        IASTNode parent = node.getParent();
+        IASTNode grandParent = null;
+        if(parent != null)
+        {
+            stack.push('©¤');
+            stack.push('©¤');
+            for(i = 0; i < parent.getChildrenNum(); i++)
+            {
+                if(node.equals(parent.getChild(i)))
+                    break;
+            }
+            if(i >= parent.getChildrenNum() - 1)
+                stack.push('©¸');
+            else
+                stack.push('©À');
+        }
+        
+        while(parent != null)
+        {
+            grandParent = parent.getParent();
+            if(grandParent == null)
+                break;
+            for(i = 0; i < grandParent.getChildrenNum(); i++)
+            {
+                if(parent.equals(grandParent.getChild(i)))
+                    break;
+            }
+            stack.push(' ');
+            stack.push(' ');
+            if(i >= grandParent.getChildrenNum() - 1)
+            {
+                stack.push(' ');
+            }
+            else
+            {
+                stack.push('©¦');
+            }
+            parent = grandParent;
+        }
+        
+        while(stack.size() > 0)
+        {
+            debugStreamOut.print(stack.pop());
+        }
+    }
 }

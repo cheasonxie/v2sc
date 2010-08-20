@@ -6,21 +6,21 @@ import java.io.IOException;
 import parser.ParserException;
 import converter.hdlConverter;
 
-public class Verilog extends hdlConverter {
-    @Override
-    public void convertDir(String srcDir) throws ParserException, IOException {
-        
-    }
-
-    @Override
+public class Verilog extends hdlConverter
+{
     public void convertFile(String srcPath, String dstPath)
-            throws ParserException, FileNotFoundException, IOException {
+            throws ParserException, FileNotFoundException, IOException
+    {
         
     }
 
-    @Override
-    public void parseLibSymbols(String srcDir) 
-            throws ParserException, IOException {
+    public void convertDir(String srcDir)
+    {
+        
+    }
+
+    public void parseLibSymbols(String srcDir)
+    {
         
     }
 }

@@ -2,20 +2,23 @@ package parser.vhdl;
 
 import java.util.ArrayList;
 
-import parser.INode;
+import parser.IASTNode;
 import parser.Token;
 
-public class ASTNode implements INode, VhdlTokenConstants, VhdlASTConstants
+public class ASTNode implements IASTNode
 {
-    protected INode parent;
-    protected ArrayList<INode> children = new ArrayList<INode>();
+    protected IASTNode parent;
+    protected ArrayList<IASTNode> children = new ArrayList<IASTNode>(1);
     protected int id;
     protected Token first_token = null;
     protected Token last_token = null;
     
     boolean isBoolean = false;  // used only for expression
     
-    public ASTNode(INode p, int id) {
+    public static int count = 0;
+    public ASTNode(IASTNode p, int id) {
+        count ++;
+        System.out.println(count);
         parent = p;
         this.id = id;
         if(p != null) {
@@ -23,11 +26,11 @@ public class ASTNode implements INode, VhdlTokenConstants, VhdlASTConstants
         }
     }
     
-    public void addChild(INode n) {
+    public void addChild(IASTNode n) {
         children.add(n);
     }
 
-    public INode getChild(int i) {
+    public IASTNode getChild(int i) {
         if(i < children.size())
             return children.get(i);
         return null;
@@ -41,11 +44,11 @@ public class ASTNode implements INode, VhdlTokenConstants, VhdlASTConstants
         return id;
     }
 
-    public INode getParent() {
+    public IASTNode getParent() {
         return parent;
     }
 
-    public void setParent(INode p) {
+    public void setParent(IASTNode p) {
         parent = p;
     }
     
@@ -66,7 +69,7 @@ public class ASTNode implements INode, VhdlTokenConstants, VhdlASTConstants
     }
     
     public String toString() {
-        return ASTNodeName[id];
+        return VhdlASTConstants.ASTNodeName[id];
     }
     
     public String firstTokenImage() {
@@ -80,12 +83,22 @@ public class ASTNode implements INode, VhdlTokenConstants, VhdlASTConstants
     public boolean isLogic() {
         return isBoolean;
     }
+
+    public IASTNode getChildById(int id) {
+        for(int i = 0; i < children.size(); i++) {
+            IASTNode child = children.get(i);
+            if(child.getId() == id) {
+                return child; 
+            }
+        }
+        return null;
+    }
 }
 
 class ASTtoken extends ASTNode {
     String image = "";
-    public ASTtoken(INode p, String image) {
-        super(p, ASTVOID);
+    public ASTtoken(IASTNode p, String image) {
+        super(p, VhdlASTConstants.ASTVOID);
         this.image = image;
     }
     
