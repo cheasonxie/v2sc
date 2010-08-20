@@ -18,10 +18,10 @@ public class ASTNode implements IASTNode
     public static int count = 0;
     public ASTNode(IASTNode p, int id) {
         count ++;
-        System.out.println(count);
         parent = p;
         this.id = id;
         if(p != null) {
+            System.out.println(count + ":" + ((ASTNode)p).firstTokenImage());
             p.addChild(this);
         }
     }

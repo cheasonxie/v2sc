@@ -1752,33 +1752,43 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
             if(tmpToken == null) { return false; }
         }
         
-        boolean ret = false;
         ASTNode node = null;
+        boolean isSignal_assignment = false;
+        boolean isGeneric_or_port_map = false;
         if(!(tmpToken.kind == BLOCK || tmpToken.kind == PROCESS
-                || tmpToken.kind == ASSERT || tmpToken.kind == LE
+                || tmpToken.kind == ASSERT 
                 || tmpToken.kind == COMPONENT || tmpToken.kind == ENTITY
-                || tmpToken.kind == CONFIGURATION || tmpToken.kind == GENERIC
-                || tmpToken.kind == PORT || tmpToken.kind == FOR
-                || tmpToken.kind == IF || tmpToken.kind == BREAK
-                || tmpToken.kind == identifier))
-        {
-            ret = true;
-            node = new ASTNode(p, ASTCONCURRENT_STATEMENT);
-            openNodeScope(node);
+                || tmpToken.kind == CONFIGURATION || tmpToken.kind == FOR
+                || tmpToken.kind == IF || tmpToken.kind == BREAK)) {
+            Token tmpToken1 = findToken(tmpToken, SEMICOLON, endToken);
+            if(tmpToken1 != null) {
+                if(findToken(tmpToken, LE, tmpToken1) != null) {
+                    isSignal_assignment = true;
+                }else if(findToken(tmpToken, GENERIC, tmpToken1) != null 
+                        || findToken(tmpToken, PORT, tmpToken1) != null) {
+                    isGeneric_or_port_map = true;
+                }
+            }
+            
+            if(!isSignal_assignment && !isGeneric_or_port_map 
+                    && tmpToken.kind != identifier) {
+                return false;
+            }
         }
+
+        node = new ASTNode(p, ASTCONCURRENT_STATEMENT);
+        openNodeScope(node);
         
         switch(tmpToken.kind)
         {
         case BLOCK:
-            tmpToken = findTokenInBlock(tm.getNextToken(tmpToken), 
-                            END, endToken);
+            tmpToken = findTokenInBlock(tm.getNextToken(tmpToken), END, endToken);
             if(tmpToken == null) { return false; }
             tmpToken = findToken(tmpToken, SEMICOLON, endToken);
             block_statement(node, tmpToken);
             break;
         case PROCESS:
-            tmpToken = findTokenInBlock(tm.getNextToken(tmpToken),
-                            END, endToken);
+            tmpToken = findTokenInBlock(tm.getNextToken(tmpToken), END, endToken);
             if(tmpToken == null) { return false; }
             tmpToken = findToken(tmpToken, SEMICOLON, endToken);
             process_statement(node, tmpToken);
@@ -1787,43 +1797,40 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
             tmpToken = findToken(tmpToken, SEMICOLON, endToken);
             concurrent_assertion_statement(node, tmpToken);
             break;
-        case LE:
-            tmpToken = findToken(tmpToken, SEMICOLON, endToken);
-            concurrent_signal_assignment_statement(node, tm.getNextToken(tmpToken));
-            break;
         case COMPONENT:
         case ENTITY:
         case CONFIGURATION:
             tmpToken = findToken(tmpToken, SEMICOLON, endToken);
             component_instantiation_statement(node, tm.getNextToken(tmpToken));
             break;
-        case GENERIC:
-        case PORT:
-            if(tm.getNextTokenKind(tmpToken) != MAP) { return false; }
-            tmpToken = findToken(tmpToken, SEMICOLON, endToken);
-            component_instantiation_statement(node, tm.getNextToken(tmpToken));
-            break;
         case FOR:
         case IF:
-            tmpToken = findToken(tmpToken, SEMICOLON, endToken);
-            generate_statement(node, tm.getNextToken(tmpToken));
+            tmpToken = findToken(tmpToken, GENERATE, endToken);
+            tmpToken = findTokenInBlock(tm.getNextToken(tmpToken), END, endToken);
+            generate_statement(node, tmpToken);
             break;
         case BREAK:
             tmpToken = findToken(tmpToken, SEMICOLON, endToken);
             concurrent_break_statement(node, tm.getNextToken(tmpToken));
             break;
-        case identifier:
-            concurrent_procedure_call_statement(node, endToken);
-            break;
+            
         default:
-            ret = false;
+            if(isSignal_assignment) {
+                tmpToken = findToken(tmpToken, SEMICOLON, endToken);
+                concurrent_signal_assignment_statement(node, tm.getNextToken(tmpToken));
+            }else if(isGeneric_or_port_map) {
+                tmpToken = findToken(tmpToken, SEMICOLON, endToken);
+                component_instantiation_statement(node, tm.getNextToken(tmpToken));
+            }else if(tmpToken.kind == identifier) {
+                concurrent_procedure_call_statement(node, endToken);
+            }else{
+                return false;
+            }
             break;
         }
         
-        if(ret){
-            closeNodeScope(node);
-        }
-        return ret;
+        closeNodeScope(node);
+        return true;
     }
 
     /**
@@ -3159,7 +3166,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         ASTNode node = new ASTNode(p, ASTGENERATE_STATEMENT);
         openNodeScope(node);
         
-        Token tmpToken = findToken(COLON, endToken);
+        Token tmpToken = findToken(COLON, endToken);    // endToken must be END
         identifier(node, tmpToken);   // label
         consumeToken(COLON);
         
@@ -3167,10 +3174,10 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         generation_scheme(node, tmpToken);
         consumeToken(GENERATE);        
         new ASTtoken(node, tokenImage[GENERATE]);
-        endToken = findTokenInBlock(END, endToken);
+        Token endToken0 = findTokenInBlock(END, endToken);
         
         tmpToken = findTokenInBlock(BEGIN, endToken);
-        if(tmpToken != null) {
+        if(endToken0 == null && tmpToken != null) {
             block_declarative_items(node, tmpToken);
             consumeToken(BEGIN);
             new ASTtoken(node, tokenImage[BEGIN]);
@@ -6010,29 +6017,31 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
             if(tmpToken == null) { return false; }
         }
         
-        boolean ret = false;
         ASTNode node = null;
         if(!(tmpToken.kind == IF || tmpToken.kind == PROCEDURAL
-                || tmpToken.kind == CASE || tmpToken.kind == NULL
-                || tmpToken.kind == EQ2))
-        {
-            ret = true;
-            node = new ASTNode(p, ASTSIMULTANEOUS_STATEMENT);
-            openNodeScope(node);
+                || tmpToken.kind == CASE || tmpToken.kind == NULL)) {
+            Token tmpToken1 = findToken(tmpToken, SEMICOLON, endToken);
+            if(tmpToken1 != null) {
+                tmpToken1 = findToken(tmpToken, EQ2, tmpToken1);
+            }
+            if(tmpToken1 == null) {
+                return false;
+            }
         }
+
+        node = new ASTNode(p, ASTSIMULTANEOUS_STATEMENT);
+        openNodeScope(node);
 
         switch(tmpToken.kind)
         {
         case IF:
-            tmpToken = findTokenInBlock(tm.getNextToken(tmpToken), 
-                            END, endToken);
+            tmpToken = findTokenInBlock(tm.getNextToken(tmpToken), END, endToken);
             if(tmpToken == null) { return false; }
             tmpToken = findToken(tmpToken, SEMICOLON, endToken);
             simultaneous_if_statement(node, tmpToken);
             break;
         case PROCEDURAL:
-            tmpToken = findTokenInBlock(tm.getNextToken(tmpToken),
-                            END, endToken);
+            tmpToken = findTokenInBlock(tm.getNextToken(tmpToken), END, endToken);
             if(tmpToken == null) { return false; }
             tmpToken = findToken(tmpToken, SEMICOLON, endToken);
             simultaneous_procedural_statement(node, tmpToken);
@@ -6048,18 +6057,14 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
             tmpToken = findToken(tmpToken, SEMICOLON, endToken);
             simultaneous_null_statement(node, endToken);
             break;
-        case EQ2:
+        default:
             tmpToken = findToken(tmpToken, SEMICOLON, endToken);
             simple_simultaneous_statement(node, endToken);
             break;
-        default:
-            break;
         }
         
-        if(ret) {
-            closeNodeScope(node);
-        }
-        return ret;
+        closeNodeScope(node);
+        return true;
     }
 
     /**
