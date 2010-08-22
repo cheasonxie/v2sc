@@ -148,7 +148,16 @@ public class TokenManager extends RegExp implements VhdlTokenConstants
                 break;
             if(!first &&((specialChar.indexOf(lastChar) < 0 && specialChar.indexOf(c) >= 0)
                     || (specialChar.indexOf(c) < 0 && specialChar.indexOf(lastChar) >= 0))) {
-                break;  // exit loop when character change between specialChar and letter&digit
+                if(column >= max) { break; }
+                if(Character.isDigit(lastChar) && c == '.' 
+                    && Character.isDigit(strLine.charAt(column+1))) {
+                    // float point
+                    ret += c;
+                    column ++;
+                    c = strLine.charAt(column);
+                }else {
+                    break;  // exit loop when character change between specialChar and letter&digit
+                }
             }
             
             // allow two continuous specialChar

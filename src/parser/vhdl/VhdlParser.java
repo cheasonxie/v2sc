@@ -473,8 +473,10 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
                 || findTokenInBlock(tm.getNextToken(tmpToken), TO, endToken) != null) {
                 actual_designator(node, endToken);  // slice name
             }else {
-                if(kind !=LBRACKET) {
+                if(kind != LBRACKET) {
                     function_call(node, endToken);
+                }else if(tm.getNextTokenKind(2) == OTHERS){
+                    aggregate(node, endToken);  //TODO ?? not in syntax tree
                 }else {
                     consumeToken(LBRACKET);
                     actual_designator(node, endToken);
@@ -511,11 +513,19 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         if(rbracketToken == null) {
             throw new ParserException(tm.toNextToken());
         }
+        
+        boolean first = true;
         while(true) {
             Token commaToken = findTokenInBlock(COMMA, rbracketToken);
             endToken = (commaToken != null) ? commaToken : rbracketToken;
-            if(tm.getNextTokenKind() == LBRACKET && endToken != rbracketToken) {
-                aggregate(node, endToken);
+            if(tm.getNextTokenKind() == LBRACKET) {
+                Token tmpToken = findTokenInBlock(tm.getNextToken(2), 
+                                    RBRACKET, rbracketToken);
+                if(endToken != rbracketToken || (!first && tmpToken != rbracketToken)) {
+                    aggregate(node, endToken);
+                }else {
+                    element_association(node, endToken);
+                }
             }else {
                 element_association(node, endToken);
             }
@@ -523,6 +533,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
                 break;
             }
             consumeToken(COMMA);
+            first = false;
         }
         consumeToken(RBRACKET);
         closeNodeScope(node);
@@ -2902,6 +2913,16 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         expression(p, endToken, false);
     }
     void expression(IASTNode p, Token endToken, boolean is_bool) throws ParserException {
+        if(tm.getNextTokenKind() == LBRACKET) {
+            if(findTokenInBlock(tm.getNextToken(2), COMMA, endToken) != null) {
+                if(endToken != null && endToken.kind == RBRACKET) {
+                    endToken = tm.getNextToken(endToken);
+                }
+                aggregate(p, endToken); //TODO ?? not in syntax tree
+                ((ASTNode)p.getChildById(ASTAGGREGATE)).isBoolean = is_bool;
+                return;
+            }
+        }
         ASTNode node = new ASTNode(p, ASTEXPRESSION);
         //TODO expression type: boolean, time, string, guard,
         //                      static, real, value, file_open_kind
