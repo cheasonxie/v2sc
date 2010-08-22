@@ -87,6 +87,7 @@ public class Vhdl extends hdlConverter implements VhdlASTConstants {
                 LibEntry entry = parserPackageTree(designFile, 0, path);
                 if(entry != null)
                     libSymbols.add(entry);
+                designFile = null;
             } catch (Exception e) {
                 e.printStackTrace();
             }

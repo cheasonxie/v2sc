@@ -90,8 +90,8 @@ public class TokenManager extends RegExp implements VhdlTokenConstants
     final char doubleQuote = '\"';
     
     /**
-     * skip space and tabulation<br>
-     * return true if success, false if end of file
+     * skip space and tabulation and comment
+     * @return true if success, false if end of file
      */
     protected boolean skipInvalid() throws IOException
     {
@@ -128,8 +128,8 @@ public class TokenManager extends RegExp implements VhdlTokenConstants
     }
    
     /**
-     * read next token image string in current line<br>
-     * return null if reach end of file and no any valid string
+     * read next token image string in current line
+     * @return null if reach end of file and no any valid string
      */
     protected String getNextImage() throws ParserException
     {
@@ -190,7 +190,7 @@ public class TokenManager extends RegExp implements VhdlTokenConstants
             }
             
             if(doubleQuote == c) {
-                if(Character.isLetterOrDigit(lastChar)) {
+                if(Character.isLetterOrDigit(lastChar) && !ret.matches(_base_specifier)) {
                     break;
                 }
                 ret += c;
@@ -213,7 +213,7 @@ public class TokenManager extends RegExp implements VhdlTokenConstants
                 }
                 
                 if(column >= max) {
-                    error = true;   //TODO can double quote be next line?
+                    //error = true;   //TODO can double quote be next line?
                 }
                 break;  // always quit loop on double quote
             }
@@ -354,14 +354,7 @@ public class TokenManager extends RegExp implements VhdlTokenConstants
      */
     public int getNextTokenKind(int nextNum) throws ParserException
     {
-        save();
-        if(nextNum <= 0)
-            return 0;
-        Token token = null;
-        for(int i = 0; i < nextNum; i++)
-            token = toNextToken();
-        
-        restore();
+        Token token = getNextToken(nextNum);
         if(token != null)
             return token.kind;
         else
@@ -369,25 +362,50 @@ public class TokenManager extends RegExp implements VhdlTokenConstants
     }
     
     /**
+     * get next several number token from current token
+     */
+    public Token getNextToken(int nextNum) throws ParserException
+    {
+        save();
+        Token token = null;
+        if(nextNum <= 0)
+            return null;
+        for(int i = 0; i < nextNum; i++)
+            token = toNextToken();
+
+        restore();
+        return token;
+    }
+    
+    /**
      * get kind of next several number token from specified token
      */
     public int getNextTokenKind(Token from, int nextNum) throws ParserException
     {
-        save();
-        curToken = from;
-        if(nextNum <= 0)
-            return 0;
-        Token token = null;
-        for(int i = 0; i < nextNum; i++)
-            token = toNextToken();
-        
-        restore();
+        Token token = getNextToken(from, nextNum);
         if(token != null)
             return token.kind;
         else
             return -1;
     }
-     
+    
+    /**
+     * get next several number token from specified token
+     */
+    public Token getNextToken(Token from, int nextNum) throws ParserException
+    {
+        save();
+        Token token = null;
+        curToken = from;
+        if(nextNum <= 0)
+            return null;
+        for(int i = 0; i < nextNum; i++)
+            token = toNextToken();
+        
+        restore();
+        return token;
+    }
+
     /**
      * scan next token from current token
      * @param bscan

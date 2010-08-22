@@ -19,6 +19,9 @@ public class ASTNode implements IASTNode
         parent = p;
         this.id = id;
         if(p != null) {
+            if(p instanceof ASTNode) {
+                isBoolean = ((ASTNode)p).isBoolean;
+            }
             p.addChild(this);
         }
     }
