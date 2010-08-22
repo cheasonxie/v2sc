@@ -470,11 +470,13 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
                 || findTokenInBlock(tm.getNextToken(tmpToken), TO, endToken) != null) {
                 actual_designator(node, endToken);  // slice name
             }else {
-                if(kind !=LBRACKET )
-                    name(node, tmpToken);
-                consumeToken(LBRACKET);
-                actual_designator(node, endToken);
-                consumeToken(RBRACKET);
+                if(kind !=LBRACKET) {
+                    function_call(node, endToken);
+                }else {
+                    consumeToken(LBRACKET);
+                    actual_designator(node, endToken);
+                    consumeToken(RBRACKET);
+                }
             }
         }
         closeNodeScope(node);
@@ -4684,7 +4686,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         int kind = tm.getNextTokenKind();
         if(kind == character_literal || kind == decimal_literal
             || kind == based_literal || kind == string_literal
-            || kind == bit_string_literal) {
+            || kind == bit_string_literal || kind == NULL) {
             literal(node, endToken);
         }else if(kind == NEW) {
             allocator(node, endToken);
@@ -5545,7 +5547,8 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
                 exit_statement(p, endToken);
             }else if(findTokenInBlock(NEXT, tmpToken) != null) {
                 next_statement(p, endToken);
-            }else if(findTokenInBlock(NULL, tmpToken) != null) {
+            }else if(tm.getNextTokenKind() == NULL || (tm.getNextTokenKind() == identifier 
+                        && tm.getNextTokenKind(2) == NULL)) {
                 null_statement(p, endToken);
             }else if(findTokenInBlock(REPORT, tmpToken) != null) {
                 report_statement(p, endToken);
@@ -6684,6 +6687,11 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
     void type_declaration(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTTYPE_DECLARATION);
         openNodeScope(node);
+        endToken = findToken(SEMICOLON, endToken);
+        endToken = tm.getNextToken(endToken);
+        if(endToken == null) {
+            throw new ParserException(tm.toNextToken());
+        }
         if(findToken(IS, endToken) != null) {
             full_type_declaration(node, endToken);
         }else {
