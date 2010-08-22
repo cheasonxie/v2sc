@@ -95,6 +95,9 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
             if(checkLateComming(token, to) || token == to) {
                 break;
             }
+            if(token != from && from.beginLine > token.beginLine) {
+                break;
+            }
             if(token.kind == kind) {
                 ret = token;
                 break;
