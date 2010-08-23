@@ -2946,7 +2946,7 @@ class SCVhdlDelay_mechanism extends SCVhdlNode {
  */
 class SCVhdlDesign_file extends SCVhdlNode {
     ArrayList<SCVhdlNode> units = new ArrayList<SCVhdlNode>(); 
-    public SCVhdlDesign_file(SCVhdlNode p, ASTNode node) {
+    public SCVhdlDesign_file(SCTreeNode p, ASTNode node) {
         super(p, node);
         assert(node.getId() == ASTDESIGN_FILE);
         for(int i = 0; i < node.getChildrenNum(); i++) {

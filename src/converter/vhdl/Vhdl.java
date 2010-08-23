@@ -51,8 +51,9 @@ public class Vhdl extends hdlConverter implements VhdlASTConstants {
         
         if(node.getId() == ASTPACKAGE_DECLARATION) {
             entry = new LibEntry(path, node.toString());
-            SCVhdlNode vhdlNode = new SCVhdlNode(null, (ASTNode)node);
-            ArrayList<SCSymbol> symbols = vhdlNode.curBlockSymbol;
+            VhdlFileNode fileNode = new VhdlFileNode(path);
+            SCVhdlNode pkgNode = new SCVhdlDesign_file(fileNode, (ASTNode)node);
+            ArrayList<SCSymbol> symbols = pkgNode.curBlockSymbol;
             if(symbols != null) {
                 entry.addAll(symbols);
             }

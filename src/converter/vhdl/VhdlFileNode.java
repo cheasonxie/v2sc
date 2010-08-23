@@ -13,6 +13,7 @@ public class VhdlFileNode extends SCFileNode
     public VhdlFileNode(String srcPath)
     {
         super(srcPath);
+        parseComment();
     }
     
     CommentBlock cb = null;
