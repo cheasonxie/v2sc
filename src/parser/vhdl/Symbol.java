@@ -11,7 +11,7 @@ package parser.vhdl;
 /**
  * A symbol - entry in symbol-table
  */
-public class Symbol implements VhdlTokenConstants
+public class Symbol
 {
     public String name;
     public int kind;

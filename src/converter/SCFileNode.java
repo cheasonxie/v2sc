@@ -2,6 +2,8 @@ package converter;
 
 import java.util.ArrayList;
 
+import parser.CommentBlock;
+
 /*
  * root node for current file
  */

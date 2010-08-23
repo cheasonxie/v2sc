@@ -4,7 +4,9 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 
+import parser.CommentBlock;
 import parser.ParserException;
 import parser.Token;
 
@@ -78,6 +80,9 @@ public class TokenManager extends RegExp implements VhdlTokenConstants
     // saved current token(used to restore when scan to next several token)
     protected Token savedToken = null;
     
+    // comment
+    protected ArrayList<CommentBlock> comments = new ArrayList<CommentBlock>();
+    
     public TokenManager(BufferedReader stream)
     {
         this.stream = stream;
@@ -97,34 +102,59 @@ public class TokenManager extends RegExp implements VhdlTokenConstants
     {
         if(strLine == null)
             return false;
+        
+        boolean ret = false;
+        int emtyLines = 0;
+        CommentBlock cb = null;
+        out:
         while(true) {
             // read until not empty line
             while(column >= strLine.length()) {
                 strLine = stream.readLine();
                 if(strLine == null)
-                    return false;    // end of file
+                    break out;    // end of file
                 column = 0;
                 line ++;
+                if(line > 1)
+                    emtyLines ++;
             }
             
             // check comment
             if(column < (strLine.length() - 1) && strLine.charAt(column) == '-'
                     && strLine.charAt(column+1) == '-') {
+                if(cb == null) {
+                    cb = new CommentBlock(line);
+                }
+                
+                for(int i =0; i < emtyLines; i++) {
+                    cb.commentLines.add("");    // add empty lines as comment
+                }
+                emtyLines = 0;
+                cb.commentLines.add(strLine.substring(column+2));
                 strLine = stream.readLine();
                 if(strLine == null)
-                    return false;    // read end of file
+                    break out;    // read end of file
                 column = -1;
                 line ++;
             }else if(lastToken != null && lastToken.kind == SEMICOLON
                     && strLine.charAt(column) == ';') {
                 continue;   // ignore several continuous semicolon
             }else if(!Character.isWhitespace(strLine.charAt(column))) {
+                ret = true;
                 break;      // break when not white space character
             }
 
             column ++;
         }
-        return true;
+
+        if(cb != null) {
+            for(int i =0; i < emtyLines; i++) {
+                cb.commentLines.add("");    // add empty lines as comment
+            }
+            cb.endLine = line;
+            comments.add(cb);
+        }
+        return ret;
     }
    
     /**

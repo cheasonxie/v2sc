@@ -5,7 +5,8 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 
-import converter.CommentBlock;
+import parser.CommentBlock;
+
 import converter.SCFileNode;
 
 public class VhdlFileNode extends SCFileNode
