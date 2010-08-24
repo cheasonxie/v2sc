@@ -8,6 +8,8 @@
  **/
 package parser.vhdl;
 
+import java.util.ArrayList;
+
 import parser.INameObject;
 
 /**
@@ -42,6 +44,11 @@ public class Symbol implements INameObject
      */
     public String[] range;
     
+    /**
+     * param list(only used in function or procedure)
+     */
+    public ArrayList<String> paramTypeList = null;
+    
     public Symbol()
     {
         this("name", KIND_INVALID);
@@ -64,14 +71,59 @@ public class Symbol implements INameObject
         this.type = type;
         this.range = range;
     }
+    
+    public boolean equals(INameObject other)
+    {
+        if(!(other instanceof Symbol)) {
+            return false;
+        }
+        
+        Symbol oth = (Symbol)other;
+        if(kind != VhdlTokenConstants.FUNCTION 
+                && kind != VhdlTokenConstants.PROCEDURE) {
+            return name.equalsIgnoreCase(oth.name);
+        }else {
+            // function or procedure may overload
+            return false;    //TODO: check function/procedure parameter type list
+            /*
+            boolean ret = (name.equalsIgnoreCase(oth.name)
+                    && kind == oth.kind
+                    && type.equalsIgnoreCase(oth.type));
+            if(!ret)
+                return false;
+            
+            // check parameter list
+            if(paramTypeList != null && oth.paramTypeList != null) {
+                if(paramTypeList.size() != oth.paramTypeList.size()) {
+                    return false;
+                }
+                for(int i = 0; i < paramTypeList.size(); i++) {
+                    if(!paramTypeList.get(i).equalsIgnoreCase(oth.paramTypeList.get(i))) {
+                        return false;
+                    }
+                }
+            }else if (paramTypeList == oth.paramTypeList) {
+                ret = true;
+            }
+            return ret;
+            */
+        }
+    }
+    
+    public void setParamList(ArrayList<String> paramList)
+    {
+        paramTypeList = paramList;
+    }
 
     @Override
-    public String getName() {
+    public String getName()
+    {
         return name;
     }
 
     @Override
-    public void setName(String name) {
+    public void setName(String name)
+    {
        this.name = name;
     }
 }

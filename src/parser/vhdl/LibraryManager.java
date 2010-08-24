@@ -62,6 +62,14 @@ class PackageEntry implements INameObject
             return null;
         return (Symbol[])table.toArray();
     }
+
+    @Override
+    public boolean equals(INameObject other) {
+        if(!(other instanceof PackageEntry)) {
+            return false;
+        }
+        return name.equalsIgnoreCase(((PackageEntry)other).getName());
+    }
 }
 
 /**
@@ -85,6 +93,14 @@ class LibraryEntry extends VhdlArrayList<PackageEntry> implements INameObject
     public void setName(String name)
     {
         this.name = name;
+    }
+
+    @Override
+    public boolean equals(INameObject other) {
+        if(!(other instanceof LibraryEntry)) {
+            return false;
+        }
+        return name.equalsIgnoreCase(((LibraryEntry)other).getName());
     }
 }
 
@@ -121,10 +137,8 @@ public class LibraryManager extends VhdlArrayList<LibraryEntry>
                         ret = pkgNode;
                     }else {
                         IASTNode[] ret0 = new IASTNode[ret.length+pkgNode.length];
-                        for(int j = 0; j < ret.length; j++)
-                            ret0[j] = ret[j];
-                        for(int j = 0; j < pkgNode.length; j++)
-                            ret0[j+ret.length] = pkgNode[j];
+                        System.arraycopy(ret0, 0, ret, 0, ret.length);
+                        System.arraycopy(ret0, ret.length, pkgNode, 0, pkgNode.length);
                         ret = ret0;
                     }
                 }

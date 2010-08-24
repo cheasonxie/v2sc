@@ -15,7 +15,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
 {
     protected TokenManager tokenMgr = null;
     protected LibraryManager libraryMgr = LibraryManager.getInstance();
-    protected SymbolTable extSymbolTable = null;
+    protected SymbolTable extSymbolTable = new SymbolTable();   // external symbols, define in use_clause
     protected SymbolTable symbolTable = null;
     protected ASTNode curNode = null;
     

@@ -96,6 +96,23 @@ public class ASTNode implements IASTNode
         return null;
     }
     
+    /**
+     * search descendant recursive to find specified ASTNode
+     */
+    public IASTNode getFirstDescendant(int id) {
+        IASTNode ret = null;
+        for(int i = 0; i < children.size(); i++) {
+            ASTNode child = (ASTNode)children.get(i);
+            if(child.getId() == id) {
+                ret = child;
+                break;
+            }
+            ret = child.getFirstDescendant(id);
+            if(ret != null) { break; }
+        }
+        return ret;
+    }
+    
     public void setSymbolTable(SymbolTable table) {
         symTab = table;
     }

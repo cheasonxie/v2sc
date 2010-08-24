@@ -16,8 +16,9 @@ public class VhdlArrayList<E extends INameObject> extends ArrayList<E>
         if(e == null) {
             return false;
         }
+
         for(int i = 0; i < size(); i++) {
-            if(e.getName().equalsIgnoreCase(get(i).getName())) {
+            if(e.equals(get(i))) {
                 return false;
             }
         }
