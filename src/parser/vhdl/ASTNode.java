@@ -8,6 +8,7 @@ import parser.Token;
 
 public class ASTNode implements IASTNode
 {
+    private String name = "";
     protected IASTNode parent;
     protected ArrayList<IASTNode> children = new ArrayList<IASTNode>(1);
     protected int id;
@@ -97,9 +98,9 @@ public class ASTNode implements IASTNode
     }
     
     /**
-     * search descendant recursive to find specified ASTNode
+     * search descendant recursive to find the first specified ASTNode
      */
-    public IASTNode getFirstDescendant(int id) {
+    public IASTNode getDescendant(int id) {
         IASTNode ret = null;
         for(int i = 0; i < children.size(); i++) {
             ASTNode child = (ASTNode)children.get(i);
@@ -107,7 +108,24 @@ public class ASTNode implements IASTNode
                 ret = child;
                 break;
             }
-            ret = child.getFirstDescendant(id);
+            ret = child.getDescendant(id);
+            if(ret != null) { break; }
+        }
+        return ret;
+    }
+    
+    /**
+     * search descendant recursive to find the first specified ASTNode
+     */
+    public IASTNode getDescendant(int id, String name) {
+        IASTNode ret = null;
+        for(int i = 0; i < children.size(); i++) {
+            ASTNode child = (ASTNode)children.get(i);
+            if(child.getId() == id && name.equalsIgnoreCase(child.getName())) {
+                ret = child;
+                break;
+            }
+            ret = child.getDescendant(id);
             if(ret != null) { break; }
         }
         return ret;
@@ -119,6 +137,42 @@ public class ASTNode implements IASTNode
     
     public SymbolTable getSymbolTable() {
         return symTab;
+    }
+    
+    public void setName(String name) {
+        this.name = name;
+    }
+    
+    public String getName() {
+        if(name.isEmpty()) {
+            // default: node name is its first identifier child node
+            // package, entity, component, architecture, etc.
+            IASTNode child = getChildById(VhdlASTConstants.ASTIDENTIFIER);
+            if(child != null) {
+                name = ((ASTNode)child).firstTokenImage();
+            }
+            
+            // function/procedure
+            if(name.isEmpty()) {
+                child = getDescendant(VhdlASTConstants.ASTDESIGNATOR);
+                if(child != null) {
+                    name = ((ASTNode)child).firstTokenImage();
+                }
+            }
+            
+            if(name.isEmpty()) {
+                child = getDescendant(VhdlASTConstants.ASTIDENTIFIER);
+                if(child != null) {
+                    name = ((ASTNode)child).firstTokenImage();
+                }
+            }
+            
+            if(name.isEmpty()) {
+                name = first_token.image;
+            }
+        }
+
+        return name;
     }
 }
 
