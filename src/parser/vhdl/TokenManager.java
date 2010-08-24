@@ -530,6 +530,26 @@ public class TokenManager extends RegExp implements VhdlTokenConstants
     }
     
     /**
+     * go to the first token<br>
+     * throw exception if meet invalid character
+     */
+    public Token toFirstToken() throws ParserException
+    {
+        curToken = firstToken;
+        return curToken;
+    }
+    
+    /**
+     * go to the last parsered token(may not be the last token of file)<br>
+     * throw exception if meet invalid character
+     */
+    public Token toLastToken() throws ParserException
+    {
+        curToken = lastToken;
+        return curToken;
+    }
+    
+    /**
      * save current state
      */
     private void save()

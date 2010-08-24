@@ -20,9 +20,6 @@ public abstract class hdlConverter implements SCTreeConstants
     static public final int T_VHDL = 1;
     static public final int T_VERILOG = 2;
     
-    static public final String EXT_VHDL = "vhd";
-    static public final String EXT_VERILOG = "v";    
-    
     String[] m_hdlFileContents = null;
     protected PrintStream m_targetFileBuff = null;
     
@@ -117,5 +114,5 @@ public abstract class hdlConverter implements SCTreeConstants
     public abstract void convertFile(String srcPath, String dstPath) 
                 throws ParserException, FileNotFoundException, IOException;    
     public abstract void convertDir(String srcDir);    
-    public abstract void parseLibSymbols(String srcDir);
+    public abstract void addLibary(String srcDir, String libName);
 }

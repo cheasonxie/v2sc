@@ -6,6 +6,7 @@ import converter.hdlConverter;
 import converter.verilog.Verilog;
 import converter.vhdl.Vhdl;
 
+import parser.IParser;
 import parser.ParserException;
 
 public class hdl2SystemC
@@ -38,7 +39,7 @@ public class hdl2SystemC
             
             if(conv != null)
             {
-                conv.parseLibSymbols("grlib-gpl-1.0.21-b3848\\lib\\grlib");
+                conv.addLibary("grlib-gpl-1.0.21-b3848\\lib\\grlib", "grlib");
                 conv.convertFile(path, "a.cpp");
             }
         }
@@ -62,9 +63,9 @@ public class hdl2SystemC
         if(index > 0)
         {
             String ext = path.substring(index + 1);
-            if(ext.equalsIgnoreCase(hdlConverter.EXT_VERILOG))
+            if(ext.equalsIgnoreCase(IParser.EXT_VERILOG))
                 return hdlConverter.T_VERILOG;
-            else if(ext.equalsIgnoreCase(hdlConverter.EXT_VHDL))
+            else if(ext.equalsIgnoreCase(IParser.EXT_VHDL))
                 return hdlConverter.T_VHDL;
             else
                 return hdlConverter.T_NONE;

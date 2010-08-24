@@ -4,50 +4,87 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.Reader;
+import java.util.ArrayList;
 
+import parser.CommentBlock;
 import parser.IASTNode;
 import parser.ParserException;
 import parser.Token;
 
 public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
 {
-    protected TokenManager tm = null;
+    protected TokenManager tokenMgr = null;
+    protected LibraryManager libraryMgr = LibraryManager.getInstance();
+    protected SymbolTable extSymbolTable = null;
     protected SymbolTable symbolTable = null;
     protected ASTNode curNode = null;
     
     /**
+     *  true -- just only parse symbols in package(if exist)<br>
+     *  false -- parse all AST
+     */
+    protected boolean parseSymbol = false;
+    
+    /**
      * constructor, file path version
      */
-    public VhdlParser(String path) {
+    public VhdlParser(String path, boolean parseSymbol) {
         try {
             BufferedReader stream = new BufferedReader(new FileReader(path));
-            tm = new TokenManager(stream);
+            tokenMgr = new TokenManager(stream);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
+        this.parseSymbol = parseSymbol;
     }
     
     /**
      * constructor, reader version
      */
-    public VhdlParser(Reader reader) {
+    public VhdlParser(Reader reader, boolean parseSymbol) {
         BufferedReader stream = new BufferedReader(reader);
-        tm = new TokenManager(stream);
+        tokenMgr = new TokenManager(stream);
+        this.parseSymbol = parseSymbol;
+    }
+    
+    /**
+     * return all comments of parsered file
+     */
+    public ArrayList<CommentBlock> getComments() {
+       return tokenMgr.comments;
+    }
+    
+    /**
+     * token which has its own symbol table call this function to start<br>
+     * use pair with endBlock
+     */
+    void startBlock() {
+        SymbolTable newTab = new SymbolTable(symbolTable);
+        symbolTable = newTab;
+    }
+    
+    /**
+     * token which has its own symbol table call this function to end<br>
+     * use pair with startBlock
+     */
+    void endBlock() {
+        symbolTable = symbolTable.getParent();
     }
     
     void openNodeScope(ASTNode n) throws ParserException  {
         curNode = n;
-        n.setFirstToken(tm.getNextToken());
+        n.setFirstToken(tokenMgr.getNextToken());
+        n.setSymbolTable(symbolTable);
     }
     
     void closeNodeScope(ASTNode n) throws ParserException  {
-        n.setLastToken(tm.getCurrentToken());
+        n.setLastToken(tokenMgr.getCurrentToken());
         curNode = null;
     }
     
     Token consumeToken(int kind) throws ParserException {
-        Token oldToken = tm.getCurrentToken();
-        Token token = tm.toNextToken();
+        Token oldToken = tokenMgr.getCurrentToken();
+        Token token = tokenMgr.toNextToken();
         if(kind == SEMICOLON) {     // consume continuous semicolons
             if(token == null || token.kind != SEMICOLON) {
                 throw new ParserException(oldToken);
@@ -55,9 +92,9 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
             Token prev = token;
             while(token != null && token.kind == SEMICOLON) {
                 prev = token;
-                token = tm.toNextToken();
+                token = tokenMgr.toNextToken();
             }
-            tm.setCurrentToken(prev);
+            tokenMgr.setCurrentToken(prev);
             return prev;
         }else {
             if(token != null && token.kind == kind) {
@@ -103,7 +140,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
                 break;
             }
             
-            Token nextToken = tm.getNextToken(token);
+            Token nextToken = tokenMgr.getNextToken(token);
             if(nextToken == null) {
                 break;
             }
@@ -114,14 +151,14 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
             {
             case LBRACKET:
                 tmp1 = findTokenInBlock(nextToken, RBRACKET, to);
-                nextToken = tm.getNextToken(tmp1); // ignore block
+                nextToken = tokenMgr.getNextToken(tmp1); // ignore block
                 break;
                 
             case ARCHITECTURE:
             case ENTITY:
             case PACKAGE:
                 tmp1 = findTokenInBlock(nextToken, END, to);
-                nextToken = tm.getNextToken(tmp1); // ignore block
+                nextToken = tokenMgr.getNextToken(tmp1); // ignore block
                 break;
                 
             case PROCEDURE:
@@ -132,21 +169,21 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
                 if((tmp1 != null && tmp2 != null && checkLateComming(tmp2, tmp1))
                         || (tmp1 != null && tmp2 == null)) {
                     tmp1 = findTokenInBlock(nextToken, END, to);    // is subprogram body
-                    nextToken = tm.getNextToken(tmp1); // ignore block
+                    nextToken = tokenMgr.getNextToken(tmp1); // ignore block
                 }else {
                     nextToken = tmp2; // is subprogram declaration
                 }
                 break;
                 
             case WAIT:
-                nextToken = tm.getNextToken(token);
+                nextToken = tokenMgr.getNextToken(token);
                 if(nextToken.kind == FOR) {
-                    nextToken = tm.getNextToken(nextToken);
+                    nextToken = tokenMgr.getNextToken(nextToken);
                 }
                 break;
                 
             case FOR:
-                if(tm.getNextTokenKind(nextToken) == IN) {  // generate or loop
+                if(tokenMgr.getNextTokenKind(nextToken) == IN) {  // generate or loop
                     tmp = nextToken;
                     while(tmp != null && tmp.kind != SEMICOLON)
                     {
@@ -154,12 +191,12 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
                             tmpKind = tmp.kind;
                             break;
                         }
-                        tmp = tm.getNextToken(tmp);
+                        tmp = tokenMgr.getNextToken(tmp);
                     }
                     if(tmp == null || tmp.kind == SEMICOLON) {
                         return null;
                     }
-                    tmp = tm.getNextToken(tmp);
+                    tmp = tokenMgr.getNextToken(tmp);
                 }else {
                     tmpKind = FOR;
                     tmp = nextToken;
@@ -167,7 +204,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
                 tmp = findTokenInBlock(tmp, END, to);
                 tmp1 = findTokenInBlock(tmp, tmpKind, to);
                 if(tmp != null && tmp1 != null && tmp.next == tmp1) {
-                    nextToken = tm.getNextToken(tmp1);  // ignore block
+                    nextToken = tokenMgr.getNextToken(tmp1);  // ignore block
                 }
                 break;
                 
@@ -176,11 +213,11 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
                 if(tmp == null) {
                     return null;
                 }
-                tmp = tm.getNextToken(tmp);
+                tmp = tokenMgr.getNextToken(tmp);
                 tmp = findTokenInBlock(tmp, END, to);
                 tmp1 = findTokenInBlock(tmp, LOOP, to);
                 if(tmp != null && tmp1 != null && tmp.next == tmp1) {
-                    nextToken = tm.getNextToken(tmp1);  // ignore block
+                    nextToken = tokenMgr.getNextToken(tmp1);  // ignore block
                 }
                 break;
                 
@@ -196,7 +233,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
                 tmp = findTokenInBlock(nextToken, END, to);
                 tmp1 = findTokenInBlock(tmp, token.kind, to);
                 if(tmp != null && tmp1 != null && tmp.next == tmp1) {
-                    nextToken = tm.getNextToken(tmp1);  // ignore block
+                    nextToken = tokenMgr.getNextToken(tmp1);  // ignore block
                 }
                 break;
                 
@@ -207,7 +244,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
                     && (tmp.next == tmp1 
                         || (tmp.next != null && tmp.next.kind == POSTPONED 
                                 && tmp.next.next == tmp1))) {
-                    nextToken = tm.getNextToken(tmp1);  // ignore block
+                    nextToken = tokenMgr.getNextToken(tmp1);  // ignore block
                 }
                 break;
                 
@@ -222,17 +259,17 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
                         tmpKind = IF;
                         break;
                     }
-                    tmp = tm.getNextToken(tmp);
+                    tmp = tokenMgr.getNextToken(tmp);
                 }
                 if(tmp == null || tmp.kind == SEMICOLON) {
                     return null;
                 }
-                tmp = tm.getNextToken(tmp);
+                tmp = tokenMgr.getNextToken(tmp);
                 
                 tmp = findTokenInBlock(tmp, END, to);
                 tmp1 = findTokenInBlock(tmp, tmpKind, to);
                 if(tmp1 != null && tmp != null && tmp.next == tmp1) {
-                    nextToken = tm.getNextToken(tmp1);  // ignore block
+                    nextToken = tokenMgr.getNextToken(tmp1);  // ignore block
                 }
                 break;
                 
@@ -251,7 +288,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
      * <br>before call this function, you must in one block(after keyword token)
      */
     Token findTokenInBlock(int kind, Token to) throws ParserException {
-        return findTokenInBlock(tm.getNextToken(), kind, to);
+        return findTokenInBlock(tokenMgr.getNextToken(), kind, to);
     }
     
     /**
@@ -271,7 +308,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
                 break;
             }
             
-            token = tm.getNextToken(token);
+            token = tokenMgr.getNextToken(token);
         }
         return ret;
     }
@@ -281,22 +318,22 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
      * no ignore
      */
     Token findToken(int kind, Token to) throws ParserException {
-        return findToken(tm.getNextToken(), kind, to);
+        return findToken(tokenMgr.getNextToken(), kind, to);
     }
     
     /**
      *  find last left-bracket token in block between current token and "to" (not including and "to")
      */
     Token findLastLBracketToken(Token to) throws ParserException {
-        Token token = findToken(tm.getNextToken(), LBRACKET, to);
+        Token token = findToken(tokenMgr.getNextToken(), LBRACKET, to);
         Token ret = null;
         while(token != null) {
             ret = token;
-            token = findTokenInBlock(tm.getNextToken(token), RBRACKET, to);
+            token = findTokenInBlock(tokenMgr.getNextToken(token), RBRACKET, to);
             if(token == null) {
                 throw new ParserException(to);
             }
-            token = findToken(tm.getNextToken(token), LBRACKET, to);
+            token = findToken(tokenMgr.getNextToken(token), LBRACKET, to);
         }
         return ret;
     }
@@ -306,10 +343,10 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
      */
     Token findLastTokenInBlock(int kind, Token to) throws ParserException {
         Token ret = null;
-        Token token = findTokenInBlock(tm.getNextToken(), kind, to);
+        Token token = findTokenInBlock(tokenMgr.getNextToken(), kind, to);
         while(token != null) {
             ret = token;
-            token = findTokenInBlock(tm.getNextToken(token), kind, to);
+            token = findTokenInBlock(tokenMgr.getNextToken(token), kind, to);
         }
         return ret;
     }
@@ -371,11 +408,11 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
     void abstract_literal(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTABSTRACT_LITERAL);
         openNodeScope(node);
-        int kind = tm.getNextTokenKind();
+        int kind = tokenMgr.getNextTokenKind();
         if(!(kind == decimal_literal || kind == based_literal)) {
-            throw new ParserException(tm.toNextToken());
+            throw new ParserException(tokenMgr.toNextToken());
         }
-        Token token = tm.toNextToken();
+        Token token = tokenMgr.toNextToken();
         new ASTtoken(node, token.image);
         closeNodeScope(node);
     }
@@ -403,10 +440,10 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         openNodeScope(node);
         endToken = findToken(ACROSS, endToken);
         identifier_list(node, endToken);
-        if(tm.getNextTokenKind() == TOLERANCE) {
+        if(tokenMgr.getNextTokenKind() == TOLERANCE) {
             tolerance_aspect(node, endToken);
         }
-        if(tm.getNextTokenKind() == ASSIGN) {
+        if(tokenMgr.getNextTokenKind() == ASSIGN) {
             consumeToken(ASSIGN);
             new ASTtoken(node, tokenImage[ASSIGN]);
             expression(node, endToken);
@@ -428,7 +465,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
     void actual_designator(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTACTUAL_DESIGNATOR);
         openNodeScope(node);
-        int kind = tm.getNextTokenKind();
+        int kind = tokenMgr.getNextTokenKind();
         if(kind == identifier) {
             if(isExpression(endToken)) {
                 expression(node, endToken);
@@ -461,7 +498,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
     void actual_part(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTACTUAL_PART);
         openNodeScope(node);
-        int kind = tm.getNextTokenKind();
+        int kind = tokenMgr.getNextTokenKind();
         if(kind == OPEN || isExpression(endToken) 
                 || findTokenInBlock(LBRACKET, endToken) == null
                 || findTokenInBlock(SQUOTE, endToken) != null
@@ -469,13 +506,13 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
             actual_designator(node, endToken);  //TODO check function name
         }else {
             Token tmpToken = findLastLBracketToken(endToken);
-            if(findTokenInBlock(tm.getNextToken(tmpToken), DOWNTO, endToken) != null
-                || findTokenInBlock(tm.getNextToken(tmpToken), TO, endToken) != null) {
+            if(findTokenInBlock(tokenMgr.getNextToken(tmpToken), DOWNTO, endToken) != null
+                || findTokenInBlock(tokenMgr.getNextToken(tmpToken), TO, endToken) != null) {
                 actual_designator(node, endToken);  // slice name
             }else {
                 if(kind != LBRACKET) {
                     function_call(node, endToken);
-                }else if(tm.getNextTokenKind(2) == OTHERS){
+                }else if(tokenMgr.getNextTokenKind(2) == OTHERS){
                     aggregate(node, endToken);  //TODO ?? not in syntax tree
                 }else {
                     consumeToken(LBRACKET);
@@ -492,12 +529,12 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
      *   <dd> + | - | &
      */
     void adding_operator(IASTNode p, Token endToken) throws ParserException {
-        int kind = tm.getNextTokenKind();
+        int kind = tokenMgr.getNextTokenKind();
         if(kind == ADD || kind == SUB || kind == CONCAT) {
             consumeToken(kind);
             new ASTtoken(p, tokenImage[kind]);
         }else {
-            throw new ParserException(tm.toNextToken());
+            throw new ParserException(tokenMgr.toNextToken());
         }
     }
 
@@ -511,15 +548,15 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         consumeToken(LBRACKET);
         Token rbracketToken = findTokenInBlock(RBRACKET, endToken);
         if(rbracketToken == null) {
-            throw new ParserException(tm.toNextToken());
+            throw new ParserException(tokenMgr.toNextToken());
         }
         
         boolean first = true;
         while(true) {
             Token commaToken = findTokenInBlock(COMMA, rbracketToken);
             endToken = (commaToken != null) ? commaToken : rbracketToken;
-            if(tm.getNextTokenKind() == LBRACKET) {
-                Token tmpToken = findTokenInBlock(tm.getNextToken(2), 
+            if(tokenMgr.getNextTokenKind() == LBRACKET) {
+                Token tmpToken = findTokenInBlock(tokenMgr.getNextToken(2), 
                                     RBRACKET, rbracketToken);
                 if(endToken != rbracketToken || (!first && tmpToken != rbracketToken)) {
                     aggregate(node, endToken);
@@ -529,7 +566,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
             }else {
                 element_association(node, endToken);
             }
-            if(tm.getNextTokenKind() != COMMA) {
+            if(tokenMgr.getNextTokenKind() != COMMA) {
                 break;
             }
             consumeToken(COMMA);
@@ -551,7 +588,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         
         Token tmpToken = findToken(IS, endToken);
         alias_designator(node, tmpToken);
-        if(tm.getNextTokenKind() == COLON) {
+        if(tokenMgr.getNextTokenKind() == COLON) {
             consumeToken(COLON);
             new ASTtoken(node, tokenImage[COLON]);
             alias_indication(node, tmpToken);
@@ -560,7 +597,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         new ASTtoken(node, tokenImage[IS]);
         
         name(node, endToken);
-        if(tm.getNextTokenKind() != SEMICOLON) {
+        if(tokenMgr.getNextTokenKind() != SEMICOLON) {
             signature(node, endToken);
         }
         consumeToken(SEMICOLON);
@@ -576,16 +613,16 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
     void alias_designator(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTALIAS_DESIGNATOR);
         openNodeScope(node);
-        int kind = tm.getNextTokenKind();
+        int kind = tokenMgr.getNextTokenKind();
         if(kind == identifier) {
             identifier(node, endToken);
         }else if(kind == character_literal) {
-            Token token = tm.toNextToken();
+            Token token = tokenMgr.toNextToken();
             new ASTtoken(node, token.image);
         }else if(kind == string_literal) {
             operator_symbol(node, endToken);
         }else {
-            throw new ParserException(tm.toNextToken());
+            throw new ParserException(tokenMgr.toNextToken());
         }
         closeNodeScope(node);
     }
@@ -618,10 +655,10 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         consumeToken(NEW);
         if(findToken(SQUOTE, endToken) != null) {
             qualified_expression(node, endToken);
-        }else if(tm.getNextTokenKind() == identifier) {
+        }else if(tokenMgr.getNextTokenKind() == identifier) {
             subtype_indication(node, endToken);
         }else {
-            throw new ParserException(tm.toNextToken());
+            throw new ParserException(tokenMgr.toNextToken());
         }
         closeNodeScope(node);
     }
@@ -637,6 +674,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
     void architecture_body(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTARCHITECTURE_BODY);
         openNodeScope(node);
+        startBlock();
         consumeToken(ARCHITECTURE);
         endToken = findTokenInBlock(END, endToken);
         
@@ -655,18 +693,19 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         architecture_statement_part(node, endToken);
         consumeToken(END);
         
-        if(tm.getNextTokenKind() == ARCHITECTURE) {
+        if(tokenMgr.getNextTokenKind() == ARCHITECTURE) {
             consumeToken(ARCHITECTURE);
         }
         
-        if(tm.getNextTokenKind() == identifier) {
+        if(tokenMgr.getNextTokenKind() == identifier) {
             Token t1 = ((ASTNode)node.getChild(0)).getFirstToken();
-            Token t2 = tm.toNextToken();
+            Token t2 = tokenMgr.toNextToken();
             if(!t1.image.equalsIgnoreCase(t2.image)) {
-                throw new ParserException(tm.getCurrentToken());
+                throw new ParserException(tokenMgr.getCurrentToken());
             }
         }
         consumeToken(SEMICOLON);
+        endBlock();
         closeNodeScope(node);
     }
 
@@ -757,7 +796,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
             tmpToken = severityToken;
         condition(node, tmpToken);
         
-        if(tm.getNextTokenKind() == REPORT) {
+        if(tokenMgr.getNextTokenKind() == REPORT) {
             consumeToken(REPORT);
             new ASTtoken(node, tokenImage[REPORT]);
             if(severityToken != null)
@@ -765,7 +804,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
             expression(node, tmpToken);
         }
 
-        if(tm.getNextTokenKind() == SEVERITY) {
+        if(tokenMgr.getNextTokenKind() == SEVERITY) {
             consumeToken(SEVERITY);
             new ASTtoken(node, tokenImage[SEVERITY]);
             expression(node, endToken);
@@ -781,7 +820,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         ASTNode node = new ASTNode(p, ASTASSERTION_STATEMENT);
         openNodeScope(node);
         endToken = findToken(SEMICOLON, endToken);
-        if(tm.getNextTokenKind(2) == COLON) {
+        if(tokenMgr.getNextTokenKind(2) == COLON) {
             identifier(node, endToken);   // label
             consumeToken(COLON);
         }
@@ -818,7 +857,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         while(true) {
             Token commaToken = findTokenInBlock(COMMA, endToken);
             association_element(node, (commaToken != null) ? commaToken : endToken);
-            if(tm.getNextTokenKind() != COMMA) {
+            if(tokenMgr.getNextTokenKind() != COMMA) {
                 break;
             }
             consumeToken(COMMA);
@@ -863,18 +902,18 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         openNodeScope(node);
         Token tk = findToken(SQUOTE, endToken);
         prefix(node, tk);
-        if(tm.getNextTokenKind() != SQUOTE) {
+        if(tokenMgr.getNextTokenKind() != SQUOTE) {
             signature(node, tk);
         }
         consumeToken(SQUOTE);
         attribute_designator(node, endToken);
-        if(tm.getNextTokenKind() == LBRACKET) {
+        if(tokenMgr.getNextTokenKind() == LBRACKET) {
             consumeToken(LBRACKET);
             endToken = findTokenInBlock(RBRACKET, endToken);
             while(true) {
                 Token commaToken = findTokenInBlock(COMMA, endToken);
                 expression(node, (commaToken != null) ? commaToken : endToken);
-                if(tm.getNextTokenKind() != COMMA) {
+                if(tokenMgr.getNextTokenKind() != COMMA) {
                     break;
                 }
                 consumeToken(COMMA);
@@ -964,15 +1003,15 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
     void binding_indication(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTBINDING_INDICATION);
         openNodeScope(node);
-        if(tm.getNextTokenKind() == USE) {
+        if(tokenMgr.getNextTokenKind() == USE) {
             consumeToken(USE);
             new ASTtoken(node, tokenImage[USE]);
             entity_aspect(node, endToken);
         }
-        if(tm.getNextTokenKind() == GENERIC) {
+        if(tokenMgr.getNextTokenKind() == GENERIC) {
             generic_map_aspect(node, endToken);
         }
-        if(tm.getNextTokenKind() == PORT) {
+        if(tokenMgr.getNextTokenKind() == PORT) {
             port_map_aspect(node, endToken);
         }
         closeNodeScope(node);
@@ -1015,11 +1054,11 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
             
         block_specification(node, tmpToken);
         while(true) {
-            if(tm.getNextTokenKind() == USE) {
+            if(tokenMgr.getNextTokenKind() == USE) {
                 new ASTtoken(node, tokenImage[USE]);
                 tmpToken = findToken(SEMICOLON, endToken);
                 use_clause(node, tmpToken);
-            }else if(tm.getNextTokenKind() == FOR) {
+            }else if(tokenMgr.getNextTokenKind() == FOR) {
                 new ASTtoken(node, tokenImage[FOR]);
                 configuration_item(node, endToken);
             }else {
@@ -1060,7 +1099,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
     void block_declarative_items(IASTNode p, Token endToken) throws ParserException {
         boolean exitLoop = false;
         while(!exitLoop) {
-            int kind = tm.getNextTokenKind();
+            int kind = tokenMgr.getNextTokenKind();
             switch(kind)
             {
             case PROCEDURE:
@@ -1164,26 +1203,26 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
     void block_header(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTBLOCK_HEADER);
         openNodeScope(node);
-        int kind = tm.getNextTokenKind();
+        int kind = tokenMgr.getNextTokenKind();
         Token semicolonToken = findTokenInBlock(SEMICOLON, endToken);
         if(kind == GENERIC) {
-            generic_clause(node, tm.getNextToken(semicolonToken));
-            if(tm.getNextTokenKind() == GENERIC
-                    && tm.getNextTokenKind(2) == MAP) {
+            generic_clause(node, tokenMgr.getNextToken(semicolonToken));
+            if(tokenMgr.getNextTokenKind() == GENERIC
+                    && tokenMgr.getNextTokenKind(2) == MAP) {
                 semicolonToken = findTokenInBlock(SEMICOLON, endToken);
                 generic_map_aspect(node, semicolonToken);
                 consumeToken(SEMICOLON);
             }
         }else if(kind == PORT) {
-            port_clause(node, tm.getNextToken(semicolonToken));
-            if(tm.getNextTokenKind() == PORT
-                    && tm.getNextTokenKind(2) == MAP) {
+            port_clause(node, tokenMgr.getNextToken(semicolonToken));
+            if(tokenMgr.getNextTokenKind() == PORT
+                    && tokenMgr.getNextTokenKind(2) == MAP) {
                 semicolonToken = findTokenInBlock(SEMICOLON, endToken);
                 port_map_aspect(node, semicolonToken);
                 consumeToken(SEMICOLON);
             }
         }else {
-            throw new ParserException(tm.toNextToken()); 
+            throw new ParserException(tokenMgr.toNextToken()); 
         }
         closeNodeScope(node);
     }
@@ -1197,8 +1236,8 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
     void block_specification(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTBLOCK_SPECIFICATION);
         openNodeScope(node);
-        if(tm.getNextTokenKind() != identifier) {
-            throw new ParserException(tm.toNextToken()); 
+        if(tokenMgr.getNextTokenKind() != identifier) {
+            throw new ParserException(tokenMgr.toNextToken()); 
         }
         
         Token tmpToken = findLastLBracketToken(endToken);
@@ -1227,6 +1266,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
     void block_statement(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTBLOCK_STATEMENT);
         openNodeScope(node);
+        startBlock();
         
         Token tmpToken = findToken(COLON, endToken);
         identifier(node, tmpToken);   // label
@@ -1234,13 +1274,13 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         consumeToken(BLOCK);
         endToken = findTokenInBlock(END, endToken);
         
-        if(tm.getNextTokenKind() == LBRACKET) {
+        if(tokenMgr.getNextTokenKind() == LBRACKET) {
             consumeToken(LBRACKET);
             tmpToken = findTokenInBlock(RBRACKET, endToken);
             expression(node, tmpToken);
             consumeToken(RBRACKET);
         }
-        if(tm.getNextTokenKind() == IS) {
+        if(tokenMgr.getNextTokenKind() == IS) {
             consumeToken(IS);
         }
         tmpToken = findTokenInBlock(BEGIN, endToken);
@@ -1250,14 +1290,15 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         block_statement_part(node, endToken);
         consumeToken(END);
         consumeToken(BLOCK);
-        if(tm.getNextTokenKind() == identifier) {
+        if(tokenMgr.getNextTokenKind() == identifier) {
             Token t1 = ((ASTNode)node.getChild(0)).getFirstToken();
-            Token t2 = tm.toNextToken();
+            Token t2 = tokenMgr.toNextToken();
             if(!t1.image.equalsIgnoreCase(t2.image)) {
-                throw new ParserException(tm.getCurrentToken());
+                throw new ParserException(tokenMgr.getCurrentToken());
             }
         }
         consumeToken(SEMICOLON);
+        endBlock();
         closeNodeScope(node);
     }
 
@@ -1300,7 +1341,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         ASTNode node = new ASTNode(p, ASTBREAK_ELEMENT);
         openNodeScope(node);
         Token tmpToken = endToken;
-        if(tm.getNextTokenKind() == FOR) {
+        if(tokenMgr.getNextTokenKind() == FOR) {
             tmpToken = findToken(USE, endToken);
             break_selector_clause(node, tmpToken);
         }
@@ -1321,7 +1362,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         while(true) {
             Token commaToken = findTokenInBlock(COMMA, endToken);
             break_element(node, (commaToken != null) ? commaToken : endToken);
-            if(tm.getNextTokenKind() != COMMA) {
+            if(tokenMgr.getNextTokenKind() != COMMA) {
                 break;
             }
             consumeToken(COMMA);
@@ -1350,7 +1391,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
     void break_statement(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTBREAK_STATEMENT);
         openNodeScope(node);
-        if(tm.getNextTokenKind(2) == COLON) {
+        if(tokenMgr.getNextTokenKind(2) == COLON) {
             Token tmpToken = findToken(COLON, endToken);
             identifier(node, tmpToken);   // label
             consumeToken(COLON);
@@ -1362,7 +1403,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         if(findToken(RARROW, endToken) != null) {
             break_list(node, endToken);
         }
-        if(tm.getNextTokenKind() == WHEN) {
+        if(tokenMgr.getNextTokenKind() == WHEN) {
             consumeToken(WHEN);
             new ASTtoken(node, tokenImage[WHEN]);
             condition(node, endToken);
@@ -1385,7 +1426,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         
         boolean hasLabel = false;        
         Token tmpToken = endToken;
-        if(tm.getNextTokenKind(2) == COLON) {
+        if(tokenMgr.getNextTokenKind(2) == COLON) {
             tmpToken = findToken(COLON, endToken);
             identifier(node, tmpToken);   // label
             consumeToken(COLON);
@@ -1398,24 +1439,24 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         tmpToken = findToken(IS, endToken);
         expression(node, tmpToken);
         consumeToken(IS);
-        tmpToken = findTokenInBlock(tm.getNextToken(), WHEN, endToken);
+        tmpToken = findTokenInBlock(tokenMgr.getNextToken(), WHEN, endToken);
         while(true) {
-            tmpToken = findTokenInBlock(tm.getNextToken(tmpToken), WHEN, endToken);
+            tmpToken = findTokenInBlock(tokenMgr.getNextToken(tmpToken), WHEN, endToken);
             case_statement_alternative(node, (tmpToken != null) ? tmpToken : endToken);
-            if(tm.getNextTokenKind() != WHEN) {
+            if(tokenMgr.getNextTokenKind() != WHEN) {
                 break;
             }
         }
         consumeToken(END);
         consumeToken(CASE);
-        if(tm.getNextTokenKind() == identifier) {
+        if(tokenMgr.getNextTokenKind() == identifier) {
             if(!hasLabel) {
-                throw new ParserException(tm.getCurrentToken());
+                throw new ParserException(tokenMgr.getCurrentToken());
             }
             Token t1 = ((ASTNode)node.getChild(0)).getFirstToken();
-            Token t2 = tm.toNextToken();
+            Token t2 = tokenMgr.toNextToken();
             if(!t1.image.equalsIgnoreCase(t2.image)) {
-                throw new ParserException(tm.getCurrentToken());
+                throw new ParserException(tokenMgr.getCurrentToken());
             }
         }
         consumeToken(SEMICOLON);
@@ -1457,9 +1498,9 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         openNodeScope(node);
         if(isDiscrete_range(endToken)) {
             discrete_range(node, endToken);
-        }else if(tm.getNextTokenKind() == identifier) {
+        }else if(tokenMgr.getNextTokenKind() == identifier) {
             simple_name(node, endToken);
-        }else if(tm.getNextTokenKind() == OTHERS) {
+        }else if(tokenMgr.getNextTokenKind() == OTHERS) {
             consumeToken(OTHERS);
             new ASTtoken(node, tokenImage[OTHERS]);
         }else {
@@ -1478,7 +1519,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         while(true) {
             Token pipeToken = findToken(PIPE, endToken);
             choice(node, (pipeToken != null) ? pipeToken : endToken);
-            if(tm.getNextTokenKind() != PIPE) {
+            if(tokenMgr.getNextTokenKind() != PIPE) {
                 break;
             }
             consumeToken(PIPE);
@@ -1501,13 +1542,13 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         endToken = findTokenInBlock(END, endToken);
         
         component_specification(node, endToken);
-        int kind = tm.getNextTokenKind();
+        int kind = tokenMgr.getNextTokenKind();
         if(kind == USE || kind == GENERIC || kind == PORT) {
             Token tmpToken = findToken(SEMICOLON, endToken);
             binding_indication(node, tmpToken);
             consumeToken(SEMICOLON);
         }
-        if(tm.getNextTokenKind() == FOR) {
+        if(tokenMgr.getNextTokenKind() == FOR) {
             block_configuration(node, endToken);
         }
         consumeToken(END);
@@ -1531,27 +1572,27 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         endToken = findTokenInBlock(END, endToken);
         
         identifier(node, endToken);
-        if(tm.getNextTokenKind() == IS) {
+        if(tokenMgr.getNextTokenKind() == IS) {
             consumeToken(IS);
         }
         
         Token tmpToken = endToken;
-        if(tm.getNextTokenKind() == GENERIC) {
+        if(tokenMgr.getNextTokenKind() == GENERIC) {
             tmpToken = findTokenInBlock(SEMICOLON, endToken);
-            generic_clause(node, tm.getNextToken(tmpToken));
+            generic_clause(node, tokenMgr.getNextToken(tmpToken));
         }
         
-        if(tm.getNextTokenKind() == PORT) {
+        if(tokenMgr.getNextTokenKind() == PORT) {
             tmpToken = findTokenInBlock(SEMICOLON, endToken);
-            port_clause(node, tm.getNextToken(tmpToken));
+            port_clause(node, tokenMgr.getNextToken(tmpToken));
         }
         consumeToken(END);
         consumeToken(COMPONENT);
-        if(tm.getNextTokenKind() == identifier) {
+        if(tokenMgr.getNextTokenKind() == identifier) {
             Token t1 = ((ASTNode)node.getChild(0)).getFirstToken();
-            Token t2 = tm.toNextToken();
+            Token t2 = tokenMgr.toNextToken();
             if(!t1.image.equalsIgnoreCase(t2.image)) {
-                throw new ParserException(tm.getCurrentToken());
+                throw new ParserException(tokenMgr.getCurrentToken());
             }
         }
         consumeToken(SEMICOLON);
@@ -1573,11 +1614,11 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         identifier(node, endToken);   // label
         consumeToken(COLON);
         instantiated_unit(node, endToken);
-        if(tm.getNextTokenKind() == GENERIC) {
+        if(tokenMgr.getNextTokenKind() == GENERIC) {
             generic_map_aspect(node, endToken);
         }
         
-        if(tm.getNextTokenKind() == PORT) {
+        if(tokenMgr.getNextTokenKind() == PORT) {
             port_map_aspect(node, endToken);
         }
         consumeToken(SEMICOLON);
@@ -1605,13 +1646,13 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
     void composite_nature_definition(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTCOMPOSITE_NATURE_DEFINITION);
         openNodeScope(node);
-        int kind = tm.getNextTokenKind();
+        int kind = tokenMgr.getNextTokenKind();
         if(kind == ARRAY) {
             array_nature_definition(node, endToken);
         }else if(kind == RECORD) {
             record_nature_definition(node, endToken);
         }else {
-            throw new ParserException(tm.toNextToken());
+            throw new ParserException(tokenMgr.toNextToken());
         }
         closeNodeScope(node);
     }
@@ -1624,13 +1665,13 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
     void composite_type_definition(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTCOMPOSITE_TYPE_DEFINITION);
         openNodeScope(node);
-        int kind = tm.getNextTokenKind();
+        int kind = tokenMgr.getNextTokenKind();
         if(kind == ARRAY) {
             array_type_definition(node, endToken);
         }else if(kind == RECORD) {
             record_type_definition(node, endToken);
         }else {
-            throw new ParserException(tm.toNextToken());
+            throw new ParserException(tokenMgr.toNextToken());
         }
         closeNodeScope(node);
     }
@@ -1644,12 +1685,12 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         openNodeScope(node);
         endToken = findToken(SEMICOLON, endToken);
         
-        if(tm.getNextTokenKind(2) == COLON) {
+        if(tokenMgr.getNextTokenKind(2) == COLON) {
             identifier(node, endToken);   // label
             consumeToken(COLON);
         }
         
-        if(tm.getNextTokenKind() == POSTPONED) {
+        if(tokenMgr.getNextTokenKind() == POSTPONED) {
             consumeToken(POSTPONED);
             new ASTtoken(node, tokenImage[POSTPONED]);
         }
@@ -1667,7 +1708,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         openNodeScope(node);
         endToken = findToken(SEMICOLON, endToken);
         
-        if(tm.getNextTokenKind(2) == COLON) {
+        if(tokenMgr.getNextTokenKind(2) == COLON) {
             identifier(node, endToken);   // label
             consumeToken(COLON);
         }
@@ -1677,10 +1718,10 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         if(findToken(RARROW, endToken) != null) {
             break_list(node, endToken);
         }
-        if(tm.getNextTokenKind() == ON) {
+        if(tokenMgr.getNextTokenKind() == ON) {
             sensitivity_clause(node, endToken);
         }
-        if(tm.getNextTokenKind() == WHEN) {
+        if(tokenMgr.getNextTokenKind() == WHEN) {
             consumeToken(WHEN);
             new ASTtoken(node, tokenImage[WHEN]);
             condition(node, endToken);
@@ -1698,12 +1739,12 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         openNodeScope(node);
         endToken = findToken(SEMICOLON, endToken);
         
-        if(tm.getNextTokenKind(2) == COLON) {
+        if(tokenMgr.getNextTokenKind(2) == COLON) {
             identifier(node, endToken);   // label
             consumeToken(COLON);
         }
         
-        if(tm.getNextTokenKind() == POSTPONED) {
+        if(tokenMgr.getNextTokenKind() == POSTPONED) {
             consumeToken(POSTPONED);
             new ASTtoken(node, tokenImage[POSTPONED]);
         }
@@ -1721,16 +1762,16 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         ASTNode node = new ASTNode(p, ASTCONCURRENT_SIGNAL_ASSIGNMENT_STATEMENT);
         openNodeScope(node);
         
-        if(tm.getNextTokenKind(2) == COLON) {
+        if(tokenMgr.getNextTokenKind(2) == COLON) {
             identifier(node, endToken);   // label
             consumeToken(COLON);
         }
         
-        if(tm.getNextTokenKind() == POSTPONED) {
+        if(tokenMgr.getNextTokenKind() == POSTPONED) {
             consumeToken(POSTPONED);
             new ASTtoken(node, tokenImage[POSTPONED]);
         }
-        if(tm.getNextTokenKind() == WITH) {
+        if(tokenMgr.getNextTokenKind() == WITH) {
             selected_signal_assignment(node, endToken);
         }else {
             conditional_signal_assignment(node, endToken);
@@ -1752,16 +1793,16 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
      *     true: this node has been handled, false elsewhere
      */
     boolean concurrent_statement(IASTNode p, Token endToken) throws ParserException {
-        Token tmpToken = tm.getNextToken();
+        Token tmpToken = tokenMgr.getNextToken();
         if(tmpToken == null) { return false; }
         if(tmpToken.kind == SEMICOLON || tmpToken.kind == BEGIN
                 || tmpToken.kind == END) {
             return false;
         }
         
-        if(tm.getNextTokenKind(2) == COLON) {
-            tmpToken = tm.getNextToken(tmpToken);   // ignore label
-            tmpToken = tm.getNextToken(tmpToken);
+        if(tokenMgr.getNextTokenKind(2) == COLON) {
+            tmpToken = tokenMgr.getNextToken(tmpToken);   // ignore label
+            tmpToken = tokenMgr.getNextToken(tmpToken);
             if(tmpToken == null) { return false; }
         }
         
@@ -1795,13 +1836,13 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         switch(tmpToken.kind)
         {
         case BLOCK:
-            tmpToken = findTokenInBlock(tm.getNextToken(tmpToken), END, endToken);
+            tmpToken = findTokenInBlock(tokenMgr.getNextToken(tmpToken), END, endToken);
             if(tmpToken == null) { return false; }
             tmpToken = findToken(tmpToken, SEMICOLON, endToken);
             block_statement(node, tmpToken);
             break;
         case PROCESS:
-            tmpToken = findTokenInBlock(tm.getNextToken(tmpToken), END, endToken);
+            tmpToken = findTokenInBlock(tokenMgr.getNextToken(tmpToken), END, endToken);
             if(tmpToken == null) { return false; }
             tmpToken = findToken(tmpToken, SEMICOLON, endToken);
             process_statement(node, tmpToken);
@@ -1814,26 +1855,26 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         case ENTITY:
         case CONFIGURATION:
             tmpToken = findToken(tmpToken, SEMICOLON, endToken);
-            component_instantiation_statement(node, tm.getNextToken(tmpToken));
+            component_instantiation_statement(node, tokenMgr.getNextToken(tmpToken));
             break;
         case FOR:
         case IF:
             tmpToken = findToken(tmpToken, GENERATE, endToken);
-            tmpToken = findTokenInBlock(tm.getNextToken(tmpToken), END, endToken);
+            tmpToken = findTokenInBlock(tokenMgr.getNextToken(tmpToken), END, endToken);
             generate_statement(node, tmpToken);
             break;
         case BREAK:
             tmpToken = findToken(tmpToken, SEMICOLON, endToken);
-            concurrent_break_statement(node, tm.getNextToken(tmpToken));
+            concurrent_break_statement(node, tokenMgr.getNextToken(tmpToken));
             break;
             
         default:
             if(isSignal_assignment) {
                 tmpToken = findToken(tmpToken, SEMICOLON, endToken);
-                concurrent_signal_assignment_statement(node, tm.getNextToken(tmpToken));
+                concurrent_signal_assignment_statement(node, tokenMgr.getNextToken(tmpToken));
             }else if(isGeneric_or_port_map) {
                 tmpToken = findToken(tmpToken, SEMICOLON, endToken);
-                component_instantiation_statement(node, tm.getNextToken(tmpToken));
+                component_instantiation_statement(node, tokenMgr.getNextToken(tmpToken));
             }else if(tmpToken.kind == identifier) {
                 concurrent_procedure_call_statement(node, endToken);
             }else{
@@ -1910,7 +1951,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
 
         tmpToken1 = findToken(WHEN, endToken);
         waveform(node, (tmpToken1 != null) ? tmpToken1 : endToken);
-        if(tm.getNextTokenKind() == WHEN) {
+        if(tokenMgr.getNextTokenKind() == WHEN) {
             consumeToken(WHEN);
             new ASTtoken(node, tokenImage[WHEN]);
             condition(node, endToken);
@@ -1947,14 +1988,14 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         
         block_configuration(node, endToken);
         consumeToken(END);
-        if(tm.getNextTokenKind() == CONFIGURATION) {
+        if(tokenMgr.getNextTokenKind() == CONFIGURATION) {
             consumeToken(CONFIGURATION);
         }
-        if(tm.getNextTokenKind() == identifier) {
+        if(tokenMgr.getNextTokenKind() == identifier) {
             Token t1 = ((ASTNode)node.getChild(0)).getFirstToken();
-            Token t2 = tm.toNextToken();
+            Token t2 = tokenMgr.toNextToken();
             if(!t1.image.equalsIgnoreCase(t2.image)) {
-                throw new ParserException(tm.getCurrentToken());
+                throw new ParserException(tokenMgr.getCurrentToken());
             }
         }
         consumeToken(SEMICOLON);
@@ -1970,7 +2011,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
     void configuration_declarative_items(IASTNode p, Token endToken) throws ParserException {
         boolean exitLoop = false;
         while(!exitLoop) {
-            int kind = tm.getNextTokenKind();
+            int kind = tokenMgr.getNextTokenKind();
             if(kind == USE) {
                 use_clause(p, endToken);
             }else if(kind == ATTRIBUTE) {
@@ -2042,7 +2083,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         
         tmpToken = findToken(ASSIGN, endToken);
         subtype_indication(node, (tmpToken != null) ? tmpToken : endToken);
-        if(tm.getNextTokenKind() == ASSIGN) {
+        if(tokenMgr.getNextTokenKind() == ASSIGN) {
             consumeToken(ASSIGN);
             expression(node, endToken);
         }
@@ -2088,7 +2129,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
     void constraint(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTCONSTRAINT);
         openNodeScope(node);
-        if(tm.getNextTokenKind() == RANGE) {
+        if(tokenMgr.getNextTokenKind() == RANGE) {
             range_constraint(node, endToken);
         }else {
             index_constraint(node, endToken);
@@ -2114,7 +2155,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
      */
     void context_items(IASTNode p, Token endToken) throws ParserException {
         while(true) {
-            int kind = tm.getNextTokenKind();
+            int kind = tokenMgr.getNextTokenKind();
             if(kind == LIBRARY) {
                 library_clause(p, endToken);
             }else if(kind == USE) {
@@ -2170,7 +2211,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
                 continue;
             }
             
-            int kind = tm.getNextTokenKind();
+            int kind = tokenMgr.getNextTokenKind();
             switch(kind)
             {
             case PROCEDURE:
@@ -2256,11 +2297,11 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         ASTNode node = new ASTNode(p, ASTDELAY_MECHANISM);
         openNodeScope(node);
         Token tmpToken = findToken(INERTIAL, endToken);
-        if(tm.getNextTokenKind() == TRANSPORT) {
+        if(tokenMgr.getNextTokenKind() == TRANSPORT) {
             consumeToken(TRANSPORT);
             new ASTtoken(node, tokenImage[TRANSPORT]);
         }else if(tmpToken != null) {
-            if(tm.getNextTokenKind() == REJECT) {
+            if(tokenMgr.getNextTokenKind() == REJECT) {
                 consumeToken(REJECT);
                 expression(node, tmpToken);
             }
@@ -2279,7 +2320,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         openNodeScope(node);
         while(true) {
             design_unit(node, null);
-            int kind = tm.getNextTokenKind();
+            int kind = tokenMgr.getNextTokenKind();
             if(!(kind == ARCHITECTURE || kind == CONFIGURATION
                 || kind == ENTITY || kind == LIBRARY
                 || kind == PACKAGE || kind == USE)) {
@@ -2297,8 +2338,10 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
     void design_unit(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTDESIGN_UNIT);
         openNodeScope(node);
+        startBlock();
         context_clause(node, endToken);
         library_unit(node, endToken);
+        endBlock();
         closeNodeScope(node);
     }
 
@@ -2309,13 +2352,13 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
     void designator(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTDESIGNATOR);
         openNodeScope(node);
-        int kind = tm.getNextTokenKind();
+        int kind = tokenMgr.getNextTokenKind();
         if(kind == identifier) {
             identifier(node, endToken);
         }else if(kind == string_literal) {
             operator_symbol(node, endToken);
         }else {
-            throw new ParserException(tm.toNextToken());
+            throw new ParserException(tokenMgr.toNextToken());
         }
         closeNodeScope(node);
     }
@@ -2327,11 +2370,11 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
     void direction(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTDIRECTION);
         openNodeScope(node);
-        int kind = tm.getNextTokenKind();
+        int kind = tokenMgr.getNextTokenKind();
         if(kind == TO || kind == DOWNTO) {
             consumeToken(kind);
         }else {
-            throw new ParserException(tm.toNextToken());
+            throw new ParserException(tokenMgr.toNextToken());
         }
         closeNodeScope(node);
     }
@@ -2361,13 +2404,13 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
     void discrete_range(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTDISCRETE_RANGE);
         openNodeScope(node);
-        if(tm.getNextTokenKind() == RANGE
+        if(tokenMgr.getNextTokenKind() == RANGE
                 || isDiscrete_range(endToken)) {
             range(node, endToken);
-        }else if(tm.getNextTokenKind() == identifier) {
+        }else if(tokenMgr.getNextTokenKind() == identifier) {
             subtype_indication(node, endToken);
         }else {
-            throw new ParserException(tm.toNextToken());
+            throw new ParserException(tokenMgr.toNextToken());
         }
         closeNodeScope(node);
     }
@@ -2437,11 +2480,11 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
     void entity_aspect(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTENTITY_ASPECT);
         openNodeScope(node);
-        int kind = tm.getNextTokenKind();
+        int kind = tokenMgr.getNextTokenKind();
         consumeToken(kind);
         if(kind == ENTITY) {
             name(node, endToken);
-            if(tm.getNextTokenKind() == LBRACKET) {
+            if(tokenMgr.getNextTokenKind() == LBRACKET) {
                 consumeToken(LBRACKET);
                 identifier(node, endToken);
                 consumeToken(RBRACKET);
@@ -2453,7 +2496,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         }else if(kind == OPEN) {
             new ASTtoken(node, tokenImage[OPEN]);
         }else {
-            throw new ParserException(tm.toNextToken());
+            throw new ParserException(tokenMgr.toNextToken());
         }
         closeNodeScope(node);
     }
@@ -2483,7 +2526,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
      *   <br> | <b>terminal</b>
      */
     void entity_class(IASTNode p, Token endToken) throws ParserException {
-        int kind = tm.getNextTokenKind();
+        int kind = tokenMgr.getNextTokenKind();
         if(!(kind == ENTITY || kind == ARCHITECTURE || kind == CONFIGURATION
                 || kind == PROCEDURE || kind == FUNCTION
                 || kind == PACKAGE || kind == TYPE
@@ -2494,7 +2537,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
                 || kind == GROUP || kind == FILE
                 || kind == SUBNATURE || kind == NATURE
                 || kind == TERMINAL)) {
-            throw new ParserException(tm.toNextToken());
+            throw new ParserException(tokenMgr.toNextToken());
         }
         consumeToken(kind);
         new ASTtoken(p, tokenImage[kind]);
@@ -2508,7 +2551,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         ASTNode node = new ASTNode(p, ASTENTITY_CLASS_ENTRY);
         openNodeScope(node);
         entity_class(node, endToken);
-        if(tm.getNextTokenKind() == INFINITE) {
+        if(tokenMgr.getNextTokenKind() == INFINITE) {
             consumeToken(INFINITE);
             new ASTtoken(node, tokenImage[INFINITE]);
         }
@@ -2525,7 +2568,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         while(true) {
             Token tmpToken = findTokenInBlock(COMMA, endToken);
             entity_class_entry(node, (tmpToken != null) ? tmpToken : endToken);
-            if(tm.getNextTokenKind() != COMMA) {
+            if(tokenMgr.getNextTokenKind() != COMMA) {
                 break;
             }
             consumeToken(COMMA);
@@ -2558,19 +2601,19 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
             tmpToken = endToken;
         entity_header(node, tmpToken);
         entity_declarative_part(node, tmpToken);
-        if(tm.getNextTokenKind() == BEGIN) {
+        if(tokenMgr.getNextTokenKind() == BEGIN) {
             consumeToken(BEGIN);
             entity_statement_part(node, endToken);
         }
         consumeToken(END);
-        if(tm.getNextTokenKind() == ENTITY) {
+        if(tokenMgr.getNextTokenKind() == ENTITY) {
             consumeToken(ENTITY);
         }
-        if(tm.getNextTokenKind() == identifier) {
+        if(tokenMgr.getNextTokenKind() == identifier) {
             Token t1 = ((ASTNode)node.getChild(0)).getFirstToken();
-            Token t2 = tm.toNextToken();
+            Token t2 = tokenMgr.toNextToken();
             if(!t1.image.equalsIgnoreCase(t2.image)) {
-                throw new ParserException(tm.getCurrentToken());
+                throw new ParserException(tokenMgr.getCurrentToken());
             }
         }
         consumeToken(SEMICOLON);
@@ -2603,7 +2646,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
     void entity_declarative_items(IASTNode p, Token endToken) throws ParserException {
         boolean exitLoop = false;
         while(!exitLoop) {
-            int kind = tm.getNextTokenKind();
+            int kind = tokenMgr.getNextTokenKind();
             switch(kind)
             {
             case PROCEDURE:
@@ -2699,7 +2742,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         ASTNode node = new ASTNode(p, ASTENTITY_DESIGNATOR);
         openNodeScope(node);
         entity_tag(node, endToken);
-        int kind = tm.getNextTokenKind();
+        int kind = tokenMgr.getNextTokenKind();
         if(kind == identifier || kind == RETURN) {
             signature(node, endToken);
         }
@@ -2714,10 +2757,10 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
     void entity_header(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTENTITY_HEADER);
         openNodeScope(node);
-        if(tm.getNextTokenKind() == GENERIC) {
+        if(tokenMgr.getNextTokenKind() == GENERIC) {
             generic_clause(node, endToken);
         }
-        if(tm.getNextTokenKind() == PORT) {
+        if(tokenMgr.getNextTokenKind() == PORT) {
             port_clause(node, endToken);
         }
         closeNodeScope(node);
@@ -2732,7 +2775,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
     void entity_name_list(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTENTITY_NAME_LIST);
         openNodeScope(node);
-        int kind = tm.getNextTokenKind();
+        int kind = tokenMgr.getNextTokenKind();
         if(kind == OTHERS) {
             consumeToken(OTHERS);
             new ASTtoken(node, tokenImage[OTHERS]);
@@ -2745,7 +2788,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
                 if(tmpToken == null)
                     tmpToken = endToken;
                 entity_designator(node, tmpToken);
-                if(tm.getNextTokenKind() != COMMA) {
+                if(tokenMgr.getNextTokenKind() != COMMA) {
                     break;
                 }
                 consumeToken(COMMA);
@@ -2808,16 +2851,16 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
     void entity_tag(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTENTITY_TAG);
         openNodeScope(node);
-        int kind = tm.getNextTokenKind();
+        int kind = tokenMgr.getNextTokenKind();
         if(kind == identifier) {
             simple_name(node, endToken);
         }else if(kind == character_literal) {
-            Token token = tm.toNextToken();
+            Token token = tokenMgr.toNextToken();
             new ASTtoken(node, token.image);
         }else if(kind == string_literal) {
             operator_symbol(node, endToken);
         }else {
-            throw new ParserException(tm.toNextToken());
+            throw new ParserException(tokenMgr.toNextToken());
         }
         closeNodeScope(node);
     }
@@ -2829,14 +2872,14 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
     void enumeration_literal(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTENUMERATION_LITERAL);
         openNodeScope(node);
-        int kind = tm.getNextTokenKind();
+        int kind = tokenMgr.getNextTokenKind();
         if(kind == identifier) {
             identifier(node, endToken);
         }else if(kind == character_literal) {
-            Token token = tm.toNextToken();
+            Token token = tokenMgr.toNextToken();
             new ASTtoken(node, token.image);
         }else {
-            throw new ParserException(tm.toNextToken());
+            throw new ParserException(tokenMgr.toNextToken());
         }
         closeNodeScope(node);
     }
@@ -2856,7 +2899,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
             if(tmpToken == null)
                 tmpToken = endToken;
             enumeration_literal(node, tmpToken);
-            if(tm.getNextTokenKind() != COMMA) {
+            if(tokenMgr.getNextTokenKind() != COMMA) {
                 break;
             }
             consumeToken(COMMA);
@@ -2874,17 +2917,17 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         openNodeScope(node);
         endToken = findToken(SEMICOLON, endToken);
         
-        if(tm.getNextTokenKind(2) == COLON) {
+        if(tokenMgr.getNextTokenKind(2) == COLON) {
             identifier(node, endToken);   // label
             consumeToken(COLON);
         }
         
         consumeToken(EXIT);
         new ASTtoken(node, tokenImage[EXIT]);
-        if(tm.getNextTokenKind() == identifier) {
+        if(tokenMgr.getNextTokenKind() == identifier) {
             label(node, endToken);
         }
-        if(tm.getNextTokenKind() == WHEN) {
+        if(tokenMgr.getNextTokenKind() == WHEN) {
             consumeToken(WHEN);
             new ASTtoken(node, tokenImage[WHEN]);
             condition(node, endToken);
@@ -2913,10 +2956,10 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         expression(p, endToken, false);
     }
     void expression(IASTNode p, Token endToken, boolean is_bool) throws ParserException {
-        if(tm.getNextTokenKind() == LBRACKET) {
-            if(findTokenInBlock(tm.getNextToken(2), COMMA, endToken) != null) {
+        if(tokenMgr.getNextTokenKind() == LBRACKET) {
+            if(findTokenInBlock(tokenMgr.getNextToken(2), COMMA, endToken) != null) {
                 if(endToken != null && endToken.kind == RBRACKET) {
-                    endToken = tm.getNextToken(endToken);
+                    endToken = tokenMgr.getNextToken(endToken);
                 }
                 aggregate(p, endToken); //TODO ?? not in syntax tree
                 ((ASTNode)p.getChildById(ASTAGGREGATE)).isBoolean = is_bool;
@@ -2940,7 +2983,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
                 expToken = tmpToken;
             }
             relation(node, expToken);
-            int kind = tm.getNextTokenKind();
+            int kind = tokenMgr.getNextTokenKind();
             if(!(kind == AND || kind == OR || kind == XOR
                 || kind == NAND || kind == NOR || kind == XNOR)) {
                 break;
@@ -2974,7 +3017,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
     void factor(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTFACTOR);
         openNodeScope(node);
-        int kind = tm.getNextTokenKind();
+        int kind = tokenMgr.getNextTokenKind();
         if(kind == ABS) {
             consumeToken(ABS);
             new ASTtoken(node, tokenImage[ABS]);
@@ -2984,11 +3027,11 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
             new ASTtoken(node, tokenImage[NOT]);
             primary(node, endToken);
         }else {
-            Token tmpToken = findTokenInBlock(tm.getNextToken(), EXP, endToken);
+            Token tmpToken = findTokenInBlock(tokenMgr.getNextToken(), EXP, endToken);
             if(tmpToken == null)
                 tmpToken = endToken;
             primary(node, tmpToken);
-            if(tm.getNextTokenKind() == EXP) {
+            if(tokenMgr.getNextTokenKind() == EXP) {
                 consumeToken(EXP);
                 new ASTtoken(node, tokenImage[EXP]);
                 primary(node, endToken);
@@ -3011,7 +3054,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         identifier_list(node, tmpToken);
         consumeToken(COLON);
         subtype_indication(node, endToken);
-        if(tm.getNextTokenKind() == OPEN) {
+        if(tokenMgr.getNextTokenKind() == OPEN) {
             file_open_information(node, endToken);
         }
         consumeToken(SEMICOLON);
@@ -3105,11 +3148,11 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
             formal_designator(node, endToken);
         }else {     //TODO check type_mark or function_name
             Token tmpToken = findLastLBracketToken(endToken);
-            if(findTokenInBlock(tm.getNextToken(tmpToken), DOWNTO, endToken) != null
-                || findTokenInBlock(tm.getNextToken(tmpToken), TO, endToken) != null) {
+            if(findTokenInBlock(tokenMgr.getNextToken(tmpToken), DOWNTO, endToken) != null
+                || findTokenInBlock(tokenMgr.getNextToken(tmpToken), TO, endToken) != null) {
                 formal_designator(node, endToken);  // slice name
             }else {
-                if(tm.getNextTokenKind() !=LBRACKET )
+                if(tokenMgr.getNextTokenKind() !=LBRACKET )
                     name(node, tmpToken);
                 consumeToken(LBRACKET);
                 tmpToken = findTokenInBlock(RBRACKET, endToken);
@@ -3138,7 +3181,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         if(tmpToken == null)
             tmpToken = endToken;
         subtype_indication(node, tmpToken);
-        if(tm.getNextTokenKind() == ASSIGN) {
+        if(tokenMgr.getNextTokenKind() == ASSIGN) {
             consumeToken(ASSIGN);
             new ASTtoken(node, tokenImage[ASSIGN]);
             expression(node, endToken);
@@ -3176,7 +3219,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         if(tmpToken == null)
             tmpToken = endToken;
         name(node, tmpToken);
-        if(tm.getNextTokenKind() == LBRACKET) {
+        if(tokenMgr.getNextTokenKind() == LBRACKET) {
             consumeToken(LBRACKET);
             tmpToken = findTokenInBlock(RBRACKET, endToken);
             actual_parameter_part(node, tmpToken);
@@ -3197,6 +3240,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
     void generate_statement(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTGENERATE_STATEMENT);
         openNodeScope(node);
+        startBlock();
         
         Token tmpToken = findToken(COLON, endToken);    // endToken must be END
         identifier(node, tmpToken);   // label
@@ -3215,20 +3259,21 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
             new ASTtoken(node, tokenImage[BEGIN]);
         }
         
-        while(tm.getNextToken() != null && tm.getNextTokenKind() != END) {
+        while(tokenMgr.getNextToken() != null && tokenMgr.getNextTokenKind() != END) {
             architecture_statements(node, endToken);
         }
         
         consumeToken(END);
         consumeToken(GENERATE);
-        if(tm.getNextTokenKind() == identifier) {
+        if(tokenMgr.getNextTokenKind() == identifier) {
             Token t1 = ((ASTNode)node.getChild(0)).getFirstToken();
-            Token t2 = tm.toNextToken();
+            Token t2 = tokenMgr.toNextToken();
             if(!t1.image.equalsIgnoreCase(t2.image)) {
-                throw new ParserException(tm.getCurrentToken());
+                throw new ParserException(tokenMgr.getCurrentToken());
             }
         }
         consumeToken(SEMICOLON);
+        endBlock();
         closeNodeScope(node);
     }
 
@@ -3240,7 +3285,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
     void generation_scheme(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTGENERATION_SCHEME);
         openNodeScope(node);
-        int kind = tm.getNextTokenKind();
+        int kind = tokenMgr.getNextTokenKind();
         if(kind == FOR) {
             consumeToken(FOR);
             new ASTtoken(node, tokenImage[FOR]);
@@ -3250,7 +3295,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
             new ASTtoken(node, tokenImage[IF]);
             condition(node, endToken);
         }else {
-            throw new ParserException(tm.toNextToken());
+            throw new ParserException(tokenMgr.toNextToken());
         }
         closeNodeScope(node);
     }
@@ -3313,8 +3358,8 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
     void group_constituent(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTGROUP_CONSTITUENT);
         openNodeScope(node);
-        if(tm.getNextTokenKind() != character_literal) {
-            Token token = tm.toNextToken();
+        if(tokenMgr.getNextTokenKind() != character_literal) {
+            Token token = tokenMgr.toNextToken();
             new ASTtoken(node, token.image);
         }else {
             name(node, endToken);
@@ -3334,7 +3379,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
             if(tmpToken == null)
                 tmpToken = endToken;
             group_constituent(node, tmpToken);
-            if(tm.getNextTokenKind() != COMMA) {
+            if(tokenMgr.getNextTokenKind() != COMMA) {
                 break;
             }
             consumeToken(COMMA);
@@ -3408,7 +3453,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
     void identifier(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTIDENTIFIER);
         openNodeScope(node);
-        Token token = tm.toNextToken();
+        Token token = tokenMgr.toNextToken();
         new ASTtoken(node, token.image);
         closeNodeScope(node);
     }
@@ -3425,7 +3470,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
             if(tmpToken == null)
                 tmpToken = endToken;
             identifier(node, tmpToken);
-            if(tm.getNextTokenKind() != COMMA) {
+            if(tokenMgr.getNextTokenKind() != COMMA) {
                 break;
             }
             consumeToken(COMMA);
@@ -3450,7 +3495,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         
         Token tmpToken = findToken(IF, endToken);
         boolean hasLabel = false;
-        if(tm.getNextTokenKind(2) == COLON) {
+        if(tokenMgr.getNextTokenKind(2) == COLON) {
             identifier(node, tmpToken);   // label
             consumeToken(COLON);
             hasLabel = true;
@@ -3471,7 +3516,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         sequence_of_statements(node, tmpToken);
         
         while(true) {
-            if(tm.getNextTokenKind() != ELSIF) {
+            if(tokenMgr.getNextTokenKind() != ELSIF) {
                 break;
             }
             consumeToken(ELSIF);
@@ -3489,21 +3534,21 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
             sequence_of_statements(node, tmpToken);
         }
         
-        if(tm.getNextTokenKind() == ELSE) {
+        if(tokenMgr.getNextTokenKind() == ELSE) {
             consumeToken(ELSE);
             new ASTtoken(node, tokenImage[ELSE]);
             sequence_of_statements(node, endToken);
         }        
         consumeToken(END);
         consumeToken(IF);
-        if(tm.getNextTokenKind() == identifier) {
+        if(tokenMgr.getNextTokenKind() == identifier) {
             if(!hasLabel) {
-                throw new ParserException(tm.getCurrentToken());
+                throw new ParserException(tokenMgr.getCurrentToken());
             }
             Token t1 = ((ASTNode)node.getChild(0)).getFirstToken();
-            Token t2 = tm.toNextToken();
+            Token t2 = tokenMgr.toNextToken();
             if(!t1.image.equalsIgnoreCase(t2.image)) {
-                throw new ParserException(tm.getCurrentToken());
+                throw new ParserException(tokenMgr.getCurrentToken());
             }
         }
         consumeToken(SEMICOLON);
@@ -3538,7 +3583,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
             if(tmpToken == null)
                 tmpToken = endToken;
             discrete_range(node, tmpToken);
-            if(tm.getNextTokenKind() != COMMA) {
+            if(tokenMgr.getNextTokenKind() != COMMA) {
                 break;
             }
             consumeToken(COMMA);
@@ -3595,7 +3640,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
             if(tmpToken == null)
                 tmpToken = endToken;
             expression(node, tmpToken);
-            if(tm.getNextTokenKind() != COMMA) {
+            if(tokenMgr.getNextTokenKind() != COMMA) {
                 break;
             }
             consumeToken(COMMA);
@@ -3613,7 +3658,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
     void instantiated_unit(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTINSTANTIATED_UNIT);
         openNodeScope(node);
-        int kind = tm.getNextTokenKind();
+        int kind = tokenMgr.getNextTokenKind();
         if(kind == COMPONENT || kind == ENTITY 
                 || kind == CONFIGURATION) {
             consumeToken(kind);
@@ -3623,7 +3668,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         if(tmpToken == null)
             tmpToken = endToken;
         name(node, tmpToken);
-        if(kind == ENTITY && tm.getNextTokenKind() == LBRACKET) {
+        if(kind == ENTITY && tokenMgr.getNextTokenKind() == LBRACKET) {
             consumeToken(LBRACKET);
             tmpToken = findTokenInBlock(RBRACKET, endToken);
             identifier(node, tmpToken);
@@ -3641,14 +3686,14 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
     void instantiation_list(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTINSTANTIATION_LIST);
         openNodeScope(node);
-        int kind = tm.getNextTokenKind();
+        int kind = tokenMgr.getNextTokenKind();
         if(kind == identifier) {
             while(true) {
                 Token tmpToken = findTokenInBlock(COMMA, endToken);
                 if(tmpToken == null)
                     tmpToken = endToken;
                 label(node, tmpToken);
-                if(tm.getNextTokenKind() != COMMA) {
+                if(tokenMgr.getNextTokenKind() != COMMA) {
                     break;
                 }
                 consumeToken(COMMA);
@@ -3657,7 +3702,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
             consumeToken(kind);
             new ASTtoken(node, tokenImage[kind]);
         }else {
-            throw new ParserException(tm.toNextToken());
+            throw new ParserException(tokenMgr.toNextToken());
         }
         closeNodeScope(node);
     }
@@ -3688,14 +3733,14 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
     void interface_constant_declaration(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTINTERFACE_CONSTANT_DECLARATION);
         openNodeScope(node);
-        if(tm.getNextTokenKind() == CONSTANT) {
+        if(tokenMgr.getNextTokenKind() == CONSTANT) {
             consumeToken(CONSTANT);
             new ASTtoken(node, tokenImage[CONSTANT]);
         }
         Token tmpToken = findToken(COLON, endToken);
         identifier_list(node, tmpToken);
         consumeToken(COLON);
-        if(tm.getNextTokenKind() == IN) {
+        if(tokenMgr.getNextTokenKind() == IN) {
             consumeToken(IN);
             new ASTtoken(node, tokenImage[IN]);
         }
@@ -3704,7 +3749,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         if(tmpToken == null)
             tmpToken = endToken;
         subtype_indication(node, tmpToken);
-        if(tm.getNextTokenKind() == ASSIGN) {
+        if(tokenMgr.getNextTokenKind() == ASSIGN) {
             consumeToken(ASSIGN);
             new ASTtoken(node, tokenImage[ASSIGN]);
             expression(node, endToken);
@@ -3724,7 +3769,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
     void interface_declaration(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTINTERFACE_DECLARATION);
         openNodeScope(node);
-        int kind = tm.getNextTokenKind();
+        int kind = tokenMgr.getNextTokenKind();
         if(kind == SIGNAL || findToken(BUS, endToken) != null) {
             interface_signal_declaration(node, endToken);
         }else if(kind == CONSTANT) {
@@ -3779,7 +3824,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
             if(tmpToken == null)
                 tmpToken = endToken;
             interface_element(node, tmpToken);
-            if(tm.getNextTokenKind() != SEMICOLON) {
+            if(tokenMgr.getNextTokenKind() != SEMICOLON) {
                 break;
             }
             consumeToken(SEMICOLON);
@@ -3799,7 +3844,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         identifier_list(node, tmpToken);
         consumeToken(COLON);
         
-        int kind = tm.getNextTokenKind();
+        int kind = tokenMgr.getNextTokenKind();
         if(kind == IN || kind == OUT) {
             consumeToken(kind);
             new ASTtoken(node, tokenImage[kind]);
@@ -3809,7 +3854,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         if(tmpToken == null)
             tmpToken = endToken;
         subtype_indication(node, tmpToken);
-        if(tm.getNextTokenKind() == ASSIGN) {
+        if(tokenMgr.getNextTokenKind() == ASSIGN) {
             consumeToken(ASSIGN);
             new ASTtoken(node, tokenImage[ASSIGN]);
             expression(node, endToken);
@@ -3825,13 +3870,13 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
     void interface_signal_declaration(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTINTERFACE_SIGNAL_DECLARATION);
         openNodeScope(node);
-        if(tm.getNextTokenKind() == SIGNAL) {
+        if(tokenMgr.getNextTokenKind() == SIGNAL) {
             consumeToken(SIGNAL);
         }
         Token tmpToken = findToken(COLON, endToken);
         identifier_list(node, tmpToken);
         consumeToken(COLON);
-        int kind = tm.getNextTokenKind();
+        int kind = tokenMgr.getNextTokenKind();
         if(kind == IN || kind == OUT || kind == INOUT
                 || kind == BUFFER || kind == LINKAGE) {
             mode(node, endToken);
@@ -3844,7 +3889,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
             tmpToken = endToken;
         subtype_indication(node, tmpToken);
         
-        if(tm.getNextTokenKind() == BUS) {
+        if(tokenMgr.getNextTokenKind() == BUS) {
             consumeToken(BUS);
             new ASTtoken(node, tokenImage[BUS]);
             tmpToken = findToken(ASSIGN, endToken);
@@ -3852,7 +3897,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
                 tmpToken = endToken;
             expression(node, tmpToken);
         }
-        if(tm.getNextTokenKind() == ASSIGN) {
+        if(tokenMgr.getNextTokenKind() == ASSIGN) {
             consumeToken(ASSIGN);
             new ASTtoken(node, tokenImage[ASSIGN]);
             expression(node, endToken);
@@ -3882,13 +3927,13 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
     void interface_variable_declaration(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTINTERFACE_VARIABLE_DECLARATION);
         openNodeScope(node);
-        if(tm.getNextTokenKind() == VARIABLE) {
+        if(tokenMgr.getNextTokenKind() == VARIABLE) {
             consumeToken(VARIABLE);
         }
         Token tmpToken = findToken(COLON, endToken);
         identifier_list(node, tmpToken);
         consumeToken(COLON);
-        int kind = tm.getNextTokenKind();
+        int kind = tokenMgr.getNextTokenKind();
         if(kind == IN || kind == OUT || kind == INOUT
                 || kind == BUFFER || kind == LINKAGE) {
             mode(node, endToken);
@@ -3898,7 +3943,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         if(tmpToken == null)
             tmpToken = endToken;
         subtype_indication(node, tmpToken);
-        if(tm.getNextTokenKind() == ASSIGN) {
+        if(tokenMgr.getNextTokenKind() == ASSIGN) {
             consumeToken(ASSIGN);
             new ASTtoken(node, tokenImage[ASSIGN]);
             expression(node, endToken);
@@ -3914,7 +3959,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
     void iteration_scheme(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTITERATION_SCHEME);
         openNodeScope(node);
-        int kind = tm.getNextTokenKind();
+        int kind = tokenMgr.getNextTokenKind();
         consumeToken(kind);
         if(kind == WHILE) {
             new ASTtoken(node, tokenImage[WHILE]);
@@ -3923,7 +3968,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
             new ASTtoken(node, tokenImage[FOR]);
             parameter_specification(node, endToken);
         }else {
-            throw new ParserException(tm.toNextToken());
+            throw new ParserException(tokenMgr.toNextToken());
         }
         closeNodeScope(node);
     }
@@ -3973,14 +4018,14 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
     void library_unit(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTLIBRARY_UNIT);
         openNodeScope(node);
-        int kind = tm.getNextTokenKind();
-        int kind2 = tm.getNextTokenKind(2);
+        int kind = tokenMgr.getNextTokenKind();
+        int kind2 = tokenMgr.getNextTokenKind(2);
         if(kind == ARCHITECTURE || (kind == PACKAGE && kind2 == BODY)) {
             secondary_unit(node, endToken);
         }else if(kind == ENTITY || kind == CONFIGURATION || kind == PACKAGE) {
             primary_unit(node, endToken);
         }else {
-            throw new ParserException(tm.toNextToken());
+            throw new ParserException(tokenMgr.toNextToken());
         }
         closeNodeScope(node);
     }
@@ -3996,17 +4041,17 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
     void literal(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTLITERAL);
         openNodeScope(node);
-        int kind = tm.getNextTokenKind();
+        int kind = tokenMgr.getNextTokenKind();
         if(kind == identifier || kind == character_literal) {
             enumeration_literal(node, endToken);
         }else if(kind == decimal_literal || kind == based_literal) {
             numeric_literal(node, endToken);
         }else if(kind == string_literal || kind == bit_string_literal
                 || kind == NULL) {
-            Token token = tm.toNextToken();
+            Token token = tokenMgr.toNextToken();
             new ASTtoken(node, token.image);
         }else {
-            throw new ParserException(tm.toNextToken());
+            throw new ParserException(tokenMgr.toNextToken());
         }
         closeNodeScope(node);
     }
@@ -4031,7 +4076,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
             if(tmpToken == null)
                 tmpToken = endToken;
             logical_name(node, tmpToken);
-            if(tm.getNextTokenKind() != COMMA) {
+            if(tokenMgr.getNextTokenKind() != COMMA) {
                 break;
             }
             consumeToken(COMMA);
@@ -4051,7 +4096,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         openNodeScope(node);
         Token tmpToken = endToken;
         boolean hasLabel = false;
-        if(tm.getNextTokenKind(2) == COLON) {
+        if(tokenMgr.getNextTokenKind(2) == COLON) {
             tmpToken = findToken(COLON, endToken);
             identifier(node, tmpToken);   // label
             consumeToken(COLON);
@@ -4059,7 +4104,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         }
         
         tmpToken = findToken(LOOP, endToken);
-        if(tm.getNextTokenKind() != LOOP) {
+        if(tokenMgr.getNextTokenKind() != LOOP) {
             iteration_scheme(node, tmpToken);
         }
         consumeToken(LOOP);
@@ -4068,14 +4113,14 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
 
         consumeToken(END);
         consumeToken(LOOP);
-        if(tm.getNextTokenKind() == identifier) {
+        if(tokenMgr.getNextTokenKind() == identifier) {
             if(!hasLabel) {
-                throw new ParserException(tm.getCurrentToken());
+                throw new ParserException(tokenMgr.getCurrentToken());
             }
             Token t1 = ((ASTNode)node.getChild(0)).getFirstToken();
-            Token t2 = tm.toNextToken();
+            Token t2 = tokenMgr.toNextToken();
             if(!t1.image.equalsIgnoreCase(t2.image)) {
-                throw new ParserException(tm.getCurrentToken());
+                throw new ParserException(tokenMgr.getCurrentToken());
             }
         }
         consumeToken(SEMICOLON);
@@ -4088,10 +4133,10 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
     void mode(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTMODE);
         openNodeScope(node);
-        int kind = tm.getNextTokenKind();
+        int kind = tokenMgr.getNextTokenKind();
         if(!(kind == IN || kind == OUT || kind == INOUT
                 || kind == BUFFER || kind == LINKAGE)) {
-            throw new ParserException(tm.toNextToken());
+            throw new ParserException(tokenMgr.toNextToken());
         }
         consumeToken(kind);
         closeNodeScope(node);
@@ -4123,10 +4168,10 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         }
         
         if(tmpToken == null) {
-            tmpToken = tm.getNextToken();
+            tmpToken = tokenMgr.getNextToken();
         }
         if(tmpToken == null) {
-            throw new ParserException(tm.toNextToken());
+            throw new ParserException(tokenMgr.toNextToken());
         }
         
         if(tmpToken.kind == string_literal) {
@@ -4137,9 +4182,9 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
             attribute_name(node, endToken);
         }else if(tmpToken.kind == LBRACKET) {
             if(lastLbracket == null) {
-                throw new ParserException(tm.toNextToken());
+                throw new ParserException(tokenMgr.toNextToken());
             }
-            Token nextToken = tm.getNextToken(lastLbracket);
+            Token nextToken = tokenMgr.getNextToken(lastLbracket);
             Token lastRbracket = findTokenInBlock(nextToken, RBRACKET, endToken);
             if(findTokenInBlock(nextToken, RANGE, lastRbracket) != null 
                 || findTokenInBlock(nextToken, TO, lastRbracket)!= null
@@ -4151,7 +4196,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         }else if(tmpToken.kind == identifier) {
             simple_name(node, endToken);
         }else {
-            throw new ParserException(tm.toNextToken());
+            throw new ParserException(tokenMgr.toNextToken());
         }
         closeNodeScope(node);
     }
@@ -4181,7 +4226,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
     void nature_definition(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTNATURE_DEFINITION);
         openNodeScope(node);
-        int kind = tm.getNextTokenKind();
+        int kind = tokenMgr.getNextTokenKind();
         if(kind == ARRAY || kind == RECORD) {
             composite_nature_definition(node, endToken);
         }else {
@@ -4224,17 +4269,17 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         openNodeScope(node);
         endToken = findToken(SEMICOLON, endToken);
         
-        if(tm.getNextTokenKind(2) == COLON) {
+        if(tokenMgr.getNextTokenKind(2) == COLON) {
             identifier(node, endToken);   // label
             consumeToken(COLON);
         }
         consumeToken(NEXT);
         new ASTtoken(node, tokenImage[NEXT]);
-        if(tm.getNextTokenKind() == identifier) {
+        if(tokenMgr.getNextTokenKind() == identifier) {
             label(node, endToken); //TODO check loop label
         }
         
-        if(tm.getNextTokenKind() == WHEN) {
+        if(tokenMgr.getNextTokenKind() == WHEN) {
             consumeToken(WHEN);
             new ASTtoken(node, tokenImage[WHEN]);
             condition(node, endToken);
@@ -4252,7 +4297,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         openNodeScope(node);
         endToken = findToken(SEMICOLON, endToken);
         
-        if(tm.getNextTokenKind(2) == COLON) {
+        if(tokenMgr.getNextTokenKind(2) == COLON) {
             identifier(node, endToken);   // label
             consumeToken(COLON);
         }
@@ -4269,7 +4314,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
     void numeric_literal(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTNUMERIC_LITERAL);
         openNodeScope(node);
-        if(tm.getNextTokenKind(2) == identifier) {
+        if(tokenMgr.getNextTokenKind(2) == identifier) {
             physical_literal(node, endToken);
         }else {
             abstract_literal(node, endToken);
@@ -4284,7 +4329,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
     void operator_symbol(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTOPERATOR_SYMBOL);
         openNodeScope(node);
-        Token token = tm.toNextToken();
+        Token token = tokenMgr.toNextToken();
         new ASTtoken(node, token.image);
         closeNodeScope(node);
     }
@@ -4296,12 +4341,12 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
     void options(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTOPTIONS);
         openNodeScope(node);
-        if(tm.getNextTokenKind() == GUARDED) {
+        if(tokenMgr.getNextTokenKind() == GUARDED) {
             consumeToken(GUARDED);
             new ASTtoken(node, tokenImage[GUARDED]);
         }
         
-        if(tm.getNextTokenKind() == TRANSPORT) {
+        if(tokenMgr.getNextTokenKind() == TRANSPORT) {
             delay_mechanism(node, endToken);
         }
         closeNodeScope(node);
@@ -4316,6 +4361,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
     void package_body(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTPACKAGE_BODY);
         openNodeScope(node);
+        startBlock();
         
         consumeToken(PACKAGE);
         consumeToken(BODY);
@@ -4326,18 +4372,19 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         consumeToken(IS);
         package_body_declarative_part(node, endToken);
         consumeToken(END);
-        if(tm.getNextTokenKind() == PACKAGE) {
+        if(tokenMgr.getNextTokenKind() == PACKAGE) {
             consumeToken(PACKAGE);
             consumeToken(BODY);
         }
-        if(tm.getNextTokenKind() == identifier) {
+        if(tokenMgr.getNextTokenKind() == identifier) {
             Token t1 = ((ASTNode)node.getChild(0)).getFirstToken();
-            Token t2 = tm.toNextToken();
+            Token t2 = tokenMgr.toNextToken();
             if(!t1.image.equalsIgnoreCase(t2.image)) {
-                throw new ParserException(tm.getCurrentToken());
+                throw new ParserException(tokenMgr.getCurrentToken());
             }
         }
         consumeToken(SEMICOLON);
+        endBlock();
         closeNodeScope(node);
     }
 
@@ -4359,23 +4406,23 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         boolean exitLoop = false;
         Token tmpToken = null, tmpToken1 = null;
         while(!exitLoop) {
-            int kind = tm.getNextTokenKind();
+            int kind = tokenMgr.getNextTokenKind();
             switch(kind)
             {
             case PROCEDURE:
             case FUNCTION:
             case IMPURE:
             case PURE:
-                tmpToken = tm.getNextToken();
+                tmpToken = tokenMgr.getNextToken();
                 if(kind == IMPURE || kind == PURE) {
-                    tmpToken = tm.getNextToken(tmpToken);
+                    tmpToken = tokenMgr.getNextToken(tmpToken);
                     if(tmpToken == null) {
-                        throw new ParserException(tm.getNextToken());
+                        throw new ParserException(tokenMgr.getNextToken());
                     }
                 }
-                tmpToken = findTokenInBlock(tm.getNextToken(tmpToken), SEMICOLON, endToken);
+                tmpToken = findTokenInBlock(tokenMgr.getNextToken(tmpToken), SEMICOLON, endToken);
                 if(tmpToken == null) {
-                    throw new ParserException(tm.getNextToken());
+                    throw new ParserException(tokenMgr.getNextToken());
                 }
                 tmpToken1 = findToken(IS, endToken);
                 if(tmpToken1 != null && checkLateComming(tmpToken, tmpToken1)) {
@@ -4385,9 +4432,9 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
                 }
                 break;
             case GROUP:
-                tmpToken = findTokenInBlock(tm.getNextToken(), SEMICOLON, endToken);
+                tmpToken = findTokenInBlock(tokenMgr.getNextToken(), SEMICOLON, endToken);
                 if(tmpToken == null) {
-                    throw new ParserException(tm.getNextToken());
+                    throw new ParserException(tokenMgr.getNextToken());
                 }
                 tmpToken1 = findToken(IS, endToken);
                 if(tmpToken1 != null && checkLateComming(tmpToken, tmpToken1)) {
@@ -4444,7 +4491,8 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
      */
     void package_declaration(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTPACKAGE_DECLARATION);
-        openNodeScope(node);        
+        openNodeScope(node);
+        startBlock();
         consumeToken(PACKAGE);
         endToken = findTokenInBlock(END, endToken);
         
@@ -4453,17 +4501,18 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         consumeToken(IS);
         package_declarative_part(node, endToken);
         consumeToken(END);
-        if(tm.getNextTokenKind() == PACKAGE) {
+        if(tokenMgr.getNextTokenKind() == PACKAGE) {
             consumeToken(PACKAGE);
         }
-        if(tm.getNextTokenKind() == identifier) {
+        if(tokenMgr.getNextTokenKind() == identifier) {
             Token t1 = ((ASTNode)node.getChild(0)).getFirstToken();
-            Token t2 = tm.toNextToken();
+            Token t2 = tokenMgr.toNextToken();
             if(!t1.image.equalsIgnoreCase(t2.image)) {
-                throw new ParserException(tm.getCurrentToken());
+                throw new ParserException(tokenMgr.getCurrentToken());
             }
         }
         consumeToken(SEMICOLON);
+        endBlock();
         closeNodeScope(node);
     }
 
@@ -4491,7 +4540,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
     void package_declarative_items(IASTNode p, Token endToken) throws ParserException {
         boolean exitLoop = false;
         while(!exitLoop) {
-            int kind = tm.getNextTokenKind();
+            int kind = tokenMgr.getNextTokenKind();
             switch(kind)
             {
             case PROCEDURE:
@@ -4593,7 +4642,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
     void physical_literal(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTPHYSICAL_LITERAL);
         openNodeScope(node);
-        int kind = tm.getNextTokenKind();
+        int kind = tokenMgr.getNextTokenKind();
         if(kind == decimal_literal || kind == based_literal) {
             abstract_literal(node, endToken);
         }
@@ -4619,18 +4668,18 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         endToken = findTokenInBlock(END, endToken);
         
         while(true) {
-            if(tm.getNextTokenKind() == END) {
+            if(tokenMgr.getNextTokenKind() == END) {
                 break;
             }
             secondary_unit_declaration(node, endToken);
         }
         consumeToken(END);
         consumeToken(UNITS);
-        if(tm.getNextTokenKind() == identifier) {
+        if(tokenMgr.getNextTokenKind() == identifier) {
             Token t1 = ((ASTNode)node.getChild(0)).getFirstToken();
-            Token t2 = tm.toNextToken();
+            Token t2 = tokenMgr.toNextToken();
             if(!t1.image.equalsIgnoreCase(t2.image)) {
-                throw new ParserException(tm.getCurrentToken());
+                throw new ParserException(tokenMgr.getCurrentToken());
             }
         }
         closeNodeScope(node);
@@ -4707,17 +4756,17 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
     void primary(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTPRIMARY);
         openNodeScope(node);
-        int kind = tm.getNextTokenKind();
+        int kind = tokenMgr.getNextTokenKind();
         if(kind == character_literal || kind == decimal_literal
             || kind == based_literal || kind == string_literal
             || kind == bit_string_literal || kind == NULL) {
             literal(node, endToken);
         }else if(kind == NEW) {
             allocator(node, endToken);
-        }else if(kind == identifier && tm.getNextTokenKind(2) == SQUOTE) {
-            Token tmpToken = tm.getNextToken(3);
+        }else if(kind == identifier && tokenMgr.getNextTokenKind(2) == SQUOTE) {
+            Token tmpToken = tokenMgr.getNextToken(3);
             if(tmpToken == null) {
-                throw new ParserException(tm.toNextToken());
+                throw new ParserException(tokenMgr.toNextToken());
             }
             if(tmpToken.kind == identifier && tmpToken.image.equalsIgnoreCase("Event")) {
                 name(node, endToken);   // attribute name
@@ -4741,7 +4790,21 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
     void primary_unit(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTPRIMARY_UNIT);
         openNodeScope(node);
-        int kind = tm.getNextTokenKind();
+        int kind = tokenMgr.getNextTokenKind();
+        
+        if(parseSymbol && kind != PACKAGE) {
+            // if only parse symbol, just ignore it
+            // because we need only package declaration
+            endToken = findTokenInBlock(tokenMgr.getNextToken(2), END, endToken);
+            Token semToken = findToken(endToken, SEMICOLON, null);
+            if(semToken == null) {
+                throw new ParserException(endToken);
+            }
+            tokenMgr.setCurrentToken(semToken);
+            closeNodeScope(node);
+            return;
+        }
+        
         if(kind == ENTITY) {
             entity_declaration(node, endToken);
         }else if(kind == CONFIGURATION) {
@@ -4749,7 +4812,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         }else if(kind == PACKAGE) {
             package_declaration(node, endToken);
         }else {
-            throw new ParserException(tm.toNextToken());
+            throw new ParserException(tokenMgr.toNextToken());
         }
         closeNodeScope(node);
     }
@@ -4785,7 +4848,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
     void procedural_declarative_items(IASTNode p, Token endToken) throws ParserException {
         boolean exitLoop = false;
         while(!exitLoop) {
-            int kind = tm.getNextTokenKind();
+            int kind = tokenMgr.getNextTokenKind();
             switch(kind)
             {
             case PROCEDURE:
@@ -4871,7 +4934,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         if(tmpToken == null)
             tmpToken = endToken;
         name(node, tmpToken);
-        if(tm.getNextTokenKind() == LBRACKET) {
+        if(tokenMgr.getNextTokenKind() == LBRACKET) {
             consumeToken(LBRACKET);
             tmpToken = findTokenInBlock(RBRACKET, endToken);
             actual_parameter_part(node, tmpToken);
@@ -4889,7 +4952,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         openNodeScope(node);
         endToken = findToken(SEMICOLON, endToken);
         
-        if(tm.getNextTokenKind(2) == COLON) {
+        if(tokenMgr.getNextTokenKind(2) == COLON) {
             identifier(node, endToken);   // label
             consumeToken(COLON);
         }
@@ -4917,7 +4980,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
     void process_declarative_items(IASTNode p, Token endToken) throws ParserException {
         boolean exitLoop = false;
         while(!exitLoop) {
-            int kind = tm.getNextTokenKind();
+            int kind = tokenMgr.getNextTokenKind();
             switch(kind)
             {
             case PROCEDURE:
@@ -4996,29 +5059,30 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
     void process_statement(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTPROCESS_STATEMENT);
         openNodeScope(node);
+        startBlock();
         
         Token tmpToken = endToken;
         boolean hasLabel = false;
-        if(tm.getNextTokenKind(2) == COLON) {
+        if(tokenMgr.getNextTokenKind(2) == COLON) {
             tmpToken = findToken(COLON, endToken);
             identifier(node, tmpToken);   // label
             consumeToken(COLON);
             hasLabel = true;
         }
-        if(tm.getNextTokenKind() == POSTPONED) {
+        if(tokenMgr.getNextTokenKind() == POSTPONED) {
             consumeToken(POSTPONED);
             new ASTtoken(node, tokenImage[POSTPONED]);
         }
         consumeToken(PROCESS);
         endToken = findTokenInBlock(END, endToken);
         
-        if(tm.getNextTokenKind() == LBRACKET) {
+        if(tokenMgr.getNextTokenKind() == LBRACKET) {
             consumeToken(LBRACKET);
             tmpToken = findTokenInBlock(RBRACKET, endToken);
             sensitivity_list(node, tmpToken);
             consumeToken(RBRACKET);
         }
-        if(tm.getNextTokenKind() == IS) {
+        if(tokenMgr.getNextTokenKind() == IS) {
             consumeToken(IS);
         }
         tmpToken = findTokenInBlock(BEGIN, endToken);
@@ -5027,21 +5091,22 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         
         process_statement_part(node, endToken);
         consumeToken(END);
-        if(tm.getNextTokenKind() == POSTPONED) {
+        if(tokenMgr.getNextTokenKind() == POSTPONED) {
             consumeToken(POSTPONED);
         }
         consumeToken(PROCESS);
-        if(tm.getNextTokenKind() == identifier) {
+        if(tokenMgr.getNextTokenKind() == identifier) {
             if(!hasLabel) {
-                throw new ParserException(tm.getCurrentToken());
+                throw new ParserException(tokenMgr.getCurrentToken());
             }
             Token t1 = ((ASTNode)node.getChild(0)).getFirstToken();
-            Token t2 = tm.toNextToken();
+            Token t2 = tokenMgr.toNextToken();
             if(!t1.image.equalsIgnoreCase(t2.image)) {
-                throw new ParserException(tm.getCurrentToken());
+                throw new ParserException(tokenMgr.getCurrentToken());
             }
         }
         consumeToken(SEMICOLON);
+        endBlock();
         closeNodeScope(node);
     }
 
@@ -5067,7 +5132,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         Token tmpToken = findToken(SQUOTE, endToken);
         type_mark(node, tmpToken);
         consumeToken(SQUOTE);
-        if(tm.getNextTokenKind() == LBRACKET) {
+        if(tokenMgr.getNextTokenKind() == LBRACKET) {
             aggregate(node, endToken);
         }else {
             expression(node, endToken);
@@ -5106,7 +5171,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
     void quantity_list(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTQUANTITY_LIST);
         openNodeScope(node);
-        int kind = tm.getNextTokenKind();
+        int kind = tokenMgr.getNextTokenKind();
         if(kind == OTHERS || kind == ALL) {
             consumeToken(kind);
             new ASTtoken(node, tokenImage[kind]);
@@ -5116,7 +5181,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
                 if(tmpToken == null)
                     tmpToken = endToken;
                 name(node, tmpToken);
-                if(tm.getNextTokenKind() != COMMA) {
+                if(tokenMgr.getNextTokenKind() != COMMA) {
                     break;
                 }
                 consumeToken(COMMA);
@@ -5188,15 +5253,15 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         
         while(true) {
             nature_element_declaration(node, endToken);
-            int kind = tm.getNextTokenKind();
+            int kind = tokenMgr.getNextTokenKind();
             if(kind < 0 || kind == END) {
                 break;
             }
         }
         consumeToken(END);
         consumeToken(RECORD);
-        if(tm.getNextTokenKind() == identifier) {
-            tm.toNextToken();
+        if(tokenMgr.getNextTokenKind() == identifier) {
+            tokenMgr.toNextToken();
         }
         closeNodeScope(node);
     }
@@ -5216,15 +5281,15 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         
         while(true) {
             element_declaration(node, endToken);
-            int kind = tm.getNextTokenKind();
+            int kind = tokenMgr.getNextTokenKind();
             if(kind < 0 || kind == END) {
                 break;
             }
         }
         consumeToken(END);
         consumeToken(RECORD);
-        if(tm.getNextTokenKind() == identifier) {
-            tm.toNextToken();
+        if(tokenMgr.getNextTokenKind() == identifier) {
+            tokenMgr.toNextToken();
         }
         closeNodeScope(node);
     }
@@ -5259,10 +5324,10 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
      *   <dd> = | /= | < | <= | > | >=
      */
     void relational_operator(IASTNode p, Token endToken) throws ParserException {
-        int kind = tm.getNextTokenKind();
+        int kind = tokenMgr.getNextTokenKind();
         if(!(kind == EQ || kind == NEQ || kind == LO || kind == LE
                 || kind == GT || kind == GE)) {
-            throw new ParserException(tm.toNextToken());
+            throw new ParserException(tokenMgr.toNextToken());
         }
         consumeToken(kind);
         new ASTtoken(p, tokenImage[kind]);
@@ -5279,7 +5344,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         openNodeScope(node);
         
         Token tmpToken = endToken;
-        if(tm.getNextTokenKind(2) == COLON) {
+        if(tokenMgr.getNextTokenKind(2) == COLON) {
             tmpToken = findToken(COLON, endToken);
             identifier(node, tmpToken);   // label
             consumeToken(COLON);
@@ -5292,7 +5357,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         if(tmpToken == null)
             tmpToken = endToken;
         expression(node, tmpToken);
-        if(tm.getNextTokenKind() == SEVERITY) {
+        if(tokenMgr.getNextTokenKind() == SEVERITY) {
             consumeToken(SEVERITY);
             new ASTtoken(node, tokenImage[SEVERITY]);
             expression(node, endToken);
@@ -5311,13 +5376,13 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         endToken = findToken(SEMICOLON, endToken);
         
         Token tmpToken = endToken;
-        if(tm.getNextTokenKind(2) == COLON) {
+        if(tokenMgr.getNextTokenKind(2) == COLON) {
             tmpToken = findToken(COLON, endToken);
             identifier(node, tmpToken);   // label
             consumeToken(COLON);
         }
         consumeToken(RETURN);
-        if(tm.getNextTokenKind() != SEMICOLON) {
+        if(tokenMgr.getNextTokenKind() != SEMICOLON) {
             expression(node, endToken);
         }
         consumeToken(SEMICOLON);
@@ -5334,7 +5399,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         ASTNode node = new ASTNode(p, ASTSCALAR_NATURE_DEFINITION);
         openNodeScope(node);
         type_mark(node, endToken);
-        Token token = tm.toNextToken();
+        Token token = tokenMgr.toNextToken();
         new ASTtoken(node, token.image);
         closeNodeScope(node);
     }
@@ -5349,7 +5414,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
     void scalar_type_definition(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTSCALAR_TYPE_DEFINITION);
         openNodeScope(node);
-        int kind = tm.getNextTokenKind();
+        int kind = tokenMgr.getNextTokenKind();
         if(kind == LBRACKET) {
             enumeration_type_definition(node, endToken);
         }else if(kind == RANGE) {
@@ -5359,7 +5424,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
                 integer_type_definition(node, endToken); // the same as floating_type_definition
             }
         }else {
-            throw new ParserException(tm.toNextToken());
+            throw new ParserException(tokenMgr.toNextToken());
         }
         closeNodeScope(node);
     }
@@ -5372,7 +5437,21 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
     void secondary_unit(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTSECONDARY_UNIT);
         openNodeScope(node);
-        int kind = tm.getNextTokenKind();
+        int kind = tokenMgr.getNextTokenKind();
+        
+        if(parseSymbol) {
+            // if only parse symbol, just ignore it
+            // because we need only package declaration
+            endToken = findTokenInBlock(tokenMgr.getNextToken(2), END, endToken);
+            Token semToken = findToken(endToken, SEMICOLON, null);
+            if(semToken == null) {
+                throw new ParserException(endToken);
+            }
+            tokenMgr.setCurrentToken(semToken);
+            closeNodeScope(node);
+            return;
+        }
+        
         if(kind == ARCHITECTURE) {
             architecture_body(node, endToken);
         }else {
@@ -5405,10 +5484,10 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         ASTNode node = new ASTNode(p, ASTSELECTED_NAME);
         openNodeScope(node);
         if(endToken == null)
-            throw new ParserException(tm.getNextToken());
+            throw new ParserException(tokenMgr.getNextToken());
         Token tmpToken = findLastTokenInBlock(POINT, endToken);
         if(tmpToken == null)
-            throw new ParserException(tm.getNextToken());
+            throw new ParserException(tokenMgr.getNextToken());
         prefix(node, tmpToken);
         consumeToken(POINT);
         suffix(node, endToken);
@@ -5459,7 +5538,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
             if(tmpToken == null)
                 tmpToken = endToken;
             choices(node, tmpToken);
-            if(tm.getNextTokenKind() != COMMA) {
+            if(tokenMgr.getNextTokenKind() != COMMA) {
                 break;
             }
             consumeToken(COMMA);
@@ -5491,7 +5570,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
             if(tmpToken == null)
                 tmpToken = endToken;
             name(node, tmpToken);
-            if(tm.getNextTokenKind() != COMMA) {
+            if(tokenMgr.getNextTokenKind() != COMMA) {
                 break;
             }
             consumeToken(COMMA);
@@ -5530,27 +5609,27 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
     void sequential_statements(IASTNode p, Token endToken) throws ParserException {
         boolean exitLoop = false;
         while(!exitLoop) {
-            Token tmpToken = tm.getNextToken();
+            Token tmpToken = tokenMgr.getNextToken();
             boolean handled = false;
             while(tmpToken != endToken) {
                 if(tmpToken == null) { return; }
                 handled = false;
                 if(tmpToken.kind == IF) {
-                    tmpToken = findTokenInBlock(tm.getNextToken(tmpToken), END, endToken);
+                    tmpToken = findTokenInBlock(tokenMgr.getNextToken(tmpToken), END, endToken);
                     if(tmpToken == null) { return; }
                     tmpToken = findToken(tmpToken, SEMICOLON, endToken);
                     if_statement(p, tmpToken);
                     handled = true;
                     break;
                 }else if(tmpToken.kind == LOOP) {
-                    tmpToken = findTokenInBlock(tm.getNextToken(tmpToken), END, endToken);
+                    tmpToken = findTokenInBlock(tokenMgr.getNextToken(tmpToken), END, endToken);
                     if(tmpToken == null) { return; }
                     tmpToken = findToken(tmpToken, SEMICOLON, endToken);
                     loop_statement(p, tmpToken);
                     handled = true;
                     break;
                 }else if(tmpToken.kind == CASE) {
-                    tmpToken = findTokenInBlock(tm.getNextToken(tmpToken), END, endToken);
+                    tmpToken = findTokenInBlock(tokenMgr.getNextToken(tmpToken), END, endToken);
                     if(tmpToken == null) { return; }
                     tmpToken = findToken(tmpToken, SEMICOLON, endToken);
                     case_statement(p, tmpToken);
@@ -5559,7 +5638,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
                 }else if(tmpToken.kind == SEMICOLON) {
                     break;
                 }
-                tmpToken = tm.getNextToken(tmpToken);
+                tmpToken = tokenMgr.getNextToken(tmpToken);
             }
             
             if(tmpToken == null) { return; }            
@@ -5571,8 +5650,8 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
                 exit_statement(p, endToken);
             }else if(findTokenInBlock(NEXT, tmpToken) != null) {
                 next_statement(p, endToken);
-            }else if(tm.getNextTokenKind() == NULL || (tm.getNextTokenKind() == identifier 
-                        && tm.getNextTokenKind(2) == NULL)) {
+            }else if(tokenMgr.getNextTokenKind() == NULL || (tokenMgr.getNextTokenKind() == identifier 
+                        && tokenMgr.getNextTokenKind(2) == NULL)) {
                 null_statement(p, endToken);
             }else if(findTokenInBlock(REPORT, tmpToken) != null) {
                 report_statement(p, endToken);
@@ -5586,7 +5665,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
                 signal_assignment_statement(p, endToken);
             }else if(findTokenInBlock(BREAK, tmpToken) != null){
                 break_statement(p, endToken);
-            }else if(tm.getNextTokenKind() == identifier){
+            }else if(tokenMgr.getNextTokenKind() == identifier){
                 procedure_call_statement(p, endToken);
             }else {
                 exitLoop = true;
@@ -5626,10 +5705,10 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
      *   <dd> <b>sll</b> | <b>srl</b> | <b>sla</b> | <b>sra</b> | <b>rol</b> | <b>ror</b>
      */
     void shift_operator(IASTNode p, Token endToken) throws ParserException {
-        int kind = tm.getNextTokenKind();
+        int kind = tokenMgr.getNextTokenKind();
         if(!(kind == SLL || kind == SRL || kind == SLA || kind == SRA
                 || kind == ROL || kind == ROR)) {
-            throw new ParserException(tm.toNextToken());
+            throw new ParserException(tokenMgr.toNextToken());
         }
         consumeToken(kind);
         new ASTtoken(p, tokenImage[kind]);
@@ -5642,9 +5721,9 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
     void sign(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTSIGN);
         openNodeScope(node);
-        int kind = tm.getNextTokenKind();
+        int kind = tokenMgr.getNextTokenKind();
         if(!(kind == ADD || kind == SUB)) {
-            throw new ParserException(tm.toNextToken());
+            throw new ParserException(tokenMgr.toNextToken());
         }
         consumeToken(kind);
         new ASTtoken(node, tokenImage[kind]);
@@ -5661,7 +5740,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         endToken = findToken(SEMICOLON, endToken);
         
         Token tmpToken = endToken;
-        if(tm.getNextTokenKind(2) == COLON) {
+        if(tokenMgr.getNextTokenKind(2) == COLON) {
             tmpToken = findToken(COLON, endToken);
             identifier(node, tmpToken);   // label
             consumeToken(COLON);
@@ -5671,7 +5750,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         target(node, tmpToken);
         consumeToken(LE);
         new ASTtoken(node, tokenImage[LE]);
-        int kind = tm.getNextTokenKind();
+        int kind = tokenMgr.getNextTokenKind();
         if(kind == TRANSPORT || kind == REJECT) {
             delay_mechanism(node, endToken);
         }
@@ -5699,11 +5778,11 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
             tmpToken = endToken;
         subtype_indication(node, tmpToken);
         
-        int kind = tm.getNextTokenKind();
+        int kind = tokenMgr.getNextTokenKind();
         if(kind == REGISTER || kind == BUS) {
             signal_kind(node, tmpToken);
         }
-        if(tm.getNextTokenKind() == ASSIGN) {
+        if(tokenMgr.getNextTokenKind() == ASSIGN) {
             consumeToken(ASSIGN);
             new ASTtoken(node, tokenImage[ASSIGN]);
             expression(node, endToken);
@@ -5719,9 +5798,9 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
     void signal_kind(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTSIGNAL_KIND);
         openNodeScope(node);
-        int kind = tm.getNextTokenKind();
+        int kind = tokenMgr.getNextTokenKind();
         if(!(kind == REGISTER || kind == BUS)) {
-            throw new ParserException(tm.toNextToken());
+            throw new ParserException(tokenMgr.toNextToken());
         }
         consumeToken(kind);
         new ASTtoken(p, tokenImage[kind]);
@@ -5737,7 +5816,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
     void signal_list(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTSIGNAL_LIST);
         openNodeScope(node);
-        int kind = tm.getNextTokenKind();
+        int kind = tokenMgr.getNextTokenKind();
         if(kind == OTHERS || kind == ALL) {
             consumeToken(kind);
             new ASTtoken(node, tokenImage[kind]);
@@ -5747,7 +5826,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
                 if(tmpToken == null)
                     tmpToken = endToken;
                 name(node, tmpToken);
-                if(tm.getNextTokenKind() != COMMA) {
+                if(tokenMgr.getNextTokenKind() != COMMA) {
                     break;
                 }
                 consumeToken(COMMA);
@@ -5763,19 +5842,19 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
     void signature(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTSIGNATURE);
         openNodeScope(node);
-        if(tm.getNextTokenKind() == identifier) {
+        if(tokenMgr.getNextTokenKind() == identifier) {
             while(true) {
                 Token tmpToken = findTokenInBlock(COMMA, endToken);
                 if(tmpToken == null)
                     tmpToken = endToken;
                 type_mark(node, tmpToken);
-                if(tm.getNextTokenKind() != COMMA) {
+                if(tokenMgr.getNextTokenKind() != COMMA) {
                     break;
                 }
                 consumeToken(COMMA);
             }
         }
-        if(tm.getNextTokenKind() == RETURN) {
+        if(tokenMgr.getNextTokenKind() == RETURN) {
             consumeToken(RETURN);
             new ASTtoken(node, tokenImage[RETURN]);
             type_mark(node, endToken);
@@ -5790,7 +5869,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
     void simple_expression(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTSIMPLE_EXPRESSION);
         openNodeScope(node);
-        int kind = tm.getNextTokenKind();
+        int kind = tokenMgr.getNextTokenKind();
         if(kind == ADD || kind == SUB) {
             sign(node, endToken);
         }
@@ -5803,8 +5882,8 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
             if(tmpToken == null)
                 tmpToken = endToken;
             term(node, tmpToken);
-            kind = tm.getNextTokenKind();
-            if(tm.getNextToken() == endToken
+            kind = tokenMgr.getNextTokenKind();
+            if(tokenMgr.getNextToken() == endToken
                    || !(kind == ADD || kind == SUB || kind == CONCAT)){
                 break;
             }
@@ -5832,7 +5911,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         endToken = findToken(SEMICOLON, endToken);
         
         Token tmpToken = endToken;
-        if(tm.getNextTokenKind(2) == COLON) {
+        if(tokenMgr.getNextTokenKind(2) == COLON) {
             tmpToken = findToken(COLON, endToken);
             identifier(node, tmpToken);   // label
             consumeToken(COLON);
@@ -5842,7 +5921,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         simple_expression(node, tmpToken);
         consumeToken(EQ2);
         simple_expression(node, endToken);
-        if(tm.getNextTokenKind() == TOLERANCE) {
+        if(tokenMgr.getNextTokenKind() == TOLERANCE) {
             tolerance_aspect(node, endToken);
         }
         consumeToken(SEMICOLON);
@@ -5879,7 +5958,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         
         boolean hasLabel = false;
         Token tmpToken = endToken;
-        if(tm.getNextTokenKind(2) == COLON) {
+        if(tokenMgr.getNextTokenKind(2) == COLON) {
             tmpToken = findToken(COLON, endToken);
             identifier(node, tmpToken);   // label
             consumeToken(COLON);
@@ -5896,20 +5975,20 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
             if(tmpToken == null)
                 tmpToken = endToken;
             simultaneous_alternative(node, tmpToken);
-            if(tm.getNextTokenKind() != WHEN) {
+            if(tokenMgr.getNextTokenKind() != WHEN) {
                 break;
             }
         }
         consumeToken(END);
         consumeToken(CASE);
-        if(tm.getNextTokenKind() == identifier) {
+        if(tokenMgr.getNextTokenKind() == identifier) {
             if(!hasLabel) {
-                throw new ParserException(tm.getCurrentToken());
+                throw new ParserException(tokenMgr.getCurrentToken());
             }
             Token t1 = ((ASTNode)node.getChild(0)).getFirstToken();
-            Token t2 = tm.toNextToken();
+            Token t2 = tokenMgr.toNextToken();
             if(!t1.image.equalsIgnoreCase(t2.image)) {
-                throw new ParserException(tm.getCurrentToken());
+                throw new ParserException(tokenMgr.getCurrentToken());
             }
         }
         consumeToken(SEMICOLON);
@@ -5933,7 +6012,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         
         boolean hasLabel = false;
         Token tmpToken = endToken;
-        if(tm.getNextTokenKind(2) == COLON) {
+        if(tokenMgr.getNextTokenKind(2) == COLON) {
             tmpToken = findToken(COLON, endToken);
             identifier(node, tmpToken);   // label
             consumeToken(COLON);
@@ -5954,7 +6033,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
             if(tmpToken == null)
                 tmpToken = endToken;
             simultaneous_statement_part(node, tmpToken);
-            if(tm.getNextTokenKind() != ELSIF) {
+            if(tokenMgr.getNextTokenKind() != ELSIF) {
                 break;
             }
             consumeToken(ELSIF);
@@ -5964,7 +6043,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
             condition(node, tmpToken);
             consumeToken(THEN);
         }
-        if(tm.getNextTokenKind() == ELSE) {
+        if(tokenMgr.getNextTokenKind() == ELSE) {
             consumeToken(ELSE);
             new ASTtoken(node, tokenImage[ELSE]);
             simultaneous_statement_part(node, endToken);
@@ -5972,14 +6051,14 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         
         consumeToken(END);
         consumeToken(USE);
-        if(tm.getNextTokenKind() == identifier) {
+        if(tokenMgr.getNextTokenKind() == identifier) {
             if(!hasLabel) {
-                throw new ParserException(tm.getCurrentToken());
+                throw new ParserException(tokenMgr.getCurrentToken());
             }
             Token t1 = ((ASTNode)node.getChild(0)).getFirstToken();
-            Token t2 = tm.toNextToken();
+            Token t2 = tokenMgr.toNextToken();
             if(!t1.image.equalsIgnoreCase(t2.image)) {
-                throw new ParserException(tm.getCurrentToken());
+                throw new ParserException(tokenMgr.getCurrentToken());
             }
         }
         consumeToken(SEMICOLON);
@@ -5995,7 +6074,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         openNodeScope(node);
         endToken = findToken(SEMICOLON, endToken);
         
-        if(tm.getNextTokenKind(2) == COLON) {
+        if(tokenMgr.getNextTokenKind(2) == COLON) {
             identifier(node, endToken);   // label
             consumeToken(COLON);
         }
@@ -6016,10 +6095,11 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
     void simultaneous_procedural_statement(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTSIMULTANEOUS_PROCEDURAL_STATEMENT);
         openNodeScope(node);
+        startBlock();
         
         boolean hasLabel = false;
         Token tmpToken = endToken;
-        if(tm.getNextTokenKind(2) == COLON) {
+        if(tokenMgr.getNextTokenKind(2) == COLON) {
             tmpToken = findToken(COLON, endToken);
             identifier(node, tmpToken);   // label
             consumeToken(COLON);
@@ -6028,7 +6108,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         consumeToken(PROCEDURAL);
         endToken = findTokenInBlock(END, endToken);
         
-        if(tm.getNextTokenKind() == IS) {
+        if(tokenMgr.getNextTokenKind() == IS) {
             consumeToken(IS);
         }
         
@@ -6037,21 +6117,22 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         consumeToken(BEGIN);
         procedural_statement_part(node, endToken);
         consumeToken(END);
-        if(tm.getNextTokenKind() == POSTPONED) {
+        if(tokenMgr.getNextTokenKind() == POSTPONED) {
             consumeToken(POSTPONED);
         }
         consumeToken(PROCEDURAL);
-        if(tm.getNextTokenKind() == identifier) {
+        if(tokenMgr.getNextTokenKind() == identifier) {
             if(!hasLabel) {
-                throw new ParserException(tm.getCurrentToken());
+                throw new ParserException(tokenMgr.getCurrentToken());
             }
             Token t1 = ((ASTNode)node.getChild(0)).getFirstToken();
-            Token t2 = tm.toNextToken();
+            Token t2 = tokenMgr.toNextToken();
             if(!t1.image.equalsIgnoreCase(t2.image)) {
-                throw new ParserException(tm.getCurrentToken());
+                throw new ParserException(tokenMgr.getCurrentToken());
             }
         }
         consumeToken(SEMICOLON);
+        endBlock();
         closeNodeScope(node);
     }
 
@@ -6066,16 +6147,16 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
      *       true: this node has been handled, false elsewhere
      */
     boolean simultaneous_statement(IASTNode p, Token endToken) throws ParserException {
-        Token tmpToken = tm.getNextToken();
+        Token tmpToken = tokenMgr.getNextToken();
         if(tmpToken == null) { return false; }
         if(tmpToken.kind == SEMICOLON || tmpToken.kind == BEGIN
                 || tmpToken.kind == END) {
             return false;
         }
         
-        if(tm.getNextTokenKind(2) == COLON) {
-            tmpToken = tm.getNextToken(tmpToken);   // ignore label
-            tmpToken = tm.getNextToken(tmpToken);
+        if(tokenMgr.getNextTokenKind(2) == COLON) {
+            tmpToken = tokenMgr.getNextToken(tmpToken);   // ignore label
+            tmpToken = tokenMgr.getNextToken(tmpToken);
             if(tmpToken == null) { return false; }
         }
         
@@ -6097,19 +6178,19 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         switch(tmpToken.kind)
         {
         case IF:
-            tmpToken = findTokenInBlock(tm.getNextToken(tmpToken), END, endToken);
+            tmpToken = findTokenInBlock(tokenMgr.getNextToken(tmpToken), END, endToken);
             if(tmpToken == null) { return false; }
             tmpToken = findToken(tmpToken, SEMICOLON, endToken);
             simultaneous_if_statement(node, tmpToken);
             break;
         case PROCEDURAL:
-            tmpToken = findTokenInBlock(tm.getNextToken(tmpToken), END, endToken);
+            tmpToken = findTokenInBlock(tokenMgr.getNextToken(tmpToken), END, endToken);
             if(tmpToken == null) { return false; }
             tmpToken = findToken(tmpToken, SEMICOLON, endToken);
             simultaneous_procedural_statement(node, tmpToken);
             break;
         case CASE:
-            tmpToken = findTokenInBlock(tm.getNextToken(tmpToken),
+            tmpToken = findTokenInBlock(tokenMgr.getNextToken(tmpToken),
                             END, endToken);
             if(tmpToken == null) { return false; }
             tmpToken = findToken(tmpToken, SEMICOLON, endToken);
@@ -6163,7 +6244,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
     void source_aspect(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTSOURCE_ASPECT);
         openNodeScope(node);
-        if(tm.getNextTokenKind() == SPECTRUM) {
+        if(tokenMgr.getNextTokenKind() == SPECTRUM) {
             Token tmpToken = findTokenInBlock(COMMA, endToken);
             consumeToken(SPECTRUM);
             simple_expression(node, tmpToken);    // magnitude
@@ -6251,7 +6332,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
             || findToken(DOWNTO, endToken) != null) {
             index_constraint(node, tmpToken);
         }
-        if(tm.getNextTokenKind() == TOLERANCE) {
+        if(tokenMgr.getNextTokenKind() == TOLERANCE) {
             consumeToken(TOLERANCE);
             new ASTtoken(node, tokenImage[TOLERANCE]);
             
@@ -6287,9 +6368,10 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
     void subprogram_body(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTSUBPROGRAM_BODY);
         openNodeScope(node);
+        startBlock();
         
         int subkind = -1;
-        if(tm.getNextTokenKind() == PROCEDURE)
+        if(tokenMgr.getNextTokenKind() == PROCEDURE)
             subkind = PROCEDURE;
         else
             subkind = FUNCTION;
@@ -6306,20 +6388,21 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         
         subprogram_statement_part(node, endToken);
         consumeToken(END);
-        int kind = tm.getNextTokenKind();
+        int kind = tokenMgr.getNextTokenKind();
         if(kind == PROCEDURE || kind == FUNCTION) {
             if(subkind != kind) {
-                throw new ParserException(tm.toNextToken());
+                throw new ParserException(tokenMgr.toNextToken());
             }
             consumeToken(kind);
         }
         
         endToken = findToken(SEMICOLON, endToken);
-        kind = tm.getNextTokenKind();
+        kind = tokenMgr.getNextTokenKind();
         if(kind == identifier || kind == string_literal) {
             designator(node, endToken);
         }
         consumeToken(SEMICOLON);
+        endBlock();
         closeNodeScope(node);
     }
 
@@ -6355,7 +6438,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
     void subprogram_declarative_items(IASTNode p, Token endToken) throws ParserException {
         boolean exitLoop = false;
         while(!exitLoop) {
-            int kind = tm.getNextTokenKind();
+            int kind = tokenMgr.getNextTokenKind();
             switch(kind)
             {
             case PROCEDURE:
@@ -6432,12 +6515,12 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         ASTNode node = new ASTNode(p, ASTSUBPROGRAM_SPECIFICATION);
         openNodeScope(node);
         Token tmpToken = findToken(RETURN, endToken);
-        int kind = tm.getNextTokenKind();
+        int kind = tokenMgr.getNextTokenKind();
         if(kind == PROCEDURE) {
             consumeToken(PROCEDURE);
             new ASTtoken(node, tokenImage[PROCEDURE]);
             designator(node, tmpToken);
-            if(tm.getNextTokenKind() == LBRACKET) {
+            if(tokenMgr.getNextTokenKind() == LBRACKET) {
                 consumeToken(LBRACKET);
                 tmpToken = findTokenInBlock(RBRACKET, endToken);
                 formal_parameter_list(node, tmpToken);
@@ -6447,14 +6530,14 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
             consumeToken(kind);
             new ASTtoken(node, tokenImage[kind]);
             if(kind == IMPURE || kind == PURE) {
-                if(tm.getNextTokenKind() != FUNCTION) {
-                    throw new ParserException(tm.toNextToken());
+                if(tokenMgr.getNextTokenKind() != FUNCTION) {
+                    throw new ParserException(tokenMgr.toNextToken());
                 }
                 consumeToken(FUNCTION);
                 new ASTtoken(node, tokenImage[FUNCTION]);
             }
             designator(node, tmpToken);
-            if(tm.getNextTokenKind() == LBRACKET) {
+            if(tokenMgr.getNextTokenKind() == LBRACKET) {
                 consumeToken(LBRACKET);
                 tmpToken = findTokenInBlock(RBRACKET, endToken);
                 formal_parameter_list(node, tmpToken);
@@ -6463,7 +6546,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
             consumeToken(RETURN);
             type_mark(node, endToken);
         }else {
-            throw new ParserException(tm.toNextToken());
+            throw new ParserException(tokenMgr.toNextToken());
         }
         closeNodeScope(node);
     }
@@ -6503,8 +6586,8 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
     void subtype_indication(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTSUBTYPE_INDICATION);
         openNodeScope(node);
-        if(tm.getNextTokenKind() == identifier
-            || tm.getNextTokenKind(2) == identifier) {
+        if(tokenMgr.getNextTokenKind() == identifier
+            || tokenMgr.getNextTokenKind(2) == identifier) {
             //name(node, endToken);   //TODO check resolution function name
         }
         Token tmpToken = findTokenInBlock(RANGE, endToken);
@@ -6521,7 +6604,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
             constraint(node, endToken);
         }
         
-        if(tm.getNextTokenKind() == TOLERANCE) {
+        if(tokenMgr.getNextTokenKind() == TOLERANCE) {
             tolerance_aspect(node, endToken);
         }
         closeNodeScope(node);
@@ -6537,16 +6620,16 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
     void suffix(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTSUFFIX);
         openNodeScope(node);
-        int kind = tm.getNextTokenKind();
+        int kind = tokenMgr.getNextTokenKind();
         if(kind == identifier) {
             simple_name(node, endToken);
         }else if(kind == character_literal || kind == ALL) {
-            Token token = tm.toNextToken();
+            Token token = tokenMgr.toNextToken();
             new ASTtoken(node, token.image);
         }else if(kind == string_literal) {
             operator_symbol(node, endToken);
         }else {
-            throw new ParserException(tm.toNextToken());
+            throw new ParserException(tokenMgr.toNextToken());
         }
         closeNodeScope(node);
     }
@@ -6559,7 +6642,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
     void target(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTTARGET);
         openNodeScope(node);
-        if(tm.getNextTokenKind() == LBRACKET) {
+        if(tokenMgr.getNextTokenKind() == LBRACKET) {
             aggregate(node, endToken);
         }else {
             name(node, endToken);
@@ -6585,8 +6668,8 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
             if(tmpToken == null)
                 tmpToken = endToken;
             factor(node, tmpToken);
-            int kind = tm.getNextTokenKind();
-            if(tm.getNextToken() == endToken
+            int kind = tokenMgr.getNextTokenKind();
+            if(tokenMgr.getNextToken() == endToken
                    || !(kind == MUL || kind == DIV || kind == MOD || kind == REM)) {
                 break;
             }
@@ -6609,7 +6692,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         if(tmpToken == null)
             tmpToken = endToken;
         name(node, tmpToken);
-        if(tm.getNextTokenKind() == TO) {
+        if(tokenMgr.getNextTokenKind() == TO) {
             consumeToken(TO);
             new ASTtoken(node, tokenImage[TO]);
             name(node, endToken);
@@ -6648,13 +6731,13 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         if(tmpToken == null)
             tmpToken = findToken(ASSIGN, endToken);
         identifier_list(node, tmpToken);
-        if(tm.getNextTokenKind() == TOLERANCE) {
+        if(tokenMgr.getNextTokenKind() == TOLERANCE) {
             tmpToken = findToken(ASSIGN, endToken);
             if(tmpToken == null)
                 tmpToken = endToken;
             tolerance_aspect(node, tmpToken);
         }
-        if(tm.getNextTokenKind() == ASSIGN) {
+        if(tokenMgr.getNextTokenKind() == ASSIGN) {
             consumeToken(ASSIGN);
             expression(node, endToken);
         }
@@ -6712,9 +6795,9 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         ASTNode node = new ASTNode(p, ASTTYPE_DECLARATION);
         openNodeScope(node);
         endToken = findToken(SEMICOLON, endToken);
-        endToken = tm.getNextToken(endToken);
+        endToken = tokenMgr.getNextToken(endToken);
         if(endToken == null) {
-            throw new ParserException(tm.toNextToken());
+            throw new ParserException(tokenMgr.toNextToken());
         }
         if(findToken(IS, endToken) != null) {
             full_type_declaration(node, endToken);
@@ -6734,7 +6817,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
     void type_definition(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTTYPE_DEFINITION);
         openNodeScope(node);
-        int kind = tm.getNextTokenKind();
+        int kind = tokenMgr.getNextTokenKind();
         if(kind == LBRACKET || kind == RANGE) {
             scalar_type_definition(node, endToken);
         }else if(kind == ARRAY || kind == RECORD) {
@@ -6744,7 +6827,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         }else if(kind == FILE) {
             file_type_definition(node, endToken);
         }else {
-            throw new ParserException(tm.toNextToken());
+            throw new ParserException(tokenMgr.toNextToken());
         }
         closeNodeScope(node);
     }
@@ -6774,14 +6857,14 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         
         Token rbracketToken = findTokenInBlock(RBRACKET, endToken);
         if(rbracketToken == null) {
-            throw new ParserException(tm.toNextToken());
+            throw new ParserException(tokenMgr.toNextToken());
         }
         while(true) {
             Token tmpToken = findTokenInBlock(COMMA, rbracketToken);
             if(tmpToken == null)
                 tmpToken = rbracketToken;
             index_subtype_definition(node, tmpToken);
-            if(tm.getNextTokenKind() != COMMA) {
+            if(tokenMgr.getNextTokenKind() != COMMA) {
                 break;
             }
             consumeToken(COMMA);
@@ -6806,14 +6889,14 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         
         Token rbracketToken = findTokenInBlock(RBRACKET, endToken);
         if(rbracketToken == null) {
-            throw new ParserException(tm.toNextToken());
+            throw new ParserException(tokenMgr.toNextToken());
         }
         while(true) {
             Token tmpToken = findTokenInBlock(COMMA, rbracketToken);
             if(tmpToken == null)
                 tmpToken = rbracketToken;
             index_subtype_definition(node, tmpToken);
-            if(tm.getNextTokenKind() != COMMA) {
+            if(tokenMgr.getNextTokenKind() != COMMA) {
                 break;
             }
             consumeToken(COMMA);
@@ -6840,7 +6923,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
             if(tmpToken == null)
                 tmpToken = endToken;
             selected_name(node, tmpToken);
-            if(tm.getNextTokenKind() != COMMA) {
+            if(tokenMgr.getNextTokenKind() != COMMA) {
                 break;
             }
             consumeToken(COMMA);
@@ -6859,7 +6942,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         endToken = findToken(SEMICOLON, endToken);
         
         Token tmpToken = endToken;
-        if(tm.getNextTokenKind(2) == COLON) {
+        if(tokenMgr.getNextTokenKind(2) == COLON) {
             tmpToken = findToken(COLON, endToken);
             identifier(node, tmpToken);   // label
             consumeToken(COLON);
@@ -6883,7 +6966,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         openNodeScope(node);
         endToken = findToken(SEMICOLON, endToken);
         
-        if(tm.getNextTokenKind() == SHARED) {
+        if(tokenMgr.getNextTokenKind() == SHARED) {
             consumeToken(SHARED);
             new ASTtoken(node, tokenImage[SHARED]);
         }
@@ -6897,7 +6980,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         if(tmpToken == null)
             tmpToken = endToken;
         subtype_indication(node, tmpToken);
-        if(tm.getNextTokenKind() == ASSIGN) {
+        if(tokenMgr.getNextTokenKind() == ASSIGN) {
             consumeToken(ASSIGN);
             expression(node, endToken);
         }
@@ -6916,14 +6999,14 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         endToken = findToken(SEMICOLON, endToken);
         
         Token tmpToken = endToken;
-        if(tm.getNextTokenKind(2) == COLON) {
+        if(tokenMgr.getNextTokenKind(2) == COLON) {
             tmpToken = findToken(COLON, endToken);
             identifier(node, tmpToken);   // label
             consumeToken(COLON);
         }
         
         consumeToken(WAIT);
-        if(tm.getNextTokenKind() == ON) {
+        if(tokenMgr.getNextTokenKind() == ON) {
             tmpToken = findToken(UNTIL, endToken);
             if(tmpToken == null)
                 tmpToken = findToken(FOR, endToken);
@@ -6931,13 +7014,13 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
                 tmpToken = endToken;
             sensitivity_clause(node, tmpToken);
         }
-        if(tm.getNextTokenKind() == UNTIL) {
+        if(tokenMgr.getNextTokenKind() == UNTIL) {
             tmpToken = findToken(FOR, endToken);
             if(tmpToken == null)
                 tmpToken = endToken;
             condition_clause(node, tmpToken);
         }
-        if(tm.getNextTokenKind() == FOR) {
+        if(tokenMgr.getNextTokenKind() == FOR) {
             timeout_clause(node, endToken);
         }
         consumeToken(SEMICOLON);
@@ -6952,7 +7035,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
     void waveform(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTWAVEFORM);
         openNodeScope(node);
-        if(tm.getNextTokenKind() == UNAFFECTED) {
+        if(tokenMgr.getNextTokenKind() == UNAFFECTED) {
             consumeToken(UNAFFECTED);
             new ASTtoken(node, tokenImage[UNAFFECTED]);
         }else {
@@ -6961,7 +7044,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
                 if(tmpToken == null)
                     tmpToken = endToken;
                 waveform_element(node, tmpToken);
-                if(tm.getNextTokenKind() != COMMA) {
+                if(tokenMgr.getNextTokenKind() != COMMA) {
                     break;
                 }
                 consumeToken(COMMA);
@@ -6979,7 +7062,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         ASTNode node = new ASTNode(p, ASTWAVEFORM_ELEMENT);
         openNodeScope(node);
         
-        if(tm.getNextTokenKind() == NULL) {
+        if(tokenMgr.getNextTokenKind() == NULL) {
             consumeToken(NULL);
             new ASTtoken(node, tokenImage[NULL]);
         }else {
@@ -6988,7 +7071,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
                 tmpToken = endToken;
             expression(node, tmpToken);
         }
-        if(tm.getNextTokenKind() == AFTER) {
+        if(tokenMgr.getNextTokenKind() == AFTER) {
             consumeToken(AFTER);
             new ASTtoken(node, tokenImage[AFTER]);
             expression(node, endToken);

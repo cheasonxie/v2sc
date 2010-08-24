@@ -8,50 +8,50 @@
  **/
 package parser.vhdl;
 
-import java.util.ArrayList;
-
-public class SymbolTable
+public class SymbolTable extends VhdlArrayList<Symbol>
 {
-    /**
-     * Hierarchie of symbol tables is stored using this variable. The upper
-     * symbol table is the enclosing architecture, entity, ... scope.
-     */
-    SymbolTable parentTable = null;
+    private static final long serialVersionUID = 2819894900029453741L;
     
-    /**
-     * arraylist, where the symbols are stored.
-     */
-    ArrayList<Symbol> symbols = new ArrayList<Symbol>();
+    SymbolTable parent = null;    
     
     public SymbolTable() {}
-    public SymbolTable(SymbolTable upsym) {
-        parentTable = upsym;
+    public SymbolTable(SymbolTable p) {
+        parent = p;
     }
-
-    /**
-     * Add an identifier to symbol table
-     */
-    public void addSymbol(Symbol s) {
-        symbols.add(s);
+    
+    @Override
+    public boolean add(Symbol e)
+    {
+        if(e == null) {
+            return false;
+        }
+        for(int i = 0; i < size(); i++) {
+            if(e.getName().equalsIgnoreCase(get(i).getName())) {
+                return false;
+            }
+        }
+        return super.add(e);
     }
 
     /**
      * Get a symbol from the symbol table
      */
-    public Symbol getSymbol(String identifier) {
-        int i;
-        for (i = 0; i < symbols.size(); i++) {
-            if (identifier.compareTo(symbols.get(i).name) == 0)
-                return symbols.get(i);
-        }
-        return parentTable.getSymbol(identifier);
+    public Symbol getSymbol(String name) {
+        Symbol ret = get(name);
+        if(ret != null)
+            return ret;
+        if(parent != null)
+            return parent.getSymbol(name);
+        else
+            return null;
     }
     
-    public SymbolTable getParentTable() {
-        return parentTable;
+    public SymbolTable getParent() {
+        return parent;
     }
     
-    public void setParentTable(SymbolTable sym) {
-        parentTable = sym;
+    public void setParent(SymbolTable sym) {
+        parent = sym;
     }
 }
+

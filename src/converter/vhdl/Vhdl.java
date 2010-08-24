@@ -8,8 +8,10 @@ import java.util.ArrayList;
 import common.FileList;
 
 import parser.IASTNode;
+import parser.IParser;
 import parser.ParserException;
 import parser.vhdl.ASTNode;
+import parser.vhdl.LibraryManager;
 import parser.vhdl.VhdlASTConstants;
 import parser.vhdl.VhdlParser;
 import converter.LibEntry;
@@ -22,7 +24,7 @@ public class Vhdl extends hdlConverter implements VhdlASTConstants {
     public void convertFile(String srcPath, String dstPath)
             throws ParserException, FileNotFoundException, IOException
     {
-        VhdlParser parser = new VhdlParser(new FileReader(srcPath));
+        VhdlParser parser = new VhdlParser(new FileReader(srcPath), false);
         createFile(dstPath, true);        
         m_targetFileBuff.println("\r\n#include <systemc.h>");
 
@@ -70,9 +72,11 @@ public class Vhdl extends hdlConverter implements VhdlASTConstants {
     }
     
     @Override
-    public void parseLibSymbols(String srcDir)
+    public void addLibary(String srcDir, String libName)
     {
-        FileList list = new FileList(srcDir, EXT_VHDL);
+        LibraryManager.getInstance().add(srcDir, libName);
+/*        
+        FileList list = new FileList(srcDir, IParser.EXT_VHDL);
         
         System.out.println("======file num:" + list.getFileNum() + "========");
         
@@ -82,7 +86,7 @@ public class Vhdl extends hdlConverter implements VhdlASTConstants {
             String path = list.getFile(i);
             try {
                 System.out.println("file:" + path);
-                VhdlParser parser = new VhdlParser(new FileReader(path));
+                VhdlParser parser = new VhdlParser(new FileReader(path), true);
                 ASTNode designFile;
                 designFile = parser.design_file();
                 LibEntry entry = parserPackageTree(designFile, 0, path);
@@ -93,5 +97,6 @@ public class Vhdl extends hdlConverter implements VhdlASTConstants {
                 e.printStackTrace();
             }
         }
+*/
     }
 }

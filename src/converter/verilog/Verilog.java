@@ -19,7 +19,7 @@ public class Verilog extends hdlConverter
         
     }
 
-    public void parseLibSymbols(String srcDir)
+    public void addLibary(String srcDir, String libName)
     {
         
     }

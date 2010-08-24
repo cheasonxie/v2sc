@@ -3,6 +3,7 @@ package parser.vhdl;
 import java.util.ArrayList;
 
 import parser.IASTNode;
+import parser.INameObject;
 import parser.Token;
 
 public class ASTNode implements IASTNode
@@ -12,6 +13,7 @@ public class ASTNode implements IASTNode
     protected int id;
     protected Token first_token = null;
     protected Token last_token = null;
+    protected SymbolTable symTab = null;
     
     boolean isBoolean = false;  // used only for expression
     
@@ -92,6 +94,14 @@ public class ASTNode implements IASTNode
             }
         }
         return null;
+    }
+    
+    public void setSymbolTable(SymbolTable table) {
+        symTab = table;
+    }
+    
+    public SymbolTable getSymbolTable() {
+        return symTab;
     }
 }
 

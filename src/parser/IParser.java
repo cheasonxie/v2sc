@@ -12,6 +12,9 @@ package parser;
 
 public interface IParser
 {
+    static public final String EXT_VHDL = "vhd";
+    static public final String EXT_VERILOG = "v";    
+
 	public static final int OUT_OF_MODULE = 0;
 	public static final int IN_MODULE = 1;
 	public static final int IN_STATEMENT = 2;
