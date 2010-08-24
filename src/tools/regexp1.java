@@ -1,3 +1,5 @@
+package tools
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -11,7 +13,7 @@ import parser.IASTNode;
 import parser.ParserException;
 import parser.Token;
 
-public class regexp
+public class regexp1
 { 
     static final int TEST_COMMON = 0;
     static final int TEST_HTML = 1;
