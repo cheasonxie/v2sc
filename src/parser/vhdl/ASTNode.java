@@ -6,7 +6,7 @@ import parser.IASTNode;
 import parser.INameObject;
 import parser.Token;
 
-public class ASTNode implements IASTNode
+public class ASTNode implements IASTNode, INameObject
 {
     private String name = "";
     protected IASTNode parent;
@@ -125,7 +125,7 @@ public class ASTNode implements IASTNode
                 ret = child;
                 break;
             }
-            ret = child.getDescendant(id);
+            ret = child.getDescendant(id, name);
             if(ret != null) { break; }
         }
         return ret;
@@ -173,6 +173,11 @@ public class ASTNode implements IASTNode
         }
 
         return name;
+    }
+
+    @Override
+    public boolean equals(INameObject other) {
+        return (other == this);
     }
 }
 

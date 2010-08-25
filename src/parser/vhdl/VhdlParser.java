@@ -72,6 +72,16 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
         symbolTable = symbolTable.getParent();
     }
     
+    /**
+     * add one symbol to symbol table
+     */
+    boolean addSymbol(ASTNode node, int id) {
+        if(symbolTable == null)
+            return false;
+        Symbol sym = new Symbol(node.getName(), id);
+        return symbolTable.add(sym);
+    }
+    
     void openNodeScope(ASTNode n) throws ParserException  {
         curNode = n;
         n.setFirstToken(tokenMgr.getNextToken());
@@ -80,7 +90,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
     
     void closeNodeScope(ASTNode n) throws ParserException  {
         n.setLastToken(tokenMgr.getCurrentToken());
-        curNode = null;
+        curNode = (ASTNode)n.getParent();
     }
     
     Token consumeToken(int kind) throws ParserException {
@@ -1099,6 +1109,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
      */
     void block_declarative_items(IASTNode p, Token endToken) throws ParserException {
         boolean exitLoop = false;
+        Token tmpToken = null, tmpToken1 = null;
         while(!exitLoop) {
             int kind = tokenMgr.getNextTokenKind();
             switch(kind)
@@ -1107,27 +1118,53 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
             case FUNCTION:
             case IMPURE:
             case PURE:
-                if(findToken(IS, endToken) != null) {
+                tmpToken = tokenMgr.getNextToken();
+                if(kind == IMPURE || kind == PURE) {
+                    tmpToken = tokenMgr.getNextToken(tmpToken);
+                    if(tmpToken == null) {
+                        throw new ParserException(tokenMgr.getNextToken());
+                    }
+                }
+                tmpToken = findTokenInBlock(tokenMgr.getNextToken(tmpToken), SEMICOLON, endToken);
+                if(tmpToken == null) {
+                    throw new ParserException(tokenMgr.getNextToken());
+                }
+                tmpToken1 = findToken(IS, endToken);
+                if(tmpToken1 != null && checkLateComming(tmpToken, tmpToken1)) {
                     subprogram_body(p, endToken);
                 }else {
                     subprogram_declaration(p, endToken);
                 }
+                if(kind == IMPURE || kind == PURE) {
+                    kind = FUNCTION;
+                }
                 break;
             case ATTRIBUTE:
-                if(findToken(IS, endToken) != null) {
+                tmpToken = findTokenInBlock(tokenMgr.getNextToken(), SEMICOLON, endToken);
+                if(tmpToken == null) {
+                    throw new ParserException(tokenMgr.getNextToken());
+                }
+                tmpToken1 = findToken(IS, endToken);
+                if(tmpToken1 != null && checkLateComming(tmpToken, tmpToken1)) {
                     attribute_specification(p, endToken);
                 }else {
                     attribute_declaration(p, endToken);
                 }
                 break;
             case GROUP:
-                if(findToken(IS, endToken) != null) {
+                tmpToken = findTokenInBlock(tokenMgr.getNextToken(), SEMICOLON, endToken);
+                if(tmpToken == null) {
+                    throw new ParserException(tokenMgr.getNextToken());
+                }
+                tmpToken1 = findToken(IS, endToken);
+                if(tmpToken1 != null && checkLateComming(tmpToken, tmpToken1)) {
                     group_template_declaration(p, endToken);
                 }else {
                     group_declaration(p, endToken);
                 }
                 break;
             case SHARED:
+                kind = VARIABLE;
             case VARIABLE:
                 variable_declaration(p, endToken);
                 break;
@@ -1179,6 +1216,10 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
             default:    // not identified
                 exitLoop = true;
                 break;
+            }
+            
+            if(!exitLoop) {
+                addSymbol((ASTNode)p.getChild(p.getChildrenNum()-1), kind);
             }
         }
     }
@@ -2647,6 +2688,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
      */
     void entity_declarative_items(IASTNode p, Token endToken) throws ParserException {
         boolean exitLoop = false;
+        Token tmpToken = null, tmpToken1 = null;
         while(!exitLoop) {
             int kind = tokenMgr.getNextTokenKind();
             switch(kind)
@@ -2655,27 +2697,53 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
             case FUNCTION:
             case IMPURE:
             case PURE:
-                if(findToken(IS, endToken) != null) {
+                tmpToken = tokenMgr.getNextToken();
+                if(kind == IMPURE || kind == PURE) {
+                    tmpToken = tokenMgr.getNextToken(tmpToken);
+                    if(tmpToken == null) {
+                        throw new ParserException(tokenMgr.getNextToken());
+                    }
+                }
+                tmpToken = findTokenInBlock(tokenMgr.getNextToken(tmpToken), SEMICOLON, endToken);
+                if(tmpToken == null) {
+                    throw new ParserException(tokenMgr.getNextToken());
+                }
+                tmpToken1 = findToken(IS, endToken);
+                if(tmpToken1 != null && checkLateComming(tmpToken, tmpToken1)) {
                     subprogram_body(p, endToken);
                 }else {
                     subprogram_declaration(p, endToken);
                 }
+                if(kind == IMPURE || kind == PURE) {
+                    kind = FUNCTION;
+                }
                 break;
             case ATTRIBUTE:
-                if(findToken(IS, endToken) != null) {
+                tmpToken = findTokenInBlock(tokenMgr.getNextToken(), SEMICOLON, endToken);
+                if(tmpToken == null) {
+                    throw new ParserException(tokenMgr.getNextToken());
+                }
+                tmpToken1 = findToken(IS, endToken);
+                if(tmpToken1 != null && checkLateComming(tmpToken, tmpToken1)) {
                     attribute_specification(p, endToken);
                 }else {
                     attribute_declaration(p, endToken);
                 }
                 break;
             case GROUP:
-                if(findToken(IS, endToken) != null) {
+                tmpToken = findTokenInBlock(tokenMgr.getNextToken(), SEMICOLON, endToken);
+                if(tmpToken == null) {
+                    throw new ParserException(tokenMgr.getNextToken());
+                }
+                tmpToken1 = findToken(IS, endToken);
+                if(tmpToken1 != null && checkLateComming(tmpToken, tmpToken1)) {
                     group_template_declaration(p, endToken);
                 }else {
                     group_declaration(p, endToken);
                 }
                 break;
             case SHARED:
+                kind = VARIABLE;
             case VARIABLE:
                 variable_declaration(p, endToken);
                 break;
@@ -2721,6 +2789,10 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
             default:    // not identified
                 exitLoop = true;
                 break;
+            }
+            
+            if(!exitLoop) {
+                addSymbol((ASTNode)p.getChild(p.getChildrenNum()-1), kind);
             }
         }
     }
@@ -4432,6 +4504,9 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
                 }else {
                     subprogram_declaration(p, endToken);
                 }
+                if(kind == IMPURE || kind == PURE) {
+                    kind = FUNCTION;
+                }
                 break;
             case GROUP:
                 tmpToken = findTokenInBlock(tokenMgr.getNextToken(), SEMICOLON, endToken);
@@ -4446,6 +4521,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
                 }
                 break;
             case SHARED:
+                kind = VARIABLE;
             case VARIABLE:
                 variable_declaration(p, endToken);
                 break;
@@ -4470,6 +4546,10 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
             default:    // not identified
                 exitLoop = true;
                 break;
+            }
+            
+            if(!exitLoop) {
+                addSymbol((ASTNode)p.getChild(p.getChildrenNum()-1), kind);
             }
         }
     }
@@ -4541,6 +4621,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
      */
     void package_declarative_items(IASTNode p, Token endToken) throws ParserException {
         boolean exitLoop = false;
+        Token tmpToken = null, tmpToken1 = null;
         while(!exitLoop) {
             int kind = tokenMgr.getNextTokenKind();
             switch(kind)
@@ -4550,22 +4631,36 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
             case IMPURE:
             case PURE:
                 subprogram_declaration(p, endToken);
+                if(kind == IMPURE || kind == PURE) {
+                    kind = FUNCTION;
+                }
                 break;
             case ATTRIBUTE:
-                if(findToken(IS, endToken) != null) {
+                tmpToken = findTokenInBlock(tokenMgr.getNextToken(), SEMICOLON, endToken);
+                if(tmpToken == null) {
+                    throw new ParserException(tokenMgr.getNextToken());
+                }
+                tmpToken1 = findToken(IS, endToken);
+                if(tmpToken1 != null && checkLateComming(tmpToken, tmpToken1)) {
                     attribute_specification(p, endToken);
                 }else {
                     attribute_declaration(p, endToken);
                 }
                 break;
             case GROUP:
-                if(findToken(IS, endToken) != null) {
+                tmpToken = findTokenInBlock(tokenMgr.getNextToken(), SEMICOLON, endToken);
+                if(tmpToken == null) {
+                    throw new ParserException(tokenMgr.getNextToken());
+                }
+                tmpToken1 = findToken(IS, endToken);
+                if(tmpToken1 != null && checkLateComming(tmpToken, tmpToken1)) {
                     group_template_declaration(p, endToken);
                 }else {
                     group_declaration(p, endToken);
                 }
                 break;
             case SHARED:
+                kind = VARIABLE;
             case VARIABLE:
                 variable_declaration(p, endToken);
                 break;
@@ -4608,6 +4703,10 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
             default:    // not identified
                 exitLoop = true;
                 break;
+            }
+            
+            if(!exitLoop) {
+                addSymbol((ASTNode)p.getChild(p.getChildrenNum()-1), kind);
             }
         }
     }
@@ -4849,6 +4948,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
      */
     void procedural_declarative_items(IASTNode p, Token endToken) throws ParserException {
         boolean exitLoop = false;
+        Token tmpToken = null, tmpToken1 = null;
         while(!exitLoop) {
             int kind = tokenMgr.getNextTokenKind();
             switch(kind)
@@ -4857,27 +4957,54 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
             case FUNCTION:
             case IMPURE:
             case PURE:
-                if(findToken(IS, endToken) != null) {
+                tmpToken = tokenMgr.getNextToken();
+                if(kind == IMPURE || kind == PURE) {
+                    tmpToken = tokenMgr.getNextToken(tmpToken);
+                    if(tmpToken == null) {
+                        throw new ParserException(tokenMgr.getNextToken());
+                    }
+                }
+                tmpToken = findTokenInBlock(tokenMgr.getNextToken(tmpToken), SEMICOLON, endToken);
+                if(tmpToken == null) {
+                    throw new ParserException(tokenMgr.getNextToken());
+                }
+                tmpToken1 = findToken(IS, endToken);
+                if(tmpToken1 != null && checkLateComming(tmpToken, tmpToken1)) {
                     subprogram_body(p, endToken);
                 }else {
                     subprogram_declaration(p, endToken);
                 }
+                
+                if(kind == IMPURE || kind == PURE) {
+                    kind = FUNCTION;
+                }
                 break;
             case ATTRIBUTE:
-                if(findToken(IS, endToken) != null) {
+                tmpToken = findTokenInBlock(tokenMgr.getNextToken(), SEMICOLON, endToken);
+                if(tmpToken == null) {
+                    throw new ParserException(tokenMgr.getNextToken());
+                }
+                tmpToken1 = findToken(IS, endToken);
+                if(tmpToken1 != null && checkLateComming(tmpToken, tmpToken1)) {
                     attribute_specification(p, endToken);
                 }else {
                     attribute_declaration(p, endToken);
                 }
                 break;
             case GROUP:
-                if(findToken(IS, endToken) != null) {
+                tmpToken = findTokenInBlock(tokenMgr.getNextToken(), SEMICOLON, endToken);
+                if(tmpToken == null) {
+                    throw new ParserException(tokenMgr.getNextToken());
+                }
+                tmpToken1 = findToken(IS, endToken);
+                if(tmpToken1 != null && checkLateComming(tmpToken, tmpToken1)) {
                     group_template_declaration(p, endToken);
                 }else {
                     group_declaration(p, endToken);
                 }
                 break;
             case SHARED:
+                kind = VARIABLE;
             case VARIABLE:
                 variable_declaration(p, endToken);
                 break;
@@ -4899,6 +5026,10 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
             default:    // not identified
                 exitLoop = true;
                 break;
+            }
+            
+            if(!exitLoop) {
+                addSymbol((ASTNode)p.getChild(p.getChildrenNum()-1), kind);
             }
         }
     }
@@ -4981,6 +5112,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
      */
     void process_declarative_items(IASTNode p, Token endToken) throws ParserException {
         boolean exitLoop = false;
+        Token tmpToken = null, tmpToken1 = null;
         while(!exitLoop) {
             int kind = tokenMgr.getNextTokenKind();
             switch(kind)
@@ -4989,27 +5121,54 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
             case FUNCTION:
             case IMPURE:
             case PURE:
-                if(findToken(IS, endToken) != null) {
+                tmpToken = tokenMgr.getNextToken();
+                if(kind == IMPURE || kind == PURE) {
+                    tmpToken = tokenMgr.getNextToken(tmpToken);
+                    if(tmpToken == null) {
+                        throw new ParserException(tokenMgr.getNextToken());
+                    }
+                }
+                tmpToken = findTokenInBlock(tokenMgr.getNextToken(tmpToken), SEMICOLON, endToken);
+                if(tmpToken == null) {
+                    throw new ParserException(tokenMgr.getNextToken());
+                }
+                tmpToken1 = findToken(IS, endToken);
+                if(tmpToken1 != null && checkLateComming(tmpToken, tmpToken1)) {
                     subprogram_body(p, endToken);
                 }else {
                     subprogram_declaration(p, endToken);
                 }
+                
+                if(kind == IMPURE || kind == PURE) {
+                    kind = FUNCTION;
+                }
                 break;
             case ATTRIBUTE:
-                if(findToken(IS, endToken) != null) {
+                tmpToken = findTokenInBlock(tokenMgr.getNextToken(), SEMICOLON, endToken);
+                if(tmpToken == null) {
+                    throw new ParserException(tokenMgr.getNextToken());
+                }
+                tmpToken1 = findToken(IS, endToken);
+                if(tmpToken1 != null && checkLateComming(tmpToken, tmpToken1)) {
                     attribute_specification(p, endToken);
                 }else {
                     attribute_declaration(p, endToken);
                 }
                 break;
             case GROUP:
-                if(findToken(IS, endToken) != null) {
+                tmpToken = findTokenInBlock(tokenMgr.getNextToken(), SEMICOLON, endToken);
+                if(tmpToken == null) {
+                    throw new ParserException(tokenMgr.getNextToken());
+                }
+                tmpToken1 = findToken(IS, endToken);
+                if(tmpToken1 != null && checkLateComming(tmpToken, tmpToken1)) {
                     group_template_declaration(p, endToken);
                 }else {
                     group_declaration(p, endToken);
                 }
                 break;
             case SHARED:
+                kind = VARIABLE;
             case VARIABLE:
                 variable_declaration(p, endToken);
                 break;
@@ -5034,6 +5193,10 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
             default:    // not identified
                 exitLoop = true;
                 break;
+            }
+            
+            if(!exitLoop) {
+                addSymbol((ASTNode)p.getChild(p.getChildrenNum()-1), kind);
             }
         }
     }
@@ -6439,6 +6602,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
      */
     void subprogram_declarative_items(IASTNode p, Token endToken) throws ParserException {
         boolean exitLoop = false;
+        Token tmpToken = null, tmpToken1 = null;
         while(!exitLoop) {
             int kind = tokenMgr.getNextTokenKind();
             switch(kind)
@@ -6447,27 +6611,54 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
             case FUNCTION:
             case IMPURE:
             case PURE:
-                if(findToken(IS, endToken) != null) {
+                tmpToken = tokenMgr.getNextToken();
+                if(kind == IMPURE || kind == PURE) {
+                    tmpToken = tokenMgr.getNextToken(tmpToken);
+                    if(tmpToken == null) {
+                        throw new ParserException(tokenMgr.getNextToken());
+                    }
+                }
+                tmpToken = findTokenInBlock(tokenMgr.getNextToken(tmpToken), SEMICOLON, endToken);
+                if(tmpToken == null) {
+                    throw new ParserException(tokenMgr.getNextToken());
+                }
+                tmpToken1 = findToken(IS, endToken);
+                if(tmpToken1 != null && checkLateComming(tmpToken, tmpToken1)) {
                     subprogram_body(p, endToken);
                 }else {
                     subprogram_declaration(p, endToken);
                 }
+                
+                if(kind == IMPURE || kind == PURE) {
+                    kind = FUNCTION;
+                }
                 break;
             case ATTRIBUTE:
-                if(findToken(IS, endToken) != null) {
+                tmpToken = findTokenInBlock(tokenMgr.getNextToken(), SEMICOLON, endToken);
+                if(tmpToken == null) {
+                    throw new ParserException(tokenMgr.getNextToken());
+                }
+                tmpToken1 = findToken(IS, endToken);
+                if(tmpToken1 != null && checkLateComming(tmpToken, tmpToken1)) {
                     attribute_specification(p, endToken);
                 }else {
                     attribute_declaration(p, endToken);
                 }
                 break;
             case GROUP:
-                if(findToken(IS, endToken) != null) {
+                tmpToken = findTokenInBlock(tokenMgr.getNextToken(), SEMICOLON, endToken);
+                if(tmpToken == null) {
+                    throw new ParserException(tokenMgr.getNextToken());
+                }
+                tmpToken1 = findToken(IS, endToken);
+                if(tmpToken1 != null && checkLateComming(tmpToken, tmpToken1)) {
                     group_template_declaration(p, endToken);
                 }else {
                     group_declaration(p, endToken);
                 }
                 break;
             case SHARED:
+                kind = VARIABLE;
             case VARIABLE:
                 variable_declaration(p, endToken);
                 break;
@@ -6492,6 +6683,10 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants
             default:
                 exitLoop = true;
                 break;
+            }
+            
+            if(!exitLoop) {
+                addSymbol((ASTNode)p.getChild(p.getChildrenNum()-1), kind);
             }
         }
     }

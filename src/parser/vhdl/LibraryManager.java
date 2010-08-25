@@ -25,17 +25,8 @@ class PackageEntry implements INameObject
     
     public PackageEntry(ASTNode pkgNode)
     {
-        if(pkgNode.getId() != VhdlASTConstants.ASTPACKAGE_DECLARATION) {
-            return;
-        }
-        for(int i = 0; i < pkgNode.getChildrenNum(); i++) {
-            ASTNode child = (ASTNode)pkgNode.getChild(i);
-            // first identifier is name
-            if(child.getId() == VhdlASTConstants.ASTIDENTIFIER) {
-                name = child.firstTokenImage();
-                break;
-            }
-        }
+        assert(pkgNode.getId() == VhdlASTConstants.ASTPACKAGE_DECLARATION);
+        name = pkgNode.getName();
         table = pkgNode.getSymbolTable();
     }
     
