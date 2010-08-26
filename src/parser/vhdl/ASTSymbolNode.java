@@ -82,13 +82,23 @@ class ASTSymbolNode extends ASTNode
         return ret;
     }
     
+    private String getSimpleExpression(ASTNode node) {
+        String ret = "";
+        Token token = node.first_token;
+        while(token != node.last_token) {
+            ret += token.image;
+            token = token.next;
+        }
+        ret += token.image;
+        return ret;
+    }
     private String[] getRange(ASTNode rangeNode) {
         String range[] = null;
         if(rangeNode.getChild(0).getId() == ASTSIMPLE_EXPRESSION) {
             range = new String[3];
-            range[0] = ((ASTNode)rangeNode.getChild(0)).getName();
+            range[0] = getSimpleExpression((ASTNode)rangeNode.getChild(0));
             range[1] = ((ASTNode)rangeNode.getChild(1)).getName();
-            range[2] = ((ASTNode)rangeNode.getChild(2)).getName();
+            range[2] = getSimpleExpression((ASTNode)rangeNode.getChild(2));
         }else {
             ASTNode atribute = (ASTNode)rangeNode.getChild(0);
             ASTNode prefix = (ASTNode)atribute.getChild(0);
