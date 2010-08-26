@@ -20,7 +20,7 @@ public class SymbolTable extends VhdlArrayList<Symbol>
     }
 
     /**
-     * Get a symbol from the symbol table
+     * Get a symbol from the symbol table by name
      */
     public Symbol getSymbol(String name) {
         Symbol ret = get(name);

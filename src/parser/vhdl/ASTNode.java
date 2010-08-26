@@ -181,7 +181,8 @@ public class ASTNode implements IASTNode, INameObject
     }
 }
 
-class ASTtoken extends ASTNode {
+class ASTtoken extends ASTNode
+{
     String image = "";
     public ASTtoken(IASTNode p, String image) {
         super(p, VhdlASTConstants.ASTVOID);

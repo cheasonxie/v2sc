@@ -17,6 +17,7 @@ import parser.INameObject;
  */
 public class Symbol implements INameObject
 {
+    /** invalid symbol kind */
     public static final int KIND_INVALID = -1;
    
     /**
@@ -25,24 +26,30 @@ public class Symbol implements INameObject
     public String name;
     
     /**
-     * symbol kind, available kinds: <br>
+     * symbol kind<br>
+     * available kinds: <br>
      * <b>function</b>, <b>procedure</b>, <b>variable</b>, <b>constant</b>, <b>type</b><br>
      * <b>attribute</b>, <b>alias</b>, <b>subtype</b>, <b>file</b>, <b>group</b><br>
      * <b>signal</b>, <b>component</b>, <b>disconnect</b>, <b>nature</b>, <b>terminal</b><br>
-     * <b>subnature</b>
+     * <b>subnature</b>, <b>generic</b>, <b>port</b>
      * @see VhdlTokenConstants
      */
     public int kind;
     
     /**
-     * constant/variable type, function return type, 
-     */
+     * data type(constant,variable, function return<br>
+    */
     public String type;
     
     /**
-     * value range
+     * type range
      */
     public String[] range;
+    
+    /**
+     * port mode(in/out/...)
+     */
+    public String mode = "";
     
     /**
      * param list(only used in function or procedure)
