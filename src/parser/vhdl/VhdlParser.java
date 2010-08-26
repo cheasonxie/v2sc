@@ -789,9 +789,9 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants, IVhdlTy
         ASTNode node = new ASTNode(p, ASTARRAY_TYPE_DEFINITION);
         openNodeScope(node);
         if(findToken(INFINITE, endToken) != null) {
-            unconstrained_array_definition(p, endToken);
+            unconstrained_array_definition(node, endToken);
         }else {
-            constrained_array_definition(p, endToken);
+            constrained_array_definition(node, endToken);
         }
         closeNodeScope(node);
     }
@@ -2252,7 +2252,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants, IVhdlTy
      */
     void declarations(IASTNode p, Token endToken) throws ParserException {
         boolean exitLoop = false;
-        Token tmpToken;
+        Token tmpToken, tmpToken1;
         while(!exitLoop) {
             if(findToken(IN, endToken) != null
                     || findToken(OUT, endToken) != null
@@ -2278,7 +2278,12 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants, IVhdlTy
                 attribute_declaration(p, endToken);
                 break;
             case GROUP:
-                if(findToken(IS, endToken) != null) {
+                tmpToken = findTokenInBlock(tokenMgr.getNextToken(), SEMICOLON, endToken);
+                if(tmpToken == null) {
+                    throw new ParserException(tokenMgr.getNextToken());
+                }
+                tmpToken1 = findToken(IS, endToken);
+                if(tmpToken1 != null && checkLateComming(tmpToken, tmpToken1)) {
                     group_template_declaration(p, endToken);
                 }else {
                     group_declaration(p, endToken);
@@ -2522,7 +2527,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants, IVhdlTy
     void element_subtype_definition(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTELEMENT_SUBTYPE_DEFINITION);
         openNodeScope(node);
-        subtype_indication(p, endToken);
+        subtype_indication(node, endToken);
         closeNodeScope(node);
     }
 
@@ -5333,13 +5338,13 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants, IVhdlTy
         openNodeScope(node);
         if(findToken(SPECTRUM, endToken) != null 
                 || findToken(NOISE, endToken) != null) {
-            source_quantity_declaration(p, endToken);
+            source_quantity_declaration(node, endToken);
         }else if(findToken(ACROSS, endToken) != null 
                 || findToken(THROUGH, endToken) != null
                 || findToken(TO, endToken) != null) {
-            branch_quantity_declaration(p, endToken);
+            branch_quantity_declaration(node, endToken);
         }else {
-            free_quantity_declaration(p, endToken);
+            free_quantity_declaration(node, endToken);
         }
         closeNodeScope(node);
     }
@@ -5985,7 +5990,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants, IVhdlTy
             throw new ParserException(tokenMgr.toNextToken());
         }
         consumeToken(kind);
-        new ASTtoken(p, tokenImage[kind]);
+        new ASTtoken(node, tokenImage[kind]);
         closeNodeScope(node);
     }
 
@@ -6596,7 +6601,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants, IVhdlTy
         ASTNode node = new ASTSymbolNode(p, ASTSUBPROGRAM_DECLARATION);
         openNodeScope(node);
         endToken = findTokenInBlock(SEMICOLON, endToken);
-        subprogram_specification(p, endToken);
+        subprogram_specification(node, endToken);
         consumeToken(SEMICOLON);
         closeNodeScope(node);
     }

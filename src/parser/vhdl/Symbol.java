@@ -42,9 +42,14 @@ public class Symbol implements INameObject
     public String type;
     
     /**
-     * type range
+     * value range(value limitation)
      */
-    public String[] range;
+    public String[] range = null;
+    
+    /**
+     * type range(array index)
+     */
+    public String[] typeRange = null;
     
     /**
      * port mode(in/out/...)

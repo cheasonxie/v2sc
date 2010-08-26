@@ -1,6 +1,8 @@
 package parser.vhdl;
 
 import java.util.ArrayList;
+import java.util.Collection;
+
 import parser.INameObject;
 
 /**
@@ -23,6 +25,22 @@ public class VhdlArrayList<E extends INameObject> extends ArrayList<E>
             }
         }
         return super.add(e);
+    }
+    
+    @SuppressWarnings("unchecked")
+    @Override
+    public boolean addAll(Collection<? extends E> c)
+    {
+        if(c == null) {
+            return false;
+        }
+        
+        Object[] eArray = c.toArray();
+
+        for(int i = 0; i < eArray.length; i++) {
+            add((E)eArray[i]);
+        }
+        return true;
     }
     
     public E get(String name)
