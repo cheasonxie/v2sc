@@ -6,6 +6,7 @@ import java.io.FileReader;
 import parser.IASTNode;
 import parser.INameObject;
 import parser.IParser;
+import parser.Token;
 
 import common.FileList;
 
@@ -49,7 +50,7 @@ class PackageEntry implements INameObject
     
     public Symbol[] getAllSymbols()
     {
-        if(table == null)
+        if(table == null || table.size() == 0)
             return null;
         return (Symbol[])table.toArray();
     }
@@ -176,6 +177,34 @@ public class LibraryManager extends VhdlArrayList<LibraryEntry>
         }
         add(lib);
         return true;
+    }
+    
+    public Symbol[] getSymbol(ASTNode node) {
+        if(node.getId() != VhdlASTConstants.ASTSELECTED_NAME) {
+            return null;
+        }
+        
+        String libName = "", pkgName = "", symbolName = "";
+        Token token = node.first_token;
+        while(!token.image.equals(".")) {
+            libName += token.image;
+            token = token.next;
+        }
+        
+        token = token.next;
+        while(!token.image.equals(".")) {
+            pkgName += token.image;
+            token = token.next;
+        }
+        
+        token = token.next;
+        while(token != node.last_token) {
+            symbolName += token.image;
+            token = token.next;
+        }
+        symbolName += token.image;
+        
+        return getSymbol(libName, pkgName, symbolName);
     }
     
     public Symbol[] getSymbol(String libName, String pkgName, String symbolName)

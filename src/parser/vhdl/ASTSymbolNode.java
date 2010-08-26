@@ -138,7 +138,7 @@ class ASTSymbolNode extends ASTNode
                 child = new ASTSymbolNode(tmpNode1);
                 SymbolTable table = child.getParsedSymbolTable(VARIABLE);
                 for(j = 0; j < table.size(); j++) {
-                    sym.paramTypeList.add(table.get(i).type);
+                    sym.paramTypeList.add(table.get(j).type);
                 }
             }
             
@@ -164,7 +164,7 @@ class ASTSymbolNode extends ASTNode
             tmpNode0 = (ASTNode)getDescendant(ASTCOMPOSITE_TYPE_DEFINITION);
             if(tmpNode0 != null) {
                 tmpNode0 = (ASTNode)tmpNode0.getChildById(ASTARRAY_TYPE_DEFINITION);
-                if(tmpNode0.getId() == ASTARRAY_TYPE_DEFINITION) {
+                if(tmpNode0 != null) {
                     // array type
                     tmpNode0 = (ASTNode)tmpNode0.getChild(0);
                     tmpNode1 = (ASTNode)tmpNode0.getChildById(ASTINDEX_CONSTRAINT);

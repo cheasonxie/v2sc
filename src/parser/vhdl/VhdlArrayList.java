@@ -43,6 +43,17 @@ public class VhdlArrayList<E extends INameObject> extends ArrayList<E>
         return true;
     }
     
+    public boolean addAll(E[] c)
+    {
+        if(c == null) {
+            return false;
+        }
+        for(int i = 0; i < c.length; i++) {
+            add(c[i]);
+        }
+        return true;
+    }
+    
     public E get(String name)
     {
         if(name == null || name.isEmpty()) {

@@ -62,6 +62,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants, IVhdlTy
     void startBlock() {
         SymbolTable newTab = new SymbolTable(symbolTable);
         symbolTable = newTab;
+        curNode.setSymbolTable(symbolTable);
     }
     
     /**
@@ -95,7 +96,9 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants, IVhdlTy
     void openNodeScope(ASTNode n) throws ParserException  {
         curNode = n;
         n.setFirstToken(tokenMgr.getNextToken());
-        n.setSymbolTable(symbolTable);
+        if(n.getParent() != null) {
+            n.setSymbolTable(((ASTNode)n.getParent()).getSymbolTable());
+        }
     }
     
     void closeNodeScope(ASTNode n) throws ParserException  {
@@ -7142,6 +7145,11 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants, IVhdlTy
             if(tmpToken == null)
                 tmpToken = endToken;
             selected_name(node, tmpToken);
+            if(!parseSymbol) {
+                Symbol[] symbols = libraryMgr.getSymbol(
+                        (ASTNode)node.getChild(node.getChildrenNum()-1));
+                extSymbolTable.addAll(symbols);
+            }
             if(tokenMgr.getNextTokenKind() != COMMA) {
                 break;
             }
