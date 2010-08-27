@@ -96,13 +96,31 @@ public class Symbol implements INameObject
             return name.equalsIgnoreCase(oth.name);
         }else {
             // function or procedure may overload
-            return false;    //TODO: check function/procedure parameter type list
-            /*
-            boolean ret = (name.equalsIgnoreCase(oth.name)
-                    && kind == oth.kind
-                    && type.equalsIgnoreCase(oth.type));
+            boolean ret = (name.equalsIgnoreCase(oth.name));
             if(!ret)
                 return false;
+            ret = (kind == oth.kind && type.equalsIgnoreCase(oth.type));
+            String msg = "two functions: " + name + ", have the same name, " +
+            		"but they are not overload";
+            if(!ret) {
+                System.err.println(msg);
+                return false;
+            }
+            
+            // check typeRange
+            if((typeRange == null && oth.typeRange != null) 
+                    || (typeRange != null && oth.typeRange == null)) {
+                System.err.println(msg);
+                return false;
+            }
+            if(typeRange != null && oth.typeRange != null) {
+                if(!(typeRange[0].equalsIgnoreCase(oth.typeRange[0])
+                        || typeRange[1].equalsIgnoreCase(oth.typeRange[1])
+                        || typeRange[2].equalsIgnoreCase(oth.typeRange[2]))) {
+                    System.err.println(msg);
+                    return false;
+                }
+            }
             
             // check parameter list
             if(paramTypeList != null && oth.paramTypeList != null) {
@@ -118,7 +136,6 @@ public class Symbol implements INameObject
                 ret = true;
             }
             return ret;
-            */
         }
     }
     
