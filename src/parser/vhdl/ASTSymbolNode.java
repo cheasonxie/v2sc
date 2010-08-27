@@ -261,9 +261,9 @@ class ASTSymbolNode extends ASTNode
     /** add private table to global table */
     public boolean addSymbols(int kind) {
         boolean ret = parseSymbol(kind);
-        if(!ret || symTab == null)
+        if(!ret || parent == null || ((ASTNode)parent).symTab == null)
             return false;
-        return symTab.addAll(mySymTab);
+        return ((ASTNode)parent).symTab.addAll(mySymTab);
     }
     
     /** parse and save to private table */

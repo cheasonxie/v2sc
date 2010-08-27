@@ -78,8 +78,6 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants, IVhdlTy
      * TODO: modify get type, range, names
      */
     boolean addSymbol(ASTNode node, int id) {
-        if(symbolTable == null)
-            return false;
         if(node instanceof ASTSymbolNode) {
             return ((ASTSymbolNode)node).addSymbols(id);
         }
@@ -87,10 +85,11 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants, IVhdlTy
     }
     
     boolean addSymbol(ASTNode node, int id, String type) {
-        if(symbolTable == null)
+        if(node.parent == null || ((ASTNode)node.parent).symTab == null) {
             return false;
+        }
         Symbol sym = new Symbol(node.getName(), id, type, null);
-        return symbolTable.add(sym);
+        return ((ASTNode)node.parent).symTab.add(sym);
     }
     
     void openNodeScope(ASTNode n) throws ParserException  {
@@ -1652,6 +1651,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants, IVhdlTy
             }
         }
         consumeToken(SEMICOLON);
+        ((ASTNode)p).getSymbolTable().addChild(node.getName(), node.getSymbolTable());
         endBlock();
         closeNodeScope(node);
     }
@@ -7146,9 +7146,10 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants, IVhdlTy
                 tmpToken = endToken;
             selected_name(node, tmpToken);
             if(!parseSymbol) {
-                Symbol[] symbols = libraryMgr.getSymbol(
+                Symbol[] symbols = libraryMgr.getSymbols(
                         (ASTNode)node.getChild(node.getChildrenNum()-1));
                 extSymbolTable.addAll(symbols);
+                extSymbolTable.copyChild(symbolTable, symbols);
             }
             if(tokenMgr.getNextTokenKind() != COMMA) {
                 break;

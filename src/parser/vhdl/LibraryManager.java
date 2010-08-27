@@ -147,6 +147,12 @@ public class LibraryManager extends VhdlArrayList<LibraryEntry>
         return ret;
     }
     
+    /**
+     * add one library
+     * @param dir: library directory
+     * @param libName: library name
+     * @return
+     */
     public boolean add(String dir, String libName)
     {
         FileList list = new FileList(dir, IParser.EXT_VHDL);
@@ -179,7 +185,24 @@ public class LibraryManager extends VhdlArrayList<LibraryEntry>
         return true;
     }
     
-    public Symbol[] getSymbol(ASTNode node) {
+    public Symbol getSymbol(String symbolName) {
+        String libName = "", pkgName = "";
+        
+        for(int i = 0; i < size(); i++) {
+            libName = get(i).getName();
+            for(int j = 0; j < get(i).size(); j++) {
+                pkgName = get(i).get(j).getName();
+                Symbol[] syms = getSymbols(libName, pkgName, symbolName);
+                if(syms != null) {
+                    return syms[0];
+                }
+            }
+        }
+        return null;
+    }
+    
+   
+    public Symbol[] getSymbols(ASTNode node) {
         if(node.getId() != VhdlASTConstants.ASTSELECTED_NAME) {
             return null;
         }
@@ -204,10 +227,10 @@ public class LibraryManager extends VhdlArrayList<LibraryEntry>
         }
         symbolName += token.image;
         
-        return getSymbol(libName, pkgName, symbolName);
+        return getSymbols(libName, pkgName, symbolName);
     }
     
-    public Symbol[] getSymbol(String libName, String pkgName, String symbolName)
+    public Symbol[] getSymbols(String libName, String pkgName, String symbolName)
     {
         Symbol[] ret = null;
 
