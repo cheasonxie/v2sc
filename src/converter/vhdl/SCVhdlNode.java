@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import common.printFileAndLineNumber;
 
 import parser.IASTNode;
+import parser.IParser;
 import parser.vhdl.ASTNode;
 import parser.vhdl.VhdlASTConstants;
 import parser.vhdl.VhdlTokenConstants;
@@ -14,6 +15,7 @@ import converter.SCTreeNode;
 public class SCVhdlNode extends SCTreeNode 
     implements SCVhdlConstants, VhdlASTConstants, VhdlTokenConstants
 {
+    protected static IParser parser = null; 
     static SCVhdlEntity_declaration curModule = null;
     public boolean targetIsLogical = false;
     
@@ -58,6 +60,10 @@ public class SCVhdlNode extends SCTreeNode
 
     }
     
+    public void setParser (IParser parser) {
+        this.parser = parser;
+    }
+    
     @Override
     public String toString()
     {
@@ -98,17 +104,6 @@ public class SCVhdlNode extends SCTreeNode
     protected void error(String msg) {
         System.err.println("line--" + startLine + ": ");
         new printFileAndLineNumber(msg);
-    }
-    
-    public void checkAndAddSymbol(String name)
-    {
-        name.toLowerCase();
-        SCSymbol sym = getSymbol(name);
-        if(sym == null)
-        {
-            sym = new SCSymbol(SC_SUBPROGRAM, name, null);
-            getFileNode().curBlockSymbol.add(sym);
-        }
     }
     
     //TODO get bitwidth of symbol

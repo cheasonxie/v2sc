@@ -6,7 +6,7 @@ import parser.IASTNode;
 import parser.INameObject;
 import parser.Token;
 
-public class ASTNode implements IASTNode, INameObject
+public class ASTNode implements IASTNode
 {
     private String name = "";
     protected IASTNode parent;
