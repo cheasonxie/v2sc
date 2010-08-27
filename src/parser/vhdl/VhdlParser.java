@@ -8,10 +8,12 @@ import java.util.ArrayList;
 
 import parser.CommentBlock;
 import parser.IASTNode;
+import parser.IParser;
+import parser.ISymbol;
 import parser.ParserException;
 import parser.Token;
 
-public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants, IVhdlType
+public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants, IVhdlType
 {
     protected TokenManager tokenMgr = null;
     protected LibraryManager libraryMgr = LibraryManager.getInstance();
@@ -29,30 +31,8 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants, IVhdlTy
     /**
      * constructor, file path version
      */
-    public VhdlParser(String path, boolean parseSymbol) {
-        try {
-            BufferedReader stream = new BufferedReader(new FileReader(path));
-            tokenMgr = new TokenManager(stream);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
+    public VhdlParser(boolean parseSymbol) {
         this.parseSymbol = parseSymbol;
-    }
-    
-    /**
-     * constructor, reader version
-     */
-    public VhdlParser(Reader reader, boolean parseSymbol) {
-        BufferedReader stream = new BufferedReader(reader);
-        tokenMgr = new TokenManager(stream);
-        this.parseSymbol = parseSymbol;
-    }
-    
-    /**
-     * return all comments of parsered file
-     */
-    public ArrayList<CommentBlock> getComments() {
-       return tokenMgr.comments;
     }
     
     /**
@@ -2377,7 +2357,7 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants, IVhdlTy
      * <dl> design_file ::=
      *   <dd> design_unit { design_unit }
      */
-    public ASTNode design_file() throws ParserException {
+    ASTNode design_file() throws ParserException {
         ASTNode node = new ASTNode(null, ASTDESIGN_FILE);
         openNodeScope(node);
         while(true) {
@@ -7305,6 +7285,53 @@ public class VhdlParser implements VhdlTokenConstants, VhdlASTConstants, IVhdlTy
             expression(node, endToken);
         }
         closeNodeScope(node);
+    }
+
+    @Override
+    public CommentBlock[] getComment() {
+        if(tokenMgr == null) {
+            System.err.println("you must parse the file by call parse() firstly");
+            return null;
+        }
+        return tokenMgr.comments.toArray(new CommentBlock[tokenMgr.comments.size()]);
+    }
+
+    @Override
+    public IASTNode getRoot() {
+        return designFile;
+    }
+
+    @Override
+    public ISymbol getSymbol(IASTNode node, String name) {
+        if(tokenMgr == null) {
+            System.err.println("you must parse the file by call parse() firstly");
+            return null;
+        }
+        Symbol sym = ((ASTNode)node).getSymbolTable().get(name);
+        if(sym != null) {
+            return sym;
+        }
+        sym = extSymbolTable.get(name);
+        return sym;
+    }
+
+    @Override
+    public IASTNode parse(String path) throws ParserException {
+        try {
+            BufferedReader stream = new BufferedReader(new FileReader(path));
+            tokenMgr = new TokenManager(stream);
+            return design_file();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    
+    @Override
+    public IASTNode parse(Reader reader) throws ParserException {
+        BufferedReader stream = new BufferedReader(reader);
+        tokenMgr = new TokenManager(stream);
+        return design_file();
     }
 }
 

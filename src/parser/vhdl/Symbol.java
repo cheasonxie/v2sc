@@ -11,11 +11,12 @@ package parser.vhdl;
 import java.util.ArrayList;
 
 import parser.INameObject;
+import parser.ISymbol;
 
 /**
  * A symbol - entry in symbol-table
  */
-public class Symbol implements INameObject
+public class Symbol implements ISymbol
 {
     /** invalid symbol kind */
     public static final int KIND_INVALID = -1;
@@ -37,7 +38,7 @@ public class Symbol implements INameObject
     public int kind;
     
     /**
-     * data type(constant,variable, function return<br>
+     * data type(constant,variable, function return)<br>
     */
     public String type;
     

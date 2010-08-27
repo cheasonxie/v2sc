@@ -1,7 +1,6 @@
 package parser.vhdl;
 
 import java.io.File;
-import java.io.FileReader;
 
 import parser.IASTNode;
 import parser.INameObject;
@@ -52,7 +51,7 @@ class PackageEntry implements INameObject
     {
         if(table == null || table.size() == 0)
             return null;
-        return (Symbol[])table.toArray();
+        return (Symbol[])table.toArray(new Symbol[table.size()]);
     }
 
     @Override
@@ -167,8 +166,8 @@ public class LibraryManager extends VhdlArrayList<LibraryEntry>
             String path = list.getFile(i);
             try {
                 System.out.println("index:" + i + ", file:" + path);
-                VhdlParser parser = new VhdlParser(new FileReader(path), true);
-                ASTNode designFile = parser.design_file();
+                VhdlParser parser = new VhdlParser(true);
+                ASTNode designFile = (ASTNode)parser.parse(path);
                 IASTNode[] pkgNodes = getPackageNode(designFile, 0);
                 if(pkgNodes != null) {
                     for(int j = 0; j < pkgNodes.length; j++) {

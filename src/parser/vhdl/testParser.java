@@ -1,9 +1,7 @@
 package parser.vhdl;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Stack;
@@ -127,11 +125,9 @@ public class testParser implements VhdlASTConstants
     {
         try {
             String dir = System.getProperty("user.dir");
-            VhdlParser parser = new VhdlParser(
-                    new BufferedReader(new FileReader(dir + "\\ahbctrl.vhd")),
-                    false);            
+            VhdlParser parser = new VhdlParser(false);
                     //new BufferedReader(new FileReader(dir + "\\apbuart.vhd")));            
-            ASTNode designFile = parser.design_file();
+            ASTNode designFile = (ASTNode)parser.parse(dir + "\\ahbctrl.vhd");
             testParser vhdl = new testParser();
             vhdl.initDebugStream("b.txt");
             vhdl.parserTree(designFile, 0);

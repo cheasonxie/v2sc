@@ -10,19 +10,36 @@
  *******************************************************************************/
 package parser;
 
+import java.io.Reader;
+
 public interface IParser
 {
     static public final String EXT_VHDL = "vhd";
-    static public final String EXT_VERILOG = "v";    
+    static public final String EXT_VERILOG = "v";
 
-	public static final int OUT_OF_MODULE = 0;
-	public static final int IN_MODULE = 1;
-	public static final int IN_STATEMENT = 2;
-	//These are tags used to set create tasks inside of comments. The first token is
-	//considered to have high priority. The rest are normal priorities
-	public static final String[] taskCommentTokens={"FIXME","TODO","FIXME:","TODO:"};
-
-	public void parse() throws ParserException;
-	public int getContext();
+    /**
+     * parse file
+     */
+	public IASTNode parse(String path) throws ParserException;
+	
+    /**
+     * parse file
+     */
+	public IASTNode parse(Reader reader) throws ParserException;
+	
+	/**
+	 * get comment blocks in parsed file
+	 */
+	public CommentBlock[] getComment();
+	
+	/** 
+	 * get root node of ast
+	 */
+	public IASTNode getRoot();
+	
+	/**
+	 * get symbol in symbol table or library 
+	 */
+	public ISymbol getSymbol(IASTNode node, String name);
 }
 
