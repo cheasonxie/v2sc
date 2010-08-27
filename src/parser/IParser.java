@@ -23,7 +23,7 @@ public interface IParser
 	public IASTNode parse(String path) throws ParserException;
 	
     /**
-     * parse file
+     * parse buffer
      */
 	public IASTNode parse(Reader reader) throws ParserException;
 	

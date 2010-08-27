@@ -1,6 +1,6 @@
 package parser;
 
-public interface IASTNode
+public interface IASTNode extends INameObject
 {
     public void setParent(IASTNode n);
     public IASTNode getParent();
