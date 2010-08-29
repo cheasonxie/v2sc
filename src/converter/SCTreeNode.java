@@ -126,34 +126,6 @@ public class SCTreeNode implements SCTreeConstants
         SCSymbol ret = null;
         int i;
 
-        // 1. find symbol in lib
-        if(curFileNode != null) {
-            for (i = 0; i < curFileNode.useLibNameArray.size(); i++) {
-                ret = hdlConverter.getGlobalSymbol(curFileNode.useLibNameArray.get(i), name);
-                if (ret != null)
-                    return ret;
-            }
-        } else {
-            ret = hdlConverter.getGlobalSymbol(name);
-            if (ret != null)
-                return ret;
-        }
-
-        // 2. if not found, find symbol in this block
-        for (i = 0; i < curBlockSymbol.size(); i++) {
-            SCSymbol s = curBlockSymbol.get(i);
-            if (name.equalsIgnoreCase(s.name)) {
-                return s;
-            }
-        }
-
-        // 3. if not found, find symbol in parent node
-        SCTreeNode scNode = parent;
-        while ((scNode != null) && (scNode.curBlockSymbol == curBlockSymbol)) {
-            scNode = scNode.parent;
-        }
-        if(scNode != null)
-            return scNode.getSymbol(name);
         return null;
     }
     

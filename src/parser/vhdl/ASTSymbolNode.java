@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import parser.IASTNode;
 import parser.Token;
 
-class ASTSymbolNode extends ASTNode 
+public class ASTSymbolNode extends ASTNode 
     implements VhdlTokenConstants, VhdlASTConstants, IVhdlType
 {
     // symbol node kind
