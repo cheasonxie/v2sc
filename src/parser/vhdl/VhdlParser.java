@@ -3968,11 +3968,8 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         if(tokenMgr.getNextTokenKind() == BUS) {
             consumeToken(BUS);
             new ASTtoken(node, tokenImage[BUS]);
-            tmpToken = findToken(ASSIGN, endToken);
-            if(tmpToken == null)
-                tmpToken = endToken;
-            expression(node, tmpToken);
         }
+
         if(tokenMgr.getNextTokenKind() == ASSIGN) {
             consumeToken(ASSIGN);
             new ASTtoken(node, tokenImage[ASSIGN]);

@@ -131,6 +131,22 @@ public class ASTNode implements IASTNode
         return ret;
     }
     
+    /**
+     * whether this node is descendant of specified type node
+     */
+    public boolean isDescendantOf(int id) {
+        boolean ret = false;
+        IASTNode pNode = parent;
+        while(pNode != null) {
+            if(pNode.getId() == id) {
+                ret = true;
+                break;
+            }
+            pNode = pNode.getParent();
+        }
+        return ret;
+    }
+    
     public void setSymbolTable(SymbolTable table) {
         symTab = table;
     }

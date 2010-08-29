@@ -3783,13 +3783,25 @@ class ScGeneration_scheme extends ScVhdl {
  *   <dd> <b>generic</b> ( generic_list ) ;
  */
 class ScGeneric_clause extends ScVhdl {
+    ScGeneric_list generic_list = null;
     public ScGeneric_clause(ASTNode node) {
         super(node);
         assert(node.getId() == ASTGENERIC_CLAUSE);
+        for(int i = 0; i < node.getChildrenNum(); i++) {
+            ASTNode c = (ASTNode)node.getChild(i);
+            switch(c.getId())
+            {
+            case ASTGENERIC_LIST:
+                generic_list = new ScGeneric_list(c);
+                break;
+            default:
+                break;
+            }
+        }
     }
 
     public String scString() {
-        return "";
+        return generic_list.scString();
     }
 }
 
@@ -4268,7 +4280,9 @@ class ScInterface_constant_declaration extends ScVhdl {
             warning("token in ignored");
         }
         ret += " " + idList.scString();
-        
+        if(expression != null) {
+            ret += " = " + expression.scString();
+        }
         return ret;
     }
 }
@@ -4348,13 +4362,34 @@ class ScInterface_element extends ScVhdl {
  *   <dd> <b>file</b> identifier_list : subtype_indication
  */
 class ScInterface_file_declaration extends ScVhdl {
+    ScIdentifier_list idList = null;
+    ScSubtype_indication subtype = null;
     public ScInterface_file_declaration(ASTNode node) {
         super(node);
         assert(node.getId() == ASTINTERFACE_FILE_DECLARATION);
+        for(int i = 0; i < node.getChildrenNum(); i++) {
+            ASTNode child = (ASTNode)node.getChild(i);
+            switch(child.getId())
+            {
+            case ASTIDENTIFIER_LIST:
+                idList = new ScIdentifier_list(child);
+                break;
+                
+            case ASTSUBTYPE_INDICATION:
+                subtype = new ScSubtype_indication(child);
+                break;
+                
+            default:
+                break;
+            }
+        }
     }
 
     public String scString() {
-        return "";
+        String ret = "";
+        ret += subtype.scString();
+        ret += " " + idList.scString();
+        return ret;
     }
 }
 
@@ -4385,9 +4420,9 @@ class ScInterface_list extends ScVhdl {
     public String scString() {
         String ret = "";
         for(int i = 0; i < items.size(); i++) {
-            ret += items.get(i).scString();
+            ret += items.get(i).scString() + ";";
             if(i < items.size() - 1) {
-                ret += ";\r\n";
+                ret += "\r\n";
             }
         }
         return ret;
@@ -4399,13 +4434,63 @@ class ScInterface_list extends ScVhdl {
  *   <dd> <b>quantity</b> identifier_list : [ <b>in</b> | <b>out</b> ] subtype_indication [ := <i>static_</i>expression ]
  */
 class ScInterface_quantity_declaration extends ScVhdl {
+    ScIdentifier_list idList = null;
+    String mode = "";
+    ScSubtype_indication subtype = null;
+    ScExpression expression = null;
     public ScInterface_quantity_declaration(ASTNode node) {
         super(node);
         assert(node.getId() == ASTINTERFACE_QUANTITY_DECLARATION);
+        for(int i = 0; i < node.getChildrenNum(); i++) {
+            ASTNode child = (ASTNode)node.getChild(i);
+            switch(child.getId())
+            {
+            case ASTIDENTIFIER_LIST:
+                idList = new ScIdentifier_list(child);
+                break;
+                
+            case ASTSUBTYPE_INDICATION:
+                subtype = new ScSubtype_indication(child);
+                break;
+                
+            case ASTEXPRESSION:
+                expression = new ScExpression(child);
+                break;
+      
+            case ASTVOID:
+                mode = child.firstTokenImage();
+                break;
+                
+            default:
+                break;
+            }
+        }
     }
 
     public String scString() {
-        return "";
+        String ret = "";
+        String strType = subtype.scString();
+
+        if(curNode.isDescendantOf(ASTPORT_LIST)) {
+            if(!mode.isEmpty()) {
+                if(mode.equalsIgnoreCase(PORT_IN)) {
+                    ret += "sc_in<";
+                }else {
+                    ret += "sc_out<";
+                }
+            }
+            if(strType.startsWith("<")) {
+                ret += " ";  // avoid double '<'
+            }
+            ret += strType + ">";
+        }else {
+            ret += strType;
+        }
+        ret += " " + idList.scString();
+        if(expression != null) {
+            ret += " = " + expression.scString();
+        }
+        return ret;
     }
 }
 
@@ -4414,13 +4499,73 @@ class ScInterface_quantity_declaration extends ScVhdl {
  *   <dd> [ <b>signal</b> ] identifier_list : [ mode ] subtype_indication [ <b>bus</b> ] [ := <i>static_</i>expression ]
  */
 class ScInterface_signal_declaration extends ScVhdl {
+    ScIdentifier_list idList = null;
+    ScMode mode = null;
+    boolean isBus = false;
+    ScSubtype_indication subtype = null;
+    ScExpression expression = null;
     public ScInterface_signal_declaration(ASTNode node) {
         super(node);
         assert(node.getId() == ASTINTERFACE_SIGNAL_DECLARATION);
+        for(int i = 0; i < node.getChildrenNum(); i++) {
+            ASTNode child = (ASTNode)node.getChild(i);
+            switch(child.getId())
+            {
+            case ASTIDENTIFIER_LIST:
+                idList = new ScIdentifier_list(child);
+                break;
+                
+            case ASTSUBTYPE_INDICATION:
+                subtype = new ScSubtype_indication(child);
+                break;
+                
+            case ASTEXPRESSION:
+                expression = new ScExpression(child);
+                break;
+                
+            case ASTMODE:
+                mode = new ScMode(child);
+                break;
+                
+            case ASTVOID:
+                if(child.firstTokenImage().equalsIgnoreCase(tokenImage[BUS]))
+                    isBus = true;
+                break;
+                
+            default:
+                break;
+            }
+        }
     }
 
     public String scString() {
-        return "";
+        String ret = "";
+        String strType = subtype.scString();
+        if(isBus) {
+            warning("token bus ignored");
+        }
+        if(curNode.isDescendantOf(ASTPORT_LIST)) {
+            if(mode != null) {
+                if(mode.scString().equalsIgnoreCase(PORT_IN)) {
+                    ret += "sc_in<";
+                }else if(mode.scString().equalsIgnoreCase(PORT_OUT)) {
+                    ret += "sc_out<";
+                }else {
+                    warning("token" + mode.scString() + " ignored");
+                }
+            }
+            if(strType.startsWith("<")) {
+                ret += " ";  // avoid double '<'
+            }
+            ret += strType + ">";
+        }else {
+            ret += strType;
+        }
+        ret += " " + idList.scString();
+        if(expression != null) {
+            ret += " = " + expression.scString();
+        }
+        return ret;
     }
 }
 
@@ -4429,13 +4574,34 @@ class ScInterface_signal_declaration extends ScVhdl {
  *   <dd> <b>terminal</b> identifier_list : subnature_indication
  */
 class ScInterface_terminal_declaration extends ScVhdl {
+    ScIdentifier_list idList = null;
+    ScSubnature_indication subnature = null;
     public ScInterface_terminal_declaration(ASTNode node) {
         super(node);
         assert(node.getId() == ASTINTERFACE_TERMINAL_DECLARATION);
+        for(int i = 0; i < node.getChildrenNum(); i++) {
+            ASTNode child = (ASTNode)node.getChild(i);
+            switch(child.getId())
+            {
+            case ASTIDENTIFIER_LIST:
+                idList = new ScIdentifier_list(child);
+                break;
+                
+            case ASTSUBNATURE_INDICATION:
+                subnature = new ScSubnature_indication(child);
+                break;
+                
+            default:
+                break;
+            }
+        }
     }
 
     public String scString() {
-        return "";
+        String ret = "";
+        ret += subnature.scString();
+        ret += " " + idList.scString();
+        return ret;
     }
 }
 
@@ -4444,13 +4610,65 @@ class ScInterface_terminal_declaration extends ScVhdl {
  *   <dd> [ <b>variable</b> ] identifier_list : [ mode ] subtype_indication [ := <i>static_</i>expression ]
  */
 class ScInterface_variable_declaration extends ScVhdl {
+    ScIdentifier_list idList = null;
+    ScMode mode = null;
+    ScSubtype_indication subtype = null;
+    ScExpression expression = null;
     public ScInterface_variable_declaration(ASTNode node) {
         super(node);
         assert(node.getId() == ASTINTERFACE_VARIABLE_DECLARATION);
+        for(int i = 0; i < node.getChildrenNum(); i++) {
+            ASTNode child = (ASTNode)node.getChild(i);
+            switch(child.getId())
+            {
+            case ASTIDENTIFIER_LIST:
+                idList = new ScIdentifier_list(child);
+                break;
+                
+            case ASTSUBTYPE_INDICATION:
+                subtype = new ScSubtype_indication(child);
+                break;
+                
+            case ASTEXPRESSION:
+                expression = new ScExpression(child);
+                break;
+                
+            case ASTMODE:
+                mode = new ScMode(child);
+                break;
+                
+            default:
+                break;
+            }
+        }
     }
 
     public String scString() {
-        return "";
+        String ret = "";
+        String strType = subtype.scString();
+
+        if(curNode.isDescendantOf(ASTPORT_LIST)) {
+            if(mode != null) {
+                if(mode.scString().equalsIgnoreCase(PORT_IN)) {
+                    ret += "sc_in<";
+                }else if(mode.scString().equalsIgnoreCase(PORT_OUT)) {
+                    ret += "sc_out<";
+                }else {
+                    warning("token" + mode.scString() + " ignored");
+                }
+            }
+            if(strType.startsWith("<")) {
+                ret += " ";  // avoid double '<'
+            }
+            ret += strType + ">";
+        }else {
+            ret += strType;
+        }
+        ret += " " + idList.scString();
+        if(expression != null) {
+            ret += " = " + expression.scString();
+        }
+        return ret;
     }
 }
 
@@ -4786,7 +5004,7 @@ class ScMode extends ScVhdl {
     }
 
     public String scString() {
-        return "";
+        return token;
     }
 }
 
@@ -5411,13 +5629,25 @@ class ScPhysical_type_definition extends ScVhdl {
  *   <dd> <b>port</b> ( port_list ) ;
  */
 class ScPort_clause extends ScVhdl {
+    ScPort_list port_list = null;
     public ScPort_clause(ASTNode node) {
         super(node);
         assert(node.getId() == ASTPORT_CLAUSE);
+        for(int i = 0; i < node.getChildrenNum(); i++) {
+            ASTNode c = (ASTNode)node.getChild(i);
+            switch(c.getId())
+            {
+            case ASTPORT_LIST:
+                port_list = new ScPort_list(c);
+                break;
+            default:
+                break;
+            }
+        }
     }
 
     public String scString() {
-        return "";
+        return port_list.scString();
     }
 }
 
@@ -5426,23 +5656,25 @@ class ScPort_clause extends ScVhdl {
  *   <dd> <i>port_</i>interface_list
  */
 class ScPort_list extends ScVhdl {
-    ScVhdl item = null;
+    ScVhdl list = null;
     public ScPort_list(ASTNode node) {
         super(node);
         assert(node.getId() == ASTPORT_LIST);
-        ASTNode c = (ASTNode)node.getChild(0);
-        switch(c.getId())
-        {
-        case ASTINTERFACE_LIST:
-            item = new ScInterface_list(c);
-            break;
-        default:
-            break;
+        for(int i = 0; i < node.getChildrenNum(); i++) {
+            ASTNode c = (ASTNode)node.getChild(i);
+            switch(c.getId())
+            {
+            case ASTINTERFACE_LIST:
+                list = new ScInterface_list(c);
+                break;
+            default:
+                break;
+            }
         }
     }
 
     public String scString() {
-        return item.scString();
+        return list.scString();
     }
 }
 
