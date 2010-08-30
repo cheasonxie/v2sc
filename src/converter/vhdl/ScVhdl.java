@@ -128,13 +128,14 @@ public class ScVhdl implements SCVhdlConstants, VhdlTokenConstants,
             addition = 1;
         }
 
+        int value = 0;
         ret = "";
         if (index > 0) {
             str = input.substring(index + 1);
             str = str.trim();
             if(str.startsWith("0x")) {
                 str = str.substring(2);
-                int value = Integer.parseInt(str, 16) + addition;
+                value = Integer.parseInt(str, 16) + addition;
                 if(value == 0) {
                     ret = input.substring(0, index).trim();
                 }else {
@@ -142,8 +143,17 @@ public class ScVhdl implements SCVhdlConstants, VhdlTokenConstants,
                     ret += String.format("%d", value);
                 }
             }
-        } else {
-            ret = input + " + 1";
+        }else {
+            try {
+                if(input.startsWith("0x")) {
+                    value = Integer.parseInt(input, 16) + 1;
+                }else {
+                    value = Integer.parseInt(input) + 1;
+                }
+                ret = String.format("%d", value);
+            }catch(NumberFormatException e) {
+                return (input + " + 1");
+            }
         }
         return ret;
     }
@@ -525,7 +535,7 @@ class ScActual_designator extends ScVhdl {
  *   <dd> <i>parameter_</i>association_list
  */
 class ScActual_parameter_part extends ScVhdl {
-    ScVhdl paramList = null;
+    ScAssociation_list paramList = null;
     public ScActual_parameter_part(ASTNode node) {
         super(node);
         //assert(node.getId() == ASTACTUAL_PARAMETER_PART);
@@ -544,17 +554,22 @@ class ScActual_parameter_part extends ScVhdl {
  *   <br> | type_mark ( actual_designator )
  */
 class ScActual_part extends ScVhdl {
-    ScVhdl name = null;
-    ScVhdl designator = null;
+    ScVhdl item = null;
+    ScActual_designator designator = null;
+    boolean isFirstBracket = false;
     public ScActual_part(ASTNode node) {
         super(node);
         assert(node.getId() == ASTACTUAL_PART);
+        isFirstBracket = (node.firstTokenImage() == "(");
         for(int i = 0; i < node.getChildrenNum(); i++) {
             ASTNode c = (ASTNode)node.getChild(i);
             switch(c.getId())
             {
-            case ASTNAME:
-                name = new ScName(c);
+            case ASTFUNCTION_CALL:
+                item = new ScFunction_call(c);
+                break;
+            case ASTAGGREGATE:
+                item = new ScAggregate(c);
                 break;
             case ASTACTUAL_DESIGNATOR:
                 designator = new ScActual_designator(c);
@@ -570,11 +585,14 @@ class ScActual_part extends ScVhdl {
         if(((ScActual_designator)designator).isOpen) {
             warning("token open ignored");
         }
-        if(name != null) {
-            ret += name.scString();
-            ret += "(" + designator.scString() + ")";
+        if(item != null) {
+            ret += item.scString();
         }else {
+            if(isFirstBracket)
+                ret += "(";
             ret += designator.scString();
+            if(isFirstBracket)
+                ret += ")";
         }
         return ret;
     }
@@ -960,10 +978,10 @@ class ScArray_type_definition extends ScCommonIdentifier {
         switch(c.getId())
         {
         case ASTUNCONSTRAINED_ARRAY_DEFINITION:
-            item = new ScUnconstrained_array_definition(node);
+            item = new ScUnconstrained_array_definition(c);
             break;
         case ASTCONSTRAINED_ARRAY_DEFINITION:
-            item = new ScConstrained_array_definition(node);
+            item = new ScConstrained_array_definition(c);
             break;
         default:
             break;
@@ -2660,7 +2678,8 @@ class ScConstrained_array_definition extends ScCommonIdentifier {
         String ret = "typedef ";
         ret += subtype.scString() + "[";
         ret += addOne(index_constraint.getMax());
-        ret += "]";
+        ret += "] ";
+        ret += identifier;
         return ret;
     }
 }
@@ -2982,7 +3001,7 @@ class ScDirection extends ScVhdl {
     }
 
     public String scString() {
-        return "";
+        return dir;
     }
 }
 
@@ -3164,7 +3183,7 @@ class ScElement_subtype_definition extends ScVhdl {
             ASTNode c = (ASTNode)node.getChild(i);
             switch(c.getId())
             {
-            case ASTSUBNATURE_INDICATION:
+            case ASTSUBTYPE_INDICATION:
                 item = new ScSubtype_indication(c);
                 break;
             default:
@@ -3739,6 +3758,7 @@ class ScExit_statement extends ScVhdl {
  *   <br> | relation { <b>xnor</b> relation }
  */
 class ScExpression extends ScVhdl {
+    ScAggregate aggregate = null;
     ArrayList<ScVhdl> items = new ArrayList<ScVhdl>();
     public ScExpression(ASTNode node) {
         super(node);
@@ -3752,6 +3772,9 @@ class ScExpression extends ScVhdl {
                 newNode = new ScRelation(c);
                 items.add(newNode);
                 break;
+            case ASTAGGREGATE:
+                aggregate = new ScAggregate(c);
+                break;
             case ASTVOID:
                 newNode = new ScToken(c);
                 items.add(newNode);
@@ -3764,10 +3787,14 @@ class ScExpression extends ScVhdl {
 
     public String scString() {
         String ret = "";
-        ret += items.get(0).scString();
-        for(int i = 1; i < items.size() - 1; i += 2){
-            ret += " " + getReplaceOperator(items.get(i).scString()) + " ";
-            ret += items.get(i+1).scString();
+        if(aggregate != null) {
+            ret += aggregate.scString();
+        }else {
+            ret += items.get(0).scString();
+            for(int i = 1; i < items.size() - 1; i += 2){
+                ret += " " + getReplaceOperator(items.get(i).scString()) + " ";
+                ret += items.get(i+1).scString();
+            }
         }
         return ret;
     }
@@ -4070,13 +4097,32 @@ class ScFull_type_declaration extends ScVhdl {
  *   <dd> <i>function_</i>name [ ( actual_parameter_part ) ]
  */
 class ScFunction_call extends ScVhdl {
+    ScName name = null;
+    ScActual_parameter_part param_part= null;
     public ScFunction_call(ASTNode node) {
         super(node);
         assert(node.getId() == ASTFUNCTION_CALL);
+        for(int i = 0; i < node.getChildrenNum(); i++) {
+            ASTNode c = (ASTNode)node.getChild(i);
+            switch(c.getId())
+            {
+            case ASTNAME:
+                break;
+            case ASTASSOCIATION_LIST:
+                param_part = new ScActual_parameter_part(c);
+                break;
+            default:
+                break;
+            }
+        }
     }
 
     public String scString() {
-        return "";
+        String ret = "";
+        ret += name + "(";
+        ret += param_part.scString();
+        ret += ")";
+        return ret;
     }
 }
 
@@ -4574,13 +4620,24 @@ class ScIndexed_name extends ScVhdl {
 
     public String scString() {
         String ret = "";
+        String strTmp = prefix.scString();
+        ret += strTmp;
         if(exps.size() > 1) {
-            warning("multi index not support");
+            ret += "(";
+        }else {
+            ret += "[";
         }
-        ret += prefix.scString();
-        ret += "[";
-        ret += exps.get(0).scString();
-        ret += "]";
+        for(int i = 0; i < exps.size(); i++) {
+            ret += exps.get(i).scString();
+            if(i < exps.size() - 1) {
+                ret += ", ";
+            }
+        }
+        if(exps.size() > 1) {
+            ret += ")";
+        }else {
+            ret += "]";
+        };
         return ret;
     }
 }
@@ -6016,6 +6073,9 @@ class ScPrimary extends ScVhdl {
             case ASTNAME:
                 item = new ScName(c);
                 break;
+            case ASTFUNCTION_CALL:
+                item = new ScFunction_call(c);
+                break;
             case ASTLITERAL:
                 item = new ScLiteral(c);
                 break;
@@ -6424,8 +6484,8 @@ class ScRange extends ScVhdl {
     }
     
     public String[] getRange() {
-        if(attribute_name == null) {
-            attribute_name.getRange();
+        if(attribute_name != null) {
+            return attribute_name.getRange();
         }
         String[] ret = {
                 simple_exp1.scString(), 
@@ -6436,7 +6496,13 @@ class ScRange extends ScVhdl {
     }
 
     public String scString() {
-        return "";
+        String ret = "";
+        if(simple_exp1 != null) {
+            ret += simple_exp1.scString();
+            ret += ", ";
+            ret += simple_exp2.scString();
+        }
+        return ret;
     }
 }
 
@@ -6522,7 +6588,7 @@ class ScRecord_type_definition extends ScCommonIdentifier {
 
     public String scString() {
         String ret = "";
-        ret += "type struct " + identifier + "\r\n";
+        ret += "typedef struct " + identifier + "\r\n";
         ret += "{\r\n";
         for(int i = 0; i < elements.size(); i++) {
             ret += elements.get(i).scString() + "\r\n";
@@ -7464,9 +7530,13 @@ class ScSlice_name extends ScVhdl {
 
     public String scString() {
         String ret = "";
-        ret += prefix.scString() + ".range(";
-        ret += range.scString();
-        ret += ")";
+        if(!curNode.isDescendantOf(ASTEXPRESSION)) {
+            ret += getReplaceType(prefix.scString(), range.getRange());
+        }else {
+            ret += prefix.scString() + ".range(";
+            ret += range.scString();
+            ret += ")";
+        }
         return ret;
     }
 }

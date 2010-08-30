@@ -402,6 +402,17 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         return tokensExist(tokens, endToken);
     }
     
+    boolean isFunction_call(Token endToken) throws ParserException {
+        Token token = tokenMgr.getNextToken();
+        if(token == null)
+            return false;
+        Symbol sym = libraryMgr.getSymbol(token.image);
+        if((sym != null) && (sym.kind == FUNCTION || sym.kind == PROCEDURE)) {
+            return true;
+        }
+        return false;
+    }
+    
     
     /**
      * <dl> abstract_literal ::=
@@ -4840,7 +4851,11 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
     void prefix(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTPREFIX);
         openNodeScope(node);
-        name(node, endToken); //TODO check function call?
+        if(isFunction_call(endToken)) {
+            function_call(node, endToken);
+        }else {
+            name(node, endToken);
+        }
         closeNodeScope(node);
     }
 
@@ -4859,26 +4874,30 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         ASTNode node = new ASTNode(p, ASTPRIMARY);
         openNodeScope(node);
         int kind = tokenMgr.getNextTokenKind();
-        if(kind == character_literal || kind == decimal_literal
-            || kind == based_literal || kind == string_literal
-            || kind == bit_string_literal || kind == NULL) {
-            literal(node, endToken);
-        }else if(kind == NEW) {
-            allocator(node, endToken);
-        }else if(kind == identifier && tokenMgr.getNextTokenKind(2) == SQUOTE) {
-            Token tmpToken = tokenMgr.getNextToken(3);
-            if(tmpToken == null) {
-                throw new ParserException(tokenMgr.toNextToken());
-            }
-            if(tmpToken.kind == identifier && tmpToken.image.equalsIgnoreCase("Event")) {
-                name(node, endToken);   // attribute name
-            }else {
-                qualified_expression(node, endToken);
-            }
-        }else if(kind == LBRACKET) {
-            aggregate(node, endToken);    // contain "(expression)"
+        if(isFunction_call(endToken)) {
+            function_call(node, endToken);
         }else {
-            name(node, endToken); // contain "function_call", "type_conversion"
+            if(kind == character_literal || kind == decimal_literal
+                || kind == based_literal || kind == string_literal
+                || kind == bit_string_literal || kind == NULL) {
+                literal(node, endToken);
+            }else if(kind == NEW) {
+                allocator(node, endToken);
+            }else if(kind == identifier && tokenMgr.getNextTokenKind(2) == SQUOTE) {
+                Token tmpToken = tokenMgr.getNextToken(3);
+                if(tmpToken == null) {
+                    throw new ParserException(tokenMgr.toNextToken());
+                }
+                if(tmpToken.kind == identifier && tmpToken.image.equalsIgnoreCase("Event")) {
+                    name(node, endToken);   // attribute name
+                }else {
+                    qualified_expression(node, endToken);
+                }
+            }else if(kind == LBRACKET) {
+                aggregate(node, endToken);    // contain "(expression)"
+            }else {
+                name(node, endToken); // contain "function_call", "type_conversion"
+            }
         }
         closeNodeScope(node);
     }
