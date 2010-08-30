@@ -4574,7 +4574,13 @@ class ScIndexed_name extends ScVhdl {
 
     public String scString() {
         String ret = "";
+        if(exps.size() > 1) {
+            warning("multi index not support");
+        }
         ret += prefix.scString();
+        ret += "[";
+        ret += exps.get(0).scString();
+        ret += "]";
         return ret;
     }
 }
