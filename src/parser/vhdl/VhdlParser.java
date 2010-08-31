@@ -3042,7 +3042,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         expression(p, endToken, false);
     }
     void expression(IASTNode p, Token endToken, boolean is_bool) throws ParserException {
-        if(tokenMgr.getNextTokenKind() == LBRACKET) {
+        /*if(tokenMgr.getNextTokenKind() == LBRACKET) {
             if(findTokenInBlock(tokenMgr.getNextToken(2), COMMA, endToken) != null) {
                 if(endToken != null && endToken.kind == RBRACKET) {
                     endToken = tokenMgr.getNextToken(endToken);
@@ -3051,7 +3051,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
                 ((ASTNode)p.getChildById(ASTAGGREGATE)).isBoolean = is_bool;
                 return;
             }
-        }
+        }*/
         ASTNode node = new ASTNode(p, ASTEXPRESSION);
         //TODO expression type: boolean, time, string, guard,
         //                      static, real, value, file_open_kind
@@ -4134,7 +4134,9 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         }else if(kind == string_literal || kind == bit_string_literal
                 || kind == NULL) {
             Token token = tokenMgr.toNextToken();
-            new ASTtoken(node, token.image);
+            ASTNode tkNode = new ASTtoken(node, token.image);
+            tkNode.setFirstToken(token);
+            tkNode.setLastToken(token);
         }else {
             throw new ParserException(tokenMgr.toNextToken());
         }
@@ -6346,9 +6348,21 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         }
         
         ASTNode node = null;
-        if(!(tmpToken.kind == IF || tmpToken.kind == PROCEDURAL
+        Token tmpToken1 = null;
+        
+        if(tmpToken.kind == IF) {
+            tmpToken1 = findToken(tmpToken, SEMICOLON, endToken);
+            if(tmpToken1 != null) {
+                tmpToken1 = findToken(tmpToken, USE, tmpToken1);
+            }
+            if(tmpToken1 == null) {
+                return false;
+            }
+        }
+        
+        if(!(tmpToken.kind == IF || tmpToken.kind == PROCEDURAL 
                 || tmpToken.kind == CASE || tmpToken.kind == NULL)) {
-            Token tmpToken1 = findToken(tmpToken, SEMICOLON, endToken);
+            tmpToken1 = findToken(tmpToken, SEMICOLON, endToken);
             if(tmpToken1 != null) {
                 tmpToken1 = findToken(tmpToken, EQ2, tmpToken1);
             }

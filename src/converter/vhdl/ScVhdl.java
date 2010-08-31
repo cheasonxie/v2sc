@@ -364,7 +364,7 @@ class ScCommonDeclaration extends ScVhdl {
             }
             ret += "> ";
         }else {
-            ret += strType;
+            ret += strType + " ";
         }
         
         if(expression != null) {
@@ -884,17 +884,17 @@ class ScArchitecture_declarative_part extends ScVhdl {
  *   <br> | concurrent_statement
  */
 class ScArchitecture_statement extends ScVhdl {
-    ScVhdl itemNode = null;
+    ScVhdl item = null;
     public ScArchitecture_statement(ASTNode node) {
         super(node);
         //assert(node.getId() == ASTARCHITECTURE_STATEMENT);
         switch(node.getId())
         {
         case ASTSIMULTANEOUS_STATEMENT:
-            itemNode = new ScSimultaneous_statement(node);
+            item = new ScSimultaneous_statement(node);
             break;
         case ASTCONCURRENT_STATEMENT:
-            itemNode = new ScConcurrent_statement(node);
+            item = new ScConcurrent_statement(node);
             break;
         default:
             break;
@@ -902,7 +902,7 @@ class ScArchitecture_statement extends ScVhdl {
     }
 
     public String scString() {
-        return itemNode.toString();
+        return item.scString();
     }
 }
 
@@ -1526,77 +1526,77 @@ class ScBlock_configuration extends ScVhdl {
  *   <br> | terminal_declaration
  */
 class ScBlock_declarative_item extends ScVhdl {
-    ScVhdl itemNode = null;
+    ScVhdl item = null;
     public ScBlock_declarative_item(ASTNode node) {
         super(node);
         //assert(node.getId() == ASTBLOCK_DECLARATIVE_ITEM);
         switch(node.getId())
         {
         case ASTSUBPROGRAM_DECLARATION:
-            itemNode = new ScSubprogram_declaration(node);
+            item = new ScSubprogram_declaration(node);
             break;
         case ASTSUBPROGRAM_BODY:
-            itemNode = new ScSubprogram_body(node);
+            item = new ScSubprogram_body(node);
             break;
         case ASTTYPE_DECLARATION:
-            itemNode = new ScType_declaration(node);
+            item = new ScType_declaration(node);
             break;
         case ASTSUBTYPE_DECLARATION:
-            itemNode = new ScSubtype_declaration(node);
+            item = new ScSubtype_declaration(node);
             break;
         case ASTCONSTANT_DECLARATION:
-            itemNode = new ScConstant_declaration(node);
+            item = new ScConstant_declaration(node);
             break;
         case ASTSIGNAL_DECLARATION:
-            itemNode = new ScSignal_declaration(node);
+            item = new ScSignal_declaration(node);
             break;
         case ASTVARIABLE_DECLARATION:
-            itemNode = new ScVariable_declaration(node);
+            item = new ScVariable_declaration(node);
             break;
         case ASTFILE_DECLARATION:
-            itemNode = new ScFile_declaration(node);
+            item = new ScFile_declaration(node);
             break;
         case ASTALIAS_DECLARATION:
-            itemNode = new ScAlias_declaration(node);
+            item = new ScAlias_declaration(node);
             break;
         case ASTCOMPONENT_DECLARATION:
-            itemNode = new ScComponent_declaration(node);
+            item = new ScComponent_declaration(node);
             break;
         case ASTATTRIBUTE_DECLARATION:
-            itemNode = new ScAttribute_declaration(node);
+            item = new ScAttribute_declaration(node);
             break;
         case ASTATTRIBUTE_SPECIFICATION:
-            itemNode = new ScAttribute_specification(node);
+            item = new ScAttribute_specification(node);
             break;
         case ASTCONFIGURATION_SPECIFICATION:
-            itemNode = new ScConfiguration_specification(node);
+            item = new ScConfiguration_specification(node);
             break;
         case ASTDISCONNECTION_SPECIFICATION:
-            itemNode = new ScDisconnection_specification(node);
+            item = new ScDisconnection_specification(node);
             break;
         case ASTSTEP_LIMIT_SPECIFICATION:
-            itemNode = new ScStep_limit_specification(node);
+            item = new ScStep_limit_specification(node);
             break;
         case ASTUSE_CLAUSE:
-            itemNode = new ScUse_clause(node);
+            item = new ScUse_clause(node);
             break;
         case ASTGROUP_TEMPLATE_DECLARATION:
-            itemNode = new ScGroup_template_declaration(node);
+            item = new ScGroup_template_declaration(node);
             break;
         case ASTGROUP_DECLARATION:
-            itemNode = new ScGroup_declaration(node);
+            item = new ScGroup_declaration(node);
             break;
         case ASTNATURE_DECLARATION:
-            itemNode = new ScNature_declaration(node);
+            item = new ScNature_declaration(node);
             break;
         case ASTSUBNATURE_DECLARATION:
-            itemNode = new ScSubnature_declaration(node);
+            item = new ScSubnature_declaration(node);
             break;
         case ASTQUANTITY_DECLARATION:
-            itemNode = new ScQuantity_declaration(node);
+            item = new ScQuantity_declaration(node);
             break;
         case ASTTERMINAL_DECLARATION:
-            itemNode = new ScTerminal_declaration(node);
+            item = new ScTerminal_declaration(node);
             break;
         default:
             break;
@@ -1605,8 +1605,8 @@ class ScBlock_declarative_item extends ScVhdl {
 
     public String scString() {
         String ret = "";
-        if(itemNode != null) {
-            ret = intent() + itemNode.scString();
+        if(item != null) {
+            ret = intent() + item.scString();
         }
         return ret;
     }
@@ -2284,9 +2284,29 @@ class ScComponent_declaration extends ScVhdl {
  *   <br> [ port_map_aspect ] ; </ul></ul>
  */
 class ScComponent_instantiation_statement extends ScVhdl {
+    ScInstantiated_unit instantiated_unit = null;
+    ScGeneric_map_aspect generic_map = null;
+    ScPort_map_aspect port_map = null;
     public ScComponent_instantiation_statement(ASTNode node) {
         super(node);
         assert(node.getId() == ASTCOMPONENT_INSTANTIATION_STATEMENT);
+        for(int i = 0; i < node.getChildrenNum(); i++) {
+            ASTNode c = (ASTNode)node.getChild(i);
+            switch(c.getId())
+            {
+            case ASTINSTANTIATED_UNIT:
+                instantiated_unit = new ScInstantiated_unit(c);
+                break;
+            case ASTGENERIC_MAP_ASPECT:
+                generic_map = new ScGeneric_map_aspect(c);
+                break;
+            case ASTPORT_MAP_ASPECT:
+                port_map = new ScPort_map_aspect(c);
+                break;
+            default:
+                break;
+            }
+        }
     }
 
     public String scString() {
@@ -2379,13 +2399,25 @@ class ScComposite_type_definition extends ScCommonIdentifier {
  *   <dd> [ label : ] [ <b>postponed</b> ] assertion ;
  */
 class ScConcurrent_assertion_statement extends ScVhdl {
+    ScAssertion assertion = null;
     public ScConcurrent_assertion_statement(ASTNode node) {
         super(node);
         assert(node.getId() == ASTCONCURRENT_ASSERTION_STATEMENT);
+        for(int i = 0; i < node.getChildrenNum(); i++) {
+            ASTNode c = (ASTNode)node.getChild(i);
+            switch(c.getId())
+            {
+            case ASTASSERTION:
+                assertion = new ScAssertion(c);
+                break;
+            default:
+                break;
+            }
+        }
     }
 
     public String scString() {
-        return "";
+        return assertion.scString() + ";";
     }
 }
 
@@ -2394,12 +2426,33 @@ class ScConcurrent_assertion_statement extends ScVhdl {
  *   <dd> [ label : ] <b>break</b> [ break_list ] [ sensitivity_clause ] [ <b>when</b> condition ] ;
  */
 class ScConcurrent_break_statement extends ScVhdl {
+    ScBreak_list break_list = null;
+    ScSensitivity_clause sensitivity_clause = null;
+    ScCondition condition = null;
     public ScConcurrent_break_statement(ASTNode node) {
         super(node);
         assert(node.getId() == ASTCONCURRENT_BREAK_STATEMENT);
+        for(int i = 0; i < node.getChildrenNum(); i++) {
+            ASTNode c = (ASTNode)node.getChild(i);
+            switch(c.getId())
+            {
+            case ASTBREAK_LIST:
+                break_list = new ScBreak_list(c);
+                break;
+            case ASTSENSITIVITY_CLAUSE:
+                sensitivity_clause = new ScSensitivity_clause(c);
+                break;
+            case ASTEXPRESSION:
+                condition = new ScCondition(c);
+                break;
+            default:
+                break;
+            }
+        }
     }
 
     public String scString() {
+        warning("break statement not support");
         return "";
     }
 }
@@ -2409,13 +2462,25 @@ class ScConcurrent_break_statement extends ScVhdl {
  *   <dd> [ label : ] [ <b>postponed</b> ] procedure_call ;
  */
 class ScConcurrent_procedure_call_statement extends ScVhdl {
+    ScProcedure_call procedure_call = null;
     public ScConcurrent_procedure_call_statement(ASTNode node) {
         super(node);
         assert(node.getId() == ASTCONCURRENT_PROCEDURE_CALL_STATEMENT);
+        for(int i = 0; i < node.getChildrenNum(); i++) {
+            ASTNode c = (ASTNode)node.getChild(i);
+            switch(c.getId())
+            {
+            case ASTPROCEDURE_CALL:
+                procedure_call = new ScProcedure_call(c);
+                break;
+            default:
+                break;
+            }
+        }
     }
 
     public String scString() {
-        return "";
+        return procedure_call.scString();
     }
 }
 
@@ -2425,13 +2490,28 @@ class ScConcurrent_procedure_call_statement extends ScVhdl {
  *   <br> | [ label : ] [ <b>postponed</b> ] selected_signal_assignment
  */
 class ScConcurrent_signal_assignment_statement extends ScVhdl {
+    ScVhdl signal_assignment = null;
     public ScConcurrent_signal_assignment_statement(ASTNode node) {
         super(node);
         assert(node.getId() == ASTCONCURRENT_SIGNAL_ASSIGNMENT_STATEMENT);
+        for(int i = 0; i < node.getChildrenNum(); i++) {
+            ASTNode c = (ASTNode)node.getChild(i);
+            switch(c.getId())
+            {
+            case ASTCONDITIONAL_SIGNAL_ASSIGNMENT:
+                signal_assignment = new ScConditional_signal_assignment(c);
+                break;
+            case ASTSELECTED_SIGNAL_ASSIGNMENT:
+                signal_assignment = new ScSelected_signal_assignment(c);
+                break;
+            default:
+                break;
+            }
+        }
     }
 
     public String scString() {
-        return "";
+        return signal_assignment.scString();
     }
 }
 
@@ -2447,13 +2527,46 @@ class ScConcurrent_signal_assignment_statement extends ScVhdl {
  *   <br> | concurrent_break_statement
  */
 class ScConcurrent_statement extends ScVhdl {
+    ScVhdl item = null;
     public ScConcurrent_statement(ASTNode node) {
         super(node);
         assert(node.getId() == ASTCONCURRENT_STATEMENT);
+        for(int i = 0; i < node.getChildrenNum(); i++) {
+            ASTNode c = (ASTNode)node.getChild(i);
+            switch(c.getId())
+            {
+            case ASTBLOCK_STATEMENT:
+                item = new ScBlock_statement(c);
+                break;
+            case ASTPROCESS_STATEMENT:
+                item = new ScProcess_statement(c);
+                break;
+            case ASTCONCURRENT_PROCEDURE_CALL_STATEMENT:
+                item = new ScConcurrent_procedure_call_statement(c);
+                break;
+            case ASTCONCURRENT_ASSERTION_STATEMENT:
+                item = new ScConcurrent_assertion_statement(c);
+                break;
+            case ASTCONCURRENT_SIGNAL_ASSIGNMENT_STATEMENT:
+                item = new ScConcurrent_signal_assignment_statement(c);
+                break;
+            case ASTCOMPONENT_INSTANTIATION_STATEMENT:
+                item = new ScComponent_instantiation_statement(c);
+                break;
+            case ASTGENERATE_STATEMENT:
+                item = new ScGenerate_statement(c);
+                break;
+            case ASTCONCURRENT_BREAK_STATEMENT:
+                item = new ScConcurrent_break_statement(c);
+                break;
+            default:
+                break;
+            }
+        }
     }
 
     public String scString() {
-        return "";
+        return item.scString();
     }
 }
 
@@ -2928,9 +3041,9 @@ class ScDesign_file extends ScVhdl {
 
     public String scString() {
         String ret = "";
-        for(int i = 0; i < units.size(); i++) {
-            ret += units.get(i).scString();
-            if(i < units.size() - 1) {
+        for(int i = 0; i < design_units.size(); i++) {
+            ret += design_units.get(i).scString();
+            if(i < design_units.size() - 1) {
                 ret += "\r\n";
             }
         }
@@ -2978,13 +3091,16 @@ class ScDesign_unit extends ScVhdl {
  *   <dd> identifier | operator_symbol
  */
 class ScDesignator extends ScVhdl {
+    String name = "";
     public ScDesignator(ASTNode node) {
         super(node);
         assert(node.getId() == ASTDESIGNATOR);
+        ASTNode c = (ASTNode)node.getChild(0);
+        name = c.firstTokenImage();
     }
 
     public String scString() {
-        return "";
+        return name;
     }
 }
 
@@ -3098,13 +3214,42 @@ class ScDiscrete_range extends ScVhdl {
  *   <dd> [ choices => ] expression
  */
 class ScElement_association extends ScVhdl {
+    ScChoices choices = null;
+    ScExpression expression = null;
     public ScElement_association(ASTNode node) {
         super(node);
         assert(node.getId() == ASTELEMENT_ASSOCIATION);
+        for(int i = 0; i < node.getChildrenNum(); i++) {
+            ASTNode c = (ASTNode)node.getChild(i);
+            switch(c.getId())
+            {
+            case ASTCHOICES:
+                choices = new ScChoices(c);
+                break;
+            case ASTEXPRESSION:
+                expression = new ScExpression(c);
+                break;
+            default:
+                break;
+            }
+        }
     }
 
     public String scString() {
-        return "";
+        String ret = "";
+        if(choices != null) {
+            //TODO choices
+            ArrayList<ScChoice> choiceItems = choices.getItems();
+            for(int i = 0; i < choiceItems.size(); i++) {
+                ScChoice item = choiceItems.get(i);
+                if(item.isOthers()) {
+                    
+                }
+            }
+        }else {
+            ret += expression.scString();
+        }
+        return ret;
     }
 }
 
@@ -3340,7 +3485,7 @@ class ScEntity_declaration extends ScCommonIdentifier {
         if(statement_part != null) {
             ret += statement_part.scString();
         }
-        body.scString();
+        ret += body.scString();
         ret += "};\r\n";
         return ret;
     }
@@ -3758,7 +3903,6 @@ class ScExit_statement extends ScVhdl {
  *   <br> | relation { <b>xnor</b> relation }
  */
 class ScExpression extends ScVhdl {
-    ScAggregate aggregate = null;
     ArrayList<ScVhdl> items = new ArrayList<ScVhdl>();
     public ScExpression(ASTNode node) {
         super(node);
@@ -3772,9 +3916,6 @@ class ScExpression extends ScVhdl {
                 newNode = new ScRelation(c);
                 items.add(newNode);
                 break;
-            case ASTAGGREGATE:
-                aggregate = new ScAggregate(c);
-                break;
             case ASTVOID:
                 newNode = new ScToken(c);
                 items.add(newNode);
@@ -3787,14 +3928,10 @@ class ScExpression extends ScVhdl {
 
     public String scString() {
         String ret = "";
-        if(aggregate != null) {
-            ret += aggregate.scString();
-        }else {
-            ret += items.get(0).scString();
-            for(int i = 1; i < items.size() - 1; i += 2){
-                ret += " " + getReplaceOperator(items.get(i).scString()) + " ";
-                ret += items.get(i+1).scString();
-            }
+        ret += items.get(0).scString();
+        for(int i = 1; i < items.size() - 1; i += 2){
+            ret += " " + getReplaceOperator(items.get(i).scString()) + " ";
+            ret += items.get(i+1).scString();
         }
         return ret;
     }
@@ -4015,13 +4152,16 @@ class ScFormal_designator extends ScVhdl {
  *   <dd> <i>parameter_</i>interface_list
  */
 class ScFormal_parameter_list extends ScVhdl {
+    ScInterface_list interface_list = null;
     public ScFormal_parameter_list(ASTNode node) {
         super(node);
         assert(node.getId() == ASTFORMAL_PARAMETER_LIST);
+        ASTNode c = (ASTNode)node.getChild(0);
+        interface_list = new ScInterface_list(c);
     }
 
     public String scString() {
-        return "";
+        return interface_list.scString();
     }
 }
 
@@ -4251,12 +4391,15 @@ class ScGeneric_map_aspect extends ScVhdl {
  *   <dd> name | character_literal
  */
 class ScGroup_constituent extends ScVhdl {
+    ScName name = null;
+    String literal = "";
     public ScGroup_constituent(ASTNode node) {
         super(node);
         assert(node.getId() == ASTGROUP_CONSTITUENT);
     }
 
     public String scString() {
+        warning("group_constituent not support");
         return "";
     }
 }
@@ -4272,6 +4415,7 @@ class ScGroup_constituent_list extends ScVhdl {
     }
 
     public String scString() {
+        warning("group_constituent_list not support");
         return "";
     }
 }
@@ -4287,6 +4431,7 @@ class ScGroup_declaration extends ScVhdl {
     }
 
     public String scString() {
+        warning("group_declaration not support");
         return "";
     }
 }
@@ -4302,6 +4447,7 @@ class ScGroup_template_declaration extends ScVhdl {
     }
 
     public String scString() {
+        warning("group_template_declaration not support");
         return "";
     }
 }
@@ -4934,14 +5080,15 @@ class ScIteration_scheme extends ScVhdl {
             ret += "while(" + condition.scString() + ")";
         }else {
             ret += "for(";
+            String var = param.identifier.scString();
             if(param.isDownto()) {
-                ret += param.identifier + " = " + param.getMax() + "; ";
-                ret += param.identifier + " >= " + param.getMin() + "; ";
-                ret += param.identifier + "--";
+                ret += var + " = " + param.getMax() + "; ";
+                ret += var + " >= " + param.getMin() + "; ";
+                ret += var + "--";
             }else {
-                ret += param.identifier + " = " + param.getMin() + "; ";
-                ret += param.identifier + " <= " + param.getMax() + "; ";
-                ret += param.identifier + "++";
+                ret += var + " = " + param.getMin() + "; ";
+                ret += var + " < " + addOne(param.getMax()) + "; ";
+                ret += var + "++";
             }
             ret += ")";
         }
@@ -6170,13 +6317,58 @@ class ScPrimary_unit_declaration extends ScVhdl {
  *   <br> | group_declaration
  */
 class ScProcedural_declarative_item extends ScVhdl {
+    ScVhdl item = null;
     public ScProcedural_declarative_item(ASTNode node) {
         super(node);
         //assert(node.getId() == ASTPROCEDURAL_DECLARATIVE_ITEM);
+        for(int i = 0; i < node.getChildrenNum(); i++) {
+            ASTNode c = (ASTNode)node.getChild(i);
+            switch(c.getId())
+            {
+            case ASTSUBPROGRAM_DECLARATION:
+                item = new ScSubprogram_declaration(c);
+                break;
+            case ASTSUBPROGRAM_BODY:
+                item = new ScSubprogram_body(c);
+                break;
+            case ASTTYPE_DECLARATION:
+                item = new ScType_declaration(c);
+                break;
+            case ASTSUBTYPE_DECLARATION:
+                item = new ScSubtype_declaration(c);
+                break;
+            case ASTCONSTANT_DECLARATION:
+                item = new ScConstant_declaration(c);
+                break;
+            case ASTVARIABLE_DECLARATION:
+                item = new ScVariable_declaration(c);
+                break;
+            case ASTALIAS_DECLARATION:
+                item = new ScAlias_declaration(c);
+                break;
+            case ASTATTRIBUTE_DECLARATION:
+                item = new ScAttribute_declaration(c);
+                break;
+            case ASTATTRIBUTE_SPECIFICATION:
+                item = new ScAttribute_specification(c);
+                break;
+            case ASTUSE_CLAUSE:
+                item = new ScUse_clause(c);
+                break;
+            case ASTGROUP_TEMPLATE_DECLARATION:
+                item = new ScGroup_template_declaration(c);
+                break;
+            case ASTGROUP_DECLARATION: 
+                item = new ScGroup_declaration(c);
+                break;
+            default:
+                break;
+            }
+        }
     }
 
     public String scString() {
-        return "";
+        return item.scString();
     }
 }
 
@@ -6185,13 +6377,23 @@ class ScProcedural_declarative_item extends ScVhdl {
  *   <dd> { procedural_declarative_item }
  */
 class ScProcedural_declarative_part extends ScVhdl {
+    ArrayList<ScVhdl> items = new ArrayList<ScVhdl>();
     public ScProcedural_declarative_part(ASTNode node) {
         super(node);
         assert(node.getId() == ASTPROCEDURAL_DECLARATIVE_PART);
+        for(int i = 0; i < node.getChildrenNum(); i++) {
+            ASTNode c = (ASTNode)node.getChild(i);
+            ScVhdl item = new ScProcedural_declarative_item(c);
+            items.add(item);
+        }
     }
 
     public String scString() {
-        return "";
+        String ret = "";
+        for(int i = 0; i < items.size(); i++) {
+            ret += items.get(i).scString() + "\r\n";
+        }
+        return ret;
     }
 }
 
@@ -6200,13 +6402,23 @@ class ScProcedural_declarative_part extends ScVhdl {
  *   <dd> { sequential_statement }
  */
 class ScProcedural_statement_part extends ScVhdl {
+    ArrayList<ScVhdl> items = new ArrayList<ScVhdl>();
     public ScProcedural_statement_part(ASTNode node) {
         super(node);
         assert(node.getId() == ASTPROCEDURAL_STATEMENT_PART);
+        for(int i = 0; i < node.getChildrenNum(); i++) {
+            ASTNode c = (ASTNode)node.getChild(i);
+            ScVhdl item = new ScSequential_statement(c);
+            items.add(item);
+        }
     }
 
     public String scString() {
-        return "";
+        String ret = "";
+        for(int i = 0; i < items.size(); i++) {
+            ret += items.get(i).scString() + "\r\n";
+        }
+        return ret;
     }
 }
 
@@ -6215,13 +6427,36 @@ class ScProcedural_statement_part extends ScVhdl {
  *   <dd> <i>procedure_</i>name [ ( actual_parameter_part ) ]
  */
 class ScProcedure_call extends ScVhdl {
+    ScName name = null;
+    ScActual_parameter_part parameter_part = null;
     public ScProcedure_call(ASTNode node) {
         super(node);
         assert(node.getId() == ASTPROCEDURE_CALL);
+        for(int i = 0; i < node.getChildrenNum(); i++) {
+            ASTNode c = (ASTNode)node.getChild(i);
+            switch(c.getId())
+            {
+            case ASTNAME:
+                name = new ScName(c);
+                break;
+            case ASTASSOCIATION_LIST:
+                parameter_part = new ScActual_parameter_part(c);
+                break;
+            default:
+                break;
+            }
+        }
     }
 
     public String scString() {
-        return "";
+        String ret = "";
+        ret += name.scString();
+        if(parameter_part != null) {
+            ret += "(";
+            ret += parameter_part.scString();
+            ret += ")";
+        }
+        return ret;
     }
 }
 
@@ -6275,6 +6510,14 @@ class ScProcess_declarative_item extends ScVhdl {
     public ScProcess_declarative_item(ASTNode node) {
         super(node);
         //assert(node.getId() == ASTPROCESS_DECLARATIVE_ITEM);
+        for(int i = 0; i < node.getChildrenNum(); i++) {
+            ASTNode c = (ASTNode)node.getChild(i);
+            switch(c.getId())
+            {
+            default:
+                break;
+            }
+        }
     }
 
     public String scString() {
@@ -6307,9 +6550,20 @@ class ScProcess_declarative_part extends ScVhdl {
  *   </ul> <b>end</b> [ <b>postponed</b> ] <b>process</b> [ <i>process_</i>label ] ; </ul>
  */
 class ScProcess_statement extends ScVhdl {
+    ScSensitivity_list sensitivity_list = null;
+    ScProcess_declarative_part declarative_part = null;
+    ScProcess_statement_part statement_part = null;
     public ScProcess_statement(ASTNode node) {
         super(node);
         assert(node.getId() == ASTPROCESS_STATEMENT);
+        for(int i = 0; i < node.getChildrenNum(); i++) {
+            ASTNode c = (ASTNode)node.getChild(i);
+            switch(c.getId())
+            {
+            default:
+                break;
+            }
+        }
     }
 
     public String scString() {
@@ -6325,6 +6579,14 @@ class ScProcess_statement_part extends ScVhdl {
     public ScProcess_statement_part(ASTNode node) {
         super(node);
         assert(node.getId() == ASTPROCESS_STATEMENT_PART);
+        for(int i = 0; i < node.getChildrenNum(); i++) {
+            ASTNode c = (ASTNode)node.getChild(i);
+            switch(c.getId())
+            {
+            default:
+                break;
+            }
+        }
     }
 
     public String scString() {
@@ -6994,13 +7256,23 @@ class ScSensitivity_list extends ScVhdl {
  *   <dd> { sequential_statement }
  */
 class ScSequence_of_statements extends ScVhdl {
+    ArrayList<ScVhdl> items = new ArrayList<ScVhdl>();
     public ScSequence_of_statements(ASTNode node) {
         super(node);
         assert(node.getId() == ASTSEQUENCE_OF_STATEMENTS);
+        for(int i = 0; i < node.getChildrenNum(); i++) {
+            ASTNode c = (ASTNode)node.getChild(i);
+            ScVhdl item = new ScSequential_statement(c);
+            items.add(item);
+        }
     }
 
     public String scString() {
-        return "";
+        String ret = "";
+        for(int i = 0; i < items.size(); i++) {
+            ret += items.get(i).scString() + "\r\n";
+        }
+        return ret;
     }
 }
 
@@ -7372,6 +7644,7 @@ class ScSimple_simultaneous_statement extends ScVhdl {
     }
 
     public String scString() {
+        warning("simple_simultaneous_statement not support");
         return "";
     }
 }
@@ -7388,6 +7661,7 @@ class ScSimultaneous_alternative extends ScVhdl {
     }
 
     public String scString() {
+        warning("simultaneous_alternative not support");
         return "";
     }
 }
@@ -7407,6 +7681,7 @@ class ScSimultaneous_case_statement extends ScVhdl {
     }
 
     public String scString() {
+        warning("simultaneous_case_statement not support");
         return "";
     }
 }
@@ -7429,6 +7704,7 @@ class ScSimultaneous_if_statement extends ScVhdl {
     }
 
     public String scString() {
+        warning("simultaneous_if_statement not support");
         return "";
     }
 }
@@ -7444,6 +7720,7 @@ class ScSimultaneous_null_statement extends ScVhdl {
     }
 
     public String scString() {
+        warning("simultaneous_null_statement not support");
         return "";
     }
 }
@@ -7464,6 +7741,7 @@ class ScSimultaneous_procedural_statement extends ScVhdl {
     }
 
     public String scString() {
+        warning("simultaneous_procedural_statement not support");
         return "";
     }
 }
@@ -7477,13 +7755,37 @@ class ScSimultaneous_procedural_statement extends ScVhdl {
  *   <br> | simultaneous_null_statement
  */
 class ScSimultaneous_statement extends ScVhdl {
+    ScVhdl item = null;
     public ScSimultaneous_statement(ASTNode node) {
         super(node);
         assert(node.getId() == ASTSIMULTANEOUS_STATEMENT);
+        for(int i = 0; i < node.getChildrenNum(); i++) {
+            ASTNode c = (ASTNode)node.getChild(i);
+            switch(c.getId())
+            {
+            case ASTSIMPLE_SIMULTANEOUS_STATEMENT:
+                item = new ScSimple_simultaneous_statement(c);
+                break;
+            case ASTSIMULTANEOUS_IF_STATEMENT:
+                item = new ScSimultaneous_if_statement(c);
+                break;
+            case ASTSIMULTANEOUS_CASE_STATEMENT:
+                item = new ScSimultaneous_case_statement(c);
+                break;
+            case ASTSIMULTANEOUS_PROCEDURAL_STATEMENT:
+                item = new ScSimultaneous_procedural_statement(c);
+                break;
+            case ASTSIMULTANEOUS_NULL_STATEMENT:
+                item = new ScSimultaneous_null_statement(c);
+                break;
+            default:
+                break;
+            }
+        }
     }
 
     public String scString() {
-        return "";
+        return item.scString();
     }
 }
 
@@ -7492,13 +7794,23 @@ class ScSimultaneous_statement extends ScVhdl {
  *   <dd> { simultaneous_statement }
  */
 class ScSimultaneous_statement_part extends ScVhdl {
+    ArrayList<ScVhdl> statements = new ArrayList<ScVhdl>();
     public ScSimultaneous_statement_part(ASTNode node) {
         super(node);
         assert(node.getId() == ASTSIMULTANEOUS_STATEMENT_PART);
+        for(int i = 0; i < node.getChildrenNum(); i++) {
+            ASTNode c = (ASTNode)node.getChild(i);
+            ScVhdl statement = new ScSimultaneous_statement(c);
+            statements.add(statement);
+        }
     }
 
     public String scString() {
-        return "";
+        String ret = "";
+        for(int i = 0; i < statements.size(); i++) {
+            ret += statements.get(i).scString() + "\r\n";
+        }
+        return ret;
     }
 }
 
@@ -7669,13 +7981,13 @@ class ScSubprogram_body extends ScVhdl {
     }
 
     public String scString() {
-        String ret = "";
+        String ret = "\r\n";
         ret += spec.scString() + "\r\n";
         ret += "{\r\n";
-        ret += declarative_part.scString() + "\r\n";
+        ret += declarative_part.scString() + "\r\n\r\n";
         ret += statement_part.scString() + "\r\n";
         ret += "}\r\n";
-        return "";
+        return ret;
     }
 }
 
@@ -7787,7 +8099,7 @@ class ScSubprogram_declarative_part extends ScVhdl {
     public String scString() {
         String ret = "";
         for(int i = 0; i < items.size(); i++) {
-            ret += items.get(i);
+            ret += items.get(i).scString();
             if(i < items.size() - 1) {
                 ret += "\r\n";
             }
@@ -7888,7 +8200,7 @@ class ScSubprogram_statement_part extends ScVhdl {
     public String scString() {
         String ret = "";
         for(int i = 0; i < items.size(); i++) {
-            ret += items.get(i);
+            ret += items.get(i).scString();
             if(i < items.size() - 1) {
                 ret += "\r\n";
             }
@@ -8396,12 +8708,8 @@ class ScUse_clause extends ScVhdl {
             }
             
             ret += "#include \"";
-            ret += segs.get(segs.size() - 1);
-            ret += ".h\"";
-            
-            ret += "using namespace ";
             ret += segs.get(segs.size() - 2);
-            ret += ";";
+            ret += ".h\"";
         }
         return ret;
     }
@@ -8451,6 +8759,12 @@ class ScVariable_declaration extends ScCommonDeclaration {
     public ScVariable_declaration(ASTNode node) {
         super(node);
         assert(node.getId() == ASTVARIABLE_DECLARATION);
+    }
+    
+    public String scString() {
+        String ret = super.scString();
+        ret += ";";
+        return ret;
     }
 }
 

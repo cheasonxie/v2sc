@@ -52,7 +52,7 @@ public interface SCVhdlConstants extends SCTreeConstants
     static final int[] replaceFastTypes = 
     {
         SC_BOOL, SC_UINT, SC_C_INT, 
-        SC_LOGIC, SC_UINT, SC_BOOL, 
+        SC_BOOL, SC_UINT, SC_BOOL, 
         SC_UINT, SC_BOOL, SC_FLOAT, 
         SC_C_UINT,
     };
