@@ -18,12 +18,12 @@ public class ScVhdl implements SCVhdlConstants, VhdlTokenConstants,
 {
     protected static IParser parser = null;
     protected static ArrayList<ScCommonIdentifier> units = null;    // entity or package
+    protected static int curLevel = 0;    // intent level
     
     protected ASTNode curNode = null;
     protected int beginLine = 0;
     protected int endLine = 0;
     
-    protected int level = 0;    // intent level
     
     /**
      * constructor
@@ -77,11 +77,14 @@ public class ScVhdl implements SCVhdlConstants, VhdlTokenConstants,
         new printFileAndLineNumber(msg);
     }
     
+    protected static void startIntentBlock() { curLevel ++; }
+    protected static void endIntentBlock() { curLevel --; }
+    
     // intent
     protected static String intent(int lv)
     {
         String ret = "";
-        for (int i = 0; i <= lv; i++)
+        for (int i = 0; i < lv; i++)
             for (int j = 0; j < tabSize; j++)
                 ret += " ";
         return ret;
@@ -89,7 +92,7 @@ public class ScVhdl implements SCVhdlConstants, VhdlTokenConstants,
     
     protected String intent()
     {
-        return intent(level);
+        return intent(curLevel);
     }
     
     String getReplaceType(String type)
@@ -434,7 +437,7 @@ class ScAccess_type_definition extends ScCommonIdentifier {
 
     public String scString() {
         warning("token access ignored");
-        return sub.scString() + " " + identifier;
+        return intent() + sub.scString() + " " + identifier;
     }
 }
 
@@ -680,7 +683,7 @@ class ScAlias_declaration extends ScVhdl {
     }
 
     public String scString() {
-        String ret = "define ";
+        String ret = intent() + "define ";
         ret += designator.scString();
         if(indication != null) {
             warning("alias indication ignored");
@@ -925,7 +928,7 @@ class ScArchitecture_statement_part extends ScVhdl {
     public String scString() {
         String ret = "";
         for(int i = 0; i < itemList.size(); i++) {
-            ret += itemList.get(i).scString();
+            ret += intent() + itemList.get(i).scString();
             if(i < itemList.size() - 1) {
                 ret += "\r\n";
             }
@@ -1030,7 +1033,7 @@ class ScAssertion extends ScVhdl {
         String ret = "";
         if(report_exp != null) {
             ret += intent() + "if(!(" + condition.scString() + "))\r\n";
-            ret += intent(level+1) + "printf(\"";
+            ret += intent(curLevel+1) + "printf(\"";
             ret += report_exp.scString() + "\");\r\n";
         }
         ret += "assert(" + condition.scString() + ");";
@@ -1068,7 +1071,7 @@ class ScAssertion_statement extends ScVhdl {
     }
 
     public String scString() {
-        String ret = "";
+        String ret = intent();
         if(label != null) {
             warning("label " + label.scString() + " ignored");
         }
@@ -1606,7 +1609,7 @@ class ScBlock_declarative_item extends ScVhdl {
     public String scString() {
         String ret = "";
         if(item != null) {
-            ret = intent() + item.scString();
+            ret = item.scString();
         }
         return ret;
     }
@@ -1777,11 +1780,12 @@ class ScBlock_statement extends ScVhdl {
 
     public String scString() {
         String ret = "";
-        String tab = intent(level+1);
         ret += intent() + "{";
-        ret += tab + header.scString() + "\r\n";
-        ret += tab + declarative_part.scString() + "\r\n";
-        ret += tab + statement_part.scString() + "\r\n";
+        startIntentBlock();
+        ret += intent() + header.scString() + "\r\n";
+        ret += intent() + declarative_part.scString() + "\r\n";
+        ret += intent() + statement_part.scString() + "\r\n";
+        endIntentBlock();
         ret += intent() + "}";
         return ret;
     }
@@ -2053,15 +2057,19 @@ class ScCase_statement extends ScVhdl {
                     ret += intent() + "else if(" + tmp + ")\r\n";
                 }
                 ret += intent() + "{\r\n";
-                ret += intent(level+1) + alt.seq_statements.scString() + "\r\n";
+                startIntentBlock();
+                ret += intent() + alt.seq_statements.scString() + "\r\n";
+                endIntentBlock();
                 ret += "}\r\n";
             }
         }else {
             ret += intent() + "switch(" + expression.scString() + ")\r\n";
             ret += intent() + "{\r\n";
+            startIntentBlock();
             for(int i = 0; i < statement_alt.size(); i++) {
                 ret += statement_alt.get(i).scString() + "\r\n";
             }
+            endIntentBlock();
             ret += intent() + "}";
         }
 
@@ -2117,7 +2125,7 @@ class ScCase_statement_alternative extends ScVhdl {
             }
         }
         ret += statementsString();
-        ret += intent(level+1) + "break;";
+        ret += intent(curLevel+1) + "break;";
         return ret;
     }
 }
@@ -2754,7 +2762,7 @@ class ScConstant_declaration extends ScCommonDeclaration {
     }
 
     public String scString() {
-        String ret = "const ";
+        String ret = intent() + "const ";
         ret += super.scString();
         ret += ";";
         return ret;
@@ -2788,7 +2796,7 @@ class ScConstrained_array_definition extends ScCommonIdentifier {
     }
 
     public String scString() {
-        String ret = "typedef ";
+        String ret = intent() + "typedef ";
         ret += subtype.scString() + "[";
         ret += addOne(index_constraint.getMax());
         ret += "] ";
@@ -3443,7 +3451,7 @@ class ScEntity_declaration extends ScCommonIdentifier {
     public ScEntity_declaration(ASTNode node) {
         super(node);
         assert(node.getId() == ASTENTITY_DECLARATION);
-        level = 0;
+        curLevel = 0;
         for(int i = 0; i < node.getChildrenNum(); i++) {
             ASTNode c = (ASTNode)node.getChild(i);
             ScVhdl tmp = null;
@@ -3476,16 +3484,20 @@ class ScEntity_declaration extends ScCommonIdentifier {
         }
         if(header.generic != null) {
             ret += "template<\r\n";
+            startIntentBlock();
             ret += header.generic.scString();
+            endIntentBlock();
             ret += "\r\n>\r\n";
         }
         ret += "SC_MODULE(" + getName() + ")\r\n{\r\n";
+        startIntentBlock();
         ret += header.scString() + ";\r\n";
         ret += declarative_part.scString() + "\r\n";
         if(statement_part != null) {
             ret += statement_part.scString();
         }
         ret += body.scString();
+        endIntentBlock();
         ret += "};\r\n";
         return ret;
     }
@@ -3843,7 +3855,7 @@ class ScEnumeration_type_definition extends ScCommonIdentifier {
     }
 
     public String scString() {
-        String ret = "typedef enum " + identifier + " ";
+        String ret = intent() + "typedef enum " + identifier + " ";
         ret += "{";
         for(int i = 0; i < items.size(); i++) {
             ret += items.get(i);
@@ -3882,7 +3894,7 @@ class ScExit_statement extends ScVhdl {
         String ret = "";
         if(condition != null) {
             ret += intent() + "if(" + condition.scString() + ")\r\n";
-            ret += intent(level+1) + "break;";  //FIXME: may break in switch
+            ret += intent(curLevel+1) + "break;";  //FIXME: may break in switch
         }else {
             ret += intent() + "break;";
         }
@@ -4039,7 +4051,7 @@ class ScFile_declaration extends ScCommonDeclaration {
     }
 
     public String scString() {
-        String ret = super.scString();
+        String ret = intent() + super.scString();
         ret += ";";
         return ret;
     }
@@ -4099,7 +4111,7 @@ class ScFile_type_definition extends ScCommonIdentifier {
 
     public String scString() {
         warning("token file ignored");
-        return type_mark.scString() + " " + identifier;
+        return intent() + type_mark.scString() + " " + identifier;
     }
 }
 
@@ -4161,7 +4173,15 @@ class ScFormal_parameter_list extends ScVhdl {
     }
 
     public String scString() {
-        return interface_list.scString();
+        String ret = "";
+        ArrayList<ScVhdl> items = interface_list.items;
+        for(int i = 0; i < items.size(); i++) {
+            ret += items.get(i).scString();
+            if(i < items.size() - 1) {
+                ret += ", ";
+            }
+        }
+        return ret;
     }
 }
 
@@ -4573,23 +4593,29 @@ class ScIf_statement extends ScVhdl {
         String ret = "";
         ret += intent() + "if(" + if_pair.condition.scString() + ")\r\n";
         ret += intent() + "{\r\n";
+        startIntentBlock();
         ret += if_pair.seq_statements.scString() + "\r\n";
         if(elsif_pair.size() > 0) {
+            endIntentBlock();
             ret += intent() + "}\r\n";
             for(int i = 0; i < elsif_pair.size(); i++) {
                 ConPair pair = elsif_pair.get(i);
                 ret += intent() + "else if(" + pair.condition.scString() + ")\r\n";
                 ret += intent() + "{\r\n";
+                startIntentBlock();
                 ret += pair.seq_statements.scString() + "\r\n";
             }
         }
         
         if(else_pair != null) {
+            endIntentBlock();
             ret += intent() + "}\r\n";
             ret += intent() + "else\r\n";
             ret += intent() + "{\r\n";
+            startIntentBlock();
             ret += else_pair.seq_statements.scString() + "\r\n";
         }
+        endIntentBlock();
         ret += intent() + "}";
         return ret;
     }
@@ -4851,7 +4877,7 @@ class ScInteger_type_definition extends ScCommonIdentifier {
     }
 
     public String scString() {
-        String ret = "typedef ";
+        String ret = intent() + "typedef ";
         ret += "sc_uint<" + addOne(getMax()) + "> ";
         ret += identifier;
         return ret;
@@ -4991,7 +5017,7 @@ class ScInterface_list extends ScVhdl {
     public String scString() {
         String ret = "";
         for(int i = 0; i < items.size(); i++) {
-            ret += items.get(i).scString();
+            ret += intent() + items.get(i).scString();
             if(i < items.size() - 1) {
                 ret += ";\r\n";
             }
@@ -5339,7 +5365,9 @@ class ScLoop_statement extends ScVhdl {
         String ret = "";
         ret += intent() + iteration.scString() + "\r\n";
         ret += intent() + "{\r\n";
+        startIntentBlock();
         ret += seq_statements.scString();
+        endIntentBlock();
         ret += intent() + "}";
         return ret;
     }
@@ -5551,7 +5579,7 @@ class ScNext_statement extends ScVhdl {
         String ret = "";
         if(condition != null) {
             ret += intent() + "if(" + condition.scString() + ")\r\n";
-            ret += intent(level+1) + "continue;";
+            ret += intent(curLevel+1) + "continue;";
         }else {
             ret += intent() + "continue;";
         }
@@ -5851,9 +5879,11 @@ class ScPackage_declaration extends ScCommonIdentifier {
         }
         ret += "namespace " + identifier;
         ret += "{\r\n";
+        startIntentBlock();
         ret += declarative_part.scString();
         ret += "\r\n";
         ret += body.scString();
+        endIntentBlock();
         ret += "};\r\n";
         return ret;
     }
@@ -6121,7 +6151,7 @@ class ScPort_clause extends ScVhdl {
  *   <dd> <i>port_</i>interface_list
  */
 class ScPort_list extends ScVhdl {
-    ScVhdl list = null;
+    ScInterface_list list = null;
     public ScPort_list(ASTNode node) {
         super(node);
         assert(node.getId() == ASTPORT_LIST);
@@ -6483,7 +6513,7 @@ class ScProcedure_call_statement extends ScVhdl {
     }
 
     public String scString() {
-        String ret = "";
+        String ret = intent();
         ret += procedure_call.scString();
         ret += ";";
         return ret;
@@ -6850,12 +6880,14 @@ class ScRecord_type_definition extends ScCommonIdentifier {
 
     public String scString() {
         String ret = "";
-        ret += "typedef struct " + identifier + "\r\n";
-        ret += "{\r\n";
+        ret += intent() + "typedef struct " + identifier + "\r\n";
+        ret += intent() +"{\r\n";
+        startIntentBlock();
         for(int i = 0; i < elements.size(); i++) {
-            ret += elements.get(i).scString() + "\r\n";
+            ret += intent() + elements.get(i).scString() + "\r\n";
         }
-        ret += "}";
+        endIntentBlock();
+        ret += intent() +"}";
         return ret;
     }
 }
@@ -7470,7 +7502,7 @@ class ScSignal_assignment_statement extends ScVhdl {
     }
 
     public String scString() {
-        String ret = "";
+        String ret = intent();
         String pre = "";
         pre = target.scString();
         if(delay != null) {
@@ -7509,7 +7541,7 @@ class ScSignal_declaration extends ScCommonDeclaration {
     }
     
     public String scString() {
-        String ret = super.scString();
+        String ret = intent() + super.scString();
         ret += ";";
         return ret;
     }
@@ -7983,10 +8015,12 @@ class ScSubprogram_body extends ScVhdl {
     public String scString() {
         String ret = "\r\n";
         ret += spec.scString() + "\r\n";
-        ret += "{\r\n";
+        ret += intent() + "{\r\n";
+        startIntentBlock();
         ret += declarative_part.scString() + "\r\n\r\n";
         ret += statement_part.scString() + "\r\n";
-        ret += "}\r\n";
+        endIntentBlock();
+        ret += intent() + "}\r\n";
         return ret;
     }
 }
@@ -8004,7 +8038,7 @@ class ScSubprogram_declaration extends ScVhdl {
     }
 
     public String scString() {
-        return spec.scString() + ";";
+        return intent() + spec.scString() + ";";
     }
 }
 
@@ -8165,7 +8199,7 @@ class ScSubprogram_specification extends ScVhdl {
     }
 
     public String scString() {
-        String ret = "";
+        String ret = intent();
         if(type_mark != null) {     // type_mark appear only in function
             ret += type_mark.scString() + " ";
         }else {
@@ -8236,7 +8270,7 @@ class ScSubtype_declaration extends ScVhdl {
     }
 
     public String scString() {
-        String ret = "";
+        String ret = intent();
         ret += "typedef";
         ret += " " + subtype.scString();
         ret += " " + identifier.scString();
@@ -8626,7 +8660,7 @@ class ScUnconstrained_array_definition extends ScCommonIdentifier {
     }
 
     public String scString() {
-        String ret = "";
+        String ret = intent();
         if(indexItems.size() > 0) {
             warning("index_subtype_definition not supported");
         }
@@ -8742,7 +8776,7 @@ class ScVariable_assignment_statement extends ScVhdl {
     }
 
     public String scString() {
-        String ret = "";
+        String ret = intent();
         ret += target.scString();
         ret += " = ";
         ret += expression.scString();
@@ -8762,7 +8796,7 @@ class ScVariable_declaration extends ScCommonDeclaration {
     }
     
     public String scString() {
-        String ret = super.scString();
+        String ret = intent() + super.scString();
         ret += ";";
         return ret;
     }
@@ -8800,7 +8834,7 @@ class ScWait_statement extends ScVhdl {
     }
     
     private String getWaitString() {
-        String ret = "";
+        String ret = intent();
         ret += "next_trigger(";
         if(timeout != null) {
             ret += timeout.scString();
