@@ -4354,7 +4354,7 @@ class ScGeneric_clause extends ScVhdl {
  *   <dd> <i>generic_</i>interface_list
  */
 class ScGeneric_list extends ScVhdl {
-    ScVhdl list = null;
+    ScInterface_list list = null;
     public ScGeneric_list(ASTNode node) {
         super(node);
         assert(node.getId() == ASTGENERIC_LIST);
@@ -4372,7 +4372,14 @@ class ScGeneric_list extends ScVhdl {
     }
 
     public String scString() {
-        return list.scString();
+        String ret = "";
+        for(int i = 0; i < list.items.size(); i++) {
+            ret += intent() + list.items.get(i).scString();
+            if(i < list.items.size() - 1) {
+                ret += ",\r\n";
+            }
+        }
+        return ret;
     }
 }
 
@@ -6579,7 +6586,7 @@ class ScProcess_declarative_part extends ScVhdl {
  *   <ul> process_statement_part
  *   </ul> <b>end</b> [ <b>postponed</b> ] <b>process</b> [ <i>process_</i>label ] ; </ul>
  */
-class ScProcess_statement extends ScVhdl {
+class ScProcess_statement extends ScCommonIdentifier {
     ScSensitivity_list sensitivity_list = null;
     ScProcess_declarative_part declarative_part = null;
     ScProcess_statement_part statement_part = null;
@@ -6590,14 +6597,37 @@ class ScProcess_statement extends ScVhdl {
             ASTNode c = (ASTNode)node.getChild(i);
             switch(c.getId())
             {
+            case ASTIDENTIFIER:
+                identifier = c.firstTokenImage();
+                break;
+            case ASTSENSITIVITY_LIST:
+                sensitivity_list = new ScSensitivity_list(c);
+                break;
+            case ASTPROCESS_DECLARATIVE_PART:
+                declarative_part = new ScProcess_declarative_part(c);
+                break;
+            case ASTPROCESS_STATEMENT_PART:
+                statement_part = new ScProcess_statement_part(c);
+                break;
             default:
                 break;
             }
         }
+        if(identifier.isEmpty()) {
+            identifier = String.format("line%d", node.getFirstToken().beginLine);
+        }
     }
 
     public String scString() {
-        return "";
+        String ret = "\r\n" + intent();
+        ret += "process_" + identifier + "()\r\n";
+        ret += intent() + "{\r\n";
+        startIntentBlock();
+        ret += declarative_part.scString() + "\r\n\r\n";
+        ret += statement_part.scString() + "\r\n";
+        endIntentBlock();
+        ret += intent() + "}\r\n";
+        return ret;
     }
 }
 
