@@ -221,6 +221,59 @@ public class ScVhdl implements SCVhdlConstants, VhdlTokenConstants,
         return ret;
     }
     
+    /** often be used in "<b>others</b>" of aggregate */
+    String[] getTargetRange() {
+        String[] ret = null;
+        ASTNode node = null;
+        
+        /* check statement */
+        if((node = curNode.getAncestor(ASTVARIABLE_ASSIGNMENT_STATEMENT)) != null) {
+            ScVariable_assignment_statement var = new ScVariable_assignment_statement(node);
+            ret = var.target.getTargetRange();
+        }else if((node = curNode.getAncestor(ASTCONDITIONAL_SIGNAL_ASSIGNMENT)) != null) {
+            ScConditional_signal_assignment csa = new ScConditional_signal_assignment(node);
+            ret = csa.target.getTargetRange();
+        }else if((node = curNode.getAncestor(ASTSELECTED_SIGNAL_ASSIGNMENT)) != null) {
+            ScSelected_signal_assignment ssa = new ScSelected_signal_assignment(node);
+            ret = ssa.target.getTargetRange();
+        }else if((node = curNode.getAncestor(ASTSIGNAL_ASSIGNMENT_STATEMENT)) != null) {
+            ScSignal_assignment_statement sas = new ScSignal_assignment_statement(node);
+            ret = sas.target.getTargetRange();
+        }else {
+            /* check declaration */
+            Symbol sym = null;
+            if((node = curNode.getAncestor(ASTCONSTANT_DECLARATION)) != null) {
+                ScConstant_declaration cd = new ScConstant_declaration(node);
+                sym = (Symbol)parser.getSymbol(node, cd.idList.items.get(0).scString());
+            }else if((node = curNode.getAncestor(ASTSIGNAL_DECLARATION)) != null) {
+                ScSignal_declaration cd = new ScSignal_declaration(node);
+                sym = (Symbol)parser.getSymbol(node, cd.idList.items.get(0).scString());
+            }else if((node = curNode.getAncestor(ASTVARIABLE_DECLARATION)) != null) {
+                ScVariable_declaration cd = new ScVariable_declaration(node);
+                sym = (Symbol)parser.getSymbol(node, cd.idList.items.get(0).scString());
+            }
+            
+            if(sym != null) {
+                ret = sym.typeRange;
+            }
+        }
+
+        return ret;
+    }
+    
+    /**
+     * @return true if current node is assignment(expression) of declaration
+     */
+    boolean isDeclarationAssignment() {
+        if(!(curNode.getId() == ASTEXPRESSION || curNode.isDescendantOf(ASTEXPRESSION)))
+            return false;
+        if(curNode.isDescendantOf(ASTCONSTANT_DECLARATION) 
+                || curNode.isDescendantOf(ASTSIGNAL_DECLARATION)
+                || curNode.isDescendantOf(ASTVARIABLE_DECLARATION))
+            return true;
+        return false;
+    }
+    
     /**
      * <dl> base ::=
      *   <dd> integer
@@ -2070,7 +2123,7 @@ class ScCase_statement extends ScVhdl {
                 ret += statement_alt.get(i).scString() + "\r\n";
             }
             endIntentBlock();
-            ret += intent() + "}";
+            ret += intent() + "}\r\n";
         }
 
         return ret;
@@ -2124,8 +2177,10 @@ class ScCase_statement_alternative extends ScVhdl {
                 ret += ":\r\n";
             }
         }
+        startIntentBlock();
         ret += statementsString();
-        ret += intent(curLevel+1) + "break;";
+        ret += intent() + "break;";
+        endIntentBlock();
         return ret;
     }
 }
@@ -2615,14 +2670,62 @@ class ScCondition_clause extends ScVhdl {
  *   <dd> target <= options conditional_waveforms ;
  */
 class ScConditional_signal_assignment extends ScVhdl {
+    ScTarget target = null;
+    ScOptions options = null;
+    ScConditional_waveforms waveforms = null;
     public ScConditional_signal_assignment(ASTNode node) {
         super(node);
         assert(node.getId() == ASTCONDITIONAL_SIGNAL_ASSIGNMENT);
+        for(int i = 0; i < node.getChildrenNum(); i++) {
+            ASTNode c = (ASTNode)node.getChild(i);
+            switch(c.getId())
+            {
+            case ASTTARGET:
+                target = new ScTarget(c);
+                break;
+            case ASTOPTIONS:
+                options = new ScOptions(c);
+                break;
+            case ASTCONDITIONAL_WAVEFORMS:
+                waveforms = new ScConditional_waveforms(c);
+                break;
+            default:
+                break;
+            }
+        }
     }
 
     public String scString() {
-        return "";
+        String ret = "";
+        String val = target.scString();
+        if(options != null) {
+            warning("options ignored");
+        }
+        
+        for(int i = 0; i < waveforms.condWaveforms.size(); i++) {
+            CondWaveform cw = waveforms.condWaveforms.get(i);
+            ScCondition condition = cw.condition;
+            if(i == 0) {
+                ret += intent() + "if(" + condition.scString() + ")\r\n";
+            }else if(condition != null) {
+                ret += intent() + "else if(" + condition.scString() + ")\r\n";
+            }else {
+                ret += intent() + "else\r\n";
+            }
+            ret += intent() + "{\r\n";
+            startIntentBlock();
+            ret += cw.waveform.assignment(val) + ";\r\n";
+            endIntentBlock();
+            ret += intent() + "}\r\n";
+        }
+
+        return ret;
     }
+}
+
+class CondWaveform {
+    ScWaveform waveform = null;
+    ScCondition condition = null;
 }
 
 /**
@@ -2631,9 +2734,26 @@ class ScConditional_signal_assignment extends ScVhdl {
  *   <br> waveform [ <b>when</b> condition ]
  */
 class ScConditional_waveforms extends ScVhdl {
+    ArrayList<CondWaveform> condWaveforms = new ArrayList<CondWaveform>();
     public ScConditional_waveforms(ASTNode node) {
         super(node);
         assert(node.getId() == ASTCONDITIONAL_WAVEFORMS);
+        CondWaveform cw = null;
+        for(int i = 0; i < node.getChildrenNum(); i++) {
+            ASTNode c = (ASTNode)node.getChild(i);
+            switch(c.getId())
+            {
+            case ASTWAVEFORM:
+                cw = new CondWaveform();
+                cw.waveform = new ScWaveform(c);
+                break;
+            case ASTEXPRESSION:
+                cw.condition = new ScCondition(c);
+                break;
+            default:
+                break;
+            }
+        }
     }
 
     public String scString() {
@@ -3245,7 +3365,11 @@ class ScElement_association extends ScVhdl {
 
     public String scString() {
         String ret = "";
+        String val = expression.scString();
         if(choices != null) {
+            if(isDeclarationAssignment()) {
+                String[] range = getTargetRange();
+            }
             //TODO choices
             ArrayList<ScChoice> choiceItems = choices.getItems();
             for(int i = 0; i < choiceItems.size(); i++) {
@@ -3255,7 +3379,7 @@ class ScElement_association extends ScVhdl {
                 }
             }
         }else {
-            ret += expression.scString();
+            ret += val;
         }
         return ret;
     }
@@ -4206,14 +4330,16 @@ class ScFormal_part extends ScVhdl {
  * <dl> free_quantity_declaration ::=
  *   <dd> <b>quantity</b> identifier_list : subtype_indication [ := expression ] ;
  */
-class ScFree_quantity_declaration extends ScVhdl {
+class ScFree_quantity_declaration extends ScCommonDeclaration {
     public ScFree_quantity_declaration(ASTNode node) {
         super(node);
         assert(node.getId() == ASTFREE_QUANTITY_DECLARATION);
     }
 
     public String scString() {
-        return "";
+        String ret = super.scString();
+        ret += ";";
+        return ret;
     }
 }
 
@@ -5685,13 +5811,25 @@ class ScOperator_symbol extends ScVhdl {
  *   <dd> [ <b>guarded</b> ] [ delay_mechanism ]
  */
 class ScOptions extends ScVhdl {
+    ScDelay_mechanism delay_mechanism = null;
     public ScOptions(ASTNode node) {
         super(node);
         assert(node.getId() == ASTOPTIONS);
+        for(int i = 0; i < node.getChildrenNum(); i++) {
+            ASTNode c = (ASTNode)node.getChild(i);
+            switch(c.getId())
+            {
+            case ASTDELAY_MECHANISM:
+                delay_mechanism = new ScDelay_mechanism(c);
+                break;
+            default:
+                break;
+            }
+        }
     }
 
     public String scString() {
-        return "";
+        return delay_mechanism.scString();
     }
 }
 
@@ -7241,14 +7379,122 @@ class ScSelected_name extends ScVhdl {
  *   <ul> target <= options selected_waveforms ; </ul>
  */
 class ScSelected_signal_assignment extends ScVhdl {
+    ScExpression expression = null;
+    ScTarget target = null;
+    ScOptions options = null;
+    ScSelected_waveforms selected_waveforms = null;
     public ScSelected_signal_assignment(ASTNode node) {
         super(node);
         assert(node.getId() == ASTSELECTED_SIGNAL_ASSIGNMENT);
+        for(int i = 0; i < node.getChildrenNum(); i++) {
+            ASTNode c = (ASTNode)node.getChild(i);
+            switch(c.getId())
+            {
+            case ASTEXPRESSION:
+                expression = new ScExpression(c);
+                break;
+            case ASTTARGET:
+                target = new ScTarget(c);
+                break;
+            case ASTOPTIONS:
+                options = new ScOptions(c);
+                break;
+            case ASTSELECTED_WAVEFORMS:
+                selected_waveforms = new ScSelected_waveforms(c);
+                break;
+            default:
+                break;
+            }
+        }
     }
-
+    
+    private boolean hasRange() {
+        boolean ret = false;
+        for(int i = 0; i < selected_waveforms.choicesWaveform.size(); i++) {
+            ChoicesWaveform cw = selected_waveforms.choicesWaveform.get(i);
+            ScChoices choices = cw.choices;
+            if(choices.hasRange()) {
+                ret = true;
+                break;
+            }
+        }
+        return ret;
+    }
+    
     public String scString() {
-        return "";
+        String ret = "";
+        String val = expression.scString();
+        String strTarget = target.scString();
+        if(hasRange()) {
+            for(int i = 0; i < selected_waveforms.choicesWaveform.size(); i++) {
+                ChoicesWaveform cw = selected_waveforms.choicesWaveform.get(i);
+                ScChoices choices = cw.choices;
+                ArrayList<ScChoice> items = choices.getItems();
+                String tmp = "";
+                boolean isElse = false;
+                for(int j = 0; j < items.size(); j++) {
+                    ScChoice choice = items.get(j);
+                    if(choice.isRange()) {
+                        ScDiscrete_range range = (ScDiscrete_range)choice.item;
+                        tmp += "(" + val + " >= " + range.getMin() + " && ";
+                        tmp += val + " <= " + range.getMax() + ")";
+                    }else if(choice.isOthers()) {
+                        isElse = true;
+                        break;
+                    }else {
+                        tmp += val + " == " + choice.scString();
+                    }
+                    
+                    if(j < items.size() - 1) {
+                        tmp += " || ";
+                    }
+                }
+                
+                if(isElse) {
+                    ret += intent() + "else\r\n";
+                }else if(i == 0) {
+                    ret += intent() + "if(" + tmp + ")";
+                }else {
+                    ret += intent() + "else if(" + tmp + ")\r\n";
+                }
+                ret += intent() + "{\r\n";
+                startIntentBlock();
+                ret += intent() + cw.waveform.assignment(strTarget) + "\r\n";
+                endIntentBlock();
+                ret += "}\r\n";
+            }
+        }else {
+            ret += intent() + "switch(" + val + ")\r\n";
+            ret += intent() + "{\r\n";
+            startIntentBlock();
+            for(int i = 0; i < selected_waveforms.choicesWaveform.size(); i++) {
+                ChoicesWaveform cw = selected_waveforms.choicesWaveform.get(i);
+                ScChoices choices = cw.choices;
+                for(int j = 0; j < choices.items.size(); j++) {
+                    ScChoice item = choices.items.get(j);
+                    if(item.isOthers()){
+                        ret += intent() + "default:\r\n";
+                    }else {
+                        ret += intent() + "case " + item.scString();
+                        ret += ":\r\n";
+                    }
+                }
+                startIntentBlock();
+                ret += cw.waveform.assignment(strTarget) + ";\r\n";
+                ret += intent() + "break;\r\n";
+                endIntentBlock();
+            }
+            endIntentBlock();
+            ret += intent() + "}\r\n";
+        }
+        return ret;
     }
+}
+
+class ChoicesWaveform
+{
+    ScWaveform waveform = null;
+    ScChoices choices = null;
 }
 
 /**
@@ -7257,9 +7503,26 @@ class ScSelected_signal_assignment extends ScVhdl {
  *   <br> waveform <b>when</b> choices
  */
 class ScSelected_waveforms extends ScVhdl {
+    ArrayList<ChoicesWaveform> choicesWaveform = new ArrayList<ChoicesWaveform>();
     public ScSelected_waveforms(ASTNode node) {
         super(node);
         assert(node.getId() == ASTSELECTED_WAVEFORMS);
+        ChoicesWaveform cw = null;
+        for(int i = 0; i < node.getChildrenNum(); i++) {
+            ASTNode c = (ASTNode)node.getChild(i);
+            switch(c.getId())
+            {
+            case ASTWAVEFORM:
+                cw = new ChoicesWaveform();
+                cw.waveform = new ScWaveform(c);
+                break;
+            case ASTCHOICES:
+                cw.choices = new ScChoices(c);
+                break;
+            default:
+                break;
+            }
+        }
     }
 
     public String scString() {
@@ -7506,9 +7769,9 @@ class ScSign extends ScVhdl {
  *   <dd> [ label : ] target <= [ delay_mechanism ] waveform ;
  */
 class ScSignal_assignment_statement extends ScVhdl {
-    ScVhdl target = null;
-    ScVhdl waveform = null;
-    ScVhdl delay = null;
+    ScTarget target = null;
+    ScWaveform waveform = null;
+    ScDelay_mechanism delay = null;
     public ScSignal_assignment_statement(ASTNode node) {
         super(node);
         assert(node.getId() == ASTSIGNAL_ASSIGNMENT_STATEMENT);
@@ -7533,27 +7796,7 @@ class ScSignal_assignment_statement extends ScVhdl {
 
     public String scString() {
         String ret = intent();
-        String pre = "";
-        pre = target.scString();
-        if(delay != null) {
-            warning("delay mechanism ignore");
-        }
-        ArrayList<ScVhdl> elements = ((ScWaveform)waveform).getElements();
-        if(elements.size() > 1) {
-            warning("multi-source of signal assignment not support");
-        }
-        for(int i = 0; i < elements.size(); i++) {
-            ScWaveform_element ele = (ScWaveform_element)elements.get(i);
-            ScExpression delayTime = (ScExpression)ele.getTime();
-            if(delayTime != null) {
-                String unit = ele.getTimeUnit();
-                ret += intent() + "next_triger(" + delayTime + ", " + getSCTime(unit) + ");\r\n";                
-            }
-            ret += intent() + pre + ".write(" + ele.getValue() + ")";
-            if(i < elements.size() - 1) {
-                ret += ";\r\n";
-            }
-        }
+        ret = waveform.assignment(target.scString());
         ret += ";";
         return ret;
     }
@@ -8413,6 +8656,21 @@ class ScTarget extends ScVhdl {
             break;
         }
     }
+    
+    public String[] getTargetRange() {
+        String[] ret = null;
+        if(item instanceof ScName) {
+            ArrayList<String> segs = ((ScName)item).getNameSegments();
+            assert(segs.size() > 0);
+            Symbol sym = (Symbol)parser.getSymbol(item.curNode, segs.get(segs.size() - 1));
+            assert(sym != null); // must found, because the variable always has been defined
+            ret = sym.typeRange;
+        }else {
+            warning("aggregate target range not supported");
+            //TODO aggregate target range
+        }
+        return ret;
+    }
 
     public String scString() {
         return item.scString();
@@ -8909,14 +9167,14 @@ class ScWait_statement extends ScVhdl {
  *   <br> <b>| unaffected</b>
  */
 class ScWaveform extends ScVhdl {
-    ArrayList<ScVhdl> elements = new ArrayList<ScVhdl>();
+    ArrayList<ScWaveform_element> elements = new ArrayList<ScWaveform_element>();
     boolean isUnaffected = false;
     public ScWaveform(ASTNode node) {
         super(node);
         assert(node.getId() == ASTWAVEFORM);
         for(int i = 0; i < node.getChildrenNum(); i++) {
             ASTNode c = (ASTNode)node.getChild(i);
-            ScVhdl ele = null; 
+            ScWaveform_element ele = null; 
             switch(c.getId())
             {
             case ASTVOID:   // unaffected
@@ -8932,15 +9190,34 @@ class ScWaveform extends ScVhdl {
         }
     }
     
-    public ArrayList<ScVhdl> getElements() {
-        return elements;
+    public String assignment(String target) {
+        String ret = "";
+        if(isUnaffected) {
+            warning("unaffected ignore");
+            return "";
+        }
+            
+        if(elements.size() > 1) {
+            warning("multi-source of signal assignment not support");
+        }
+        for(int j = 0; j < elements.size(); j++) {
+            ScWaveform_element ele = elements.get(j);
+            ScExpression delayTime = (ScExpression)ele.getTime();
+            if(delayTime != null) {
+                String unit = ele.getTimeUnit();
+                ret += intent() + "next_triger(" + delayTime + ", " + getSCTime(unit) + ");\r\n";                
+            }
+            ret += intent() + target + ".write(" + ele.getValue() + ")";
+            if(j < elements.size() - 1) {
+                ret += ";\r\n";
+            }
+        }
+        return ret;
     }
 
     public String scString() {
-        if(isUnaffected) {
-            warning("unaffected ignore");
-        }
-        return "";
+        String ret = "";
+        return ret;
     }
 }
 

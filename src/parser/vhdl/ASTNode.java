@@ -135,11 +135,18 @@ public class ASTNode implements IASTNode
      * whether this node is descendant of specified type node
      */
     public boolean isDescendantOf(int id) {
-        boolean ret = false;
+        return (getAncestor(id) != null);
+    }
+    
+    /**
+     * get specified type ancestor node
+     */
+    public ASTNode getAncestor(int id) {
+        ASTNode ret = null;
         IASTNode pNode = parent;
         while(pNode != null) {
             if(pNode.getId() == id) {
-                ret = true;
+                ret = (ASTNode)pNode;
                 break;
             }
             pNode = pNode.getParent();
