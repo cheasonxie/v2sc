@@ -4927,10 +4927,11 @@ class ScIndexed_name extends ScVhdl {
         String ret = "";
         String strTmp = prefix.scString();
         ret += strTmp;
-        if(exps.size() > 1) {
-            ret += "(";
-        }else {
+        Symbol sym = (Symbol)parser.getSymbol(curNode, strTmp);
+        if(sym.typeRange != null) { // has array index
             ret += "[";
+        }else {
+            ret += ")";
         }
         for(int i = 0; i < exps.size(); i++) {
             ret += exps.get(i).scString();
@@ -4938,10 +4939,10 @@ class ScIndexed_name extends ScVhdl {
                 ret += ", ";
             }
         }
-        if(exps.size() > 1) {
-            ret += ")";
-        }else {
+        if(sym.typeRange != null) {
             ret += "]";
+        }else {
+            ret += ")";
         };
         return ret;
     }

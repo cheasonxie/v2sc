@@ -24,7 +24,8 @@ public class SymbolTable extends VhdlArrayList<Symbol>
     
     /**
      * add one child to children table<br>
-     * only package need child table(such as component's port_list/generic_list)
+     * 1. package need child table(such as component's port_list/generic_list)
+     * 2. record, physical, enum need child table
      */
     protected void addChild(String name, SymbolTable child) {
         if(children == null) {
@@ -35,7 +36,8 @@ public class SymbolTable extends VhdlArrayList<Symbol>
     
     /**
      * copy another's children to my children table<br>
-     * only package need child table(such as component's port_list/generic_list)
+     * 1. package need child table(such as component's port_list/generic_list)
+     * 2. record, physical, enum need child table
      */
     protected void copyChild(SymbolTable other, Symbol[] symbols) {
         if(other == null || symbols == null) {
@@ -56,7 +58,8 @@ public class SymbolTable extends VhdlArrayList<Symbol>
     
     /**
      * get one child table<br>
-     * only package need child table(such as component's port_list/generic_list)
+     * 1. package need child table(such as component's port_list/generic_list)
+     * 2. record, physical, enum need child table
      */
     protected SymbolTable getChild(String name) {
         if(children == null) {

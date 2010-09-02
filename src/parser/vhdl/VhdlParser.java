@@ -2499,6 +2499,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         consumeToken(COLON);
         element_subtype_definition(node, endToken);
         consumeToken(SEMICOLON);
+        addSymbol(node, RECORD, strVhdlType[TYPE_RECORD]);
         closeNodeScope(node);
     }
 
@@ -2975,22 +2976,28 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
      *   <dd> ( enumeration_literal { , enumeration_literal } )
      */
     void enumeration_type_definition(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTENUMERATION_TYPE_DEFINITION);
+        ASTNode node = new ASTSymbolNode(p, ASTENUMERATION_TYPE_DEFINITION);
         openNodeScope(node);
         consumeToken(LBRACKET);
         endToken = findTokenInBlock(RBRACKET, endToken);
+        startBlock();
         
         while(true) {
             Token tmpToken = findTokenInBlock(COMMA, endToken);
             if(tmpToken == null)
                 tmpToken = endToken;
             enumeration_literal(node, tmpToken);
+            addSymbol((ASTNode)node.getChild(node.getChildrenNum() - 1), CONSTANT, 
+                    strVhdlType[TYPE_INTEGER]);   // regard enum as constant integer 
             if(tokenMgr.getNextTokenKind() != COMMA) {
                 break;
             }
             consumeToken(COMMA);
         }
         consumeToken(RBRACKET);
+        ASTNode typeNode = node.getAncestor(ASTTYPE_DECLARATION);
+        ((ASTNode)p).getSymbolTable().addChild(typeNode.getName(), node.getSymbolTable());
+        endBlock();
         closeNodeScope(node);
     }
 
@@ -4773,13 +4780,16 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
      *   </ul> <b>end</b> <b>units</b> [ <i>physical_type_</i>simple_name ] </ul>
      */
     void physical_type_definition(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTPHYSICAL_TYPE_DEFINITION);
+        ASTNode node = new ASTSymbolNode(p, ASTPHYSICAL_TYPE_DEFINITION);
         openNodeScope(node);
+        startBlock();
         
         Token tmpToken = findToken(UNITS, endToken);
         range_constraint(node, tmpToken);
         consumeToken(UNITS);
         endToken = findTokenInBlock(END, endToken);
+        
+        primary_unit_declaration(node, endToken);
         
         while(true) {
             if(tokenMgr.getNextTokenKind() == END) {
@@ -4796,6 +4806,9 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
                 throw new ParserException(tokenMgr.getCurrentToken());
             }
         }
+        ASTNode typeNode = node.getAncestor(ASTTYPE_DECLARATION);
+        ((ASTNode)p).getSymbolTable().addChild(typeNode.getName(), node.getSymbolTable());
+        endBlock();
         closeNodeScope(node);
     }
 
@@ -4950,6 +4963,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         endToken = findToken(SEMICOLON, endToken);
         identifier(node, endToken);
         consumeToken(SEMICOLON);
+        addSymbol(node, UNITS, strVhdlType[TYPE_PHYSICAL]);
         closeNodeScope(node);
     }
 
@@ -5461,10 +5475,11 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
      *   </ul><b>end</b> <b>record</b> [ <i>record_type_</i>simple_name ]
      */
     void record_type_definition(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTRECORD_TYPE_DEFINITION);
+        ASTNode node = new ASTSymbolNode(p, ASTRECORD_TYPE_DEFINITION);
         openNodeScope(node);        
         consumeToken(RECORD);
         endToken = findTokenInBlock(END, endToken);
+        startBlock();
         
         while(true) {
             element_declaration(node, endToken);
@@ -5478,6 +5493,9 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         if(tokenMgr.getNextTokenKind() == identifier) {
             tokenMgr.toNextToken();
         }
+        ASTNode typeNode = node.getAncestor(ASTTYPE_DECLARATION);
+        ((ASTNode)p).getSymbolTable().addChild(typeNode.getName(), node.getSymbolTable());
+        endBlock();
         closeNodeScope(node);
     }
 
@@ -5659,6 +5677,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         identifier(node, endToken);
         consumeToken(EQ);
         physical_literal(node, endToken);
+        addSymbol(node, UNITS, strVhdlType[TYPE_PHYSICAL]);
         consumeToken(SEMICOLON);
         closeNodeScope(node);
     }

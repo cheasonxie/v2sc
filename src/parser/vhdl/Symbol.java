@@ -33,6 +33,7 @@ public class Symbol implements ISymbol
      * <b>attribute</b>, <b>alias</b>, <b>subtype</b>, <b>file</b>, <b>group</b><br>
      * <b>signal</b>, <b>component</b>, <b>disconnect</b>, <b>nature</b>, <b>terminal</b><br>
      * <b>subnature</b>, <b>generic</b>, <b>port</b>
+     * <b>record</b>, <b>units</b>
      * @see VhdlTokenConstants
      */
     public int kind;
