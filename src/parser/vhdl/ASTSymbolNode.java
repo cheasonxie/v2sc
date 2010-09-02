@@ -47,7 +47,8 @@ public class ASTSymbolNode extends ASTNode
         case PROCEDURE:
             ret = KIND_SUBPROGRAM;
             break;
-            
+       
+        case RECORD:
         case VARIABLE:
         case CONSTANT:
         case FILE:

@@ -2490,7 +2490,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
      *   <dd> identifier_list : element_subtype_definition ;
      */
     void element_declaration(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTELEMENT_DECLARATION);
+        ASTNode node = new ASTSymbolNode(p, ASTELEMENT_DECLARATION);
         openNodeScope(node);
         endToken = findToken(SEMICOLON, endToken);
         
@@ -2499,7 +2499,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         consumeToken(COLON);
         element_subtype_definition(node, endToken);
         consumeToken(SEMICOLON);
-        addSymbol(node, RECORD, strVhdlType[TYPE_RECORD]);
+        addSymbol(node, RECORD);
         closeNodeScope(node);
     }
 
@@ -5475,7 +5475,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
      *   </ul><b>end</b> <b>record</b> [ <i>record_type_</i>simple_name ]
      */
     void record_type_definition(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTSymbolNode(p, ASTRECORD_TYPE_DEFINITION);
+        ASTNode node = new ASTNode(p, ASTRECORD_TYPE_DEFINITION);
         openNodeScope(node);        
         consumeToken(RECORD);
         endToken = findTokenInBlock(END, endToken);
