@@ -16,7 +16,7 @@ import parser.ISymbol;
 /**
  * A symbol - entry in symbol-table
  */
-public class Symbol implements ISymbol
+public class Symbol implements ISymbol, Cloneable
 {
     /** invalid symbol kind */
     public static final int KIND_INVALID = -1;
@@ -48,7 +48,12 @@ public class Symbol implements ISymbol
     public String[] range = null;
     
     /**
-     * type range(array index)
+     * array range(only valid in array type)
+     */
+    public String[] arrayRange = null;
+    
+    /**
+     * type range(bitwidth of type)
      */
     public String[] typeRange = null;
     
@@ -138,6 +143,20 @@ public class Symbol implements ISymbol
             }
             return ret;
         }
+    }
+    
+    @Override
+    public Symbol clone() {
+        Symbol newSym = new Symbol();
+        newSym.kind = kind;
+        newSym.mode = mode;
+        newSym.name = name;
+        newSym.paramTypeList = paramTypeList;
+        newSym.range = range;
+        newSym.type = type;
+        newSym.typeRange = typeRange;
+        newSym.arrayRange = arrayRange;
+        return newSym;
     }
     
     public void setParamList(ArrayList<String> paramList)
