@@ -128,8 +128,8 @@ public class LibraryManager extends VhdlArrayList<LibraryEntry>
                         ret = pkgNode;
                     }else {
                         IASTNode[] ret0 = new IASTNode[ret.length+pkgNode.length];
-                        System.arraycopy(ret0, 0, ret, 0, ret.length);
-                        System.arraycopy(ret0, ret.length, pkgNode, 0, pkgNode.length);
+                        System.arraycopy(ret, 0, ret0, 0, ret.length);
+                        System.arraycopy(pkgNode, 0, ret0, ret.length, pkgNode.length);
                         ret = ret0;
                     }
                 }

@@ -7473,7 +7473,7 @@ class ScSelected_name extends ScVhdl {
     public String[] getNameSegments() {
         String[] psegs = prefix.getNameSegments();
         String[] segments = new String[psegs.length + 1];
-        System.arraycopy(segments, 0, psegs, 0, psegs.length);
+        System.arraycopy(psegs, 0, segments, 0, psegs.length);
         segments[psegs.length] = suffix.scString();
         return segments;
     }
