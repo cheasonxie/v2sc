@@ -7350,6 +7350,22 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
     public IASTNode getRoot() {
         return designFile;
     }
+    
+    protected Symbol getNamesSymbol(SymbolTable curTab, String[] names) {
+        SymbolTable tab0, tab1;
+        Symbol sym = null;
+
+        tab0 = curTab;
+        for(int i = 0; i < names.length; i++)
+        {
+            if((sym = tab0.getSymbol(names[i])) == null)
+                return null;
+            if((tab1 = tab0.getTableOfSymbol(sym.type)) == null)
+                return null;
+            tab0 = tab1.getChild(sym.type);
+        }
+        return sym;
+    }
 
     @Override
     public ISymbol getSymbol(IASTNode node, String name) {
@@ -7358,15 +7374,14 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
             return null;
         }
         if(tokenMgr == null) {
-            System.err.println("you must parse the file by call parse() firstly");
+            System.err.println("you must parse the file by calling parse() firstly");
             return null;
         }
-        Symbol sym = ((ASTNode)node).getSymbolTable().get(name);
+        Symbol sym = ((ASTNode)node).getSymbolTable().getSymbol(name);
         if(sym != null) {
             return sym;
         }
-        sym = extSymbolTable.get(name);
-        return sym;
+        return extSymbolTable.getSymbol(name);
     }
     
     @Override
@@ -7377,31 +7392,15 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
             return null;
         }
         if(tokenMgr == null) {
-            System.err.println("you must parse the file by call parse() firstly");
+            System.err.println("you must parse the file by calling parse() firstly");
             return null;
         }
         
-        SymbolTable table = ((ASTNode)node).getSymbolTable();
-        Symbol sym = table.get(names[0]);
-        if(sym == null) {
-            table = extSymbolTable;
-            sym = table.get(names[0]);
-        }
-        if(sym == null) {
-            return null;
-        }
+        Symbol ret = getNamesSymbol(((ASTNode)node).getSymbolTable(), names);
+        if(ret != null)
+            return ret;
         
-        for(int i = 1; i < names.length; i++) {
-            table = table.getChild(sym.name);
-            if(table == null) {
-                return null;
-            }
-            sym = table.get(names[i]);
-            if(sym == null) {
-                return null;
-            }
-        }
-        return sym;
+        return getNamesSymbol(extSymbolTable, names);
     }
 
     @Override

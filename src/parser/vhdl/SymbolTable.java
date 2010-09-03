@@ -76,10 +76,39 @@ public class SymbolTable extends VhdlArrayList<Symbol>
         if(ret != null)
             return ret;
         
-        if(parent != null)
-            return parent.getSymbol(name);
-        else
-            return null;
+        if(parent != null) {
+            ret = parent.getSymbol(name);
+        }else if(children != null) {    // component's port/generic symbol
+            for(int i = 0; i < children.size(); i++) {
+                SymbolTable table = children.get(i);
+                if((ret = table.get(name)) != null) {
+                    break;
+                }
+            }
+        }
+        return ret;
+    }
+    
+    /**
+     * Get symbol table which actually contains the symbol by name
+     */
+    protected SymbolTable getTableOfSymbol(String name) {
+        SymbolTable ret = null;
+        if(get(name) != null)
+            return this;
+        
+        if(parent != null) {
+            return parent.getTableOfSymbol(name);
+        }else if(children != null) {    // component's port/generic symbol
+            for(int i = 0; i < children.size(); i++) {
+                SymbolTable table = children.get(i);
+                if(table.get(name) != null) {
+                    ret = table;
+                    break;
+                }
+            }
+        }
+        return ret;
     }
     
     public SymbolTable getParent() {
