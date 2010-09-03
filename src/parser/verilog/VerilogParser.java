@@ -35,4 +35,9 @@ public class VerilogParser implements IParser
         return null;
     }
 
+    @Override
+    public ISymbol getSymbol(IASTNode node, String[] names) {
+        return null;
+    }
+
 }

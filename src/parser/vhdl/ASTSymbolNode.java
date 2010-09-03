@@ -148,7 +148,14 @@ public class ASTSymbolNode extends ASTNode
             tmpNode0 = (ASTNode)tmpNode0.getChildById(ASTTYPE_MARK);
             if(tmpNode0 != null) {
                 sym.type = tmpNode0.getName();
+                
+                // type range(children of type_mark)
+                tmpNode0 = (ASTNode)tmpNode0.getDescendant(ASTRANGE);
+                if(tmpNode0 != null) {
+                    sym.typeRange = getRange(tmpNode0);
+                }
             }
+            
             mySymTab.add(sym);
             break;
             
