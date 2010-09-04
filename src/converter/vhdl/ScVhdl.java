@@ -10,7 +10,9 @@ import parser.Token;
 import parser.vhdl.ASTNode;
 import parser.vhdl.IVhdlType;
 import parser.vhdl.Symbol;
+import parser.vhdl.SymbolTable;
 import parser.vhdl.VhdlASTConstants;
+import parser.vhdl.VhdlParser;
 import parser.vhdl.VhdlTokenConstants;
 
 public class ScVhdl implements SCVhdlConstants, VhdlTokenConstants, 
@@ -221,6 +223,23 @@ public class ScVhdl implements SCVhdlConstants, VhdlTokenConstants,
         return ret;
     }
     
+    String[] getTypeRange(ASTNode node, String[] names) {
+        Symbol sym = (Symbol)parser.getSymbol(node, names);
+        if(sym == null) { return null; }
+        Symbol sym1 = (Symbol)parser.getSymbol(node, sym.type);
+        if(sym1 == null) { return sym.typeRange; }  //TODO: only tow level here
+        return sym1.typeRange;
+    }
+    
+    String[] getArrayRange(ASTNode node, String[] names) {
+        Symbol sym = (Symbol)parser.getSymbol(node, names);
+        if(sym == null) { return null; }
+        Symbol sym1 = (Symbol)parser.getSymbol(node, sym.type);
+        if(sym1 == null) { return sym.arrayRange; }  //TODO: only tow level here
+        return sym1.arrayRange;
+    }
+    
+    
     /** often be used in "<b>others</b>" of aggregate */
     String[] getTargetRange() {
         String[] ret = null;
@@ -251,10 +270,45 @@ public class ScVhdl implements SCVhdlConstants, VhdlTokenConstants,
             }
             
             if(cd != null) {
-                Symbol sym = null;
-                String[] segs = new String[cd.idList.items.size()];
-                sym = (Symbol)parser.getSymbol(node, cd.idList.items.toArray(segs));
-                ret = sym.typeRange;
+                String[] names = {cd.idList.items.get(0).identifier};
+                ret = getTypeRange(node, names);
+            }
+        }
+
+        return ret;
+    }
+    
+    String[] getTargetArrayRange() {
+        String[] ret = null;
+        ASTNode node = null;
+        
+        /* check statement */
+        if((node = curNode.getAncestor(ASTVARIABLE_ASSIGNMENT_STATEMENT)) != null) {
+            ScVariable_assignment_statement var = new ScVariable_assignment_statement(node);
+            ret = var.target.getTargetArrayRange();
+        }else if((node = curNode.getAncestor(ASTCONDITIONAL_SIGNAL_ASSIGNMENT)) != null) {
+            ScConditional_signal_assignment csa = new ScConditional_signal_assignment(node);
+            ret = csa.target.getTargetArrayRange();
+        }else if((node = curNode.getAncestor(ASTSELECTED_SIGNAL_ASSIGNMENT)) != null) {
+            ScSelected_signal_assignment ssa = new ScSelected_signal_assignment(node);
+            ret = ssa.target.getTargetArrayRange();
+        }else if((node = curNode.getAncestor(ASTSIGNAL_ASSIGNMENT_STATEMENT)) != null) {
+            ScSignal_assignment_statement sas = new ScSignal_assignment_statement(node);
+            ret = sas.target.getTargetArrayRange();
+        }else {
+            /* check declaration */
+            ScCommonDeclaration cd = null;
+            if((node = curNode.getAncestor(ASTCONSTANT_DECLARATION)) != null) {
+                cd = new ScConstant_declaration(node);
+            }else if((node = curNode.getAncestor(ASTSIGNAL_DECLARATION)) != null) {
+                cd = new ScSignal_declaration(node);
+            }else if((node = curNode.getAncestor(ASTVARIABLE_DECLARATION)) != null) {
+                cd = new ScVariable_declaration(node);
+            }
+            
+            if(cd != null) {
+                String[] names = {cd.idList.items.get(0).identifier};
+                ret = getArrayRange(node, names);
             }
         }
 
@@ -440,7 +494,7 @@ class ScCommonDeclaration extends ScVhdl {
         }
         
         if(expression != null) {
-            ArrayList<ScVhdl> items = idList.getItems();
+            ArrayList<ScIdentifier> items = idList.getItems();
             for(int i = 0; i < items.size(); i++) {
                 ret += " " + items.get(i).scString();
                 ret += " = " + expression.scString();
@@ -470,8 +524,8 @@ class ScCommonIdentifier extends ScVhdl {
         if(sym != null) {
             String[] range = sym.typeRange;
             if(range != null) {
-                int v1 = getIntValue(sym.range[0]);
-                int v2 = getIntValue(sym.range[2]);
+                int v1 = getIntValue(sym.typeRange[0]);
+                int v2 = getIntValue(sym.typeRange[2]);
                 return (v1 > v2) ? (v1-v2+1) : (v2-v1+1);
             }
         }
@@ -705,13 +759,13 @@ class ScAdding_operator extends ScVhdl {
  *   <dd> ( element_association { , element_association } )
  */
 class ScAggregate extends ScVhdl {
-    ArrayList<ScVhdl> elementList = new ArrayList<ScVhdl>();
+    ArrayList<ScElement_association> elementList = new ArrayList<ScElement_association>();
     public ScAggregate(ASTNode node) {
         super(node);
         assert(node.getId() == ASTAGGREGATE);
         for(int i = 0; i < node.getChildrenNum(); i++) {
             IASTNode c = node.getChild(i);
-            ScVhdl n = new ScElement_association((ASTNode)c);
+            ScElement_association n = new ScElement_association((ASTNode)c);
             elementList.add(n);
         }
     }
@@ -723,16 +777,71 @@ class ScAggregate extends ScVhdl {
         }
         return ret;
     }
+    
+    public SymbolTable getTargetTypeSymbolTable() {
+        SymbolTable ret = null;
+        ASTNode node = null;
+        ScCommonDeclaration cd = null;
+        if((node = curNode.getAncestor(ASTCONSTANT_DECLARATION)) != null) {
+            cd = new ScConstant_declaration(node);
+        }else if((node = curNode.getAncestor(ASTSIGNAL_DECLARATION)) != null) {
+            cd = new ScSignal_declaration(node);
+        }else if((node = curNode.getAncestor(ASTVARIABLE_DECLARATION)) != null) {
+            cd = new ScVariable_declaration(node);
+        }
+        
+        if(cd != null) {
+            Symbol sym = (Symbol)parser.getSymbol(node, cd.idList.items.get(0).identifier);
+            if(sym == null) { return null; }
+            ret = curNode.getSymbolTable().getTableOfSymbol(sym.type); //TODO: only tow level here
+            if(ret != null)
+                ret = ret.getChild(sym.type);
+        }
+        return ret;
+    }
 
     public String scString() {
-        String ret = "(";
+        String[] typeRange = getTargetRange();
+        String[] arrayRange = getTargetArrayRange();
+        SymbolTable recordTable = getTargetTypeSymbolTable();
+        boolean isArray = (arrayRange != null);
+        
+        String ret = "";
+        if(isArray)
+            ret += "{";
+        else if(elementList.size() > 1)
+            ret += "(";
+        
+        int max = 1;
+        if(isArray) {
+            int v1 = getIntValue(arrayRange[0]);
+            int v2 = getIntValue(arrayRange[2]);
+            max = (v1 > v2) ? (v1-v2+1) : (v2-v1+1);
+        }else if(typeRange != null) {
+            int v1 = getIntValue(typeRange[0]);
+            int v2 = getIntValue(typeRange[2]);
+            max = (v1 > v2) ? (v1-v2+1) : (v2-v1+1);
+        }
+        
+        int num = 0;
         for(int i = 0; i < elementList.size(); i++) {
-            ret += elementList.get(i).scString();
+            int width = max-num;
+            if(recordTable != null && recordTable.get(i).typeRange != null) {
+                int v1 = getIntValue(recordTable.get(i).typeRange[0]);
+                int v2 = getIntValue(recordTable.get(i).typeRange[2]);
+                width = (v1 > v2) ? (v1-v2+1) : (v2-v1+1);
+            }
+            ret += elementList.get(i).toBitString(width, isArray);
+            num += elementList.get(i).getBitWidth();
             if(i < elementList.size() - 1) {
                 ret += ", ";
             }
         }
-        ret += ")";
+        
+        if(isArray)
+            ret += "}";
+        else if(elementList.size() > 1)
+            ret += ")";
         return ret;
     }
 }
@@ -3423,19 +3532,35 @@ class ScElement_association extends ScVhdl {
         }
         return expression.getBitWidth();
     }
-
-    public String scString() {
+    
+    public String toBitString(int max, boolean isArray) {
         String ret = "";
         String val = expression.scString();
         if(choices != null) {
             //TODO choices
             if(choices.isOthers()) {
-                
+                if(isArray) {
+                    for(int i = 0; i < max; i++) {
+                        ret += val;
+                        if(i < max-1) { ret += ", "; }
+                    }
+                }else {
+                    ret += '\"';
+                    String tmp = getReplaceValue(val);
+                    for(int i = 0; i < max; i++) { ret += tmp; }
+                    ret += '\"';
+                }
+            }else {
+                ret += val;
             }
         }else {
             ret += val;
         }
         return ret;
+    }
+
+    public String scString() {
+        return toBitString(getBitWidth(), false);
     }
 }
 
@@ -4706,19 +4831,19 @@ class ScIdentifier extends ScCommonIdentifier {
  *   <dd> identifier { , identifier }
  */
 class ScIdentifier_list extends ScVhdl {
-    ArrayList<ScVhdl> items = new ArrayList<ScVhdl>();
+    ArrayList<ScIdentifier> items = new ArrayList<ScIdentifier>();
     public ScIdentifier_list(ASTNode node) {
         super(node);
         assert(node.getId() == ASTIDENTIFIER_LIST);
         for(int i = 0; i < node.getChildrenNum(); i++) {
             ASTNode c = (ASTNode)node.getChild(i);
             assert(c.getId() == ASTIDENTIFIER);
-            ScVhdl item = new ScIdentifier(c);
+            ScIdentifier item = new ScIdentifier(c);
             items.add(item);
         }
     }
     
-    public ArrayList<ScVhdl> getItems() {
+    public ArrayList<ScIdentifier> getItems() {
         return items;
     }
 
@@ -4796,7 +4921,7 @@ class ScIf_statement extends ScVhdl {
         ret += intent() + "if(" + if_pair.condition.scString() + ")\r\n";
         ret += intent() + "{\r\n";
         startIntentBlock();
-        ret += if_pair.seq_statements.scString() + "\r\n";
+        ret += if_pair.seq_statements.scString();
         if(elsif_pair.size() > 0) {
             endIntentBlock();
             ret += intent() + "}\r\n";
@@ -4805,7 +4930,7 @@ class ScIf_statement extends ScVhdl {
                 ret += intent() + "else if(" + pair.condition.scString() + ")\r\n";
                 ret += intent() + "{\r\n";
                 startIntentBlock();
-                ret += pair.seq_statements.scString() + "\r\n";
+                ret += pair.seq_statements.scString();
             }
         }
         
@@ -4815,7 +4940,7 @@ class ScIf_statement extends ScVhdl {
             ret += intent() + "else\r\n";
             ret += intent() + "{\r\n";
             startIntentBlock();
-            ret += else_pair.seq_statements.scString() + "\r\n";
+            ret += else_pair.seq_statements.scString();
         }
         endIntentBlock();
         ret += intent() + "}";
@@ -8275,7 +8400,8 @@ class ScSlice_name extends ScVhdl {
 
     public String scString() {
         String ret = "";
-        if(!curNode.isDescendantOf(ASTEXPRESSION)) {
+        if(!curNode.isDescendantOf(ASTEXPRESSION)
+            && !curNode.isDescendantOf(ASTTARGET)) {
             ret += getReplaceType(prefix.scString(), range.getRange());
         }else {
             ret += prefix.scString() + ".range(";
@@ -8793,16 +8919,26 @@ class ScTarget extends ScVhdl {
         String[] ret = null;
         if(item instanceof ScName) {
             String[] segs = ((ScName)item).getNameSegments();
-            Symbol sym = (Symbol)parser.getSymbol(item.curNode, segs);
-            assert(sym != null); // must found, because the variable always has been defined
-            ret = sym.typeRange;
+            ret = getTypeRange(item.curNode, segs);
         }else {
             warning("aggregate target range not supported");
             //TODO aggregate target range
         }
         return ret;
     }
-
+    
+    public String[] getTargetArrayRange() {
+        String[] ret = null;
+        if(item instanceof ScName) {
+            String[] segs = ((ScName)item).getNameSegments();
+            ret = getArrayRange(item.curNode, segs);
+        }else {
+            warning("aggregate target range not supported");
+            //TODO aggregate target range
+        }
+        return ret;
+    }
+    
     public String scString() {
         return item.scString();
     }

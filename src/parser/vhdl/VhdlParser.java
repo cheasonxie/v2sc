@@ -7360,9 +7360,11 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         {
             if((sym = tab0.getSymbol(names[i])) == null)
                 return null;
-            if((tab1 = tab0.getTableOfSymbol(sym.type)) == null)
-                return null;
-            tab0 = tab1.getChild(sym.type);
+            if(i < names.length - 1) {
+                if((tab1 = tab0.getTableOfSymbol(sym.type)) == null)
+                    return null;
+                tab0 = tab1.getChild(sym.type);
+            }
         }
         return sym;
     }

@@ -27,7 +27,7 @@ public class SymbolTable extends VhdlArrayList<Symbol>
      * 1. package need child table(such as component's port_list/generic_list)
      * 2. record, physical, enum need child table
      */
-    protected void addChild(String name, SymbolTable child) {
+    public void addChild(String name, SymbolTable child) {
         if(children == null) {
             children = new HashMap<String, SymbolTable>();
         }
@@ -39,7 +39,7 @@ public class SymbolTable extends VhdlArrayList<Symbol>
      * 1. package need child table(such as component's port_list/generic_list)
      * 2. record, physical, enum need child table
      */
-    protected void copyChild(SymbolTable other, Symbol[] symbols) {
+    public void copyChild(SymbolTable other, Symbol[] symbols) {
         if(other == null || symbols == null) {
             return;
         }
@@ -61,7 +61,7 @@ public class SymbolTable extends VhdlArrayList<Symbol>
      * 1. package need child table(such as component's port_list/generic_list)
      * 2. record, physical, enum need child table
      */
-    protected SymbolTable getChild(String name) {
+    public SymbolTable getChild(String name) {
         if(children == null) {
             return null;
         }
@@ -92,7 +92,7 @@ public class SymbolTable extends VhdlArrayList<Symbol>
     /**
      * Get symbol table which actually contains the symbol by name
      */
-    protected SymbolTable getTableOfSymbol(String name) {
+    public SymbolTable getTableOfSymbol(String name) {
         SymbolTable ret = null;
         if(get(name) != null)
             return this;
