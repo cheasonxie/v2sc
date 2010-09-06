@@ -743,14 +743,19 @@ class ScActual_part extends ScVhdl {
  */
 class ScAdding_operator extends ScVhdl {
     ScToken token = null;
+    boolean isConcat = false;
     public ScAdding_operator(ASTNode node) {
         super(node);
         //assert(node.getId() == ASTADDING_OPERATOR);
         token = new ScToken(node);
+        isConcat = token.image.equals("&");
     }
 
     public String scString() {
-        return token.scString();
+        if(isConcat)
+            return ",";
+        else
+            return token.scString();
     }
 }
 
@@ -8161,7 +8166,11 @@ class ScSimple_expression extends ScVhdl {
         }
         
         for(int i = 1; i < items.size() - 1; i += 2) {
-            ret += " " + getReplaceOperator(items.get(i).scString()) + " ";
+            if(!(items.get(i) instanceof ScAdding_operator 
+                    && ((ScAdding_operator)items.get(i)).isConcat))
+                ret += " ";
+            ret += getReplaceOperator(items.get(i).scString());
+            ret += " ";
             term = (ScTerm)items.get(i+1);
             tmp = term.scString();
             if(term.items.size() > 2) {
