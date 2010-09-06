@@ -1,6 +1,7 @@
 package converter.vhdl;
 
 import java.util.ArrayList;
+import java.util.StringTokenizer;
 
 import common.printFileAndLineNumber;
 
@@ -11,6 +12,7 @@ import parser.vhdl.ASTNode;
 import parser.vhdl.IVhdlType;
 import parser.vhdl.Symbol;
 import parser.vhdl.SymbolTable;
+import parser.vhdl.TokenManager;
 import parser.vhdl.VhdlASTConstants;
 import parser.vhdl.VhdlParser;
 import parser.vhdl.VhdlTokenConstants;
@@ -21,6 +23,7 @@ public class ScVhdl implements SCVhdlConstants, VhdlTokenConstants,
     protected static IParser parser = null;
     protected static ArrayList<ScCommonIdentifier> units = null;    // entity or package
     protected static int curLevel = 0;    // intent level
+    protected static ArrayList<String> additionStatements = null;   // somthing ignored
     
     protected ASTNode curNode = null;
     protected int beginLine = 0;
@@ -119,6 +122,9 @@ public class ScVhdl implements SCVhdlConstants, VhdlTokenConstants,
                 && (range[0].length() > 0));
     }
     
+    /**
+     * calculate result of add one
+     */
     static String addOne(String input)
     {
         String str, ret;
@@ -141,12 +147,15 @@ public class ScVhdl implements SCVhdlConstants, VhdlTokenConstants,
             if(str.startsWith("0x")) {
                 str = str.substring(2);
                 value = Integer.parseInt(str, 16) + addition;
-                if(value == 0) {
-                    ret = input.substring(0, index).trim();
-                }else {
-                    ret = input.substring(0, index+1) + " ";
-                    ret += String.format("%d", value);
-                }
+            }else {
+                value = Integer.parseInt(str, 10) + addition;
+            }
+            
+            if(value == 0) {
+                ret = input.substring(0, index).trim();
+            }else {
+                ret = input.substring(0, index+1) + " ";
+                ret += String.format("%d", value);
             }
         }else {
             try {
@@ -179,7 +188,8 @@ public class ScVhdl implements SCVhdlConstants, VhdlTokenConstants,
         String max = to;
         if (dir.equalsIgnoreCase(RANGE_DOWNTO))
             max = from;
-
+        
+        // check whether max is valid
         ret += "<" + addOne(max) + ">";
         return ret;
     }
@@ -476,12 +486,26 @@ class ScCommonDeclaration extends ScVhdl {
         }
     }
     
+    protected boolean isTypeValid() {
+        return true;
+    }
+    
     public String scString() {
         String ret = "";
         if(signal_kind != null) {
             warning("signal kind ignored:" + signal_kind.token);
         }
         String strType = sub.scString();
+        String maxIndex = "";
+        int index = strType.indexOf('<');
+          if(!isTypeValid() && index > 0) {
+            String strTmp = strType.substring(0, index);
+            if(strTmp.equals(scType[SC_UINT])) {
+                int index2 = strType.lastIndexOf('>');
+                maxIndex = strType.substring(index+1, index2).trim();
+                strType = "sc_uint_base";
+            }
+        }
         
         if(curNode.isDescendantOf(ASTPORT_LIST)) {
             if(mode != null) {
@@ -497,22 +521,23 @@ class ScCommonDeclaration extends ScVhdl {
             if(strType.endsWith(">")) {
                 ret += " ";  // avoid double '>'
             }
-            ret += "> ";
+            ret += ">";
         }else {
-            ret += strType + " ";
-        }
+            ret += strType;
+        }        
         
-        if(expression != null) {
-            ArrayList<ScIdentifier> items = idList.getItems();
-            for(int i = 0; i < items.size(); i++) {
-                ret += " " + items.get(i).scString();
-                ret += " = " + expression.scString();
-                if(i < items.size() - 1) {
-                    ret += ",";
-                }
+        ArrayList<ScIdentifier> items = idList.getItems();
+        for(int i = 0; i < items.size(); i++) {
+            ret += " " + items.get(i).scString();
+            if(!maxIndex.isEmpty()) {
+                ret += "(" + maxIndex + ")";
             }
-        }else {
-            ret += idList.scString();
+            if(expression != null) {
+                ret += " = " + expression.scString();
+            }
+            if(i < items.size() - 1) {
+                ret += ",";
+            }
         }
         return ret;
     }
@@ -1455,21 +1480,29 @@ class ScAttribute_name extends ScVhdl {
 
     public String scString() {
         String ret = "";
-        ret += prefix.scString();
         if(signature != null) {
             warning("signature ignored");
         }
-        ret += "." + designator.scString();
-        ret += "(";
-        if(expressions.size() > 0) {
-            for(int i = 0; i < expressions.size(); i++) {
-                ret += expressions.get(i).scString();
-                if(i < expressions.size() - 1) {
-                    ret += ", ";
+        
+        String attri = designator.scString();
+        //if(attri.equalsIgnoreCase("left")) {
+        //    ret += getMax();
+        //}else if(attri.equalsIgnoreCase("right")) {
+        //    ret += getMin();
+        //}else {
+            ret += prefix.scString();
+            ret += "." + attri;
+            ret += "(";
+            if(expressions.size() > 0) {
+                for(int i = 0; i < expressions.size(); i++) {
+                    ret += expressions.get(i).scString();
+                    if(i < expressions.size() - 1) {
+                        ret += ", ";
+                    }
                 }
             }
-        }
-        ret += ")";
+            ret += ")";
+        //}
         return ret;
     }
 }
@@ -4538,7 +4571,7 @@ class ScFree_quantity_declaration extends ScCommonDeclaration {
     }
 
     public String scString() {
-        String ret = super.scString();
+        String ret = intent() + super.scString();
         ret += ";";
         return ret;
     }
@@ -4886,8 +4919,8 @@ class ScIdentifier_list extends ScVhdl {
  */
 class ScIf_statement extends ScVhdl {
     class ConPair {
-        ScVhdl condition = null;
-        ScVhdl seq_statements = null;
+        ScCondition condition = null;
+        ScSequence_of_statements seq_statements = null;
     }
     ConPair if_pair = new ConPair();
     ArrayList<ConPair> elsif_pair = new ArrayList<ConPair>();
@@ -5137,22 +5170,25 @@ class ScIndexed_name extends ScVhdl {
         Symbol sym = (Symbol)parser.getSymbol(curNode, prefix.getNameSegments());
         if(sym != null)
             sym = (Symbol)parser.getSymbol(curNode, sym.type);
+        
         if(sym != null && sym.arrayRange != null) { // has array index
             ret += "[";
         }else {
             ret += "(";
         }
+        
         for(int i = 0; i < exps.size(); i++) {
             ret += exps.get(i).scString();
             if(i < exps.size() - 1) {
                 ret += ", ";
             }
         }
-        if(sym != null && sym.typeRange != null) {
+        
+        if(sym != null && sym.arrayRange != null) {
             ret += "]";
         }else {
             ret += ")";
-        };
+        }
         return ret;
     }
 }
@@ -5239,7 +5275,7 @@ class ScInterface_constant_declaration extends ScCommonDeclaration {
     }
 
     public String scString() {
-        String ret = "const ";
+        String ret = intent() + "const ";
         ret += super.scString();
         return ret;
     }
@@ -5327,7 +5363,7 @@ class ScInterface_file_declaration extends ScCommonDeclaration {
     }
 
     public String scString() {
-        String ret = "file ";
+        String ret = intent() + "file ";
         ret += super.scString();
         return ret;
     }
@@ -7349,8 +7385,8 @@ class ScRelation extends ScVhdl {
         }
         
         if(r_exp != null) {
-            ret += " " + getReplaceOperator(operator.scString()) + " ";
-            tmp += r_exp.scString();
+            ret += " " + operator.scString() + " ";
+            tmp = r_exp.scString();
             if(r_exp.r_exp != null) {
                 ret += "(" + tmp + ")";
             }else {
@@ -7375,7 +7411,7 @@ class ScRelational_operator extends ScVhdl {
     }
 
     public String scString() {
-        return op.scString();
+        return getReplaceOperator(op.scString());
     }
 }
 
@@ -8558,6 +8594,7 @@ class ScSubprogram_body extends ScVhdl {
     }
 
     public String scString() {
+        additionStatements = new ArrayList<String>();
         String ret = "\r\n";
         ret += spec.scString() + "\r\n";
         ret += intent() + "{\r\n";
@@ -8574,6 +8611,7 @@ class ScSubprogram_body extends ScVhdl {
             }
             ret += ";\r\n";
         }
+        additionStatements = null;
         ret += "\r\n" + statement_part.scString() + "\r\n";
         endIntentBlock();
         ret += intent() + "}\r\n";
@@ -9045,7 +9083,7 @@ class ScTerminal_declaration extends ScCommonDeclaration {
     }
     
     public String scString() {
-        String ret = super.scString();
+        String ret = intent() + super.scString();
         ret += ";";
         return ret;
     }
@@ -9383,6 +9421,20 @@ class ScVariable_declaration extends ScCommonDeclaration {
     public ScVariable_declaration(ASTNode node) {
         super(node);
         assert(node.getId() == ASTVARIABLE_DECLARATION);
+    }
+    
+    protected boolean isTypeValid() {
+        boolean ret = true;
+        StringTokenizer tkn = new StringTokenizer(sub.scString(), TokenManager.specialChar);
+        while(tkn.hasMoreTokens()) {
+            String tmp = tkn.nextToken().trim();
+            Symbol sym = (Symbol)parser.getSymbol(curNode, tmp);
+            if(sym != null && sym.kind == VARIABLE) {
+                ret = false;
+                break;
+            }
+        }
+        return ret;
     }
     
     public String scString() {

@@ -90,9 +90,9 @@ public class TokenManager extends RegExp implements VhdlTokenConstants
         strLine = "";
     }
     
-    final String specialChar = "&()*+,-./:;<>=|[]!$%@?";
-    final char singleQuote = '\'';
-    final char doubleQuote = '\"';
+    public static final String specialChar = "&()*+,-./:;<>=|[]!$%@?";
+    static final char singleQuote = '\'';
+    static final char doubleQuote = '\"';
     
     /**
      * skip space and tabulation and comment
