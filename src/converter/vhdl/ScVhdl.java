@@ -223,6 +223,15 @@ public class ScVhdl implements SCVhdlConstants, VhdlTokenConstants,
         return ret;
     }
     
+    String[] getLoopVar() {
+        ArrayList<Symbol> syms = curNode.getSymbolTable().getSymbol(LOOP);
+        String[] ret = new String[syms.size()];
+        for(int i = 0; i < syms.size(); i++) {
+            ret[i] = syms.get(i).name;
+        }
+        return ret;
+    }
+    
     String[] getTypeRange(ASTNode node, String[] names) {
         Symbol sym = (Symbol)parser.getSymbol(node, names);
         if(sym == null) { return null; }
@@ -8553,8 +8562,19 @@ class ScSubprogram_body extends ScVhdl {
         ret += spec.scString() + "\r\n";
         ret += intent() + "{\r\n";
         startIntentBlock();
-        ret += declarative_part.scString() + "\r\n\r\n";
-        ret += statement_part.scString() + "\r\n";
+        ret += declarative_part.scString() + "\r\n";
+        String[] lvars = getLoopVar();
+        if(lvars != null && lvars.length > 0) {
+            ret += intent() + "int ";
+            for(int i = 0; i < lvars.length; i++) {
+                ret += lvars[i];
+                if(i < lvars.length - 1) {
+                    ret += ", ";
+                }
+            }
+            ret += ";\r\n";
+        }
+        ret += "\r\n" + statement_part.scString() + "\r\n";
         endIntentBlock();
         ret += intent() + "}\r\n";
         return ret;

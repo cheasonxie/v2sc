@@ -8,6 +8,7 @@
  **/
 package parser.vhdl;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class SymbolTable extends VhdlArrayList<Symbol>
@@ -87,6 +88,27 @@ public class SymbolTable extends VhdlArrayList<Symbol>
             }
         }
         return ret;
+    }
+    
+    /**
+     * Get all symbols of specified kind
+     */
+    public ArrayList<Symbol> getSymbol(int kind) {
+        ArrayList<Symbol> syms = new ArrayList<Symbol>();
+        for(int i = 0; i < size(); i++) {
+            if(get(i).kind == kind) {
+                syms.add(get(i));
+            }
+        }
+        
+        if(parent != null) {
+            syms.addAll(parent.getSymbol(kind));
+        }else if(children != null) {    // component's port/generic symbol
+            for(int i = 0; i < children.size(); i++) {
+                syms.addAll(children.get(i));
+            }
+        }
+        return syms;
     }
     
     /**

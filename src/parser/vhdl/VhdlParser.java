@@ -4058,7 +4058,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         }else if(kind == FOR) {
             new ASTtoken(node, tokenImage[FOR]);
             parameter_specification(node, endToken);
-            addSymbol(node, VARIABLE, strVhdlType[TYPE_INTEGER]);  // loop variable
+            addSymbol(node, LOOP, strVhdlType[TYPE_INTEGER]);  // loop variable
         }else {
             throw new ParserException(tokenMgr.toNextToken());
         }
