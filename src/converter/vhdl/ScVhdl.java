@@ -1280,11 +1280,11 @@ class ScAssertion extends ScVhdl {
     public String scString() {
         String ret = "";
         if(report_exp != null) {
-            ret += intent() + "if(!(" + condition.scString() + "))\r\n";
+            ret += "if(!(" + condition.scString() + "))\r\n";
             ret += intent(curLevel+1) + "printf(\"";
             ret += report_exp.scString() + "\");\r\n";
         }
-        ret += "assert(" + condition.scString() + ");";
+        ret += intent() + "assert(" + condition.scString() + ")";
         if(severity_exp != null) {
             warning("assertion severity ignored");
         }
@@ -1466,26 +1466,38 @@ class ScAttribute_name extends ScVhdl {
     }
     
     public String getMin() {
-        Symbol sym = (Symbol)parser.getSymbol(curNode, prefix.curNode.firstTokenImage());
-        if(sym.range[1].equalsIgnoreCase(RANGE_TO)) {
-            return sym.range[2];
+        String[] names = {prefix.curNode.firstTokenImage()};
+        String[] range = getTypeRange(curNode, names);
+        if(range == null) {
+            range = getArrayRange(curNode, names);
+        }
+        if(range[1].equalsIgnoreCase(RANGE_TO)) {
+            return range[2];
         }else {
-            return sym.range[0];
+            return range[0];
         }
     }
     
     public String getMax() {
-        Symbol sym = (Symbol)parser.getSymbol(curNode, prefix.curNode.firstTokenImage());
-        if(sym.range[1].equalsIgnoreCase(RANGE_TO)) {
-            return sym.range[0];
+        String[] names = {prefix.curNode.firstTokenImage()};
+        String[] range = getTypeRange(curNode, names);
+        if(range == null) {
+            range = getArrayRange(curNode, names);
+        }
+        if(range[1].equalsIgnoreCase(RANGE_TO)) {
+            return range[0];
         }else {
-            return sym.range[2];
+            return range[2];
         }
     }
     
     public String[] getRange() {
-        Symbol sym = (Symbol)parser.getSymbol(curNode, prefix.curNode.firstTokenImage());
-        return sym.range;
+        String[] names = {prefix.curNode.firstTokenImage()};
+        String[] range = getTypeRange(curNode, names);
+        if(range == null) {
+            range = getArrayRange(curNode, names);
+        }
+        return range;
     }
 
     public String scString() {
@@ -2321,11 +2333,9 @@ class ScCase_statement extends ScVhdl {
         }else {
             ret += intent() + "switch(" + expression.scString() + ")\r\n";
             ret += intent() + "{\r\n";
-            startIntentBlock();
             for(int i = 0; i < statement_alt.size(); i++) {
                 ret += statement_alt.get(i).scString() + "\r\n";
             }
-            endIntentBlock();
             ret += intent() + "}\r\n";
         }
 
@@ -6994,21 +7004,58 @@ class ScProcedure_call_statement extends ScVhdl {
  *   <br> | group_declaration
  */
 class ScProcess_declarative_item extends ScVhdl {
+    ScVhdl item = null;
     public ScProcess_declarative_item(ASTNode node) {
         super(node);
         //assert(node.getId() == ASTPROCESS_DECLARATIVE_ITEM);
-        for(int i = 0; i < node.getChildrenNum(); i++) {
-            ASTNode c = (ASTNode)node.getChild(i);
-            switch(c.getId())
-            {
-            default:
-                break;
-            }
+        switch(node.getId())
+        {
+        case ASTSUBPROGRAM_DECLARATION:
+            item = new ScSubprogram_declaration(node);
+            break;
+        case ASTSUBPROGRAM_BODY:
+            item = new ScSubprogram_body(node);
+            break;
+        case ASTTYPE_DECLARATION:
+            item = new ScType_declaration(node);
+            break;
+        case ASTSUBTYPE_DECLARATION:
+            item = new ScSubtype_declaration(node);
+            break;
+        case ASTCONSTANT_DECLARATION:
+            item = new ScConstant_declaration(node);
+            break;
+        case ASTVARIABLE_DECLARATION:
+            item = new ScVariable_declaration(node);
+            break;
+        case ASTFILE_DECLARATION:
+            item = new ScFile_declaration(node);
+            break;
+        case ASTALIAS_DECLARATION:
+            item = new ScAlias_declaration(node);
+            break;
+        case ASTATTRIBUTE_DECLARATION:
+            item = new ScAttribute_declaration(node);
+            break;
+        case ASTATTRIBUTE_SPECIFICATION:
+            item = new ScAttribute_specification(node);
+            break;
+        case ASTUSE_CLAUSE:
+            item = new ScUse_clause(node);
+            break;
+        case ASTGROUP_TEMPLATE_DECLARATION:
+            item = new ScGroup_template_declaration(node);
+            break;
+        case ASTGROUP_DECLARATION:
+            item = new ScGroup_declaration(node);
+            break;
+        default:
+            break;
         }
     }
 
     public String scString() {
-        return "";
+        return item.scString();
     }
 }
 
@@ -7017,13 +7064,23 @@ class ScProcess_declarative_item extends ScVhdl {
  *   <dd> { process_declarative_item }
  */
 class ScProcess_declarative_part extends ScVhdl {
+    ArrayList<ScProcess_declarative_item> items = new ArrayList<ScProcess_declarative_item>();
     public ScProcess_declarative_part(ASTNode node) {
         super(node);
         assert(node.getId() == ASTPROCESS_DECLARATIVE_PART);
+        for(int i = 0; i < node.getChildrenNum(); i++) {
+            ASTNode c = (ASTNode)node.getChild(i);
+            ScProcess_declarative_item item = new ScProcess_declarative_item(c);
+            items.add(item);
+        }
     }
 
     public String scString() {
-        return "";
+        String ret = "";
+        for(int i = 0; i < items.size(); i++) {
+            ret += items.get(i).scString() + "\r\n";
+        }
+        return ret;
     }
 }
 
@@ -7086,21 +7143,23 @@ class ScProcess_statement extends ScCommonIdentifier {
  *   <dd> { sequential_statement }
  */
 class ScProcess_statement_part extends ScVhdl {
+    ArrayList<ScSequential_statement> statements = new ArrayList<ScSequential_statement>();
     public ScProcess_statement_part(ASTNode node) {
         super(node);
         assert(node.getId() == ASTPROCESS_STATEMENT_PART);
         for(int i = 0; i < node.getChildrenNum(); i++) {
             ASTNode c = (ASTNode)node.getChild(i);
-            switch(c.getId())
-            {
-            default:
-                break;
-            }
+            ScSequential_statement s = new ScSequential_statement(c);
+            statements.add(s);
         }
     }
 
     public String scString() {
-        return "";
+        String ret = "";
+        for(int i = 0; i < statements.size(); i++) {
+            ret += statements.get(i).scString() + "\r\n";
+        }
+        return ret;
     }
 }
 
@@ -9655,9 +9714,10 @@ class ScWaveform extends ScVhdl {
             ScExpression delayTime = (ScExpression)ele.getTime();
             if(delayTime != null) {
                 String unit = ele.getTimeUnit();
-                ret += intent() + "next_triger(" + delayTime + ", " + getSCTime(unit) + ");\r\n";                
+                ret += intent() + "next_triger(" + delayTime.scString() + 
+                                ", " + getSCTime(unit) + ");\r\n";                
             }
-            ret += intent() + target + ".write(" + ele.getValue() + ")";
+            ret += intent() + target + ".write(" + ele.getValue().scString() + ")";
             if(j < elements.size() - 1) {
                 ret += ";\r\n";
             }
