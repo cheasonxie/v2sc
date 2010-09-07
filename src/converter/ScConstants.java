@@ -1,6 +1,6 @@
 package converter;
 
-public interface SCTreeConstants
+public interface ScConstants
 {
     // symbol type
     static final int SC_INVALID_TYPE    = -1;    

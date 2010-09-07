@@ -1,8 +1,8 @@
 package converter.vhdl;
 
-import converter.SCTreeConstants;
+import converter.ScConstants;
 
-public interface SCVhdlConstants extends SCTreeConstants
+public interface SCVhdlConstants extends ScConstants
 {
     // array direction
     static final String RANGE_TO = "to";

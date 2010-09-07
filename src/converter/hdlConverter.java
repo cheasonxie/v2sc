@@ -15,7 +15,7 @@ import parser.IParser;
 import parser.ParserException;
 import parser.vhdl.ASTNode;
 
-public abstract class hdlConverter implements SCTreeConstants
+public abstract class hdlConverter implements ScConstants
 {
     static public final int T_NONE = 0;
     static public final int T_VHDL = 1;
