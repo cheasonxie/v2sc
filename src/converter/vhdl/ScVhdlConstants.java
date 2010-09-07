@@ -2,7 +2,7 @@ package converter.vhdl;
 
 import converter.ScConstants;
 
-public interface SCVhdlConstants extends ScConstants
+public interface ScVhdlConstants extends ScConstants
 {
     // array direction
     static final String RANGE_TO = "to";

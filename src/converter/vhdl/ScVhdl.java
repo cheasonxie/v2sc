@@ -12,7 +12,7 @@ import parser.vhdl.Symbol;
 import parser.vhdl.VhdlASTConstants;
 import parser.vhdl.VhdlTokenConstants;
 
-public class ScVhdl implements SCVhdlConstants, VhdlTokenConstants, 
+public class ScVhdl implements ScVhdlConstants, VhdlTokenConstants, 
                         VhdlASTConstants, IVhdlType
 {
     protected static IParser parser = null;
