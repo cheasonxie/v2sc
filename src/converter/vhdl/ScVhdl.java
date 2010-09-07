@@ -23,7 +23,6 @@ public class ScVhdl implements SCVhdlConstants, VhdlTokenConstants,
     protected static IParser parser = null;
     protected static ArrayList<ScCommonIdentifier> units = null;    // entity or package
     protected static int curLevel = 0;    // intent level
-    protected static ArrayList<String> additionStatements = null;   // somthing ignored
     
     protected ASTNode curNode = null;
     protected int beginLine = 0;
@@ -3606,7 +3605,7 @@ class ScElement_association extends ScVhdl {
             if(choices.isOthers()) {
                 if(isArray) {
                     for(int i = 0; i < max; i++) {
-                        ret += val;
+                        ret += getReplaceValue(val);
                         if(i < max-1) { ret += ", "; }
                     }
                 }else {
@@ -5894,6 +5893,8 @@ class ScName extends ScVhdl {
         String[] segments = null;
         if(item instanceof ScSelected_name) {
             segments = ((ScSelected_name)item).getNameSegments();
+        }else if(item instanceof ScSlice_name) {
+            segments = ((ScSlice_name)item).prefix.getNameSegments();
         }else {
             segments = new String[1];
             segments[0] = item.scString();
@@ -8679,7 +8680,6 @@ class ScSubprogram_body extends ScVhdl {
     }
 
     public String scString() {
-        additionStatements = new ArrayList<String>();
         String ret = "\r\n";
         ret += spec.scString() + "\r\n";
         ret += intent() + "{\r\n";
@@ -8696,7 +8696,6 @@ class ScSubprogram_body extends ScVhdl {
             }
             ret += ";\r\n";
         }
-        additionStatements = null;
         ret += "\r\n" + statement_part.scString() + "\r\n";
         endIntentBlock();
         ret += intent() + "}\r\n";
@@ -9070,11 +9069,17 @@ class ScTarget extends ScVhdl {
     public String[] getTargetRange() {
         String[] ret = null;
         if(item instanceof ScName) {
-            String[] segs = ((ScName)item).getNameSegments();
+            String[] segs = null;
+            ScName name = (ScName)item;
+            segs = name.getNameSegments();
             ret = getTypeRange(item.curNode, segs);
         }else {
             warning("aggregate target range not supported");
             //TODO aggregate target range
+            ret = new String[3];
+            ret[0] = "0";
+            ret[1] = tokenImage[TO];
+            ret[2] = String.format("%d", item.getBitWidth());
         }
         return ret;
     }
