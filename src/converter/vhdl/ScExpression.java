@@ -44,9 +44,7 @@ class ScExpression extends ScVhdl {
     protected void setLogic(boolean logic) {
         super.setLogic(logic);
         for(int i = 0; i < items.size(); i ++) {
-            if(items.get(i) instanceof ScRelation) {
-                items.get(i).setLogic(logic);
-            }
+            items.get(i).setLogic(logic);
         }
     }
 

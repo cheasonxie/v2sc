@@ -1,20 +1,15 @@
 package converter.vhdl;
 
 import java.util.ArrayList;
-import java.util.StringTokenizer;
 
 import common.printFileAndLineNumber;
 
-import parser.IASTNode;
 import parser.IParser;
 import parser.Token;
 import parser.vhdl.ASTNode;
 import parser.vhdl.IVhdlType;
 import parser.vhdl.Symbol;
-import parser.vhdl.SymbolTable;
-import parser.vhdl.TokenManager;
 import parser.vhdl.VhdlASTConstants;
-import parser.vhdl.VhdlParser;
 import parser.vhdl.VhdlTokenConstants;
 
 public class ScVhdl implements SCVhdlConstants, VhdlTokenConstants, 

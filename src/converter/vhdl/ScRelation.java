@@ -46,11 +46,8 @@ class ScRelation extends ScVhdl {
             operator.setLogic(true);
         }
         super.setLogic(logic);
-        if(l_exp != null) {
+        if(r_exp == null) {
             l_exp.setLogic(logic);
-        }
-        if(r_exp != null) {
-            r_exp.setLogic(logic);
         }
     }
 

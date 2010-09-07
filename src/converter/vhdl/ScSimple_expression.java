@@ -19,6 +19,9 @@ class ScSimple_expression extends ScVhdl {
             ScVhdl newNode = null;
             switch(c.getId())
             {
+            case ASTSIGN:
+                sign = new ScSign(c);
+                break;
             case ASTTERM:
                 newNode = new ScTerm(c);
                 items.add(newNode);

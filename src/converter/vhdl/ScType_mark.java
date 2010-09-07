@@ -1,7 +1,6 @@
 package converter.vhdl;
 
 import parser.vhdl.ASTNode;
-import parser.vhdl.Symbol;
 
 
 /**
