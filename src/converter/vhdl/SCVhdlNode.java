@@ -30,7 +30,7 @@ public class SCVhdlNode extends SCTreeNode
         if(node == null)
             return;
 
-        targetIsLogical = node.isLogic();
+        targetIsLogical = false;
         startLine = node.getFirstToken().beginLine;
         endLine = node.getLastToken().endLine;
         if(curFileNode == null)

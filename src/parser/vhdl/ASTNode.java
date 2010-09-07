@@ -16,15 +16,10 @@ public class ASTNode implements IASTNode
     protected Token last_token = null;
     protected SymbolTable symTab = null;
     
-    boolean isBoolean = false;  // used only for expression
-    
     public ASTNode(IASTNode p, int id) {
         parent = p;
         this.id = id;
         if(p != null) {
-            if(p instanceof ASTNode) {
-                isBoolean = ((ASTNode)p).isBoolean;
-            }
             p.addChild(this);
         }
     }
@@ -81,10 +76,6 @@ public class ASTNode implements IASTNode
         }else {
             return "invalid_image";
         }
-    }
-   
-    public boolean isLogic() {
-        return isBoolean;
     }
 
     public IASTNode getChildById(int id) {

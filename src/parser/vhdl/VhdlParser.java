@@ -1939,7 +1939,18 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
      *   <dd> <i>boolean_</i>expression
      */
     void condition(IASTNode p, Token endToken) throws ParserException {
-        expression(p, endToken, true);
+        if(tokenMgr.getNextToken().kind == LBRACKET) {
+            Token tk1 = findTokenInBlock(tokenMgr.getNextToken(2), RBRACKET, endToken);
+            if(tokenMgr.getNextToken(tk1) == endToken) {
+                tokenMgr.toNextToken();
+                expression(p, endToken.prev);
+                tokenMgr.toNextToken();
+            }else {
+                expression(p, endToken);
+            }
+        }else {
+            expression(p, endToken);
+        }
     }
 
     /**
@@ -3046,23 +3057,9 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
      *   <br> | relation { <b>xnor</b> relation }
      */
     void expression(IASTNode p, Token endToken) throws ParserException {
-        expression(p, endToken, false);
-    }
-    void expression(IASTNode p, Token endToken, boolean is_bool) throws ParserException {
-        /*if(tokenMgr.getNextTokenKind() == LBRACKET) {
-            if(findTokenInBlock(tokenMgr.getNextToken(2), COMMA, endToken) != null) {
-                if(endToken != null && endToken.kind == RBRACKET) {
-                    endToken = tokenMgr.getNextToken(endToken);
-                }
-                aggregate(p, endToken); //TODO ?? not in syntax tree
-                ((ASTNode)p.getChildById(ASTAGGREGATE)).isBoolean = is_bool;
-                return;
-            }
-        }*/
         ASTNode node = new ASTNode(p, ASTEXPRESSION);
         //TODO expression type: boolean, time, string, guard,
         //                      static, real, value, file_open_kind
-        node.isBoolean = is_bool;
         openNodeScope(node);
         while(true) {
             Token expToken = endToken;
@@ -4909,7 +4906,15 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
                     qualified_expression(node, endToken);
                 }
             }else if(kind == LBRACKET) {
-                aggregate(node, endToken);    // contain "(expression)"
+                Token tmp = findTokenInBlock(tokenMgr.getNextToken(2), COMMA, endToken);
+                Token tmp1 = findTokenInBlock(tokenMgr.getNextToken(2), RARROW, endToken);
+                if(tmp != null || tmp1 != null) {
+                    aggregate(node, endToken);
+                }else {
+                    tokenMgr.toNextToken();     // "("
+                    expression(node, endToken.prev);
+                    tokenMgr.toNextToken();     // ")"
+                }
             }else {
                 name(node, endToken); // contain "function_call", "type_conversion"
             }

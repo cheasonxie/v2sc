@@ -28,6 +28,7 @@ public class ScVhdl implements SCVhdlConstants, VhdlTokenConstants,
     protected ASTNode curNode = null;
     protected int beginLine = 0;
     protected int endLine = 0;
+    protected boolean isLogic = false;
     
     
     /**
@@ -98,6 +99,10 @@ public class ScVhdl implements SCVhdlConstants, VhdlTokenConstants,
     protected String intent()
     {
         return intent(curLevel);
+    }
+    
+    protected void setLogic(boolean logic) {
+        isLogic = logic;
     }
     
     String getReplaceType(String type)
@@ -199,7 +204,7 @@ public class ScVhdl implements SCVhdlConstants, VhdlTokenConstants,
         String ret = token;
         for (int i = 0; i < vhdlOperators.length; i++) {
             if (token.equalsIgnoreCase(vhdlOperators[i])) {
-                if (curNode.isLogic())
+                if (isLogic)
                     ret = scOperators[replaceBooleanOp[i]];
                 else
                     ret = scOperators[replaceOp[i]];
@@ -837,6 +842,12 @@ class ScAggregate extends ScVhdl {
                 ret = ret.getChild(sym.type);
         }
         return ret;
+    }
+    
+    protected void setLogic(boolean logic) {
+        super.setLogic(logic);
+        if(elementList.size() < 2)
+            elementList.get(0).setLogic(logic);
     }
 
     public String scString() {
@@ -2841,11 +2852,12 @@ class ScConcurrent_statement extends ScVhdl {
  *   <dd> <i>boolean_</i>expression
  */
 class ScCondition extends ScVhdl {
-    ScVhdl expression = null;
+    ScExpression expression = null;
     public ScCondition(ASTNode node) {
         super(node);
         //assert(node.getId() == ASTCONDITION);
         expression = new ScExpression(node);
+        expression.setLogic(true);
     }
 
     public String scString() {
@@ -3580,6 +3592,12 @@ class ScElement_association extends ScVhdl {
         return expression.getBitWidth();
     }
     
+    protected void setLogic(boolean logic) {
+        super.setLogic(logic);
+        if(choices == null)
+            expression.setLogic(logic);
+    }
+    
     public String toBitString(int max, boolean isArray) {
         String ret = "";
         String val = expression.scString();
@@ -4291,24 +4309,33 @@ class ScExpression extends ScVhdl {
     public int getBitWidth() {
         return items.get(0).getBitWidth();
     }
+    
+    protected void setLogic(boolean logic) {
+        super.setLogic(logic);
+        for(int i = 0; i < items.size(); i ++) {
+            if(items.get(i) instanceof ScRelation) {
+                items.get(i).setLogic(logic);
+            }
+        }
+    }
 
     public String scString() {
         String ret = "";
-        boolean addBracket = false;
+//        boolean addBracket = false;
         ret += items.get(0).scString();
-        if(curNode.firstTokenImage().equals("(")
-                && items.get(0).scString().charAt(0) != '('
-                && curNode.getDescendant(ASTAGGREGATE) != null) {
-            addBracket = true;
-        }
-        if(addBracket)
-            ret = "(" + ret;
+//        if(curNode.firstTokenImage().equals("(")
+//                && items.get(0).scString().charAt(0) != '('
+//                && curNode.getDescendant(ASTAGGREGATE) != null) {
+//            addBracket = true;
+//        }
+//        if(addBracket)
+//            ret = "(" + ret;
         for(int i = 1; i < items.size() - 1; i += 2){
-            ret += " " + getReplaceOperator(items.get(i).scString()) + " ";
+            ret += getReplaceOperator(items.get(i).scString());
             ret += items.get(i+1).scString();
         }
-        if(addBracket)
-            ret += ")";
+//        if(addBracket)
+//            ret += ")";
         return ret;
     }
 }
@@ -4381,6 +4408,12 @@ class ScFactor extends ScVhdl {
     
     public int getBitWidth() {
         return primary0.getBitWidth();
+    }
+    
+    protected void setLogic(boolean logic) {
+        super.setLogic(logic);
+        if(primary1 == null)
+            primary0.setLogic(logic);
     }
 
     public String scString() {
@@ -6684,9 +6717,18 @@ class ScPrimary extends ScVhdl {
     public int getBitWidth() {
         return item.getBitWidth();
     }
+    
+    protected void setLogic(boolean logic) {
+        super.setLogic(logic);
+        item.setLogic(logic);
+    }
 
     public String scString() {
-        return item.scString();
+        if(item instanceof ScExpression) {
+            return "(" + item.scString() + ")";
+        }else {
+            return item.scString();
+        }
     }
 }
 
@@ -7384,6 +7426,20 @@ class ScRelation extends ScVhdl {
     public int getBitWidth() {
         return l_exp.getBitWidth();
     }
+    
+    protected void setLogic(boolean logic) {
+        if(operator != null) {
+            logic = true;
+            operator.setLogic(true);
+        }
+        super.setLogic(logic);
+        if(l_exp != null) {
+            l_exp.setLogic(logic);
+        }
+        if(r_exp != null) {
+            r_exp.setLogic(logic);
+        }
+    }
 
     public String scString() {
         String ret = "";
@@ -7393,7 +7449,7 @@ class ScRelation extends ScVhdl {
         }else {
             ret = tmp;
         }
-        
+
         if(r_exp != null) {
             ret += operator.scString();
             tmp = r_exp.scString();
@@ -8014,6 +8070,19 @@ class ScShift_expression extends ScVhdl {
     public int getBitWidth() {
         return l_exp.getBitWidth();
     }
+    
+    protected void setLogic(boolean logic) {
+        super.setLogic(logic);
+        if(l_exp != null) {
+            l_exp.setLogic(logic);
+        }
+        if(r_exp != null) {
+            r_exp.setLogic(logic);
+        }
+        if(operator != null) {
+            operator.setLogic(logic);
+        }
+    }
 
     public String scString() {
         String ret = "";
@@ -8206,6 +8275,12 @@ class ScSimple_expression extends ScVhdl {
     public int getBitWidth() {
         return items.get(0).getBitWidth();
     }
+    
+    protected void setLogic(boolean logic) {
+        super.setLogic(logic);
+        if(items.size() < 2)
+            items.get(0).setLogic(logic);
+    }
 
     public String scString() {
         String ret = "";
@@ -8214,11 +8289,11 @@ class ScSimple_expression extends ScVhdl {
         }
         ScTerm term = (ScTerm)items.get(0);
         String tmp = term.scString();
-        if(term.items.size() > 2) {
-            ret += "(" + tmp + ")";
-        }else {
+        //if(term.items.size() > 2) {
+        //    ret += "(" + tmp + ")";
+        //}else {
             ret += tmp;
-        }
+        //}
         
         for(int i = 1; i < items.size() - 1; i += 2) {
             if(!(items.get(i) instanceof ScAdding_operator 
@@ -8228,11 +8303,11 @@ class ScSimple_expression extends ScVhdl {
             ret += " ";
             term = (ScTerm)items.get(i+1);
             tmp = term.scString();
-            if(term.items.size() > 2) {
-                ret += "(" + tmp + ")";
-            }else {
+            //if(term.items.size() > 2) {
+            //    ret += "(" + tmp + ")";
+            //}else {
                 ret += tmp;
-            }
+            //}
         }
         return ret;
     }
@@ -9051,6 +9126,12 @@ class ScTerm extends ScVhdl {
     
     public int getBitWidth() {
         return items.get(0).getBitWidth();
+    }
+    
+    protected void setLogic(boolean logic) {
+        super.setLogic(logic);
+        if(items.size() <2)
+            items.get(0).setLogic(logic);
     }
 
     public String scString() {
