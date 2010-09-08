@@ -241,9 +241,12 @@ public class LibraryManager extends VhdlArrayList<LibraryEntry>
                     if(symbolName.equalsIgnoreCase("all")) {
                         ret = pkg.getAllSymbols();
                     }else {
-                        Symbol[] syms = new Symbol[1];
-                        syms[0] = pkg.getSymbol(symbolName);
-                        ret = syms;
+                        Symbol tmpSym = pkg.getSymbol(symbolName);
+                        if(tmpSym != null) {
+                            Symbol[] syms = new Symbol[1];
+                            syms[0] = tmpSym;
+                            ret = syms;
+                        }
                     }
                     break;
                 }

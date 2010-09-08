@@ -36,28 +36,14 @@ class ScIndexed_name extends ScVhdl {
     public String scString() {
         String ret = "";
         ret += prefix.scString();
-        Symbol sym = (Symbol)parser.getSymbol(curNode, prefix.getNameSegments());
-        if(sym != null)
-            sym = (Symbol)parser.getSymbol(curNode, sym.type);
-        
-        if(sym != null && sym.arrayRange != null) { // has array index
-            ret += "[";
-        }else {
-            ret += "(";
-        }
-        
+        ret += "[";        
         for(int i = 0; i < exps.size(); i++) {
             ret += exps.get(i).scString();
             if(i < exps.size() - 1) {
                 ret += ", ";
             }
         }
-        
-        if(sym != null && sym.arrayRange != null) {
-            ret += "]";
-        }else {
-            ret += ")";
-        }
+        ret += "]";
         return ret;
     }
 }

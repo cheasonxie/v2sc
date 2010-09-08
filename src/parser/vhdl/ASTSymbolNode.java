@@ -138,7 +138,7 @@ public class ASTSymbolNode extends ASTNode
                 tmpNode1 = (ASTNode)tmpNode0.getChild(i).getChild(0); // interface_declaration
                 child = new ASTSymbolNode(tmpNode1);
                 SymbolTable table = child.getParsedSymbolTable(VARIABLE);
-                mySymTab.addAll(table);     // parameter is regard as variable
+                symTab.addAll(table);     // parameter is regard as variable
                 for(j = 0; j < table.size(); j++) {
                     sym.paramTypeList.add(table.get(j).type);
                 }

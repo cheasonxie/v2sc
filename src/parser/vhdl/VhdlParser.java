@@ -402,15 +402,18 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         return tokensExist(tokens, endToken);
     }
     
-    boolean isFunction_call(Token endToken) throws ParserException {
+    boolean isFunction_call(ASTNode node, Token endToken) throws ParserException {
         Token token = tokenMgr.getNextToken();
+        boolean ret = false;
         if(token == null)
-            return false;
-        Symbol sym = libraryMgr.getSymbol(token.image);
+            return ret;
+        Symbol sym = (Symbol)getSymbol(node, token.image);
         if((sym != null) && (sym.kind == FUNCTION || sym.kind == PROCEDURE)) {
-            return true;
+            Token tmpToken = findLastLBracketToken(endToken);
+            if(tokenMgr.getNextToken(token) == tmpToken)
+                ret = true;
         }
-        return false;
+        return ret;
     }
     
     
@@ -3312,7 +3315,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         if(tokenMgr.getNextTokenKind() == LBRACKET) {
             consumeToken(LBRACKET);
             tmpToken = findTokenInBlock(RBRACKET, endToken);
-            actual_parameter_part(node, tmpToken);
+            actual_parameter_part(node, tokenMgr.getNextToken(tmpToken));
             consumeToken(RBRACKET);
         }
         closeNodeScope(node);
@@ -4863,7 +4866,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
     void prefix(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTPREFIX);
         openNodeScope(node);
-        if(isFunction_call(endToken)) {
+        if(isFunction_call(node, endToken)) {
             function_call(node, endToken);
         }else {
             name(node, endToken);
@@ -4886,7 +4889,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         ASTNode node = new ASTNode(p, ASTPRIMARY);
         openNodeScope(node);
         int kind = tokenMgr.getNextTokenKind();
-        if(isFunction_call(endToken)) {
+        if(isFunction_call(node, endToken)) {
             function_call(node, endToken);
         }else {
             if(kind == character_literal || kind == decimal_literal

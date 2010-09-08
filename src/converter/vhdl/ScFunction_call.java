@@ -19,6 +19,7 @@ class ScFunction_call extends ScVhdl {
             switch(c.getId())
             {
             case ASTNAME:
+                name = new ScName(c);
                 break;
             case ASTASSOCIATION_LIST:
                 param_part = new ScActual_parameter_part(c);
@@ -38,8 +39,9 @@ class ScFunction_call extends ScVhdl {
 
     public String scString() {
         String ret = "";
-        ret += name + "(";
-        ret += param_part.scString();
+        ret += name.scString() + "(";
+        if(param_part != null)
+            ret += param_part.scString();
         ret += ")";
         return ret;
     }
