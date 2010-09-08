@@ -33,7 +33,7 @@ class ScEntity_header extends ScVhdl {
     public String scString() {
         String ret = "";
         if(port != null) {
-            ret += port.scString();
+            ret += port.toString();
         }
         return ret;
     }

@@ -23,7 +23,7 @@ class ScArchitecture_declarative_part extends ScVhdl {
     public String scString() {
         String ret = "";
         for(int i = 0; i < itemList.size(); i++) {
-            ret += itemList.get(i).scString();
+            ret += itemList.get(i).toString();
             if(i < itemList.size() - 1) {
                 ret += "\r\n";
             }

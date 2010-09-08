@@ -49,8 +49,8 @@ class ScProcess_statement extends ScCommonIdentifier {
         ret += "process_" + identifier + "()\r\n";
         ret += intent() + "{\r\n";
         startIntentBlock();
-        ret += declarative_part.scString() + "\r\n\r\n";
-        ret += statement_part.scString() + "\r\n";
+        ret += declarative_part.toString() + "\r\n\r\n";
+        ret += statement_part.toString() + "\r\n";
         endIntentBlock();
         ret += intent() + "}\r\n";
         return ret;

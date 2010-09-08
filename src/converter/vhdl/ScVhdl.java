@@ -3,7 +3,9 @@ package converter.vhdl;
 import java.util.ArrayList;
 
 import common.printFileAndLineNumber;
+import converter.CommentManager;
 
+import parser.CommentBlock;
 import parser.IParser;
 import parser.Token;
 import parser.vhdl.ASTNode;
@@ -16,13 +18,16 @@ public class ScVhdl implements ScVhdlConstants, VhdlTokenConstants,
                         VhdlASTConstants, IVhdlType
 {
     protected static IParser parser = null;
-    protected static ArrayList<ScCommonIdentifier> units = null;    // entity or package
-    protected static int curLevel = 0;    // intent level
+    protected static CommentManager commentMgr = null;
+    protected static ArrayList<ScCommonIdentifier> units = null; // entity or package
+    protected static int curLevel = 0;    // intent level    
     
     protected ASTNode curNode = null;
     protected int beginLine = 0;
     protected int endLine = 0;
     protected boolean isLogic = false;
+    protected ArrayList<CommentBlock> myPrevComment = null;
+    protected CommentBlock myPostComment = null;
     
     
     /**
@@ -32,6 +37,7 @@ public class ScVhdl implements ScVhdlConstants, VhdlTokenConstants,
         ScVhdl.parser = parser;
         if(parser != null) {
             curNode = (ASTNode)parser.getRoot();
+            commentMgr = new CommentManager(parser);
             init();
         }
     }
@@ -56,7 +62,60 @@ public class ScVhdl implements ScVhdlConstants, VhdlTokenConstants,
             }else {
                 endLine = ((ASTNode)curNode.getParent()).getLastToken().beginLine;
             }
-        } 
+        }
+        
+        if(commentMgr != null) {
+            CommentBlock tmp = commentMgr.getCurrentBlock();
+            if(tmp != null) {
+                if(tmp.endLine < beginLine) {
+                    if(myPrevComment == null)
+                        myPrevComment = new ArrayList<CommentBlock>();
+                    do {
+                        myPrevComment.add(tmp);
+                        commentMgr.toNextBlock();
+                        tmp = commentMgr.getCurrentBlock();
+                    }while(tmp != null && tmp.endLine < beginLine);
+                }
+                
+                if(tmp != null && tmp.startLine == tmp.endLine 
+                        && beginLine == endLine 
+                        && tmp.startLine == endLine) {
+                    // the comment is at the end of this line
+                    myPostComment = tmp;
+                    commentMgr.toNextBlock();
+                }
+            }
+        }
+    }
+    
+    protected String addPrevComment() {
+        if(myPrevComment == null) return "";
+        String ret = "";
+        String strIntent = intent();
+        for(int i = 0; i < myPrevComment.size(); i ++) {
+            CommentBlock cb = myPrevComment.get(i);
+            for(int j = 0; j < cb.commentLines.size(); j++) {
+                ret += strIntent + cb.commentLines.get(j) + "\r\n";
+            }
+        }
+        return ret;
+    }
+    
+    protected String addPostComment() {
+        if(myPostComment == null) return "";
+        String ret = "    ";
+        ret += myPostComment.commentLines.get(0);
+        return ret;
+    }
+    
+    
+    @Override
+    public String toString() {
+        String ret = "";
+        ret += addPrevComment();
+        ret += scString();
+        ret += addPostComment();
+        return ret;
     }
     
     public String scString() {

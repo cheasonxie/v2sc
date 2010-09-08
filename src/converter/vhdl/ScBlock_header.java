@@ -43,18 +43,18 @@ class ScBlock_header extends ScVhdl {
     public String scString() {
         String ret = "";
         if(generic != null) {
-            ret += generic.scString();
+            ret += generic.toString();
             if(generic_map != null) {
-                ret += "\r\n" + generic_map.scString();
+                ret += "\r\n" + generic_map.toString();
             }
         }
         if(!ret.isEmpty()) {
             ret += "\r\n";
         }
         if(port != null) {
-            ret += port.scString();
+            ret += port.toString();
             if(port_map != null) {
-                ret += "\r\n" + port.scString();
+                ret += "\r\n" + port.toString();
             }
         }
         return ret;

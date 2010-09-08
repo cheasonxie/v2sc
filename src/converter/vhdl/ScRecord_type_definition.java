@@ -37,7 +37,7 @@ class ScRecord_type_definition extends ScCommonIdentifier {
         ret += intent() +"{\r\n";
         startIntentBlock();
         for(int i = 0; i < elements.size(); i++) {
-            ret += intent() + elements.get(i).scString() + "\r\n";
+            ret += intent() + elements.get(i).toString() + "\r\n";
         }
         endIntentBlock();
         ret += intent() +"}";

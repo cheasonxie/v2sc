@@ -82,12 +82,16 @@ public class TokenManager extends RegExp implements VhdlTokenConstants
     
     // comment
     protected ArrayList<CommentBlock> comments = new ArrayList<CommentBlock>();
+    // only parse symbol, don't care comments
+    // save memory when parse library
+    protected boolean parseSymbol = false;
     
-    public TokenManager(BufferedReader stream)
+    public TokenManager(BufferedReader stream, boolean parseSymbol)
     {
         this.stream = stream;
         line = column = 0;
         strLine = "";
+        this.parseSymbol = parseSymbol;
     }
     
     public static final String specialChar = "&()*+,-./:;<>=|[]!$%@?";
@@ -122,15 +126,18 @@ public class TokenManager extends RegExp implements VhdlTokenConstants
             // check comment
             if(column < (strLine.length() - 1) && strLine.charAt(column) == '-'
                     && strLine.charAt(column+1) == '-') {
-                if(cb == null) {
-                    cb = new CommentBlock(line);
+                if(!parseSymbol) {
+                    if(cb == null) {
+                        cb = new CommentBlock(line);
+                    }
+                    
+                    //for(int i =0; i < emtyLines; i++) {
+                    if(emtyLines > 0) {
+                        cb.commentLines.add("");    // add empty lines as comment
+                    }
+                    emtyLines = 0;
+                    cb.commentLines.add("//" + strLine.substring(column+2));
                 }
-                
-                for(int i =0; i < emtyLines; i++) {
-                    cb.commentLines.add("");    // add empty lines as comment
-                }
-                emtyLines = 0;
-                cb.commentLines.add(strLine.substring(column+2));
                 strLine = stream.readLine();
                 if(strLine == null)
                     break out;    // read end of file
@@ -151,7 +158,7 @@ public class TokenManager extends RegExp implements VhdlTokenConstants
             for(int i =0; i < emtyLines; i++) {
                 cb.commentLines.add("");    // add empty lines as comment
             }
-            cb.endLine = line;
+            cb.endLine = line - 1;
             comments.add(cb);
         }
         return ret;
@@ -572,7 +579,7 @@ public class TokenManager extends RegExp implements VhdlTokenConstants
             String dir = System.getProperty("user.dir");
             TokenManager tm = new TokenManager(
                     new BufferedReader(
-                            new FileReader(dir + "\\ahbctrl.vhd")));
+                            new FileReader(dir + "\\ahbctrl.vhd")), false);
             Token token = null;
             int kind = tm.getNextTokenKind();
             kind = tm.getNextTokenKind(2);

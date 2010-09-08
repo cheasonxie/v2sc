@@ -34,7 +34,7 @@ class ScLoop_statement extends ScVhdl {
 
     public String scString() {
         String ret = "";
-        ret += intent() + iteration.scString() + "\r\n";
+        ret += intent() + iteration.toString() + "\r\n";
         ret += intent() + "{\r\n";
         startIntentBlock();
         ret += seq_statements.scString();

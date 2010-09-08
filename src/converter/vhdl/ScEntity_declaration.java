@@ -54,18 +54,18 @@ class ScEntity_declaration extends ScCommonIdentifier {
         if(header.generic != null) {
             ret += "template<\r\n";
             startIntentBlock();
-            ret += header.generic.scString();
+            ret += header.generic.toString();
             endIntentBlock();
             ret += "\r\n>\r\n";
         }
         ret += "SC_MODULE(" + getName() + ")\r\n{\r\n";
         startIntentBlock();
-        ret += header.scString() + ";\r\n";
-        ret += declarative_part.scString() + "\r\n";
+        ret += header.toString() + "\r\n";
+        ret += declarative_part.toString() + "\r\n";
         if(statement_part != null) {
-            ret += statement_part.scString();
+            ret += statement_part.toString() + "\r\n";
         }
-        ret += body.scString();
+        ret += body.toString() + "\r\n";
         endIntentBlock();
         ret += "};\r\n";
         return ret;

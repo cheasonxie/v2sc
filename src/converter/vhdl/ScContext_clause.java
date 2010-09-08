@@ -23,7 +23,7 @@ class ScContext_clause extends ScVhdl {
     public String scString() {
         String ret = "";
         for(int i = 0; i < items.size(); i++) {
-            String tmp = items.get(i).scString();
+            String tmp = items.get(i).toString();
             ret += tmp;
             if(i < items.size() - 1 && !tmp.isEmpty()) {
                 ret += "\r\n";

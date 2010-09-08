@@ -28,9 +28,14 @@ class ScGeneric_list extends ScVhdl {
     public String scString() {
         String ret = "";
         for(int i = 0; i < list.items.size(); i++) {
+            ret += list.items.get(i).addPrevComment();
             ret += intent() + list.items.get(i).scString();
             if(i < list.items.size() - 1) {
-                ret += ",\r\n";
+                ret += ",";
+            }
+            ret += list.items.get(i).addPostComment();
+            if(i < list.items.size() - 1) {
+                ret += "\r\n";
             }
         }
         return ret;

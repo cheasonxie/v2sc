@@ -31,9 +31,9 @@ class ScDesign_unit extends ScVhdl {
 
     public String scString() {
         String ret = "";
-        ret += context_clause.scString();
+        ret += context_clause.toString();
         ret += "\r\n";
-        ret += library_unit.scString();
+        ret += library_unit.toString();
         return ret;
     }
 }

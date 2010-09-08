@@ -23,7 +23,7 @@ class ScProcess_declarative_part extends ScVhdl {
     public String scString() {
         String ret = "";
         for(int i = 0; i < items.size(); i++) {
-            ret += items.get(i).scString() + "\r\n";
+            ret += items.get(i).toString() + "\r\n";
         }
         return ret;
     }

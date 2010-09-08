@@ -51,7 +51,7 @@ class ScPackage_body extends ScCommonIdentifier {
     }
 
     public String scString() {
-        String ret = declarative_part.scString() + "\r\n";
+        String ret = declarative_part.toString() + "\r\n";
         return ret;
     }
 }

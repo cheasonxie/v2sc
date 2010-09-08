@@ -26,6 +26,6 @@ class ScGeneric_clause extends ScVhdl {
     }
 
     public String scString() {
-        return generic_list.scString();
+        return generic_list.toString();
     }
 }

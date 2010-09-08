@@ -43,9 +43,9 @@ class ScBlock_statement extends ScVhdl {
         String ret = "";
         ret += intent() + "{";
         startIntentBlock();
-        ret += intent() + header.scString() + "\r\n";
-        ret += intent() + declarative_part.scString() + "\r\n";
-        ret += intent() + statement_part.scString() + "\r\n";
+        ret += intent() + header.toString() + "\r\n";
+        ret += intent() + declarative_part.toString() + "\r\n";
+        ret += intent() + statement_part.toString() + "\r\n";
         endIntentBlock();
         ret += intent() + "}";
         return ret;

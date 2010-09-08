@@ -16,11 +16,9 @@ public class Vhdl extends hdlConverter {
     {
         VhdlParser parser = new VhdlParser(false);
         createFile(dstPath, true);
-        m_targetFileBuff.println("\r\n#include <systemc.h>");
-
-        ASTNode designFile = (ASTNode)parser.parse(srcPath);
+        parser.parse(srcPath);
         ScVhdl root = new ScDesign_file(parser);
-        m_targetFileBuff.println(root.scString());
+        m_targetFileBuff.print(root.toString());
     }
     
     @Override

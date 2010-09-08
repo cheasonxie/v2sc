@@ -24,9 +24,9 @@ class ScDesign_file extends ScVhdl {
     }
 
     public String scString() {
-        String ret = "";
+        String ret = "\r\n#include <systemc.h>\r\n";
         for(int i = 0; i < design_units.size(); i++) {
-            ret += design_units.get(i).scString();
+            ret += design_units.get(i).toString();
             if(i < design_units.size() - 1) {
                 ret += "\r\n";
             }

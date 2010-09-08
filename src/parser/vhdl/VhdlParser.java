@@ -7417,7 +7417,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
     public IASTNode parse(String path) throws ParserException {
         try {
             BufferedReader stream = new BufferedReader(new FileReader(path));
-            tokenMgr = new TokenManager(stream);
+            tokenMgr = new TokenManager(stream, parseSymbol);
             return design_file();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -7428,7 +7428,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
     @Override
     public IASTNode parse(Reader reader) throws ParserException {
         BufferedReader stream = new BufferedReader(reader);
-        tokenMgr = new TokenManager(stream);
+        tokenMgr = new TokenManager(stream, parseSymbol);
         return design_file();
     }
 }

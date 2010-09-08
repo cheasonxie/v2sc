@@ -31,9 +31,14 @@ class ScInterface_list extends ScVhdl {
     public String scString() {
         String ret = "";
         for(int i = 0; i < items.size(); i++) {
+            ret += items.get(i).addPrevComment();
             ret += intent() + items.get(i).scString();
             if(i < items.size() - 1) {
-                ret += ";\r\n";
+                ret += ";";
+            }
+            ret += items.get(i).addPostComment();
+            if(i < items.size() - 1) {
+                ret += "\r\n";
             }
         }
         return ret;
