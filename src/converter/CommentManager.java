@@ -19,7 +19,10 @@ public class CommentManager
     }
     
     public CommentBlock getCurrentBlock() {
-        if(comments == null) { return null; }
+        if(comments == null || curIndex < 0 
+            || curIndex >= comments.length) {
+            return null;
+        }
         return comments[curIndex];
     }
     
