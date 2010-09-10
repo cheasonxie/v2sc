@@ -25,12 +25,16 @@ public interface ScVhdlConstants extends ScConstants
     static final int VHDL_BOOLEAN           = 7;
     static final int VHDL_FLOAT             = 8;
     static final int VHDL_NATURAL           = 9;
+    static final int VHDL_REAL              = 10;
+    static final int VHDL_SIGNED            = 11;
+    static final int VHDL_UNSIGNED          = 12;
     
     static final String[] vhdlTypes = 
     {
         "bit", "bit_vector", "integer", 
         "std_logic", "std_logic_vector", "std_ulogic",
         "std_ulogic_vector", "boolean", "float", "natural",
+        "real", "signed", "unsigned"
     };
     
     /*
@@ -45,7 +49,7 @@ public interface ScVhdlConstants extends ScConstants
         SC_BIT, SC_BV, SC_C_INT, 
         SC_LOGIC, SC_LV, SC_LOGIC,
         SC_LV, SC_BOOL, SC_FLOAT,
-        SC_C_UINT,
+        SC_C_UINT, SC_DOUBLE, SC_C_INT, SC_C_UINT,
     };
 
     // faster simulation
@@ -54,7 +58,7 @@ public interface ScVhdlConstants extends ScConstants
         SC_BOOL, SC_UINT, SC_C_INT, 
         SC_BOOL, SC_UINT, SC_BOOL, 
         SC_UINT, SC_BOOL, SC_FLOAT, 
-        SC_C_UINT,
+        SC_C_UINT, SC_DOUBLE, SC_C_INT, SC_C_UINT,
     };
     
     

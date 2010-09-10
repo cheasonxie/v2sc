@@ -37,33 +37,33 @@ public class PredefinedPackage implements VhdlTokenConstants
     static final Symbol[] std_logic_1164_syms = 
     {
         //subtype
-        new Symbol("x01", SUBTYPE),
-        new Symbol("x01Z", SUBTYPE),
-        new Symbol("ux01", SUBTYPE),
-        new Symbol("ux01z", SUBTYPE),
+        new Symbol("x01", SUBTYPE, "std_ulogic", new String[]{"X", "to", "1"}),
+        new Symbol("x01Z", SUBTYPE, "std_ulogic", new String[]{"X", "to", "Z"}),
+        new Symbol("ux01", SUBTYPE, "std_ulogic", new String[]{"U", "to", "1"}),
+        new Symbol("ux01z", SUBTYPE, "std_ulogic", new String[]{"U", "to", "Z"}),
         
         // function
-        new Symbol("to_bit", FUNCTION),
-        new Symbol("to_bitvector", FUNCTION),
-        new Symbol("to_stdULlogic", FUNCTION),
-        new Symbol("to_stdLogicVector", FUNCTION),
-        new Symbol("to_stdULogicVector", FUNCTION),
-        new Symbol("to_x01", FUNCTION),
-        new Symbol("to_x01z", FUNCTION),
-        new Symbol("to_ux01", FUNCTION),
-        new Symbol("rising_edge", FUNCTION),
-        new Symbol("falling_edge", FUNCTION),
-        new Symbol("is_x", FUNCTION),
+        new Symbol("to_bit", FUNCTION, "bit"),
+        new Symbol("to_bitvector", FUNCTION, "bit_vector"),
+        new Symbol("to_stdULogic", FUNCTION, "std_ulogic"),
+        new Symbol("to_stdLogicVector", FUNCTION, "std_logic_vector"),
+        new Symbol("to_stdULogicVector", FUNCTION, "std_ulogic_vector"),
+        new Symbol("to_x01", FUNCTION, "x01"),
+        new Symbol("to_x01z", FUNCTION, "x01z"),
+        new Symbol("to_ux01", FUNCTION, "ux01"),
+        new Symbol("rising_edge", FUNCTION, "boolean"),
+        new Symbol("falling_edge", FUNCTION, "boolean"),
+        new Symbol("is_x", FUNCTION, "boolean"),
    };
     
     static final Symbol[] textio_syms = 
     {
-        new Symbol("line", TYPE),
-        new Symbol("text", TYPE),
+        new Symbol("line", TYPE, "string"),
+        new Symbol("text", TYPE, "string"),
         new Symbol("side", TYPE),
-        new Symbol("width", SUBTYPE),
-        new Symbol("input", FILE),
-        new Symbol("output", FILE),
+        new Symbol("width", SUBTYPE, "natural"),
+        new Symbol("input", FILE, "text"),
+        new Symbol("output", FILE, "text"),
         new Symbol("read", PROCEDURE),
         new Symbol("write", PROCEDURE),
         new Symbol("writeline", PROCEDURE),
@@ -80,12 +80,30 @@ public class PredefinedPackage implements VhdlTokenConstants
         new Symbol("to_integer", FUNCTION),
         new Symbol("to_unsigned", FUNCTION),
         new Symbol("to_signed", FUNCTION),
-        new Symbol("rising_edge", FUNCTION),
-        new Symbol("falling_edge", FUNCTION),
+        new Symbol("rising_edge", FUNCTION, "boolean"),
+        new Symbol("falling_edge", FUNCTION, "boolean"),
     };
     
     static final Symbol[] numeric_std_syms =
     {
+        // part of std_logic_1164
+        new Symbol("x01", SUBTYPE, "std_ulogic", new String[]{"X", "to", "1"}),
+        new Symbol("x01Z", SUBTYPE, "std_ulogic", new String[]{"X", "to", "Z"}),
+        new Symbol("ux01", SUBTYPE, "std_ulogic", new String[]{"U", "to", "1"}),
+        new Symbol("ux01z", SUBTYPE, "std_ulogic", new String[]{"U", "to", "Z"}),
+        new Symbol("to_bit", FUNCTION, "bit"),
+        new Symbol("to_bitvector", FUNCTION, "bit_vector"),
+        new Symbol("to_stdULogic", FUNCTION, "std_ulogic"),
+        new Symbol("to_stdLogicVector", FUNCTION, "std_logic_vector"),
+        new Symbol("to_stdULogicVector", FUNCTION, "std_ulogic_vector"),
+        new Symbol("to_x01", FUNCTION, "x01"),
+        new Symbol("to_x01z", FUNCTION, "x01z"),
+        new Symbol("to_ux01", FUNCTION, "ux01"),
+        new Symbol("rising_edge", FUNCTION, "boolean"),
+        new Symbol("falling_edge", FUNCTION, "boolean"),
+        new Symbol("is_x", FUNCTION, "boolean"),
+        
+        // addition in numeric_std
         new Symbol("shift_left", FUNCTION),
         new Symbol("shift_right", FUNCTION),
         new Symbol("rotate_left", FUNCTION),
@@ -101,24 +119,24 @@ public class PredefinedPackage implements VhdlTokenConstants
     static final Symbol[] math_real_syms =
     {
         // constant
-        new Symbol("MATH_E", CONSTANT),          //2.71828_18284_59045_23536
-        new Symbol("MATH_1_OVER_E", CONSTANT),    //0.36787_94411_71442_32160
-        new Symbol("MATH_PI",  CONSTANT),         //3.14159_26535_89793_23846
-        new Symbol("MATH_2_PI", CONSTANT),        //6.28318_53071_79586_47693
-        new Symbol("MATH_1_OVER_PI", CONSTANT),   //0.31830_98861_83790_67154
-        new Symbol("MATH_PI_OVER_2", CONSTANT),   //1.57079_63267_94896_61923
-        new Symbol("MATH_PI_OVER_3", CONSTANT),   //1.04719_75511_96597_74615
-        new Symbol("MATH_PI_OVER_4", CONSTANT),   //0.78539_81633_97448_30962
-        new Symbol("MATH_3_PI_OVER_2", CONSTANT), //4.71238_89803_84689_85769
-        new Symbol("MATH_LOG_OF_2", CONSTANT),   //0.69314_71805_59945_30942
-        new Symbol("MATH_LOG_OF_10", CONSTANT),   //2.30258_50929_94045_68402
-        new Symbol("MATH_LOG2_OF_E", CONSTANT),   //1.44269_50408_88963_4074
-        new Symbol("MATH_LOG10_OF_E", CONSTANT),  //0.43429_44819_03251_82765
-        new Symbol("MATH_SQRT_2", CONSTANT),      //1.41421_35623_73095_04880
-        new Symbol("MATH_1_OVER_SQRT_2", CONSTANT),    //0.70710_67811_86547_52440
-        new Symbol("MATH_SQRT_PI", CONSTANT),     //1.77245_38509_05516_02730
-        new Symbol("MATH_DEG_TO_RAD", CONSTANT),  //0.01745_32925_19943_29577
-        new Symbol("MATH_RAD_TO_DEG", CONSTANT),  //57.29577_95130_82320_87680
+        new Symbol("MATH_E", CONSTANT, "real"),          //2.71828_18284_59045_23536
+        new Symbol("MATH_1_OVER_E", CONSTANT, "real"),    //0.36787_94411_71442_32160
+        new Symbol("MATH_PI",  CONSTANT, "real"),         //3.14159_26535_89793_23846
+        new Symbol("MATH_2_PI", CONSTANT, "real"),        //6.28318_53071_79586_47693
+        new Symbol("MATH_1_OVER_PI", CONSTANT, "real"),   //0.31830_98861_83790_67154
+        new Symbol("MATH_PI_OVER_2", CONSTANT, "real"),   //1.57079_63267_94896_61923
+        new Symbol("MATH_PI_OVER_3", CONSTANT, "real"),   //1.04719_75511_96597_74615
+        new Symbol("MATH_PI_OVER_4", CONSTANT, "real"),   //0.78539_81633_97448_30962
+        new Symbol("MATH_3_PI_OVER_2", CONSTANT, "real"), //4.71238_89803_84689_85769
+        new Symbol("MATH_LOG_OF_2", CONSTANT, "real"),   //0.69314_71805_59945_30942
+        new Symbol("MATH_LOG_OF_10", CONSTANT, "real"),   //2.30258_50929_94045_68402
+        new Symbol("MATH_LOG2_OF_E", CONSTANT, "real"),   //1.44269_50408_88963_4074
+        new Symbol("MATH_LOG10_OF_E", CONSTANT, "real"),  //0.43429_44819_03251_82765
+        new Symbol("MATH_SQRT_2", CONSTANT, "real"),      //1.41421_35623_73095_04880
+        new Symbol("MATH_1_OVER_SQRT_2", CONSTANT, "real"),    //0.70710_67811_86547_52440
+        new Symbol("MATH_SQRT_PI", CONSTANT, "real"),     //1.77245_38509_05516_02730
+        new Symbol("MATH_DEG_TO_RAD", CONSTANT, "real"),  //0.01745_32925_19943_29577
+        new Symbol("MATH_RAD_TO_DEG", CONSTANT, "real"),  //57.29577_95130_82320_87680
         
         // function
         new Symbol("sign", FUNCTION),
@@ -150,14 +168,14 @@ public class PredefinedPackage implements VhdlTokenConstants
     
     static final Symbol[] math_complex_syms = 
     {
-        new Symbol("complex", TYPE), // record
+        new Symbol("complex", TYPE, "record"), // record
         
-        new Symbol("positive_real", SUBTYPE),
-        new Symbol("principal_value", SUBTYPE),
-        new Symbol("complex_polar", TYPE),   // record
-        new Symbol("MATH_CBASE_1", CONSTANT),
-        new Symbol("MATH_CBASE_J", CONSTANT),
-        new Symbol("MATH_CZERO", CONSTANT),
+        new Symbol("positive_real", SUBTYPE, "real"),
+        new Symbol("principal_value", SUBTYPE, "real"),
+        new Symbol("complex_polar", TYPE, "record"),   // record
+        new Symbol("MATH_CBASE_1", CONSTANT, "complex"),
+        new Symbol("MATH_CBASE_J", CONSTANT, "complex"),
+        new Symbol("MATH_CZERO", CONSTANT, "complex"),
         
         new Symbol("cmplx", FUNCTION),
         new Symbol("get_pricipal_value", FUNCTION),

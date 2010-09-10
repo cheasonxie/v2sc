@@ -14,19 +14,21 @@ public interface ScConstants
     static final int SC_FLOAT           = 7;
     static final int SC_C_UINT          = 8;
     static final int SC_UINT            = 9;
+    static final int SC_DOUBLE          = 10;
     
-    static final int SC_BUILDIN_TYPE    = 10;
+    static final int SC_BUILDIN_TYPE    = 11;
     
-    static final int SC_STRUCTURE       = 11;
-    static final int SC_SUBPROGRAM      = 12;
-    static final int SC_ENUME           = 13;
-    static final int SC_COMPONENT       = 14;
+    static final int SC_STRUCTURE       = 12;
+    static final int SC_SUBPROGRAM      = 13;
+    static final int SC_ENUME           = 14;
+    static final int SC_COMPONENT       = 15;
     
     static final String[] scType = 
     {
         "sc_bit", "sc_bv", "int", "sc_int",
         "sc_logic", "sc_lv", "bool",
         "float", "unsigned int", "sc_uint",
+        "double",
     };
     
     // c/c++ language operator
