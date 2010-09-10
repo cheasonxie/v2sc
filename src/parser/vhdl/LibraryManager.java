@@ -17,6 +17,12 @@ class PackageEntry implements INameObject
     String name = "";
     SymbolTable table = null;
     
+    public PackageEntry(String name)
+    {
+        this.name = name;
+        table = new SymbolTable();
+    }
+    
     public PackageEntry(String name, SymbolTable table)
     {
         this.name = name;
@@ -104,8 +110,10 @@ public class LibraryManager extends VhdlArrayList<LibraryEntry>
     static protected  LibraryManager libMgr = null;
     
     public static LibraryManager getInstance() {
-        if(libMgr == null)
+        if(libMgr == null) {
             libMgr = new LibraryManager();
+            libMgr.addPredefinedPackage();
+        }
         return libMgr;
     }
     
@@ -181,6 +189,27 @@ public class LibraryManager extends VhdlArrayList<LibraryEntry>
             }
         }
         add(lib);
+        return true;
+    }
+    
+    protected boolean addPredefinedPackage() {
+        PrePkg[] prePkg = PredefinedPackage.predefined_pkgs;
+        for(int i = 0; i < prePkg.length; i++) {
+            LibraryEntry lib = get(prePkg[i].libName);
+            if(lib == null) {
+                lib = new LibraryEntry(prePkg[i].libName);
+                add(lib);
+            }
+            
+            PackageEntry pkg = lib.get(prePkg[i].pkgName);
+            if(pkg == null) {
+                pkg = new PackageEntry(prePkg[i].pkgName);
+                lib.add(pkg);
+            }
+            for(int j = 0; j < prePkg[i].syms.length; j++) {
+                pkg.table.add(prePkg[i].syms[j]);
+            }
+        }
         return true;
     }
     

@@ -407,7 +407,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         boolean ret = false;
         if(token == null)
             return ret;
-        Symbol sym = (Symbol)getSymbol(node, token.image);
+        Symbol sym = (Symbol)getSymbol(node, token.image);  //TODO check selected name
         if((sym != null) && (sym.kind == FUNCTION || sym.kind == PROCEDURE)) {
             Token tmpToken = findLastLBracketToken(endToken);
             if(tokenMgr.getNextToken(token) == tmpToken)

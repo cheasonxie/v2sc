@@ -2,9 +2,11 @@ package parser.vhdl;
 
 class PrePkg
 {
+    String libName = "";
     String pkgName = "";
     Symbol[] syms = null;
-    public PrePkg(String pkgName, Symbol[] syms) {
+    public PrePkg(String libName, String pkgName, Symbol[] syms) {
+        this.libName = libName;
         this.pkgName = pkgName;
         this.syms = syms;
     }
@@ -15,12 +17,17 @@ class PrePkg
  */
 public class PredefinedPackage implements VhdlTokenConstants
 {
-    static final String STD_LOGIC_1164 = "std_logic_1164";  // ieee
-    static final String TEXTIO = "textio";  // std
-    static final String NUMERIC_BIT = "numeric_bit";    // ieee
-    static final String NUMERIC_STD = "numeric_std";    // ieee
-    static final String MATH_REAL = "math_real";    // ieee
-    static final String MATH_COMPLEX = "math_complex";  // ieee
+    // library name
+    static final String IEEE = "ieee";
+    static final String STD = "std";
+    
+    // package name
+    static final String STD_LOGIC_1164 = "std_logic_1164";
+    static final String TEXTIO = "textio";
+    static final String NUMERIC_BIT = "numeric_bit";
+    static final String NUMERIC_STD = "numeric_std";
+    static final String MATH_REAL = "math_real";
+    static final String MATH_COMPLEX = "math_complex";
     
     static final Symbol[] standard_syms = 
     {
@@ -170,12 +177,12 @@ public class PredefinedPackage implements VhdlTokenConstants
         new Symbol("tanh", FUNCTION),
     };
     
-    static final PrePkg pkg_std_logic_1164 = new PrePkg(STD_LOGIC_1164, std_logic_1164_syms);
-    static final PrePkg pkg_textio = new PrePkg(TEXTIO, textio_syms);
-    static final PrePkg pkg_numeric_bit = new PrePkg(NUMERIC_BIT, numeric_bit_syms);
-    static final PrePkg pkg_numeric_std = new PrePkg(NUMERIC_STD, numeric_std_syms);
-    static final PrePkg pkg_math_real = new PrePkg(MATH_REAL, math_real_syms);
-    static final PrePkg pkg_math_complex = new PrePkg(MATH_COMPLEX, math_real_syms);
+    static final PrePkg pkg_std_logic_1164 = new PrePkg(IEEE, STD_LOGIC_1164, std_logic_1164_syms);
+    static final PrePkg pkg_textio = new PrePkg(STD, TEXTIO, textio_syms);
+    static final PrePkg pkg_numeric_bit = new PrePkg(IEEE, NUMERIC_BIT, numeric_bit_syms);
+    static final PrePkg pkg_numeric_std = new PrePkg(IEEE, NUMERIC_STD, numeric_std_syms);
+    static final PrePkg pkg_math_real = new PrePkg(IEEE, MATH_REAL, math_real_syms);
+    static final PrePkg pkg_math_complex = new PrePkg(IEEE, MATH_COMPLEX, math_real_syms);
     
     static final PrePkg[] predefined_pkgs = 
     {
@@ -186,17 +193,4 @@ public class PredefinedPackage implements VhdlTokenConstants
         pkg_math_real,
         pkg_math_complex,
     };
-    
-    static final Symbol[] getSymbols(String name)
-    {
-        Symbol[] ret = null;
-        for(int i = 0; i < predefined_pkgs.length; i++)
-        {
-            if(name.equalsIgnoreCase(predefined_pkgs[i].pkgName)) {
-                ret = predefined_pkgs[i].syms;
-                break;
-            }
-        }
-        return ret;
-    }
 }
