@@ -229,8 +229,8 @@ public class LibraryManager extends VhdlArrayList<LibraryEntry>
         return null;
     }
     
-   
-    public Symbol[] getSymbols(ASTNode node) {
+    private String[] getSelectedNames(ASTNode node) {
+        String[] ret = new String[3];
         if(node.getId() != VhdlASTConstants.ASTSELECTED_NAME) {
             return null;
         }
@@ -254,11 +254,22 @@ public class LibraryManager extends VhdlArrayList<LibraryEntry>
             token = token.next;
         }
         symbolName += token.image;
+        ret[0] = libName;
+        ret[1] = pkgName;
+        ret[2] = symbolName;
+        return ret;
+    }
+   
+    public Symbol[] getSymbols(ASTNode node) {
+        String[] names = getSelectedNames(node);
+        if(names == null) {
+            return null;
+        }
         
-        return getSymbols(libName, pkgName, symbolName);
+        return getSymbols(names[0], names[1], names[2]);
     }
     
-    public Symbol[] getSymbols(String libName, String pkgName, String symbolName)
+    protected Symbol[] getSymbols(String libName, String pkgName, String symbolName)
     {
         Symbol[] ret = null;
 
@@ -283,4 +294,38 @@ public class LibraryManager extends VhdlArrayList<LibraryEntry>
         }
         return ret;
     }
+    
+    public SymbolTable getSymbolTable(ASTNode node) {
+        String[] names = getSelectedNames(node);
+        if(names == null) {
+            return null;
+        }
+        
+        return getSymbolTable(names[0], names[1], names[2]);
+    }
+    
+    protected SymbolTable getSymbolTable(String libName, String pkgName, String symbolName)
+    {
+        SymbolTable ret = null;
+
+        for(int i = 0; i < size(); i++) {
+            LibraryEntry lib = get(i);
+            if(lib.getName().equalsIgnoreCase(libName)) {
+                PackageEntry pkg = lib.get(pkgName);
+                if(pkg != null) {
+                    if(symbolName.equalsIgnoreCase("all")) {
+                        ret = pkg.table;
+                    }else {
+                        Symbol tmpSym = pkg.getSymbol(symbolName);
+                        if(tmpSym != null) {
+                            ret = pkg.table;    //TODO: create an symboltable
+                        }
+                    }
+                    break;
+                }
+            }
+        }
+        return ret;
+    }
+
 }

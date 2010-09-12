@@ -60,6 +60,21 @@ public class SymbolTable extends VhdlArrayList<Symbol> implements ISymbolTable
         }
     }
     
+    public void addAllInTable(SymbolTable other) {
+        if(other == null)
+            return;
+        for(int i = 0; i < other.size(); i++) {
+            add(other.get(i));
+        }
+        
+        if(other.subTable != null) {
+            if(subTable == null) {
+                subTable = new HashMap<String, SymbolTable>();
+            }
+            subTable.putAll(other.subTable);
+        }
+    }
+    
     /**
      * get one subtable<br>
      * 1. package need subtable(such as component's port_list/generic_list)
