@@ -46,5 +46,10 @@ public interface IParser
 	 * get symbol in symbol table or library(including child table) 
 	 */
 	public ISymbol getSymbol(IASTNode node, String[] names);
+	
+	/**
+	 * get symbol table which actually contains the symbol of specified name
+	 */
+	public ISymbolTable getTableOfSymbol(IASTNode node, String name);
 }
 

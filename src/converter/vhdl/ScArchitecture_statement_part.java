@@ -35,7 +35,7 @@ class ScArchitecture_statement_part extends ScVhdl implements IStatement {
     public String getDeclaration() {
         String ret = "";
         for(int i = 0; i < itemList.size(); i++) {
-            ret += intent() + itemList.get(i).getDeclaration() + "\r\n";
+            ret += itemList.get(i).getDeclaration() + "\r\n";
         }
         return ret;
     }
@@ -44,7 +44,7 @@ class ScArchitecture_statement_part extends ScVhdl implements IStatement {
     public String getImplements() {
         String ret = "";
         for(int i = 0; i < itemList.size(); i++) {
-            ret += intent() + itemList.get(i).getImplements() + "\r\n";
+            ret += itemList.get(i).getImplements() + "\r\n";
         }
         return ret;
     }
@@ -54,7 +54,7 @@ class ScArchitecture_statement_part extends ScVhdl implements IStatement {
     {
         String ret = "";
         for(int i = 0; i < itemList.size(); i++) {
-            ret += intent() + itemList.get(i).getInitCode() + "\r\n";
+            ret += itemList.get(i).getInitCode() + "\r\n";
         }
         return ret;
     }

@@ -75,14 +75,14 @@ class ScComponent_instantiation_statement extends ScCommonIdentifier implements 
     @Override
     public String getImplements() {
         String ret = getSpec() + "\r\n";
-        ret += intent() + "{";
+        ret += intent() + "{\r\n";
         startIntentBlock();
         if(port_map != null) {
             String name = instantiated_unit.name.scString();
-            ret += intent() + port_map.mapString(name, "comp_" + name);
+            ret += port_map.mapString(name, "comp_" + name);
         }
         endIntentBlock();
-        ret += intent() + "}";
+        ret += intent() + "}\r\n";
         return ret;
     }
 

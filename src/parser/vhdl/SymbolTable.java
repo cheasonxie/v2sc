@@ -11,7 +11,10 @@ package parser.vhdl;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class SymbolTable extends VhdlArrayList<Symbol>
+import parser.ISymbol;
+import parser.ISymbolTable;
+
+public class SymbolTable extends VhdlArrayList<Symbol> implements ISymbolTable
 {
     private static final long serialVersionUID = 2819894900029453741L;
     
@@ -113,7 +116,7 @@ public class SymbolTable extends VhdlArrayList<Symbol>
     /**
      * get all symbols of specified kind
      */
-    public ArrayList<Symbol> getSymbol(int kind) {
+    public ArrayList<Symbol> getKindSymbols(int kind) {
         ArrayList<Symbol> syms = new ArrayList<Symbol>();
         for(int i = 0; i < size(); i++) {
             if(get(i).kind == kind) {
@@ -122,7 +125,7 @@ public class SymbolTable extends VhdlArrayList<Symbol>
         }
         
         if(parent != null) {
-            syms.addAll(parent.getSymbol(kind));
+            syms.addAll(parent.getKindSymbols(kind));
         }
         return syms;
     }
@@ -155,6 +158,18 @@ public class SymbolTable extends VhdlArrayList<Symbol>
     
     public void setParent(SymbolTable sym) {
         parent = sym;
+    }
+    
+    @Override
+    public int getSize()
+    {
+        return size();
+    }
+    
+    @Override
+    public Symbol getSymbol(int i)
+    {
+        return get(i);
     }
 }
 

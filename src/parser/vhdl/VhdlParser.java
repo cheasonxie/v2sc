@@ -9,6 +9,7 @@ import parser.CommentBlock;
 import parser.IASTNode;
 import parser.IParser;
 import parser.ISymbol;
+import parser.ISymbolTable;
 import parser.ParserException;
 import parser.Token;
 
@@ -7411,6 +7412,16 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         
         return getNamesSymbol(extSymbolTable, names);
     }
+    
+    @Override
+    public ISymbolTable getTableOfSymbol(IASTNode node, String name)
+    {
+        SymbolTable ret = ((ASTNode)node).getSymbolTable().getTableOfSymbol(name);
+        if(ret != null) {
+            return ret;
+        }
+        return extSymbolTable.getTableOfSymbol(name);
+    }
 
     @Override
     public IASTNode parse(String path) throws ParserException {
@@ -7430,6 +7441,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         tokenMgr = new TokenManager(stream, parseSymbol);
         return design_file();
     }
+
 }
 
 

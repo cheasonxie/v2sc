@@ -294,7 +294,7 @@ public class ScVhdl implements ScVhdlConstants, VhdlTokenConstants,
     }
     
     String[] getLoopVar() {
-        ArrayList<Symbol> syms = curNode.getSymbolTable().getSymbol(LOOP);
+        ArrayList<Symbol> syms = curNode.getSymbolTable().getKindSymbols(LOOP);
         String[] ret = new String[syms.size()];
         for(int i = 0; i < syms.size(); i++) {
             ret[i] = syms.get(i).name;
@@ -414,9 +414,10 @@ public class ScVhdl implements ScVhdlConstants, VhdlTokenConstants,
         SymbolTable ret = null;
         SymbolTable tmpTable = null;
         String genericName = "";
-        tmpTable = curNode.getSymbolTable().getTableOfSymbol(componentName);
-        if(tmpTable == null)
+        tmpTable = (SymbolTable)parser.getTableOfSymbol(curNode, componentName);
+        if(tmpTable == null) {
             return null;
+        }
         tmpTable = tmpTable.getSubtable(componentName);
         if(tmpTable == null)
             return null;

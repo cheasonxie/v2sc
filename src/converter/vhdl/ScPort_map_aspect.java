@@ -52,7 +52,7 @@ class ScPort_map_aspect extends ScVhdl {
             }else {
                 portName = elements.get(i).formal_part.scString();
             }
-            ret += entityName + "." + portName + "(";
+            ret += intent() + entityName + "." + portName + "(";
             ret += elements.get(i).actual_part.scString();
             ret += ");\r\n";
         }

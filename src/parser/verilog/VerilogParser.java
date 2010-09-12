@@ -6,6 +6,7 @@ import parser.CommentBlock;
 import parser.IASTNode;
 import parser.IParser;
 import parser.ISymbol;
+import parser.ISymbolTable;
 import parser.ParserException;
 
 public class VerilogParser implements IParser
@@ -37,6 +38,12 @@ public class VerilogParser implements IParser
 
     @Override
     public ISymbol getSymbol(IASTNode node, String[] names) {
+        return null;
+    }
+
+    @Override
+    public ISymbolTable getTableOfSymbol(IASTNode node, String name)
+    {
         return null;
     }
 
