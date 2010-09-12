@@ -11,10 +11,10 @@ import parser.vhdl.ASTNode;
  *   <br>   [ port_map_aspect ; ] ]
  */
 class ScBlock_header extends ScVhdl {
-    ScVhdl generic = null;
-    ScVhdl generic_map = null;
-    ScVhdl port = null;
-    ScVhdl port_map = null;
+    ScGeneric_clause generic = null;
+    ScGeneric_map_aspect generic_map = null;
+    ScPort_clause port = null;
+    ScPort_map_aspect port_map = null;
     public ScBlock_header(ASTNode node) {
         super(node);
         assert(node.getId() == ASTBLOCK_HEADER);

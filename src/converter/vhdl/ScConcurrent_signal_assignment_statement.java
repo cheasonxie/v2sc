@@ -8,7 +8,7 @@ import parser.vhdl.ASTNode;
  *   <dd> [ label : ] [ <b>postponed</b> ] conditional_signal_assignment
  *   <br> | [ label : ] [ <b>postponed</b> ] selected_signal_assignment
  */
-class ScConcurrent_signal_assignment_statement extends ScVhdl {
+class ScConcurrent_signal_assignment_statement extends ScCommonIdentifier implements IStatement {
     ScVhdl signal_assignment = null;
     public ScConcurrent_signal_assignment_statement(ASTNode node) {
         super(node);
@@ -23,13 +23,34 @@ class ScConcurrent_signal_assignment_statement extends ScVhdl {
             case ASTSELECTED_SIGNAL_ASSIGNMENT:
                 signal_assignment = new ScSelected_signal_assignment(c);
                 break;
+            case ASTIDENTIFIER:
+                identifier = c.firstTokenImage();
+                break;
             default:
                 break;
             }
         }
+        if(identifier.isEmpty())
+            identifier = String.format("line%d", node.getFirstToken().beginLine);
     }
 
     public String scString() {
         return signal_assignment.scString();
+    }
+
+    @Override
+    public String getDeclaration() {
+        return "";
+    }
+
+    @Override
+    public String getImplements() {
+        return "";
+    }
+
+    @Override
+    public String getInitCode()
+    {
+        return toString();
     }
 }

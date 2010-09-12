@@ -12,7 +12,7 @@ import parser.vhdl.ASTNode;
  *   <ul> entity_statement_part ]
  *   </ul> <b>end</b> [ <b>entity</b> ] [ <i>entity_</i>simple_name ] ;
  */
-class ScEntity_declaration extends ScCommonIdentifier {
+class ScEntity_declaration extends ScCommonIdentifier implements IStatement {
     ScArchitecture_body body = null;
     ScEntity_header header = null;
     ScEntity_declarative_part declarative_part = null;
@@ -62,10 +62,10 @@ class ScEntity_declaration extends ScCommonIdentifier {
         startIntentBlock();
         ret += header.toString() + "\r\n";
         ret += declarative_part.toString() + "\r\n";
-        if(statement_part != null) {
-            ret += statement_part.toString() + "\r\n";
-        }
-        ret += body.toString() + "\r\n";
+        ret += body.getDeclaration() + "\r\n";
+        
+        ret += getInitCode();
+        ret += getImplements();
         endIntentBlock();
         ret += "};\r\n";
         return ret;
@@ -77,5 +77,59 @@ class ScEntity_declaration extends ScCommonIdentifier {
     
     public String getName() {
         return identifier;
+    }
+
+    @Override
+    public String getInitCode()
+    {
+        if(body == null) {
+            return "";  //TODO no entity body, ignore
+        }
+        String ret = "";
+        ret += intent() + "SC_CTOR(" + getName() + ")\r\n";
+        ret += intent() + "{\r\n";
+        startIntentBlock();
+        ret += body.getInitCode();
+        endIntentBlock();
+        ret += intent() + "}\r\n";
+        return ret;
+    }
+
+    @Override
+    public String getDeclaration()
+    {
+        String ret = "";
+        if(body == null) {
+            return "";  //TODO no entity body, ignore
+        }
+        if(header.generic != null) {
+            ret += "template<\r\n";
+            startIntentBlock();
+            ret += header.generic.toString();
+            endIntentBlock();
+            ret += "\r\n>\r\n";
+        }
+        ret += "SC_MODULE(" + getName() + ")\r\n{\r\n";
+        startIntentBlock();
+        ret += header.toString() + "\r\n";
+        ret += declarative_part.toString() + "\r\n";
+        ret += body.getDeclaration() + "\r\n";
+        endIntentBlock();
+        ret += "};\r\n";
+        return ret;
+    }
+
+    @Override
+    public String getImplements()
+    {
+        String ret = "";
+        if(body == null) {
+            return "";  //TODO no entity body, ignore
+        }
+        if(statement_part != null) {
+            ret += statement_part.toString() + "\r\n";
+        }
+        ret += body.getImplements() + "\r\n";
+        return ret;
     }
 }

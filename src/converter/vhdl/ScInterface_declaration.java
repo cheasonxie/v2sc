@@ -13,7 +13,7 @@ import parser.vhdl.ASTNode;
  *   <br> | interface_quantity_declaration
  */
 class ScInterface_declaration extends ScVhdl {
-    ScVhdl item = null;
+    ScCommonDeclaration item = null;
     public ScInterface_declaration(ASTNode node) {
         super(node);
         assert(node.getId() == ASTINTERFACE_DECLARATION);

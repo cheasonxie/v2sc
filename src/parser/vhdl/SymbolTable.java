@@ -16,7 +16,7 @@ public class SymbolTable extends VhdlArrayList<Symbol>
     private static final long serialVersionUID = 2819894900029453741L;
     
     SymbolTable parent = null;
-    HashMap<String, SymbolTable> children = null;
+    HashMap<String, SymbolTable> subTable = null;
     
     public SymbolTable() {}
     public SymbolTable(SymbolTable p) {
@@ -24,74 +24,94 @@ public class SymbolTable extends VhdlArrayList<Symbol>
     }
     
     /**
-     * add one child to children table<br>
-     * 1. package need child table(such as component's port_list/generic_list)
-     * 2. record, physical, enum need child table
+     * add one table to subtable <br>
+     * 1. package need subtable(such as component's port_list/generic_list)
+     * 2. record, physical, enum need subtable
      */
-    public void addChild(String name, SymbolTable child) {
-        if(children == null) {
-            children = new HashMap<String, SymbolTable>();
+    public void addSubtable(String name, SymbolTable table) {
+        if(subTable == null) {
+            subTable = new HashMap<String, SymbolTable>();
         }
-        children.put(name, child);
+        subTable.put(name, table);
     }
     
     /**
-     * copy another's children to my children table<br>
-     * 1. package need child table(such as component's port_list/generic_list)
-     * 2. record, physical, enum need child table
+     * copy another's subtable to my subtable<br>
+     * 1. package need subtable(such as component's port_list/generic_list)
+     * 2. record, physical, enum need subtable
      */
-    public void copyChild(SymbolTable other, Symbol[] symbols) {
+    public void copySubtable(SymbolTable other, Symbol[] symbols) {
         if(other == null || symbols == null) {
             return;
         }
-        if(children == null) {
-            children = new HashMap<String, SymbolTable>();
+        if(subTable == null) {
+            subTable = new HashMap<String, SymbolTable>();
         }
         
         for(int i = 0; i < symbols.length; i++) {
             String name = symbols[i].getName();
-            SymbolTable child = other.getChild(name);
+            SymbolTable child = other.getSubtable(name);
             if(child != null) {
-                children.put(name, child);
+                subTable.put(name, child);
             }
         }
     }
     
     /**
-     * get one child table<br>
-     * 1. package need child table(such as component's port_list/generic_list)
-     * 2. record, physical, enum need child table
+     * get one subtable<br>
+     * 1. package need subtable(such as component's port_list/generic_list)
+     * 2. record, physical, enum need subtable
      */
-    public SymbolTable getChild(String name) {
-        if(children == null) {
+    public SymbolTable getSubtable(String name) {
+        if(name == null || name.isEmpty() || subTable == null) {
             return null;
         }
-        return children.get(name);
+        return subTable.get(name);
+    }
+    
+    /**
+     * get symbol from subtable
+     */
+    private Symbol getSubtableSymbol(String name) {
+        Symbol ret = null;
+        if(subTable == null) {
+            return null;
+        }
+        for(int i = 0; i < size(); i++) {
+            SymbolTable table = subTable.get(get(i).name);
+            if(table != null) {
+                if((ret = table.get(name)) != null) {
+                    return ret;
+                }
+                if((ret = table.getSubtableSymbol(name)) != null) {
+                    return ret;
+                }
+            }
+        }
+        return null;
     }
 
     /**
-     * Get a symbol from the symbol table by name
+     * get a symbol from the symbol table of specified name
      */
     public Symbol getSymbol(String name) {
         Symbol ret = get(name);
         if(ret != null)
             return ret;
         
-        if(parent != null) {
-            ret = parent.getSymbol(name);
-        }else if(children != null) {    // component's port/generic symbol
-            for(int i = 0; i < children.size(); i++) {
-                SymbolTable table = children.get(i);
-                if((ret = table.get(name)) != null) {
-                    break;
-                }
-            }
+        if((ret = getSubtableSymbol(name)) != null) {
+            return ret;
         }
-        return ret;
+        
+        if(parent != null) {
+            return parent.getSymbol(name);
+        }
+      
+        return null;
     }
     
     /**
-     * Get all symbols of specified kind
+     * get all symbols of specified kind
      */
     public ArrayList<Symbol> getSymbol(int kind) {
         ArrayList<Symbol> syms = new ArrayList<Symbol>();
@@ -103,34 +123,30 @@ public class SymbolTable extends VhdlArrayList<Symbol>
         
         if(parent != null) {
             syms.addAll(parent.getSymbol(kind));
-        }else if(children != null) {    // component's port/generic symbol
-            for(int i = 0; i < children.size(); i++) {
-                syms.addAll(children.get(i));
-            }
         }
         return syms;
     }
     
     /**
-     * Get symbol table which actually contains the symbol by name
+     * get symbol table which actually contains the symbol of specified name
      */
     public SymbolTable getTableOfSymbol(String name) {
-        SymbolTable ret = null;
         if(get(name) != null)
             return this;
         
-        if(parent != null) {
-            ret = parent.getTableOfSymbol(name);
-        }else if(children != null) {    // component's port/generic symbol
-            for(int i = 0; i < children.size(); i++) {
-                SymbolTable table = children.get(i);
-                if(table.get(name) != null) {
-                    ret = table;
-                    break;
+        if(subTable != null) {    // component's port/generic symbol
+            for(int i = 0; i < size(); i++) {
+                SymbolTable table = subTable.get(get(i).name);
+                if(table != null && table.get(name) != null) {
+                    return table;
                 }
             }
         }
-        return ret;
+        
+        if(parent != null) {
+            return parent.getTableOfSymbol(name);
+        } 
+        return null;
     }
     
     public SymbolTable getParent() {

@@ -8,8 +8,8 @@ import parser.vhdl.ASTNode;
  *   <dd> [ formal_part => ] actual_part
  */
 class ScAssociation_element extends ScVhdl {
-    ScVhdl formal_part = null;
-    ScVhdl actual_part = null;
+    ScFormal_part formal_part = null;
+    ScActual_part actual_part = null;
     public ScAssociation_element(ASTNode node) {
         super(node);
         assert(node.getId() == ASTASSOCIATION_ELEMENT);

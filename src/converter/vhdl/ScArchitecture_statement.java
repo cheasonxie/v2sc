@@ -8,18 +8,18 @@ import parser.vhdl.ASTNode;
  *   <dd> simultaneous_statement
  *   <br> | concurrent_statement
  */
-class ScArchitecture_statement extends ScVhdl {
-    ScVhdl item = null;
+class ScArchitecture_statement extends ScVhdl implements IStatement {
+    IStatement statement = null;
     public ScArchitecture_statement(ASTNode node) {
         super(node);
         //assert(node.getId() == ASTARCHITECTURE_STATEMENT);
         switch(node.getId())
         {
         case ASTSIMULTANEOUS_STATEMENT:
-            item = new ScSimultaneous_statement(node);
+            statement = new ScSimultaneous_statement(node);
             break;
         case ASTCONCURRENT_STATEMENT:
-            item = new ScConcurrent_statement(node);
+            statement = new ScConcurrent_statement(node);
             break;
         default:
             break;
@@ -27,6 +27,22 @@ class ScArchitecture_statement extends ScVhdl {
     }
 
     public String scString() {
-        return item.scString();
+        return statement.scString();
+    }
+
+    @Override
+    public String getDeclaration() {
+        return statement.getDeclaration();
+    }
+
+    @Override
+    public String getImplements() {
+        return statement.getImplements();
+    }
+
+    @Override
+    public String getInitCode()
+    {
+        return statement.getInitCode();
     }
 }

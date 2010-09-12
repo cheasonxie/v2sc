@@ -9,13 +9,13 @@ import parser.vhdl.ASTNode;
  *   <dd> interface_element { ; interface_element }
  */
 class ScInterface_list extends ScVhdl {
-    ArrayList<ScVhdl> items = new ArrayList<ScVhdl>();
+    ArrayList<ScInterface_element> items = new ArrayList<ScInterface_element>();
     public ScInterface_list(ASTNode node) {
         super(node);
         assert(node.getId() == ASTINTERFACE_LIST);
         for(int i = 0; i < node.getChildrenNum(); i++) {
             ASTNode child = (ASTNode)node.getChild(i);
-            ScVhdl item = null;
+            ScInterface_element item = null;
             switch(child.getId())
             {
             case ASTINTERFACE_ELEMENT:

@@ -11,8 +11,8 @@ import parser.vhdl.ASTNode;
  *   <br> | simultaneous_procedural_statement
  *   <br> | simultaneous_null_statement
  */
-class ScSimultaneous_statement extends ScVhdl {
-    ScVhdl item = null;
+class ScSimultaneous_statement extends ScVhdl implements IStatement {
+    IStatement item = null;
     public ScSimultaneous_statement(ASTNode node) {
         super(node);
         assert(node.getId() == ASTSIMULTANEOUS_STATEMENT);
@@ -43,5 +43,21 @@ class ScSimultaneous_statement extends ScVhdl {
 
     public String scString() {
         return item.scString();
+    }
+
+    @Override
+    public String getDeclaration() {
+        return item.getDeclaration();
+    }
+
+    @Override
+    public String getImplements() {
+        return item.getImplements();
+    }
+
+    @Override
+    public String getInitCode()
+    {
+        return item.getInitCode();
     }
 }

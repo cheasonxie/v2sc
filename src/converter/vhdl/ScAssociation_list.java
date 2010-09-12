@@ -9,14 +9,14 @@ import parser.vhdl.ASTNode;
  *   <dd> association_element { , association_element }
  */
 class ScAssociation_list extends ScVhdl {
-    ArrayList<ScVhdl> elements = new ArrayList<ScVhdl>();
+    ArrayList<ScAssociation_element> elements = new ArrayList<ScAssociation_element>();
     public ScAssociation_list(ASTNode node) {
         super(node);
         assert(node.getId() == ASTASSOCIATION_LIST);
         for(int i = 0; i < node.getChildrenNum(); i++){
             ASTNode c = (ASTNode)node.getChild(i);
             assert(c.getId() == ASTASSOCIATION_ELEMENT);
-            ScVhdl newNode = new ScAssociation_element(c);
+            ScAssociation_element newNode = new ScAssociation_element(c);
             elements.add(newNode);
         }
     }

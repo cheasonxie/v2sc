@@ -10,9 +10,21 @@ import parser.vhdl.ASTNode;
  *   <br> | <b>configuration</b> <i>configuration_</i>name
  */
 class ScInstantiated_unit extends ScVhdl {
+    ScName name = null;
     public ScInstantiated_unit(ASTNode node) {
         super(node);
         assert(node.getId() == ASTINSTANTIATED_UNIT);
+        for(int i = 0; i < node.getChildrenNum(); i++) {
+            ASTNode c = (ASTNode)node.getChild(i);
+            switch(c.getId())
+            {
+            case ASTNAME:
+                name = new ScName(c);
+                break;
+            default:
+                break;
+            }
+        }
     }
 
     public String scString() {

@@ -48,7 +48,7 @@ class ScAggregate extends ScVhdl {
             if(sym == null) { return null; }
             ret = curNode.getSymbolTable().getTableOfSymbol(sym.type); //TODO: only tow level here
             if(ret != null)
-                ret = ret.getChild(sym.type);
+                ret = ret.getSubtable(sym.type);
         }
         return ret;
     }

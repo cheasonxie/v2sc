@@ -14,8 +14,8 @@ import parser.vhdl.ASTNode;
  *   <br> | generate_statement
  *   <br> | concurrent_break_statement
  */
-class ScConcurrent_statement extends ScVhdl {
-    ScVhdl item = null;
+class ScConcurrent_statement extends ScVhdl implements IStatement {
+    IStatement item = null;
     public ScConcurrent_statement(ASTNode node) {
         super(node);
         assert(node.getId() == ASTCONCURRENT_STATEMENT);
@@ -55,5 +55,21 @@ class ScConcurrent_statement extends ScVhdl {
 
     public String scString() {
         return item.scString();
+    }
+
+    @Override
+    public String getDeclaration() {
+        return item.getDeclaration();
+    }
+
+    @Override
+    public String getImplements() {
+        return item.getImplements();
+    }
+
+    @Override
+    public String getInitCode()
+    {
+        return item.getInitCode();
     }
 }

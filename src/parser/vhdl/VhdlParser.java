@@ -67,7 +67,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         if(node.parent == null || ((ASTNode)node.parent).symTab == null) {
             return false;
         }
-        Symbol sym = new Symbol(node.getName(), id, type, null);
+        Symbol sym = new Symbol(node.getName(), id, type);
         return ((ASTNode)node.parent).symTab.add(sym);
     }
     
@@ -1644,7 +1644,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
             }
         }
         consumeToken(SEMICOLON);
-        ((ASTNode)p).getSymbolTable().addChild(node.getName(), node.getSymbolTable());
+        ((ASTNode)p).getSymbolTable().addSubtable(node.getName(), node.getSymbolTable());
         endBlock();
         closeNodeScope(node);
     }
@@ -3010,7 +3010,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         }
         consumeToken(RBRACKET);
         ASTNode typeNode = node.getAncestor(ASTTYPE_DECLARATION);
-        ((ASTNode)p).getSymbolTable().addChild(typeNode.getName(), node.getSymbolTable());
+        ((ASTNode)p).getSymbolTable().addSubtable(typeNode.getName(), node.getSymbolTable());
         endBlock();
         closeNodeScope(node);
     }
@@ -3245,7 +3245,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
                 || findTokenInBlock(tokenMgr.getNextToken(tmpToken), TO, endToken) != null) {
                 formal_designator(node, endToken);  // slice name
             }else {
-                if(tokenMgr.getNextTokenKind() !=LBRACKET )
+                if(tokenMgr.getNextTokenKind() != LBRACKET)
                     name(node, tmpToken);
                 consumeToken(LBRACKET);
                 tmpToken = findTokenInBlock(RBRACKET, endToken);
@@ -3347,14 +3347,13 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         
         tmpToken = findTokenInBlock(BEGIN, endToken);
         if(endToken0 == null && tmpToken != null) {
-            block_declarative_items(node, tmpToken);
+            block_declarative_part(node, tmpToken);
             consumeToken(BEGIN);
             new ASTtoken(node, tokenImage[BEGIN]);
         }
         
-        while(tokenMgr.getNextToken() != null && tokenMgr.getNextTokenKind() != END) {
-            architecture_statements(node, endToken);
-        }
+        tmpToken = findTokenInBlock(END, endToken);
+        architecture_statement_part(node, endToken);
         
         consumeToken(END);
         consumeToken(GENERATE);
@@ -4807,7 +4806,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
             }
         }
         ASTNode typeNode = node.getAncestor(ASTTYPE_DECLARATION);
-        ((ASTNode)p).getSymbolTable().addChild(typeNode.getName(), node.getSymbolTable());
+        ((ASTNode)p).getSymbolTable().addSubtable(typeNode.getName(), node.getSymbolTable());
         endBlock();
         closeNodeScope(node);
     }
@@ -5504,7 +5503,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
             tokenMgr.toNextToken();
         }
         ASTNode typeNode = node.getAncestor(ASTTYPE_DECLARATION);
-        ((ASTNode)p).getSymbolTable().addChild(typeNode.getName(), node.getSymbolTable());
+        ((ASTNode)p).getSymbolTable().addSubtable(typeNode.getName(), node.getSymbolTable());
         endBlock();
         closeNodeScope(node);
     }
@@ -7187,7 +7186,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
                 Symbol[] symbols = libraryMgr.getSymbols(
                         (ASTNode)node.getChild(node.getChildrenNum()-1));
                 extSymbolTable.addAll(symbols);
-                extSymbolTable.copyChild(symbolTable, symbols);
+                extSymbolTable.copySubtable(symbolTable, symbols);
             }
             if(tokenMgr.getNextTokenKind() != COMMA) {
                 break;
@@ -7371,7 +7370,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
             if(i < names.length - 1) {
                 if((tab1 = tab0.getTableOfSymbol(sym.type)) == null)
                     return null;
-                tab0 = tab1.getChild(sym.type);
+                tab0 = tab1.getSubtable(sym.type);
             }
         }
         return sym;

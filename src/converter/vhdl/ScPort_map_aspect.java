@@ -1,6 +1,12 @@
 package converter.vhdl;
 
+import java.util.ArrayList;
+
+import com.sun.org.apache.xalan.internal.xsltc.compiler.sym;
+
 import parser.vhdl.ASTNode;
+import parser.vhdl.Symbol;
+import parser.vhdl.SymbolTable;
 
 
 /**
@@ -8,9 +14,50 @@ import parser.vhdl.ASTNode;
  *   <dd> <b>port</b> <b>map</b> ( <i>port_</i>association_list )
  */
 class ScPort_map_aspect extends ScVhdl {
+    ScAssociation_list association_list = null;
     public ScPort_map_aspect(ASTNode node) {
         super(node);
         assert(node.getId() == ASTPORT_MAP_ASPECT);
+        for(int i = 0; i < node.getChildrenNum(); i++) {
+            ASTNode c = (ASTNode)node.getChild(i);
+            switch(c.getId())
+            {
+            case ASTASSOCIATION_LIST:
+                association_list = new ScAssociation_list(c);
+                break;
+            default:
+                break;
+            }
+        }
+    }
+    
+    /**
+     * map to component
+     * @param componentName: name of component
+     * @param entityName: name of entity
+     */
+    public String mapString(String componentName, String entityName) {
+        String ret = "";
+        int i = 0;
+
+        SymbolTable table = getComponentChildTable(componentName, PORT);
+        ArrayList<ScAssociation_element> elements = association_list.elements;
+        
+        for(i = 0; i < elements.size(); i++) {
+            if(elements.get(i).actual_part.designator.isOpen)   // ignore open port
+                continue;
+            String portName = "";
+            if(elements.get(i).formal_part == null) {
+                portName = table.get(i).name;
+            }else {
+                portName = elements.get(i).formal_part.scString();
+            }
+            ret += entityName + "." + portName + "(";
+            ret += elements.get(i).actual_part.scString();
+            ret += ");\r\n";
+        }
+
+        return ret;
     }
 
     public String scString() {

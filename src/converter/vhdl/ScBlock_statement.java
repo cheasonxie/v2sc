@@ -13,10 +13,10 @@ import parser.vhdl.ASTNode;
  *   <ul> block_statement_part
  *   </ul> <b>end</b> <b>block</b> [ <i>block_</i>label ] ; </ul>
  */
-class ScBlock_statement extends ScVhdl {
-    ScVhdl header = null;
-    ScVhdl declarative_part = null;
-    ScVhdl statement_part = null;
+class ScBlock_statement extends ScCommonIdentifier implements IStatement {
+    ScBlock_header header = null;
+    ScBlock_declarative_part declarative_part = null;
+    ScBlock_statement_part statement_part = null;
     public ScBlock_statement(ASTNode node) {
         super(node);
         assert(node.getId() == ASTBLOCK_STATEMENT);
@@ -33,14 +33,26 @@ class ScBlock_statement extends ScVhdl {
             case ASTBLOCK_STATEMENT_PART:
                 statement_part = new ScBlock_statement_part(c);
                 break;
+            case ASTIDENTIFIER:
+                identifier = c.firstTokenImage();
+                break;
             default:
                 break;
             }
         }
+        if(identifier.isEmpty())
+            identifier = String.format("line%d", node.getFirstToken().beginLine);
+    }
+    
+    private String getName() {
+        return "process_block_" + identifier;
+    }
+    private String getSpec() {
+        return intent() + "void " + getName() + "(void)";
     }
 
     public String scString() {
-        String ret = "";
+        String ret = getSpec() + "\r\n";
         ret += intent() + "{";
         startIntentBlock();
         ret += intent() + header.toString() + "\r\n";
@@ -49,5 +61,23 @@ class ScBlock_statement extends ScVhdl {
         endIntentBlock();
         ret += intent() + "}";
         return ret;
+    }
+
+    @Override
+    public String getDeclaration() {
+        String ret = getSpec() + ";";
+        return ret;
+    }
+
+    @Override
+    public String getImplements() {
+        return toString();
+    }
+
+    @Override
+    public String getInitCode()
+    {
+        // just call it
+        return getName() + "();";
     }
 }

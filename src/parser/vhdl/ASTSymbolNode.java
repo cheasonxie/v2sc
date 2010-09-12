@@ -253,6 +253,13 @@ public class ASTSymbolNode extends ASTNode
                 sym.range = getRange(rangeNode);
             }
             
+            // get value
+            tmpNode0 = (ASTNode)getDescendant(ASTEXPRESSION);
+            if(tmpNode0 != null) {
+                //TODO only save primitive type value(integer, bit, ...)
+                sym.value = tmpNode0.firstTokenImage();
+            }
+            
             // get names
             tmpNode0 = (ASTNode)getDescendant(ASTIDENTIFIER_LIST);
             for(i = 0; i < tmpNode0.getChildrenNum(); i++) {

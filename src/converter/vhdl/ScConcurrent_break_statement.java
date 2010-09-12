@@ -7,7 +7,7 @@ import parser.vhdl.ASTNode;
  * <dl> concurrent_break_statement ::=
  *   <dd> [ label : ] <b>break</b> [ break_list ] [ sensitivity_clause ] [ <b>when</b> condition ] ;
  */
-class ScConcurrent_break_statement extends ScVhdl {
+class ScConcurrent_break_statement extends ScCommonIdentifier implements IStatement {
     ScBreak_list break_list = null;
     ScSensitivity_clause sensitivity_clause = null;
     ScCondition condition = null;
@@ -36,5 +36,23 @@ class ScConcurrent_break_statement extends ScVhdl {
     public String scString() {
         warning("break statement not support");
         return "";
+    }
+
+    @Override
+    public String getDeclaration()
+    {
+        return "";
+    }
+
+    @Override
+    public String getImplements()
+    {
+        return "";
+    }
+
+    @Override
+    public String getInitCode()
+    {
+        return toString();
     }
 }

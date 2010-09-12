@@ -7,7 +7,7 @@ import parser.vhdl.ASTNode;
  * <dl> concurrent_assertion_statement ::=
  *   <dd> [ label : ] [ <b>postponed</b> ] assertion ;
  */
-class ScConcurrent_assertion_statement extends ScVhdl {
+class ScConcurrent_assertion_statement extends ScCommonIdentifier implements IStatement {
     ScAssertion assertion = null;
     public ScConcurrent_assertion_statement(ASTNode node) {
         super(node);
@@ -19,13 +19,34 @@ class ScConcurrent_assertion_statement extends ScVhdl {
             case ASTASSERTION:
                 assertion = new ScAssertion(c);
                 break;
+            case ASTIDENTIFIER:
+                identifier = c.firstTokenImage();
+                break;
             default:
                 break;
             }
         }
+        if(identifier.isEmpty())
+            identifier = String.format("line%d", node.getFirstToken().beginLine);
     }
 
     public String scString() {
         return assertion.scString() + ";";
+    }
+
+    @Override
+    public String getDeclaration() {
+        return "";
+    }
+
+    @Override
+    public String getImplements() {
+        return "";
+    }
+
+    @Override
+    public String getInitCode()
+    {
+        return toString();
     }
 }

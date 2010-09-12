@@ -11,10 +11,10 @@ import parser.vhdl.ASTNode;
  *   <ul> architecture_statement_part </ul>
  *   <b>end</b> [ <b>architecture</b> ] [ <i>architecture_</i>simple_name ] ;
  */
-class ScArchitecture_body extends ScCommonIdentifier {
-    ScVhdl entity_name = null;
-    ScVhdl declarative_part = null;
-    ScVhdl statement_part = null;
+class ScArchitecture_body extends ScCommonIdentifier implements IStatement {
+    ScName entity_name = null;
+    ScArchitecture_declarative_part declarative_part = null;
+    ScArchitecture_statement_part statement_part = null;
     public ScArchitecture_body(ASTNode node) {
         super(node);
         assert(node.getId() == ASTARCHITECTURE_BODY);
@@ -55,10 +55,31 @@ class ScArchitecture_body extends ScCommonIdentifier {
             System.err.println("architecture boty no corresponding entity");
         }
     }
-
+    
     public String scString() {
         String ret = declarative_part.toString() + "\r\n";
         ret += statement_part.scString();
         return ret;
+    }
+
+    @Override
+    public String getDeclaration()
+    {
+        String ret = "";
+        ret += declarative_part.toString() + "\r\n";
+        ret += statement_part.getDeclaration() + "\r\n";
+        return ret;
+    }
+
+    @Override
+    public String getImplements()
+    {
+        return statement_part.getImplements();
+    }
+
+    @Override
+    public String getInitCode()
+    {
+        return statement_part.getInitCode();
     }
 }

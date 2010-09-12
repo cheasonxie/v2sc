@@ -11,6 +11,7 @@ import parser.Token;
 import parser.vhdl.ASTNode;
 import parser.vhdl.IVhdlType;
 import parser.vhdl.Symbol;
+import parser.vhdl.SymbolTable;
 import parser.vhdl.VhdlASTConstants;
 import parser.vhdl.VhdlTokenConstants;
 
@@ -19,7 +20,8 @@ public class ScVhdl implements ScVhdlConstants, VhdlTokenConstants,
 {
     protected static IParser parser = null;
     protected static CommentManager commentMgr = null;
-    protected static ArrayList<ScCommonIdentifier> units = null; // entity or package
+    /** entities and packages in this design file */
+    protected static ArrayList<ScCommonIdentifier> units = null;
     protected static int curLevel = 0;    // intent level    
     
     protected ASTNode curNode = null;
@@ -406,6 +408,26 @@ public class ScVhdl implements ScVhdlConstants, VhdlTokenConstants,
     
     public int getBitWidth() {
         return 0;
+    }
+    
+    protected SymbolTable getComponentChildTable(String componentName, int kind) {
+        SymbolTable ret = null;
+        SymbolTable tmpTable = null;
+        String genericName = "";
+        tmpTable = curNode.getSymbolTable().getTableOfSymbol(componentName);
+        if(tmpTable == null)
+            return null;
+        tmpTable = tmpTable.getSubtable(componentName);
+        if(tmpTable == null)
+            return null;
+        for(int i = 0; i < tmpTable.size(); i++) {
+            if(tmpTable.get(i).kind == kind) {
+                genericName = tmpTable.get(i).name;
+                break;
+            }
+        }
+        ret = tmpTable.getSubtable(genericName);
+        return ret;
     }
     
     /**

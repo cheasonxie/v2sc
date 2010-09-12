@@ -63,6 +63,13 @@ public class Symbol implements ISymbol, Cloneable
     public String mode = "";
     
     /**
+     * default value
+     * @note only save primitive type value(integer, bit, ...)<br>
+     * don't use in composite type(record, array, ...)
+     */
+    public String value = "";
+    
+    /**
      * param list(only used in function or procedure)
      */
     public ArrayList<String> paramTypeList = null;
@@ -79,14 +86,27 @@ public class Symbol implements ISymbol, Cloneable
     
     public Symbol(String name, int kind, String type)
     {
-        this(name, kind, type, null);
+        this(name, kind, type, "");
+    }
+    
+    public Symbol(String name, int kind, String type, String value)
+    {
+        this(name, kind, type, value, null, null);
     }
     
     public Symbol(String name, int kind, String type, String[] range)
     {
+        this(name, kind, type, "", null, range);
+    }
+    
+    public Symbol(String name, int kind, String type, String value, 
+            String[] typeRange, String[] range)
+    {
         this.name = name;
         this.kind = kind;
         this.type = type;
+        this.value = value;
+        this.typeRange = typeRange;
         this.range = range;
     }
     

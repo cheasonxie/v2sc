@@ -8,7 +8,7 @@ import parser.vhdl.ASTNode;
  *   <dd> interface_declaration
  */
 class ScInterface_element extends ScVhdl {
-    ScVhdl item = null;
+    ScInterface_declaration item = null;
     public ScInterface_element(ASTNode node) {
         super(node);
         assert(node.getId() == ASTINTERFACE_ELEMENT);
