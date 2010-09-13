@@ -257,7 +257,10 @@ public class ScVhdl implements ScVhdlConstants, VhdlTokenConstants,
             max = from;
         
         // check whether max is valid
-        ret += "<" + addOne(max) + ">";
+        if(ret.equals(scType[SC_UINT]))
+            ret += "<" + addOne(max) + ">";
+        else
+            ret += "[" + addOne(max) + "]";
         return ret;
     }
     

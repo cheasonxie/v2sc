@@ -34,7 +34,7 @@ public interface ScVhdlConstants extends ScConstants
         "bit", "bit_vector", "integer", 
         "std_logic", "std_logic_vector", "std_ulogic",
         "std_ulogic_vector", "boolean", "float", "natural",
-        "real", "signed", "unsigned"
+        "real", "signed", "unsigned", "string",
     };
     
     /*
@@ -49,7 +49,8 @@ public interface ScVhdlConstants extends ScConstants
         SC_BIT, SC_BV, SC_C_INT, 
         SC_LOGIC, SC_LV, SC_LOGIC,
         SC_LV, SC_BOOL, SC_FLOAT,
-        SC_C_UINT, SC_DOUBLE, SC_C_INT, SC_C_UINT,
+        SC_C_UINT, SC_DOUBLE, SC_C_INT, 
+        SC_C_UINT, SC_CHAR,
     };
 
     // faster simulation
@@ -58,7 +59,8 @@ public interface ScVhdlConstants extends ScConstants
         SC_BOOL, SC_UINT, SC_C_INT, 
         SC_BOOL, SC_UINT, SC_BOOL, 
         SC_UINT, SC_BOOL, SC_FLOAT, 
-        SC_C_UINT, SC_DOUBLE, SC_C_INT, SC_C_UINT,
+        SC_C_UINT, SC_DOUBLE, SC_C_INT,
+        SC_C_UINT, SC_CHAR,
     };
     
     
