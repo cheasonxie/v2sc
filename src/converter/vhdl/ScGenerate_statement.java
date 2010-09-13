@@ -74,20 +74,21 @@ class ScGenerate_statement extends ScCommonIdentifier implements IStatement {
         startIntentBlock();
         if(declarative_part != null)
             ret += declarative_part.toString() + "\r\n";
-        ret += statement_part.getImplements() + "\r\n";
+        ret += statement_part.getInitCode() + "\r\n";   // call statement part's init code
         endIntentBlock();
         ret += intent() + "}\r\n";
         endIntentBlock();
-        ret += intent() + "}\r\n";
+        ret += intent() + "}\r\n\r\n";
+        
+        
+        ret += statement_part.getImplements();
         return ret;
     }
 
     @Override
     public String getInitCode()
     {
-        String ret = "";
-        ret += statement_part.getInitCode() + "\r\n";
-        ret += intent() + getName() + "();";
-        return ret;
+        // just call it
+        return intent() + getName() + "();";
     }
 }

@@ -32,6 +32,16 @@ class ScConditional_signal_assignment extends ScVhdl {
             }
         }
     }
+    
+    public boolean hasCondition() {
+        for(int i = 0; i < waveforms.condWaveforms.size(); i++) {
+            CondWaveform cw = waveforms.condWaveforms.get(i);
+            if(cw.condition != null) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     public String scString() {
         String ret = "";
@@ -40,21 +50,26 @@ class ScConditional_signal_assignment extends ScVhdl {
             warning("options ignored");
         }
         
-        for(int i = 0; i < waveforms.condWaveforms.size(); i++) {
-            CondWaveform cw = waveforms.condWaveforms.get(i);
-            ScCondition condition = cw.condition;
-            if(i == 0) {
-                ret += intent() + "if(" + condition.scString() + ")\r\n";
-            }else if(condition != null) {
-                ret += intent() + "else if(" + condition.scString() + ")\r\n";
-            }else {
-                ret += intent() + "else\r\n";
-            }
-            ret += intent() + "{\r\n";
-            startIntentBlock();
+        if(!hasCondition()) {
+            CondWaveform cw = waveforms.condWaveforms.get(0);
             ret += cw.waveform.assignment(val) + ";\r\n";
-            endIntentBlock();
-            ret += intent() + "}\r\n";
+        }else {
+            for(int i = 0; i < waveforms.condWaveforms.size(); i++) {
+                CondWaveform cw = waveforms.condWaveforms.get(i);
+                ScCondition condition = cw.condition;
+                if(i == 0) {
+                    ret += intent() + "if(" + condition.scString() + ")\r\n";
+                }else if(condition != null) {
+                    ret += intent() + "else if(" + condition.scString() + ")\r\n";
+                }else {
+                    ret += intent() + "else\r\n";
+                }
+                ret += intent() + "{\r\n";
+                startIntentBlock();
+                ret += cw.waveform.assignment(val) + ";\r\n";
+                endIntentBlock();
+                ret += intent() + "}\r\n";
+            }
         }
 
         return ret;

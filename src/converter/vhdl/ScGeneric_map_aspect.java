@@ -37,19 +37,19 @@ class ScGeneric_map_aspect extends ScVhdl {
         String ret = "";
         int i = 0;
 
-        SymbolTable table = getComponentChildTable(name, GENERIC);
+        Symbol[] syms = getComponentChildSymbols(name, GENERIC);
         ArrayList<ScAssociation_element> elements = association_list.elements;
         
         for(i = 0; i < elements.size(); i++) {
             if(elements.get(i).formal_part!= null) {
                 String genName = elements.get(i).formal_part.scString();
-                for(int j = i; j < table.size(); j++) {     // add omitted items
-                    Symbol sym = table.get(j);
+                for(int j = i; j < syms.length; j++) {     // add omitted items
+                    Symbol sym = syms[j];
                     if(sym.name.equalsIgnoreCase(genName)) {
                         break;
                     }
                     ret += sym.value;
-                    if(j < table.size() - 1 && i < elements.size() - 1) {
+                    if(j < syms.length - 1 && i < elements.size() - 1) {
                         ret += ", ";
                     }
                 }

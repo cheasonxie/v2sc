@@ -410,10 +410,8 @@ public class ScVhdl implements ScVhdlConstants, VhdlTokenConstants,
         return 0;
     }
     
-    protected SymbolTable getComponentChildTable(String componentName, int kind) {
-        SymbolTable ret = null;
+    protected Symbol[] getComponentChildSymbols(String componentName, int kind) {
         SymbolTable tmpTable = null;
-        String genericName = "";
         tmpTable = (SymbolTable)parser.getTableOfSymbol(curNode, componentName);
         if(tmpTable == null) {
             return null;
@@ -421,13 +419,21 @@ public class ScVhdl implements ScVhdlConstants, VhdlTokenConstants,
         tmpTable = tmpTable.getSubtable(componentName);
         if(tmpTable == null)
             return null;
+        
+        int count = 0;
         for(int i = 0; i < tmpTable.size(); i++) {
             if(tmpTable.get(i).kind == kind) {
-                genericName = tmpTable.get(i).name;
-                break;
+                count ++;
             }
         }
-        ret = tmpTable.getSubtable(genericName);
+        
+        Symbol[] ret = new Symbol[count];
+        count = 0;
+        for(int i = 0; i < tmpTable.size(); i++) {
+            if(tmpTable.get(i).kind == kind) {
+                ret[count++] = tmpTable.get(i);
+            }
+        }
         return ret;
     }
     

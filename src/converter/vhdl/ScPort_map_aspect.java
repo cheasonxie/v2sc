@@ -40,7 +40,7 @@ class ScPort_map_aspect extends ScVhdl {
         String ret = "";
         int i = 0;
 
-        SymbolTable table = getComponentChildTable(componentName, PORT);
+        Symbol[] syms = getComponentChildSymbols(componentName, PORT);
         ArrayList<ScAssociation_element> elements = association_list.elements;
         
         for(i = 0; i < elements.size(); i++) {
@@ -48,7 +48,7 @@ class ScPort_map_aspect extends ScVhdl {
                 continue;
             String portName = "";
             if(elements.get(i).formal_part == null) {
-                portName = table.get(i).name;
+                portName = syms[i].name;
             }else {
                 portName = elements.get(i).formal_part.scString();
             }

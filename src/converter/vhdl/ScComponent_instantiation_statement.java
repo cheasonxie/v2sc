@@ -1,10 +1,6 @@
 package converter.vhdl;
 
-import java.util.ArrayList;
-
 import parser.vhdl.ASTNode;
-import parser.vhdl.Symbol;
-import parser.vhdl.SymbolTable;
 
 
 /**
@@ -65,8 +61,8 @@ class ScComponent_instantiation_statement extends ScCommonIdentifier implements 
             if(generic_map != null) {
                 ret += "<" + generic_map.mapString(name) + ">";
             }
-            name = " comp_" + name;
-            ret += name + "(\"" + name + "\");\r\n";
+            name = "comp_" + name;
+            ret += " " + name + "(\"" + name + "\");\r\n";
         }
         ret += getSpec() + ";";
         return ret;
@@ -89,6 +85,6 @@ class ScComponent_instantiation_statement extends ScCommonIdentifier implements 
     @Override
     public String getInitCode()
     {
-        return getName() + "();";
+        return intent() + getName() + "();";
     }
 }

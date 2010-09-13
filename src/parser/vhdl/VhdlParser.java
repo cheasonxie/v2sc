@@ -20,7 +20,8 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
     protected SymbolTable extSymbolTable = new SymbolTable();   // external symbols, define in use_clause
     protected SymbolTable symbolTable = null;
     protected ASTNode curNode = null;       // current parsing node
-    protected ASTNode designFile = null;    // design file node
+    protected ASTNode lastNode = null;      // last parsed node
+    protected ASTNode designFile = null;  // design file node
     
     /**
      *  true -- just only parse symbols in package(if exist)<br>
@@ -82,6 +83,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
     
     void closeNodeScope(ASTNode n) throws ParserException  {
         n.setLastToken(tokenMgr.getCurrentToken());
+        lastNode = curNode;
         curNode = (ASTNode)n.getParent();
     }
     
@@ -1225,7 +1227,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
             }
             
             if(!exitLoop) {
-                addSymbol((ASTNode)p.getChild(p.getChildrenNum()-1), kind);
+                addSymbol(lastNode, kind);
             }
         }
     }
@@ -2820,7 +2822,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
             }
             
             if(!exitLoop) {
-                addSymbol((ASTNode)p.getChild(p.getChildrenNum()-1), kind);
+                addSymbol(lastNode, kind);
             }
         }
     }
@@ -3002,8 +3004,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
             if(tmpToken == null)
                 tmpToken = endToken;
             enumeration_literal(node, tmpToken);
-            addSymbol((ASTNode)node.getChild(node.getChildrenNum() - 1), CONSTANT, 
-                    strVhdlType[TYPE_INTEGER]);   // regard enum as constant integer 
+            addSymbol(lastNode, CONSTANT, strVhdlType[TYPE_INTEGER]);   // regard enum as constant integer 
             if(tokenMgr.getNextTokenKind() != COMMA) {
                 break;
             }
@@ -3415,7 +3416,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
      *   <dd> <i>generic_</i>interface_list
      */
     void generic_list(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTGENERIC_LIST);
+        ASTNode node = new ASTSymbolNode(p, ASTGENERIC_LIST);
         openNodeScope(node);
         interface_list(node, endToken);
         closeNodeScope(node);
@@ -4569,7 +4570,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
             }
             
             if(!exitLoop) {
-                addSymbol((ASTNode)p.getChild(p.getChildrenNum()-1), kind);
+                addSymbol(lastNode, kind);
             }
         }
     }
@@ -4726,7 +4727,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
             }
             
             if(!exitLoop) {
-                addSymbol((ASTNode)p.getChild(p.getChildrenNum()-1), kind);
+                addSymbol(lastNode, kind);
             }
         }
     }
@@ -5073,7 +5074,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
             }
             
             if(!exitLoop) {
-                addSymbol((ASTNode)p.getChild(p.getChildrenNum()-1), kind);
+                addSymbol(lastNode, kind);
             }
         }
     }
@@ -5240,7 +5241,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
             }
             
             if(!exitLoop) {
-                addSymbol((ASTNode)p.getChild(p.getChildrenNum()-1), kind);
+                addSymbol(lastNode, kind);
             }
         }
     }
@@ -6749,7 +6750,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
             }
             
             if(!exitLoop) {
-                addSymbol((ASTNode)p.getChild(p.getChildrenNum()-1), kind);
+                addSymbol(lastNode, kind);
             }
         }
     }

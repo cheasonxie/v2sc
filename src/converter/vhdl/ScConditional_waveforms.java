@@ -22,6 +22,7 @@ class ScConditional_waveforms extends ScVhdl {
             case ASTWAVEFORM:
                 cw = new CondWaveform();
                 cw.waveform = new ScWaveform(c);
+                condWaveforms.add(cw);
                 break;
             case ASTEXPRESSION:
                 cw.condition = new ScCondition(c);
