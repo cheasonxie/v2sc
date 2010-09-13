@@ -3,7 +3,6 @@ package converter.vhdl;
 import java.io.IOException;
 
 import parser.ParserException;
-import parser.vhdl.ASTNode;
 import parser.vhdl.LibraryManager;
 import parser.vhdl.VhdlParser;
 import converter.hdlConverter;

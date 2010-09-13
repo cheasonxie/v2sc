@@ -1,7 +1,5 @@
 package converter.vhdl;
 
-import java.util.ArrayList;
-
 import parser.vhdl.ASTNode;
 
 

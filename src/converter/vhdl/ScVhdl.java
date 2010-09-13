@@ -410,7 +410,7 @@ public class ScVhdl implements ScVhdlConstants, VhdlTokenConstants,
         if(Character.isDigit(str.charAt(0))) {
             return Integer.parseInt(str);
         }else {
-            Symbol sym = (Symbol)parser.getSymbol(curNode, str);
+            //Symbol sym = (Symbol)parser.getSymbol(curNode, str);
             //TODO get value
         }
         return 0;

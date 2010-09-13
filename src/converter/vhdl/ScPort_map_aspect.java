@@ -2,11 +2,8 @@ package converter.vhdl;
 
 import java.util.ArrayList;
 
-import com.sun.org.apache.xalan.internal.xsltc.compiler.sym;
-
 import parser.vhdl.ASTNode;
 import parser.vhdl.Symbol;
-import parser.vhdl.SymbolTable;
 
 
 /**
