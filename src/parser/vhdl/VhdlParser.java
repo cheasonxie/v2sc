@@ -7185,8 +7185,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
                 tmpToken = endToken;
             selected_name(node, tmpToken);
             if(!parseSymbol) {
-                SymbolTable table = libraryMgr.getSymbolTable(
-                        (ASTNode)node.getChild(node.getChildrenNum()-1));
+                SymbolTable table = libraryMgr.getSymbolTable(lastNode);
                 extSymbolTable.addAllInTable(table);
             }
             if(tokenMgr.getNextTokenKind() != COMMA) {
