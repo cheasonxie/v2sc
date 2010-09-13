@@ -11,7 +11,7 @@ import parser.vhdl.ASTNode;
 class ScArchitecture_statement extends ScVhdl implements IStatement {
     IStatement statement = null;
     public ScArchitecture_statement(ASTNode node) {
-        super(node);
+        super(node, false);
         //assert(node.getId() == ASTARCHITECTURE_STATEMENT);
         switch(node.getId())
         {

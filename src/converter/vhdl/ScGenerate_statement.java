@@ -66,7 +66,9 @@ class ScGenerate_statement extends ScCommonIdentifier implements IStatement {
 
     @Override
     public String getImplements() {
-        String ret = getSpec() + "\r\n";
+        String ret = "";
+        ret += addPrevComment();
+        ret += getSpec() + "\r\n";
         ret += intent() + "{\r\n";
         startIntentBlock();
         ret += scheme.toString() + "\r\n";
@@ -79,7 +81,6 @@ class ScGenerate_statement extends ScCommonIdentifier implements IStatement {
         ret += intent() + "}\r\n";
         endIntentBlock();
         ret += intent() + "}\r\n\r\n";
-        
         
         ret += statement_part.getImplements();
         return ret;

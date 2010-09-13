@@ -14,7 +14,7 @@ import parser.vhdl.ASTNode;
 class ScSimultaneous_statement extends ScVhdl implements IStatement {
     IStatement item = null;
     public ScSimultaneous_statement(ASTNode node) {
-        super(node);
+        super(node, false);
         assert(node.getId() == ASTSIMULTANEOUS_STATEMENT);
         for(int i = 0; i < node.getChildrenNum(); i++) {
             ASTNode c = (ASTNode)node.getChild(i);

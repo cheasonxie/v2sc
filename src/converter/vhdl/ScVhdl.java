@@ -30,6 +30,7 @@ public class ScVhdl implements ScVhdlConstants, VhdlTokenConstants,
     protected boolean isLogic = false;
     protected ArrayList<CommentBlock> myPrevComment = null;
     protected CommentBlock myPostComment = null;
+    protected boolean needComment = true;
     
     
     /**
@@ -46,6 +47,12 @@ public class ScVhdl implements ScVhdlConstants, VhdlTokenConstants,
     
     public ScVhdl(ASTNode node) {
         curNode = node;
+        init();
+    }
+    
+    public ScVhdl(ASTNode node, boolean needComment) {
+        curNode = node;
+        this.needComment = needComment;
         init();
     }
     
@@ -66,7 +73,7 @@ public class ScVhdl implements ScVhdlConstants, VhdlTokenConstants,
             }
         }
         
-        if(commentMgr != null) {
+        if(needComment && commentMgr != null) {
             CommentBlock tmp = commentMgr.getCurrentBlock();
             if(tmp != null) {
                 if(tmp.endLine < beginLine) {
