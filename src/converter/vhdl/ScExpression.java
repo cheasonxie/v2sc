@@ -50,21 +50,11 @@ class ScExpression extends ScVhdl {
 
     public String scString() {
         String ret = "";
-//        boolean addBracket = false;
         ret += items.get(0).scString();
-//        if(curNode.firstTokenImage().equals("(")
-//                && items.get(0).scString().charAt(0) != '('
-//                && curNode.getDescendant(ASTAGGREGATE) != null) {
-//            addBracket = true;
-//        }
-//        if(addBracket)
-//            ret = "(" + ret;
         for(int i = 1; i < items.size() - 1; i += 2){
             ret += getReplaceOperator(items.get(i).scString());
             ret += items.get(i+1).scString();
         }
-//        if(addBracket)
-//            ret += ")";
-        return ret;
+        return getReplaceValue(ret);
     }
 }

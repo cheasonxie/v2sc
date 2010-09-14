@@ -39,11 +39,19 @@ class ScFunction_call extends ScVhdl {
 
     public String scString() {
         String ret = "";
-        ret += name.scString();
-        if(param_part != null)
-            ret += encloseBracket(param_part.scString());
-        else
-            ret += "()";
+        String strName = name.scString();
+        if(param_part != null) {
+            String tmp = param_part.scString();
+            if(strName.equalsIgnoreCase("rising_edge")) {
+                ret += tmp + ".pos()";
+            }else if(strName.equalsIgnoreCase("rising_edge")) {
+                ret += tmp + ".neg()";
+            }else {
+                ret += strName + encloseBracket(tmp);
+            }
+        }else {
+            ret += strName + "()";
+        }
         return ret;
     }
 }

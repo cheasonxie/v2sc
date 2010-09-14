@@ -55,8 +55,10 @@ class ScProcess_statement extends ScCommonIdentifier implements IStatement {
         String ret = "\r\n" + getSpec() + "\r\n";
         ret += intent() + "{\r\n";
         startIntentBlock();
-        ret += declarative_part.toString() + "\r\n\r\n";
-        ret += statement_part.toString() + "\r\n";
+        String tmp = declarative_part.toString();
+        if(!tmp.isEmpty())
+            ret += tmp + "\r\n\r\n";
+        ret += statement_part.toString();
         endIntentBlock();
         ret += intent() + "}\r\n";
         return ret;

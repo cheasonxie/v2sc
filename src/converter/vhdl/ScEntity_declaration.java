@@ -113,7 +113,7 @@ class ScEntity_declaration extends ScCommonIdentifier implements IStatement {
         startIntentBlock();
         ret += header.toString() + "\r\n";
         ret += declarative_part.toString() + "\r\n";
-        ret += body.getDeclaration() + "\r\n";
+        ret += body.getDeclaration();
         endIntentBlock();
         ret += "};\r\n";
         return ret;

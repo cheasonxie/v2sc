@@ -44,7 +44,9 @@ class ScArchitecture_statement_part extends ScVhdl implements IStatement {
     public String getImplements() {
         String ret = "";
         for(int i = 0; i < itemList.size(); i++) {
-            ret += itemList.get(i).getImplements() + "\r\n";
+            String tmp = itemList.get(i).getImplements();
+            if(!tmp.isEmpty())
+                ret += tmp + "\r\n";
         }
         return ret;
     }

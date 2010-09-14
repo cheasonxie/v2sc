@@ -90,7 +90,7 @@ class ScCase_statement extends ScVhdl {
                 startIntentBlock();
                 ret += intent() + alt.seq_statements.toString() + "\r\n";
                 endIntentBlock();
-                ret += "}\r\n";
+                ret += "}";
             }
         }else {
             ret += intent() + "switch(" + expression.scString() + ")\r\n";
@@ -98,7 +98,7 @@ class ScCase_statement extends ScVhdl {
             for(int i = 0; i < statement_alt.size(); i++) {
                 ret += statement_alt.get(i).toString() + "\r\n";
             }
-            ret += intent() + "}\r\n";
+            ret += intent() + "}";
         }
 
         return ret;

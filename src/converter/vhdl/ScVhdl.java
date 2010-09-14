@@ -453,8 +453,8 @@ public class ScVhdl implements ScVhdlConstants, VhdlTokenConstants,
         if(str.charAt(0) == '(')
         {
             int i = 1;
-            int count = 0;
-            while(i < str.length()) {
+            boolean ret = true;
+            while(i < str.length() - 1) {
                 char c = str.charAt(i);
                 if(c == '\"') {
                     i ++;
@@ -462,7 +462,7 @@ public class ScVhdl implements ScVhdlConstants, VhdlTokenConstants,
                         i++;
                     }
                 }else if(c == ',') {
-                    count = 0;
+                    ret = false;
                     break;
                 }else if(c == '(') {
                     i ++;
@@ -470,11 +470,12 @@ public class ScVhdl implements ScVhdlConstants, VhdlTokenConstants,
                         i++;
                     }
                 }else if(c == ')') {
-                    count --;
+                    ret = false;
+                    break;
                 }
                 i ++;
             }
-            return (count < 0);
+            return ret;
         }
         return false;
     }

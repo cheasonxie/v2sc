@@ -31,7 +31,7 @@ class ScElement_association extends ScVhdl {
     
     public int getBitWidth() {
         if(choices != null && choices.isOthers()) {
-            return -1;
+            return 1;
         }
         return expression.getBitWidth();
     }
@@ -54,10 +54,14 @@ class ScElement_association extends ScVhdl {
                         if(i < max-1) { ret += ", "; }
                     }
                 }else {
-                    ret += '\"';
                     String tmp = getReplaceValue(val);
-                    for(int i = 0; i < max; i++) { ret += tmp; }
-                    ret += '\"';
+                    if(max == 1)
+                        ret += tmp;
+                    else {
+                        ret += '\"';
+                        for(int i = 0; i < max; i++) { ret += tmp; }
+                        ret += '\"';
+                    }
                 }
             }else {
                 ret += val;
