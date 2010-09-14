@@ -33,7 +33,7 @@ class ScAssociation_element extends ScVhdl {
         String ret = "";
         if(formal_part != null) {
             ret += formal_part.scString();
-            ret += "(" + actual_part.scString() + ")";   //TODO write() ??
+            ret += encloseBracket(actual_part.scString());   //TODO write() ??
         }else {
             ret += actual_part.scString();
         }

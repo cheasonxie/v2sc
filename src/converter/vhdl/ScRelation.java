@@ -55,7 +55,7 @@ class ScRelation extends ScVhdl {
         String ret = "";
         String tmp = l_exp.scString();
         if(l_exp.r_exp != null) {
-            ret = "(" + tmp + ")";
+            ret = encloseBracket(tmp);
         }else {
             ret = tmp;
         }
@@ -64,7 +64,7 @@ class ScRelation extends ScVhdl {
             ret += operator.scString();
             tmp = r_exp.scString();
             if(r_exp.r_exp != null) {
-                ret += "(" + tmp + ")";
+                ret += encloseBracket(tmp);
             }else {
                 ret += tmp;
             }

@@ -16,7 +16,7 @@ class ScActual_part extends ScVhdl {
     public ScActual_part(ASTNode node) {
         super(node);
         assert(node.getId() == ASTACTUAL_PART);
-        isFirstBracket = (node.firstTokenImage() == "(");
+        isFirstBracket = (node.firstTokenImage().charAt(0) == '(');
         for(int i = 0; i < node.getChildrenNum(); i++) {
             ASTNode c = (ASTNode)node.getChild(i);
             switch(c.getId())
@@ -44,11 +44,11 @@ class ScActual_part extends ScVhdl {
         if(item != null) {
             ret += item.scString();
         }else {
+            String tmp = designator.scString();
             if(isFirstBracket)
-                ret += "(";
-            ret += designator.scString();
-            if(isFirstBracket)
-                ret += ")";
+                ret += encloseBracket(tmp);
+            else
+                ret += tmp;
         }
         return ret;
     }

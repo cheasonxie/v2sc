@@ -52,26 +52,20 @@ class ScSimple_expression extends ScVhdl {
             ret += sign.scString();
         }
         ScTerm term = (ScTerm)items.get(0);
-        String tmp = term.scString();
-        //if(term.items.size() > 2) {
-        //    ret += "(" + tmp + ")";
-        //}else {
-            ret += tmp;
-        //}
+        boolean isStringAdd = (term.isString() 
+                && curNode.getAncestor(ASTPROCEDURE_CALL) != null);
+        ret += term.scString();
         
         for(int i = 1; i < items.size() - 1; i += 2) {
             if(!(items.get(i) instanceof ScAdding_operator 
                     && ((ScAdding_operator)items.get(i)).isConcat))
                 ret += " ";
-            ret += getReplaceOperator(items.get(i).scString());
+            if(isStringAdd)
+                ret += " +";
+            else
+                ret += getReplaceOperator(items.get(i).scString());
             ret += " ";
-            term = (ScTerm)items.get(i+1);
-            tmp = term.scString();
-            //if(term.items.size() > 2) {
-            //    ret += "(" + tmp + ")";
-            //}else {
-                ret += tmp;
-            //}
+            ret += items.get(i+1).scString();
         }
         return ret;
     }

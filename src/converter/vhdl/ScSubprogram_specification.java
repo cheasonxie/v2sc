@@ -52,11 +52,11 @@ class ScSubprogram_specification extends ScVhdl {
             ret += "void ";
         }
         ret += designator.scString();
-        ret += "(";
         if(parameter_list != null) {
-            ret += parameter_list.scString();
+            ret += encloseBracket(parameter_list.scString());
+        } else {
+            ret += "()";
         }
-        ret += ")";
         return ret;
     }
 }

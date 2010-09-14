@@ -38,7 +38,7 @@ class ScBlock_specification extends ScVhdl {
         String ret = "";
         ret += name.scString();
         if(index_spec != null) {
-            ret += "(" + index_spec.scString() + ")";   //TODO: modify here
+            ret += encloseBracket(index_spec.scString());   //TODO: modify here
         }
         return ret;
     }

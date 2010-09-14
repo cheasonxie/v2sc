@@ -39,10 +39,11 @@ class ScFunction_call extends ScVhdl {
 
     public String scString() {
         String ret = "";
-        ret += name.scString() + "(";
+        ret += name.scString();
         if(param_part != null)
-            ret += param_part.scString();
-        ret += ")";
+            ret += encloseBracket(param_part.scString());
+        else
+            ret += "()";
         return ret;
     }
 }

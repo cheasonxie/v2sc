@@ -258,9 +258,9 @@ public class ScVhdl implements ScVhdlConstants, VhdlTokenConstants,
         
         // check whether max is valid
         if(ret.equals(scType[SC_UINT]))
-            ret += "<" + addOne(max) + ">";
+            ret += encloseBracket(addOne(max), "<>");
         else
-            ret += "[" + addOne(max) + "]";
+            ret += encloseBracket(addOne(max), "[]");
         return ret;
     }
     
@@ -447,6 +447,66 @@ public class ScVhdl implements ScVhdlConstants, VhdlTokenConstants,
         return ret;
     }
     
+    static private boolean isBracketEnclosed(String str) {
+        if(str.isEmpty())
+            return false;
+        if(str.charAt(0) == '(')
+        {
+            int i = 1;
+            int count = 0;
+            while(i < str.length()) {
+                char c = str.charAt(i);
+                if(c == '\"') {
+                    i ++;
+                    while(i < str.length() && str.charAt(i) != '\"') {
+                        i++;
+                    }
+                }else if(c == ',') {
+                    count = 0;
+                    break;
+                }else if(c == '(') {
+                    i ++;
+                    while(i < str.length() && str.charAt(i) != ')') {
+                        i++;
+                    }
+                }else if(c == ')') {
+                    count --;
+                }
+                i ++;
+            }
+            return (count < 0);
+        }
+        return false;
+    }
+    
+    /**
+     * add "(" and ")" at two sides if necessary
+     */
+    static protected String encloseBracket(String str) {
+        String ret = "";
+        if(!isBracketEnclosed(str)) {
+            ret = "(" + str + ")";
+        }else {
+            ret = str;
+        }
+        return ret;
+    }
+    
+    /**
+     * force to add bracket, and eliminate redundant "()"
+     */
+    static protected String encloseBracket(String str, String bracket) {
+        String ret = "";
+
+        ret += bracket.charAt(0);
+        if(!isBracketEnclosed(str)) {
+            ret += str; 
+        }else {
+            ret += str.substring(1, str.length() - 1);
+        }
+        ret += bracket.charAt(1);
+        return ret;
+    }    
     /**
      * @return true if current node is assignment(expression) of declaration
      */

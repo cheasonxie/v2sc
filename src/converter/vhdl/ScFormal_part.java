@@ -35,7 +35,7 @@ class ScFormal_part extends ScVhdl {
         String ret = "";
         if(name != null) {
             ret += name.scString();
-            ret += "(" + designator.scString() + ")";
+            ret += encloseBracket(designator.scString());
         }else {
             ret += designator.scString();
         }

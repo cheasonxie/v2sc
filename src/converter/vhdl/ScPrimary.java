@@ -61,7 +61,7 @@ class ScPrimary extends ScVhdl {
 
     public String scString() {
         if(item instanceof ScExpression) {
-            return "(" + item.scString() + ")";
+            return encloseBracket(item.scString());
         }else {
             return item.scString();
         }

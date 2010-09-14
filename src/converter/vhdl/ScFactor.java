@@ -53,7 +53,7 @@ class ScFactor extends ScVhdl {
         if(operator != null
             && operator.scString().equalsIgnoreCase(vhdlOperators[VHDL_ABS])) {
             String tmp = getReplaceOperator(operator.scString());
-            ret += tmp + "(" + primary0.scString() + ")";
+            ret += tmp + encloseBracket(primary0.scString());
         }else if(operator != null
             && operator.scString().equalsIgnoreCase(vhdlOperators[VHDL_NOT])) {
             String tmp = getReplaceOperator(operator.scString());

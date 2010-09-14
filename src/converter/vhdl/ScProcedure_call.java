@@ -33,9 +33,7 @@ class ScProcedure_call extends ScVhdl {
         String ret = "";
         ret += name.scString();
         if(parameter_part != null) {
-            ret += "(";
-            ret += parameter_part.scString();
-            ret += ")";
+            ret += encloseBracket(parameter_part.scString());
         }
         return ret;
     }

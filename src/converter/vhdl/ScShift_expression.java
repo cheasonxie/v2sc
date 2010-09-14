@@ -57,7 +57,7 @@ class ScShift_expression extends ScVhdl {
         String ret = "";
         String tmp = l_exp.scString();
         if(l_exp.items.size() > 2) {
-            ret += "(" + tmp + ")";
+            ret += encloseBracket(tmp);
         }else {
             ret += tmp;
         }
@@ -66,7 +66,7 @@ class ScShift_expression extends ScVhdl {
             ret += " " + getReplaceOperator(operator.scString()) + " ";
             tmp = r_exp.scString();
             if(r_exp.items.size() > 2) {
-                ret += "(" + tmp + ")";
+                ret += encloseBracket(tmp);
             }else {
                 ret += tmp;
             }

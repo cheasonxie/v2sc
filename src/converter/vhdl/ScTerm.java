@@ -2,6 +2,7 @@ package converter.vhdl;
 
 import java.util.ArrayList;
 import parser.vhdl.ASTNode;
+import parser.vhdl.Symbol;
 
 
 /**
@@ -40,6 +41,24 @@ class ScTerm extends ScVhdl {
         super.setLogic(logic);
         if(items.size() <2)
             items.get(0).setLogic(logic);
+    }
+    
+    public boolean isString() {
+        boolean ret = (curNode.firstTokenImage().charAt(0) == '\"');
+        if(ret)
+            return true;
+        
+        ASTNode dNode = (ASTNode)curNode.getDescendant(ASTFUNCTION_CALL);
+        if(dNode != null) {
+            ScFunction_call func = new ScFunction_call(dNode);
+            if(func.name.scString().equals("tost")) {
+                System.out.println();
+            }
+            Symbol sym = (Symbol)parser.getSymbol(dNode, func.name.scString());
+            assert(sym != null && sym.kind == FUNCTION);
+            return sym.type.equalsIgnoreCase("string");
+        }
+        return false;
     }
 
     public String scString() {

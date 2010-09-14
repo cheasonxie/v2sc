@@ -35,14 +35,15 @@ class ScIndexed_name extends ScVhdl {
     public String scString() {
         String ret = "";
         ret += prefix.scString();
-        ret += "[";        
+        String tmp = "";
+      
         for(int i = 0; i < exps.size(); i++) {
-            ret += exps.get(i).scString();
+            tmp += exps.get(i).scString();
             if(i < exps.size() - 1) {
-                ret += ", ";
+                tmp += ", ";
             }
         }
-        ret += "]";
+        ret += encloseBracket(tmp, "[]");
         return ret;
     }
 }
