@@ -16,8 +16,9 @@ public class hdl2SystemC
         try
         {
             hdlConverter conv = null;
-            String path = "ahbctrl.vhd";
-            //String path = "apbuart.vhd";
+            String name = "amba";
+            //String path = "ahbctrl.vhd";
+            String path = name + ".vhd";
             //String path = "ac97_top.v";
             if(args.length > 1)
                 path = args[1];
@@ -40,7 +41,7 @@ public class hdl2SystemC
             if(conv != null)
             {
                 conv.addLibary("grlib-gpl-1.0.21-b3848\\lib\\grlib", "grlib");
-                conv.convertFile(path, "a.cpp");
+                conv.convertFile(path, name + ".cpp");
             }
         }
         catch (FileNotFoundException e)

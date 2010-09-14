@@ -13,6 +13,7 @@ public class Vhdl extends hdlConverter {
     public void convertFile(String srcPath, String dstPath)
             throws ParserException, IOException
     {
+        System.out.println("convertFile:" + srcPath);
         VhdlParser parser = new VhdlParser(false);
         createFile(dstPath, true);
         parser.parse(srcPath);

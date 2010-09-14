@@ -9,8 +9,8 @@ import parser.vhdl.ASTNode;
  *   <ul> package_declarative_part
  *   </ul> <b>end</b> [ <b>package</b> ] [ <i>package_</i>simple_name ] ;
  */
-class ScPackage_declaration extends ScCommonIdentifier {
-    ScVhdl declarative_part = null;
+class ScPackage_declaration extends ScCommonIdentifier implements IStatement {
+    ScPackage_declarative_part declarative_part = null;
     ScPackage_body body = null;
     public ScPackage_declaration(ASTNode node) {
         super(node);
@@ -55,6 +55,34 @@ class ScPackage_declaration extends ScCommonIdentifier {
         ret += body.scString();
         endIntentBlock();
         ret += "};\r\n";
+        return ret;
+    }
+
+    @Override
+    public String getDeclaration() {
+        String ret = "";
+        if(body == null) {
+            warning("no package body");
+        }
+        ret += "namespace " + identifier;
+        ret += "{\r\n";
+        startIntentBlock();
+        ret += declarative_part.scString();
+        ret += "\r\n";
+        ret += body.getDeclaration();
+        endIntentBlock();
+        ret += "};\r\n";
+        return ret;
+    }
+
+    @Override
+    public String getImplements() {
+        return body.getImplements();
+    }
+
+    @Override
+    public String getInitCode() {
+        String ret = "";
         return ret;
     }
 }

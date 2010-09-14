@@ -9,13 +9,13 @@ import parser.vhdl.ASTNode;
  *   <dd> { package_declarative_item }
  */
 class ScPackage_declarative_part extends ScVhdl {
-    ArrayList<ScVhdl> items = new ArrayList<ScVhdl>();
+    ArrayList<ScPackage_declarative_item> items = new ArrayList<ScPackage_declarative_item>();
     public ScPackage_declarative_part(ASTNode node) {
         super(node);
         assert(node.getId() == ASTPACKAGE_DECLARATIVE_PART);
         for(int i = 0; i < node.getChildrenNum(); i++) {
             ASTNode c = (ASTNode)node.getChild(i);
-            ScVhdl item = new ScPackage_declarative_item(c);
+            ScPackage_declarative_item item = new ScPackage_declarative_item(c);
             items.add(item);
         }
     }
@@ -23,6 +23,8 @@ class ScPackage_declarative_part extends ScVhdl {
     public String scString() {
         String ret = "";
         for(int i = 0; i < items.size(); i++) {
+            if(items.get(i).item instanceof ScComponent_declaration)
+                continue;   // component declaration in other file
             ret += items.get(i);
             if(i < items.size() - 1) {
                 ret += "\r\n";

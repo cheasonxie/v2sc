@@ -570,26 +570,14 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
             throw new ParserException(tokenMgr.toNextToken());
         }
         
-        boolean first = true;
         while(true) {
             Token commaToken = findTokenInBlock(COMMA, rbracketToken);
             endToken = (commaToken != null) ? commaToken : rbracketToken;
-            if(tokenMgr.getNextTokenKind() == LBRACKET) {
-                Token tmpToken = findTokenInBlock(tokenMgr.getNextToken(2), 
-                                    RBRACKET, rbracketToken);
-                if(endToken != rbracketToken || (!first && tmpToken != rbracketToken)) {
-                    aggregate(node, endToken);
-                }else {
-                    element_association(node, endToken);
-                }
-            }else {
-                element_association(node, endToken);
-            }
+            element_association(node, endToken);
             if(tokenMgr.getNextTokenKind() != COMMA) {
                 break;
             }
             consumeToken(COMMA);
-            first = false;
         }
         consumeToken(RBRACKET);
         closeNodeScope(node);
@@ -2492,7 +2480,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
     void element_association(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTELEMENT_ASSOCIATION);
         openNodeScope(node);
-        Token tmpToken = findToken(RARROW, endToken);
+        Token tmpToken = findTokenInBlock(RARROW, endToken);
         if(tmpToken != null) {
             choices(node, tmpToken);
             consumeToken(RARROW);
