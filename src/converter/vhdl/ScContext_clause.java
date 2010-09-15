@@ -1,6 +1,9 @@
 package converter.vhdl;
 
 import java.util.ArrayList;
+
+import converter.IScStatementBlock;
+import converter.IncludePath;
 import parser.vhdl.ASTNode;
 
 
@@ -43,5 +46,29 @@ class ScContext_clause extends ScVhdl {
             }
         }
         return ret;
+    }
+    
+    public IncludePath[] getInclude()
+    {
+        String tmp = "";
+        ArrayList<IncludePath> ret = new ArrayList<IncludePath>();
+        for(int i = 0; i < items.size(); i++) {
+            tmp = items.get(i).scString();
+            if(!tmp.isEmpty()) {
+                ret.add(new IncludePath(tmp));
+            }
+        }
+        for(int i = 0; i < items.size(); i++) {
+            ScContext_item item = items.get(i);
+            if(item.isUse) {
+                ScUse_clause useClause = (ScUse_clause)item.item;
+                String[] pkgs = useClause.getPackageNames();
+                for(int j = 0; j < pkgs.length; j++) {
+                    tmp = "using namespace " + pkgs[j] + ";";
+                    ret.add(new IncludePath(tmp));
+                }
+            }
+        }
+        return ret.toArray(new IncludePath[ret.size()]);
     }
 }

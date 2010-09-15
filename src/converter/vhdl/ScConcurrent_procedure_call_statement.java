@@ -1,5 +1,6 @@
 package converter.vhdl;
 
+import converter.IScStatementBlock;
 import parser.vhdl.ASTNode;
 
 
@@ -7,7 +8,7 @@ import parser.vhdl.ASTNode;
  * <dl> concurrent_procedure_call_statement ::=
  *   <dd> [ label : ] [ <b>postponed</b> ] procedure_call ;
  */
-class ScConcurrent_procedure_call_statement extends ScCommonIdentifier implements IStatement {
+class ScConcurrent_procedure_call_statement extends ScCommonIdentifier implements IScStatementBlock {
     ScProcedure_call procedure_call = null;
     public ScConcurrent_procedure_call_statement(ASTNode node) {
         super(node);

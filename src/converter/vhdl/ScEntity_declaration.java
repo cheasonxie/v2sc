@@ -1,5 +1,6 @@
 package converter.vhdl;
 
+import converter.IScStatementBlock;
 import parser.vhdl.ASTNode;
 
 
@@ -12,7 +13,7 @@ import parser.vhdl.ASTNode;
  *   <ul> entity_statement_part ]
  *   </ul> <b>end</b> [ <b>entity</b> ] [ <i>entity_</i>simple_name ] ;
  */
-class ScEntity_declaration extends ScCommonIdentifier implements IStatement {
+class ScEntity_declaration extends ScCommonIdentifier implements IScStatementBlock {
     ScArchitecture_body body = null;
     ScEntity_header header = null;
     ScEntity_declarative_part declarative_part = null;

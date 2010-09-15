@@ -1,5 +1,6 @@
 package converter.vhdl;
 
+import converter.IScStatementBlock;
 import parser.vhdl.ASTNode;
 
 
@@ -11,8 +12,8 @@ import parser.vhdl.ASTNode;
  *   <br> | simultaneous_procedural_statement
  *   <br> | simultaneous_null_statement
  */
-class ScSimultaneous_statement extends ScVhdl implements IStatement {
-    IStatement item = null;
+class ScSimultaneous_statement extends ScVhdl implements IScStatementBlock {
+    IScStatementBlock item = null;
     public ScSimultaneous_statement(ASTNode node) {
         super(node, false);
         assert(node.getId() == ASTSIMULTANEOUS_STATEMENT);

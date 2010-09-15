@@ -1,5 +1,6 @@
 package converter.vhdl;
 
+import converter.IScStatementBlock;
 import parser.vhdl.ASTNode;
 
 
@@ -9,7 +10,7 @@ import parser.vhdl.ASTNode;
  *   <ul> package_declarative_part
  *   </ul> <b>end</b> [ <b>package</b> ] [ <i>package_</i>simple_name ] ;
  */
-class ScPackage_declaration extends ScCommonIdentifier implements IStatement {
+class ScPackage_declaration extends ScCommonIdentifier implements IScStatementBlock {
     ScPackage_declarative_part declarative_part = null;
     ScPackage_body body = null;
     public ScPackage_declaration(ASTNode node) {
@@ -48,7 +49,7 @@ class ScPackage_declaration extends ScCommonIdentifier implements IStatement {
             warning("no package body");
         }
         ret += "namespace " + identifier;
-        ret += "{\r\n";
+        ret += "\r\n{\r\n";
         startIntentBlock();
         ret += declarative_part.scString();
         ret += "\r\n";
@@ -65,7 +66,7 @@ class ScPackage_declaration extends ScCommonIdentifier implements IStatement {
             warning("no package body");
         }
         ret += "namespace " + identifier;
-        ret += "{\r\n";
+        ret += "\r\n{\r\n";
         startIntentBlock();
         ret += declarative_part.scString();
         ret += "\r\n";

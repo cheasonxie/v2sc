@@ -1,5 +1,6 @@
 package converter.vhdl;
 
+import converter.IScStatementBlock;
 import parser.vhdl.ASTNode;
 
 
@@ -8,7 +9,7 @@ import parser.vhdl.ASTNode;
  *   <dd> [ label : ] [ <b>postponed</b> ] conditional_signal_assignment
  *   <br> | [ label : ] [ <b>postponed</b> ] selected_signal_assignment
  */
-class ScConcurrent_signal_assignment_statement extends ScCommonIdentifier implements IStatement {
+class ScConcurrent_signal_assignment_statement extends ScCommonIdentifier implements IScStatementBlock {
     ScVhdl signal_assignment = null;
     public ScConcurrent_signal_assignment_statement(ASTNode node) {
         super(node);

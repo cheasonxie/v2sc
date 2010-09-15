@@ -1,5 +1,6 @@
 package converter.vhdl;
 
+import converter.IScStatementBlock;
 import parser.vhdl.ASTNode;
 
 
@@ -7,7 +8,7 @@ import parser.vhdl.ASTNode;
  * <dl> concurrent_break_statement ::=
  *   <dd> [ label : ] <b>break</b> [ break_list ] [ sensitivity_clause ] [ <b>when</b> condition ] ;
  */
-class ScConcurrent_break_statement extends ScCommonIdentifier implements IStatement {
+class ScConcurrent_break_statement extends ScCommonIdentifier implements IScStatementBlock {
     ScBreak_list break_list = null;
     ScSensitivity_clause sensitivity_clause = null;
     ScCondition condition = null;

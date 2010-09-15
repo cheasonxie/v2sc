@@ -1,5 +1,6 @@
 package converter.vhdl;
 
+import converter.IScStatementBlock;
 import parser.vhdl.ASTNode;
 
 
@@ -7,7 +8,7 @@ import parser.vhdl.ASTNode;
  * <dl> simple_simultaneous_statement ::=
  *   <dd> [ label : ] simple_expression == simple_expression [ tolerance_aspect ] ;
  */
-class ScSimple_simultaneous_statement extends ScCommonIdentifier implements IStatement {
+class ScSimple_simultaneous_statement extends ScCommonIdentifier implements IScStatementBlock {
     ScSimple_expression exp1 = null;
     ScSimple_expression exp2 = null;
     ScTolerance_aspect tolerance = null;

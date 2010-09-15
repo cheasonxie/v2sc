@@ -1,5 +1,6 @@
 package converter.vhdl;
 
+import converter.IScStatementBlock;
 import parser.vhdl.ASTNode;
 
 
@@ -12,7 +13,7 @@ import parser.vhdl.ASTNode;
  *   <ul> { architecture_statement }
  *   </ul> <b>end</b> <b>generate</b> [ <i>generate_</i>label ] ; </ul>
  */
-class ScGenerate_statement extends ScCommonIdentifier implements IStatement {
+class ScGenerate_statement extends ScCommonIdentifier implements IScStatementBlock {
     ScGeneration_scheme scheme = null;
     ScBlock_declarative_part declarative_part = null;
     ScArchitecture_statement_part statement_part = null;

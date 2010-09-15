@@ -1,5 +1,6 @@
 package converter.vhdl;
 
+import converter.IScStatementBlock;
 import parser.vhdl.ASTNode;
 
 
@@ -7,7 +8,7 @@ import parser.vhdl.ASTNode;
  * <dl> concurrent_assertion_statement ::=
  *   <dd> [ label : ] [ <b>postponed</b> ] assertion ;
  */
-class ScConcurrent_assertion_statement extends ScCommonIdentifier implements IStatement {
+class ScConcurrent_assertion_statement extends ScCommonIdentifier implements IScStatementBlock {
     ScAssertion assertion = null;
     public ScConcurrent_assertion_statement(ASTNode node) {
         super(node);

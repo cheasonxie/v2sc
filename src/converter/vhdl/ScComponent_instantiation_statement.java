@@ -1,5 +1,6 @@
 package converter.vhdl;
 
+import converter.IScStatementBlock;
 import parser.vhdl.ASTNode;
 
 
@@ -10,7 +11,7 @@ import parser.vhdl.ASTNode;
  *   <ul> [ generic_map_aspect ]
  *   <br> [ port_map_aspect ] ; </ul></ul>
  */
-class ScComponent_instantiation_statement extends ScCommonIdentifier implements IStatement {
+class ScComponent_instantiation_statement extends ScCommonIdentifier implements IScStatementBlock {
     ScInstantiated_unit instantiated_unit = null;
     ScGeneric_map_aspect generic_map = null;
     ScPort_map_aspect port_map = null;

@@ -1,5 +1,6 @@
 package converter.vhdl;
 
+import converter.IScStatementBlock;
 import parser.vhdl.ASTNode;
 
 
@@ -8,8 +9,8 @@ import parser.vhdl.ASTNode;
  *   <dd> simultaneous_statement
  *   <br> | concurrent_statement
  */
-class ScArchitecture_statement extends ScVhdl implements IStatement {
-    IStatement statement = null;
+class ScArchitecture_statement extends ScVhdl implements IScStatementBlock {
+    IScStatementBlock statement = null;
     public ScArchitecture_statement(ASTNode node) {
         super(node, false);
         //assert(node.getId() == ASTARCHITECTURE_STATEMENT);

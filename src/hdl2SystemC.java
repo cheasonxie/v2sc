@@ -41,7 +41,7 @@ public class hdl2SystemC
             if(conv != null)
             {
                 conv.addLibary("grlib-gpl-1.0.21-b3848\\lib\\grlib", "grlib");
-                conv.convertFile(path, name + ".cpp");
+                conv.convertFile(path, name);
             }
         }
         catch (FileNotFoundException e)

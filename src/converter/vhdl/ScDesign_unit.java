@@ -1,5 +1,7 @@
 package converter.vhdl;
 
+import converter.IScModule;
+import converter.IncludePath;
 import parser.vhdl.ASTNode;
 
 
@@ -7,9 +9,9 @@ import parser.vhdl.ASTNode;
  * <dl> design_unit ::=
  *   <dd> context_clause library_unit
  */
-class ScDesign_unit extends ScVhdl {
-    ScVhdl context_clause = null;
-    ScVhdl library_unit = null;
+class ScDesign_unit extends ScVhdl implements IScModule {
+    ScContext_clause context_clause = null;
+    ScLibrary_unit library_unit = null;
     public ScDesign_unit(ASTNode node) {
         super(node);
         assert(node.getId() == ASTDESIGN_UNIT);
@@ -35,5 +37,23 @@ class ScDesign_unit extends ScVhdl {
         ret += "\r\n";
         ret += library_unit.toString();
         return ret;
+    }
+
+    @Override
+    public String getDeclaration()
+    {
+        return library_unit.getDeclaration();
+    }
+
+    @Override
+    public String getImplements()
+    {
+        return library_unit.getImplements();
+    }
+
+    @Override
+    public IncludePath[] getInclude()
+    {
+        return context_clause.getInclude();
     }
 }

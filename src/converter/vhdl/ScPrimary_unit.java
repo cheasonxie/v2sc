@@ -1,5 +1,6 @@
 package converter.vhdl;
 
+import converter.IScStatementBlock;
 import parser.vhdl.ASTNode;
 
 
@@ -9,8 +10,8 @@ import parser.vhdl.ASTNode;
  *   <br> | configuration_declaration
  *   <br> | package_declaration
  */
-class ScPrimary_unit extends ScVhdl {
-    ScVhdl declaration = null;
+class ScPrimary_unit extends ScVhdl implements IScStatementBlock {
+    IScStatementBlock declaration = null;
     public ScPrimary_unit(ASTNode node) {
         super(node);
         assert(node.getId() == ASTPRIMARY_UNIT);
@@ -33,5 +34,23 @@ class ScPrimary_unit extends ScVhdl {
 
     public String scString() {
         return declaration.scString();
+    }
+
+    @Override
+    public String getDeclaration()
+    {
+        return declaration.getDeclaration();
+    }
+
+    @Override
+    public String getImplements()
+    {
+        return declaration.getImplements();
+    }
+
+    @Override
+    public String getInitCode()
+    {
+        return declaration.getInitCode();
     }
 }

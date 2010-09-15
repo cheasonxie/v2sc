@@ -2,6 +2,8 @@ package converter.vhdl;
 
 import java.util.ArrayList;
 
+import converter.IScStatementBlock;
+
 import parser.vhdl.ASTNode;
 
 
@@ -16,7 +18,7 @@ import parser.vhdl.ASTNode;
  *   <ul> simultaneous_statement_part ]
  *   </ul> <b>end</b> <b>use</b> [ <i>if_</i>label ] ; </ul>
  */
-class ScSimultaneous_if_statement extends ScCommonIdentifier implements IStatement {
+class ScSimultaneous_if_statement extends ScCommonIdentifier implements IScStatementBlock {
     class ConPair {
         ScCondition condition = null;
         ScSimultaneous_statement_part statements = null;

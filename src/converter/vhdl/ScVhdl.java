@@ -461,7 +461,7 @@ public class ScVhdl implements ScVhdlConstants, VhdlTokenConstants,
                     while(i < str.length() && str.charAt(i) != '\"') {
                         i++;
                     }
-                }else if(c == ',') {
+                }else if(c == ',' || c == ')') {
                     ret = false;
                     break;
                 }else if(c == '(') {
@@ -469,9 +469,6 @@ public class ScVhdl implements ScVhdlConstants, VhdlTokenConstants,
                     while(i < str.length() && str.charAt(i) != ')') {
                         i++;
                     }
-                }else if(c == ')') {
-                    ret = false;
-                    break;
                 }
                 i ++;
             }

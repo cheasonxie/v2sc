@@ -1,5 +1,6 @@
 package converter.vhdl;
 
+import converter.IScStatementBlock;
 import parser.vhdl.ASTNode;
 
 
@@ -12,7 +13,7 @@ import parser.vhdl.ASTNode;
  *   <ul> process_statement_part
  *   </ul> <b>end</b> [ <b>postponed</b> ] <b>process</b> [ <i>process_</i>label ] ; </ul>
  */
-class ScProcess_statement extends ScCommonIdentifier implements IStatement {
+class ScProcess_statement extends ScCommonIdentifier implements IScStatementBlock {
     ScSensitivity_list sensitivity_list = null;
     ScProcess_declarative_part declarative_part = null;
     ScProcess_statement_part statement_part = null;

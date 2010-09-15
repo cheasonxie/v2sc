@@ -1,9 +1,9 @@
-package converter.vhdl;
+package converter;
 
 /**
- * concurrent statement
+ * statement block
  */
-public interface IStatement
+public interface IScStatementBlock
 {
     /**
      * place in systemC module declaration(.h)

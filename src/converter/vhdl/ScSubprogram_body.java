@@ -39,10 +39,13 @@ class ScSubprogram_body extends ScVhdl {
 
     public String scString() {
         String ret = "";
+        String tmp = "";
         ret += spec.toString() + "\r\n";
         ret += intent() + "{\r\n";
         startIntentBlock();
-        ret += declarative_part.toString() + "\r\n";
+        tmp = declarative_part.toString();
+        if(!tmp.isEmpty())
+            ret += tmp + "\r\n";
         String[] lvars = getLoopVar();
         if(lvars != null && lvars.length > 0) {
             ret += intent() + "int ";
@@ -54,7 +57,9 @@ class ScSubprogram_body extends ScVhdl {
             }
             ret += ";\r\n";
         }
-        ret += "\r\n" + statement_part.toString() + "\r\n";
+        if(!tmp.isEmpty())
+            ret += "\r\n";
+        ret += statement_part.toString() + "\r\n";
         endIntentBlock();
         ret += intent() + "}\r\n";
         return ret;

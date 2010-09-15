@@ -1,5 +1,6 @@
 package converter.vhdl;
 
+import converter.IScStatementBlock;
 import parser.vhdl.ASTNode;
 
 
@@ -12,7 +13,7 @@ import parser.vhdl.ASTNode;
  *   <ul> procedural_statement_part
  *   </ul> <b>end</b> <b>procedural</b> [ <i>procedural_</i>label ] ; </ul>
  */
-class ScSimultaneous_procedural_statement extends ScCommonIdentifier implements IStatement {
+class ScSimultaneous_procedural_statement extends ScCommonIdentifier implements IScStatementBlock {
     ScProcedural_declarative_part declarative_part = null;
     ScProcedural_statement_part statement_part = null;
     public ScSimultaneous_procedural_statement(ASTNode node) {

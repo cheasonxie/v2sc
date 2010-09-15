@@ -1,6 +1,8 @@
 package converter.vhdl;
 
 import java.util.ArrayList;
+
+import converter.IScStatementBlock;
 import parser.vhdl.ASTNode;
 
 
@@ -8,7 +10,7 @@ import parser.vhdl.ASTNode;
  * <dl> architecture_statement_part ::=
  *   <dd> { architecture_statement }
  */
-class ScArchitecture_statement_part extends ScVhdl implements IStatement {
+class ScArchitecture_statement_part extends ScVhdl implements IScStatementBlock {
     ArrayList<ScArchitecture_statement> itemList = new ArrayList<ScArchitecture_statement>();
     public ScArchitecture_statement_part(ASTNode node) {
         super(node);

@@ -1,5 +1,6 @@
 package converter.vhdl;
 
+import converter.IScStatementBlock;
 import parser.vhdl.ASTNode;
 
 
@@ -9,7 +10,7 @@ import parser.vhdl.ASTNode;
  *   <ul> package_body_declarative_part
  *   </ul> <b>end</b> [ <b>package body</b> ] [ <i>package_</i>simple_name ] ;
  */
-class ScPackage_body extends ScCommonIdentifier implements IStatement {
+class ScPackage_body extends ScCommonIdentifier implements IScStatementBlock {
     ScName package_name = null;
     ScPackage_body_declarative_part declarative_part = null;
     public ScPackage_body(ASTNode node) {

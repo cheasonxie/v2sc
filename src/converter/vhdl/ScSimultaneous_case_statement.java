@@ -2,6 +2,8 @@ package converter.vhdl;
 
 import java.util.ArrayList;
 
+import converter.IScStatementBlock;
+
 import parser.vhdl.ASTNode;
 
 
@@ -13,7 +15,7 @@ import parser.vhdl.ASTNode;
  *   <br> { simultaneous_alternative }
  *   </ul> <b>end</b> <b>case</b> [ <i>case_</i>label ] ; </ul>
  */
-class ScSimultaneous_case_statement extends ScCommonIdentifier implements IStatement {
+class ScSimultaneous_case_statement extends ScCommonIdentifier implements IScStatementBlock {
     ScVhdl expression = null;
     ArrayList<ScVhdl> alts = new ArrayList<ScVhdl>();
     public ScSimultaneous_case_statement(ASTNode node) {

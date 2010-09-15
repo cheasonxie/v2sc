@@ -1,5 +1,6 @@
 package converter.vhdl;
 
+import converter.IScStatementBlock;
 import parser.vhdl.ASTNode;
 
 
@@ -11,7 +12,7 @@ import parser.vhdl.ASTNode;
  *   <ul> architecture_statement_part </ul>
  *   <b>end</b> [ <b>architecture</b> ] [ <i>architecture_</i>simple_name ] ;
  */
-class ScArchitecture_body extends ScCommonIdentifier implements IStatement {
+class ScArchitecture_body extends ScCommonIdentifier implements IScStatementBlock {
     ScName entity_name = null;
     ScArchitecture_declarative_part declarative_part = null;
     ScArchitecture_statement_part statement_part = null;

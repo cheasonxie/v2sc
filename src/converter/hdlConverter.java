@@ -48,7 +48,6 @@ public abstract class hdlConverter implements ScConstants
         File file = new File(path);
         if(file.exists() && !replace)
             return;
-        m_targetFileBuff = new PrintStream(file);
     }
     
     public abstract void convertFile(String srcPath, String dstPath) 
