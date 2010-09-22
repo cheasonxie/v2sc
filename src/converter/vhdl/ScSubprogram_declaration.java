@@ -16,6 +16,6 @@ class ScSubprogram_declaration extends ScVhdl {
     }
 
     public String scString() {
-        return intent() + spec.scString() + ";";
+        return spec.scString() + ";";
     }
 }

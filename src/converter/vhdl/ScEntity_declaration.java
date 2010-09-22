@@ -14,10 +14,12 @@ import parser.vhdl.ASTNode;
  *   </ul> <b>end</b> [ <b>entity</b> ] [ <i>entity_</i>simple_name ] ;
  */
 class ScEntity_declaration extends ScCommonIdentifier implements IScStatementBlock {
-    ScArchitecture_body body = null;
     ScEntity_header header = null;
     ScEntity_declarative_part declarative_part = null;
     ScEntity_statement_part statement_part = null;
+    ScArchitecture_body body = null;
+    ScConfiguration_declaration config = null;
+    
     public ScEntity_declaration(ASTNode node) {
         super(node);
         assert(node.getId() == ASTENTITY_DECLARATION);
@@ -74,6 +76,10 @@ class ScEntity_declaration extends ScCommonIdentifier implements IScStatementBlo
     
     public void setArchitectureBody(ScArchitecture_body body) {
         this.body = body;
+    }
+    
+    public void setConfigurationDeclaration(ScConfiguration_declaration config) {
+        this.config = config;
     }
     
     public String getName() {

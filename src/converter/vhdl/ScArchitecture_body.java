@@ -53,7 +53,7 @@ class ScArchitecture_body extends ScCommonIdentifier implements IScStatementBloc
             }
         }
         if(i == units.size()) {
-            System.err.println("architecture boty no corresponding entity");
+            System.err.println("architecture boty has no corresponding entity");
         }
     }
     

@@ -11,10 +11,47 @@ import parser.vhdl.ASTNode;
  *   <br> block_configuration
  *   </ul><b>end</b> [ <b>configuration</b> ] [ <i>configuration_</i>simple_name ] ;
  */
-class ScConfiguration_declaration extends ScVhdl implements IScStatementBlock {
+class ScConfiguration_declaration extends ScCommonIdentifier implements IScStatementBlock {
+    ScName entity_name = null;
+    ScConfiguration_declarative_part declarative_part = null;
+    ScBlock_configuration block_config = null;
     public ScConfiguration_declaration(ASTNode node) {
         super(node);
+        int i = 0;
         assert(node.getId() == ASTCONFIGURATION_DECLARATION);
+        for(i = 0; i < node.getChildrenNum(); i++) {
+            ASTNode c = (ASTNode)node.getChild(i);
+            switch(c.getId())
+            {
+            case ASTIDENTIFIER:
+                identifier = c.firstTokenImage();
+                break;
+            case ASTNAME:
+                entity_name = new ScName(c);
+                break;
+            case ASTCONFIGURATION_DECLARATIVE_PART:
+                declarative_part = new ScConfiguration_declarative_part(c);
+                break;
+            case ASTBLOCK_CONFIGURATION:
+                block_config = new ScBlock_configuration(c);
+                break;
+            default:
+                break;
+            }
+        }
+        
+        assert(entity_name != null);
+        for(i = 0; i < units.size(); i++) {
+            ScCommonIdentifier ident = units.get(i);
+            if(ident instanceof ScEntity_declaration
+                && ident.identifier.equalsIgnoreCase(entity_name.scString())) {
+                ((ScEntity_declaration)ident).setConfigurationDeclaration(this);
+                break;
+            }
+        }
+        if(i == units.size()) {
+            System.err.println("configuration declaration has no corresponding entity");
+        }
     }
 
     public String scString() {
@@ -24,21 +61,18 @@ class ScConfiguration_declaration extends ScVhdl implements IScStatementBlock {
     @Override
     public String getDeclaration()
     {
-        // TODO Auto-generated method stub
-        return null;
+        return "";
     }
 
     @Override
     public String getImplements()
     {
-        // TODO Auto-generated method stub
-        return null;
+        return "";
     }
 
     @Override
     public String getInitCode()
     {
-        // TODO Auto-generated method stub
-        return null;
+        return "";
     }
 }
