@@ -3,6 +3,9 @@ package converter.vhdl;
 import java.io.IOException;
 import java.io.PrintStream;
 
+import common.FileList;
+
+import parser.IParser;
 import parser.ParserException;
 import parser.vhdl.LibraryManager;
 import parser.vhdl.VhdlParser;
@@ -23,7 +26,7 @@ public class Vhdl extends hdlConverter {
         saveSource(root, dstPath);
     }
     
-    String preHeaderGuard(String name)
+    private String preHeaderGuard(String name)
     {
         String ret = "";
         name = name.toUpperCase();
@@ -33,7 +36,7 @@ public class Vhdl extends hdlConverter {
         return ret;
     }
     
-    String postHeaderGuard(String name)
+    private String postHeaderGuard(String name)
     {
         String ret = "";
         name = name.toUpperCase();
@@ -42,10 +45,10 @@ public class Vhdl extends hdlConverter {
         return ret;
     }
     
-    void saveHeader(ScDesign_file root, String dstPath)
+    private void saveHeader(ScDesign_file root, String dstPath)
     {
         String path = dstPath+".h";
-        path.replace('\\', '/');
+        path = path.replace('\\', '/');
         int index = path.lastIndexOf('/');
         String name = "";
         if(index > 0)
@@ -64,13 +67,24 @@ public class Vhdl extends hdlConverter {
         }
     }
     
-    void saveSource(ScDesign_file root, String dstPath)
+    private void saveSource(ScDesign_file root, String dstPath)
     {
         try {
+            String buff = root.getImplements();
+            if(buff.isEmpty())
+                return;
             createFile(dstPath+".cpp", true);
             PrintStream fileBuff = new PrintStream(dstPath+".cpp");
-            fileBuff.println("#include \"" + dstPath + ".h\"");
-            fileBuff.print(root.getImplements());
+            String path = dstPath+".h";
+            path = path.replace('\\', '/');
+            int index = path.lastIndexOf('/');
+            String name = "";
+            if(index > 0)
+                name = path.substring(index+1);
+            else
+                name = path;
+            fileBuff.println("#include \"" + name + "\"");
+            fileBuff.print(buff);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -79,7 +93,18 @@ public class Vhdl extends hdlConverter {
     @Override
     public void convertDir(String srcDir)
     {
-        
+        FileList list = new FileList(srcDir, IParser.EXT_VHDL);
+        for(int i = 0; i < list.getFileNum(); i++) {
+            String path = list.getFile(i);
+            path = path.toLowerCase();
+            int index = path.lastIndexOf(IParser.EXT_VHDL);
+            String dstPath = path.substring(0, index-1);
+            try {
+                convertFile(path, dstPath);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     @Override

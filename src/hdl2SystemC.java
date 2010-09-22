@@ -13,7 +13,11 @@ public class hdl2SystemC
 {
     public static void main(String[] args)
     {
-        try
+        hdlConverter conv = new Vhdl();
+        conv.addLibary("grlib-gpl-1.0.21-b3848\\lib\\grlib", "grlib");
+        conv.convertDir("grlib-gpl-1.0.21-b3848\\lib\\grlib");
+        
+        /*try
         {
             hdlConverter conv = null;
             String name = "amba";
@@ -55,7 +59,7 @@ public class hdl2SystemC
         catch (IOException e)
         {
             e.printStackTrace();
-        }
+        }*/
     }
     
     public static int getFileType(String path)

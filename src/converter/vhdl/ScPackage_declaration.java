@@ -53,7 +53,8 @@ class ScPackage_declaration extends ScCommonIdentifier implements IScStatementBl
         startIntentBlock();
         ret += declarative_part.scString();
         ret += "\r\n";
-        ret += body.scString();
+        if(body != null)
+            ret += body.scString();
         endIntentBlock();
         ret += "};\r\n";
         return ret;
@@ -70,7 +71,8 @@ class ScPackage_declaration extends ScCommonIdentifier implements IScStatementBl
         startIntentBlock();
         ret += declarative_part.scString();
         ret += "\r\n";
-        ret += body.getDeclaration();
+        if(body != null)
+            ret += body.getDeclaration();
         endIntentBlock();
         ret += "};\r\n";
         return ret;
@@ -78,7 +80,10 @@ class ScPackage_declaration extends ScCommonIdentifier implements IScStatementBl
 
     @Override
     public String getImplements() {
-        return body.getImplements();
+        if(body != null)
+            return body.getImplements();
+        else
+            return "";
     }
 
     @Override
