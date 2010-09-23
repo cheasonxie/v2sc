@@ -126,7 +126,7 @@ public class testParser implements VhdlASTConstants
         try {
             String dir = System.getProperty("user.dir");
             VhdlParser parser = new VhdlParser(false);
-            String name = "ahbctrl";
+            String name = "leaves";
             ASTNode designFile = (ASTNode)parser.parse(dir + "\\" + name + ".vhd");
             testParser vhdl = new testParser();
             vhdl.initDebugStream(name + ".txt");
