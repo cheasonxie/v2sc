@@ -11,55 +11,58 @@ import parser.ParserException;
 
 public class hdl2SystemC
 {
+    public static boolean testDir = false;
     public static void main(String[] args)
     {
-        hdlConverter conv = new Vhdl();
-        conv.addLibary("grlib-gpl-1.0.21-b3848\\lib\\grlib", "grlib");
-        conv.convertDir("grlib-gpl-1.0.21-b3848\\lib\\grlib");
-        
-        /*try
-        {
-            hdlConverter conv = null;
-            String name = "amba";
-            //String path = "ahbctrl.vhd";
-            String path = name + ".vhd";
-            //String path = "ac97_top.v";
-            if(args.length > 1)
-                path = args[1];
-            switch(getFileType(path))
+        if(testDir) {
+            hdlConverter conv = new Vhdl();
+            conv.addLibary("grlib-gpl-1.0.21-b3848\\lib\\grlib", "grlib");
+            conv.convertDir("grlib-gpl-1.0.21-b3848\\lib\\grlib");
+        }else {
+            try
             {
-            case hdlConverter.T_VERILOG:
-                conv = new Verilog();
-                break;
+                hdlConverter conv = null;
+                String name = "leaves";
+                //String name = "ahbctrl";
+                String path = name + ".vhd";
+                //String path = "ac97_top.v";
+                if(args.length > 1)
+                    path = args[1];
+                switch(getFileType(path))
+                {
+                case hdlConverter.T_VERILOG:
+                    conv = new Verilog();
+                    break;
+                    
+                case hdlConverter.T_VHDL:
+                    conv = new Vhdl();
+                    break;
+                    
+                default:
+                case hdlConverter.T_NONE:
+                    System.err.println("file type not support! : " + path);
+                    return;
+                }
                 
-            case hdlConverter.T_VHDL:
-                conv = new Vhdl();
-                break;
-                
-            default:
-            case hdlConverter.T_NONE:
-                System.err.println("file type not support! : " + path);
-                return;
+                if(conv != null)
+                {
+                    conv.addLibary("grlib-gpl-1.0.21-b3848\\lib\\grlib", "grlib");
+                    conv.convertFile(path, name);
+                }
             }
-            
-            if(conv != null)
+            catch (FileNotFoundException e)
             {
-                conv.addLibary("grlib-gpl-1.0.21-b3848\\lib\\grlib", "grlib");
-                conv.convertFile(path, name);
+                e.printStackTrace();
+            }
+            catch (ParserException e)
+            {
+                e.printStackTrace();
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
             }
         }
-        catch (FileNotFoundException e)
-        {
-            e.printStackTrace();
-        }
-        catch (ParserException e)
-        {
-            e.printStackTrace();
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }*/
     }
     
     public static int getFileType(String path)

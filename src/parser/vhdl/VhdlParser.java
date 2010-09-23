@@ -518,6 +518,10 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         ASTNode node = new ASTNode(p, ASTACTUAL_PART);
         openNodeScope(node);
         int kind = tokenMgr.getNextTokenKind();
+        if(kind < 0) {
+            throw new ParserException(tokenMgr.getCurrentToken());
+        }
+        
         if(kind == OPEN || isExpression(endToken) 
                 || findTokenInBlock(LBRACKET, endToken) == null
                 || findTokenInBlock(SQUOTE, endToken) != null
@@ -530,12 +534,18 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
                 actual_designator(node, endToken);  // slice name
             }else {
                 if(kind != LBRACKET) {
-                    function_call(node, endToken);
+                    Token token = tokenMgr.getNextToken();
+                    Symbol sym = (Symbol)getSymbol(node, token.image);
+                    if((sym == null) || !(sym.kind == FUNCTION || sym.kind == PROCEDURE)) {
+                        actual_designator(node, endToken);  // slice name
+                    }else {
+                        function_call(node, endToken);
+                    }
                 }else if(tokenMgr.getNextTokenKind(2) == OTHERS){
                     aggregate(node, endToken);  //TODO ?? not in syntax tree
                 }else {
                     consumeToken(LBRACKET);
-                    actual_designator(node, endToken);
+                    actual_designator(node, endToken.prev);
                     consumeToken(RBRACKET);
                 }
             }
@@ -2545,7 +2555,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
             name(node, endToken);
             if(tokenMgr.getNextTokenKind() == LBRACKET) {
                 consumeToken(LBRACKET);
-                identifier(node, endToken);
+                identifier(node, endToken.prev);
                 consumeToken(RBRACKET);
             }
             new ASTtoken(node, tokenImage[ENTITY]);
@@ -3051,9 +3061,19 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
      */
     void expression(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTEXPRESSION);
+        
+        openNodeScope(node);
+        
+        //TODO special handle, decrease level of tree
+        if(tokenMgr.getNextToken(2) == endToken) {
+            // only one token, regard as literal
+            literal(node, endToken);
+            closeNodeScope(node);
+            return;
+        }
+        
         //TODO expression type: boolean, time, string, guard,
         //                      static, real, value, file_open_kind
-        openNodeScope(node);
         while(true) {
             Token expToken = endToken;
             Token tmpToken = null;
@@ -3393,7 +3413,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         
         consumeToken(GENERIC);
         consumeToken(LBRACKET);
-        generic_list(node, endToken);
+        generic_list(node, endToken.prev);
         consumeToken(RBRACKET);
         consumeToken(SEMICOLON);
         closeNodeScope(node);
@@ -6074,6 +6094,15 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
     void simple_expression(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTSIMPLE_EXPRESSION);
         openNodeScope(node);
+        
+        //TODO special handle, decrease level of tree
+        if(tokenMgr.getNextToken(2) == endToken) {
+            // only one token, regard as literal
+            literal(node, endToken);
+            closeNodeScope(node);
+            return;
+        }
+        
         int kind = tokenMgr.getNextTokenKind();
         if(kind == ADD || kind == SUB) {
             sign(node, endToken);
@@ -6448,7 +6477,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         Token tk = findLastLBracketToken(endToken);
         prefix(node, tk);
         consumeToken(LBRACKET);
-        discrete_range(node, endToken);
+        discrete_range(node, endToken.prev);
         consumeToken(RBRACKET);
         closeNodeScope(node);
     }

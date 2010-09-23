@@ -30,6 +30,10 @@ class ScSimple_expression extends ScVhdl {
                 newNode = new ScAdding_operator(c);
                 items.add(newNode);
                 break;
+            case ASTLITERAL:
+                newNode = new ScLiteral(c);
+                items.add(newNode);
+                break;
             default:
                 break;
             }
@@ -48,6 +52,9 @@ class ScSimple_expression extends ScVhdl {
 
     public String scString() {
         String ret = "";
+        if(items.get(0) instanceof ScLiteral)
+            return items.get(0).scString();
+        
         if(sign != null) {
             ret += sign.scString();
         }

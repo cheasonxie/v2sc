@@ -31,6 +31,10 @@ class ScExpression extends ScVhdl {
                 newNode = new ScToken(c);
                 items.add(newNode);
                 break;
+            case ASTLITERAL:
+                newNode = new ScLiteral(c);
+                items.add(newNode);
+                break;
             default:
                 break;
             }

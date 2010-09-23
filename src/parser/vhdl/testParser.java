@@ -126,10 +126,10 @@ public class testParser implements VhdlASTConstants
         try {
             String dir = System.getProperty("user.dir");
             VhdlParser parser = new VhdlParser(false);
-                    //new BufferedReader(new FileReader(dir + "\\apbuart.vhd")));            
-            ASTNode designFile = (ASTNode)parser.parse(dir + "\\ahbctrl.vhd");
+            String name = "ahbctrl";
+            ASTNode designFile = (ASTNode)parser.parse(dir + "\\" + name + ".vhd");
             testParser vhdl = new testParser();
-            vhdl.initDebugStream("b.txt");
+            vhdl.initDebugStream(name + ".txt");
             vhdl.parserTree(designFile, 0);
             vhdl.printStatistics();
         } catch (FileNotFoundException e) {
