@@ -2,6 +2,7 @@ package converter.vhdl;
 
 import java.util.ArrayList;
 import parser.vhdl.ASTNode;
+import parser.vhdl.Symbol;
 
 
 /**
@@ -47,6 +48,11 @@ class ScAttribute_name extends ScVhdl {
         if(range == null) {
             range = getArrayRange(curNode, names);
         }
+        
+        if(range == null) {
+            return "0";
+        }
+        
         if(range[1].equalsIgnoreCase(RANGE_TO)) {
             return range[2];
         }else {
@@ -60,6 +66,11 @@ class ScAttribute_name extends ScVhdl {
         if(range == null) {
             range = getArrayRange(curNode, names);
         }
+        
+        if(range == null) {
+            return names[0] + ".length() - 1";
+        }
+        
         if(range[1].equalsIgnoreCase(RANGE_TO)) {
             return range[0];
         }else {

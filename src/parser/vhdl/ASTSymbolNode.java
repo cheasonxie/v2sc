@@ -105,7 +105,17 @@ public class ASTSymbolNode extends ASTNode
             ASTNode prefix = (ASTNode)atribute.getChild(0);
             ASTNode designator = (ASTNode)atribute.getChildById(ASTATTRIBUTE_DESIGNATOR);
             assert(designator.getName().equalsIgnoreCase("range"));
-            range = symTab.getSymbol(prefix.getName()).range.clone();
+            Symbol sym = symTab.getSymbol(prefix.getName());
+            if(sym != null) {
+                if(sym.typeRange == null) {
+                    range = new String[3];
+                    range[0] = "0";
+                    range[1] = "to";
+                    range[2] = prefix.getName() + ".length() - 1";
+                }else {
+                    range = symTab.getSymbol(prefix.getName()).typeRange.clone();
+                }
+            }
         }
         return range;
     }
@@ -138,7 +148,7 @@ public class ASTSymbolNode extends ASTNode
                 tmpNode1 = (ASTNode)tmpNode0.getChild(i).getChild(0); // interface_declaration
                 child = new ASTSymbolNode(tmpNode1);
                 SymbolTable table = child.getParsedSymbolTable(VARIABLE);
-                symTab.addAll(table);     // parameter is regard as variable
+                //symTab.addAll(table);     // parameter is regard as variable
                 for(j = 0; j < table.size(); j++) {
                     sym.paramTypeList.add(table.get(j).type);
                 }
@@ -185,7 +195,9 @@ public class ASTSymbolNode extends ASTNode
                     if(tmpNode1 != null) {
                         // constraint array
                         ASTNode rangeNode = (ASTNode)tmpNode1.getDescendant(ASTRANGE);
-                        sym.arrayRange = getRange(rangeNode);
+                        if(rangeNode != null) {
+                            sym.arrayRange = getRange(rangeNode);
+                        }
                     }
                     
                     tmpNode1 = (ASTNode)tmpNode0.getChildById(ASTSUBTYPE_INDICATION);

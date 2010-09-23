@@ -3230,10 +3230,13 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
      *   <dd> <i>parameter_</i>interface_list
      */
     void formal_parameter_list(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTFORMAL_PARAMETER_LIST);
+        ASTNode node = new ASTSymbolNode(p, ASTFORMAL_PARAMETER_LIST);
         openNodeScope(node);
         interface_list(node, endToken);
         closeNodeScope(node);
+        for(int i = 0; i < node.getChildrenNum(); i++) {
+            addSymbol((ASTNode)node.getChild(i), VARIABLE);
+        }
     }
 
     /**
@@ -3920,7 +3923,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
      *   <dd> interface_element { ; interface_element }
      */
     void interface_list(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTINTERFACE_LIST);
+        ASTNode node = new ASTSymbolNode(p, ASTINTERFACE_LIST);
         openNodeScope(node);
         while(true) {
             Token tmpToken = findToken(SEMICOLON, endToken);
@@ -6659,9 +6662,11 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
     void subprogram_declaration(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTSymbolNode(p, ASTSUBPROGRAM_DECLARATION);
         openNodeScope(node);
+        startBlock();
         endToken = findTokenInBlock(SEMICOLON, endToken);
         subprogram_specification(node, endToken);
         consumeToken(SEMICOLON);
+        endBlock();
         closeNodeScope(node);
     }
 

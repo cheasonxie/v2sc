@@ -316,7 +316,9 @@ public class ScVhdl implements ScVhdlConstants, VhdlTokenConstants,
         Symbol sym = (Symbol)parser.getSymbol(node, names);
         if(sym == null) { return null; }
         Symbol sym1 = (Symbol)parser.getSymbol(node, sym.type);
-        if(sym1 == null) { return sym.typeRange; }  //TODO: only tow level here
+        if(sym1 == null) { //TODO: only tow level here
+            return sym.typeRange;
+        }  
         return sym1.typeRange;
     }
     
