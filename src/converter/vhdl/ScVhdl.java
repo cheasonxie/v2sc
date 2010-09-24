@@ -211,11 +211,15 @@ public class ScVhdl implements ScVhdlConstants, VhdlTokenConstants,
         if (index > 0) {
             str = input.substring(index + 1);
             str = str.trim();
-            if(str.startsWith("0x")) {
-                str = str.substring(2);
-                value = Integer.parseInt(str, 16) + addition;
-            }else {
-                value = Integer.parseInt(str, 10) + addition;
+            try {
+                if(str.startsWith("0x")) {
+                    str = str.substring(2);
+                    value = Integer.parseInt(str, 16) + addition;
+                }else {
+                    value = Integer.parseInt(str, 10) + addition;
+                }
+            }catch(NumberFormatException e) {
+                    return (input + " + 1");
             }
             
             if(value == 0) {

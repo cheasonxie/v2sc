@@ -4266,10 +4266,12 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         Token lastLbracket = findLastLBracketToken(endToken);
         
         Token tmpToken = lastPoint;
-        if(tmpToken == null || (lastSQuote != null && checkLateComming(lastSQuote, tmpToken))) {
+        if(tmpToken == null || (lastSQuote != null 
+               && checkLateComming(lastSQuote, tmpToken))) {
             tmpToken = lastSQuote;
         }
-        if(tmpToken == null || (lastLbracket != null && checkLateComming(lastLbracket, tmpToken))) {
+        if(tmpToken == null || (lastSQuote == null && lastLbracket != null 
+                && checkLateComming(lastLbracket, tmpToken))) {
             tmpToken = lastLbracket;
         }
         
