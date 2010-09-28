@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import parser.CommentBlock;
 import parser.ParserException;
 import parser.Token;
+import parser.TokenManager;
 
 /** verilog literal/identifier regular expression */
 class RegExp
@@ -109,29 +110,11 @@ class RegExp
     }
 }
 
-public class TokenManager extends RegExp implements VerilogTokenConstants
+public class VerilogTokenManager extends TokenManager implements VerilogTokenConstants
 {
-    protected BufferedReader stream = null;
-    int line, column;
-    String strLine;
-    protected Token firstToken = null;  // first token
-    protected Token lastToken = null;   // last scan token
-    protected Token curToken = null;    // current processing token
-    // saved current token(used to restore when scan to next several token)
-    protected Token savedToken = null;
-    
-    // comment
-    protected ArrayList<CommentBlock> comments = new ArrayList<CommentBlock>();
-    // only parse symbol, don't care comments
-    // save memory when parse library
-    protected boolean parseSymbol = false;
-    
-    public TokenManager(BufferedReader stream, boolean parseSymbol)
+    public VerilogTokenManager(BufferedReader stream, boolean parseSymbol)
     {
-        this.stream = stream;
-        line = column = 0;
-        strLine = "";
-        this.parseSymbol = parseSymbol;
+        super(stream, parseSymbol);
     }
     
     public static final String specialChar = "&()*+,-./:;<>=|[]!$%@?~^{}";
@@ -251,7 +234,7 @@ public class TokenManager extends RegExp implements VerilogTokenConstants
             c = strLine.charAt(column);
             if(Character.isWhitespace(c)) {
                 if(!ret.isEmpty() && ret.indexOf(singleQuote) > 0
-                        && !is_number(ret)) {
+                        && !RegExp.is_number(ret)) {
                     column ++;
                     continue;
                 }else {
@@ -288,7 +271,7 @@ public class TokenManager extends RegExp implements VerilogTokenConstants
                     && c != '.' && c != singleQuote && !ret.startsWith("`")) {
                 String tmp = ret + c;
                 // divide some string(such as 10ns) into two token
-                if(!is_IDENTIFIER(tmp) && !is_number(tmp))
+                if(!RegExp.is_IDENTIFIER(tmp) && !RegExp.is_number(tmp))
                     break;
             }
             
@@ -376,7 +359,7 @@ public class TokenManager extends RegExp implements VerilogTokenConstants
      * @param image
      * @return token id, -1 if not found
      */
-    final int getBuildinTokenKind(String image)
+    protected int getBuildinTokenKind(String image)
     {
         int kind = -1;        
         for(int i = 0; i < tokenImage.length; i++) {
@@ -393,11 +376,11 @@ public class TokenManager extends RegExp implements VerilogTokenConstants
      * @param image
      * @return token id, -1 if not found
      */
-    final int getOtherTokenKind(String image)
+    protected int getOtherTokenKind(String image)
     {
-        if(is_IDENTIFIER(image)) {
+        if(RegExp.is_IDENTIFIER(image)) {
             return IDENTIFIER;
-        }else if(is_number(image)){
+        }else if(RegExp.is_number(image)){
             return number_lexical;
         }else if(image.startsWith("\"") && image.endsWith("\"")){
             return string_lexical;
@@ -408,263 +391,19 @@ public class TokenManager extends RegExp implements VerilogTokenConstants
         }
     }
     
-    /**
-     * get token kind of specified image
-     */
-    protected int getTokenKind(String image)
-    {
-        if(image == null || image.isEmpty())
-            return-1;
-        int kind = getBuildinTokenKind(image);
-        if(kind >= 0)
-            return kind;
-        
-        return getOtherTokenKind(image);
-    }
-    
-    /**
-     * get current token
-     */
-    public Token getCurrentToken() throws ParserException
-    {
-        if(curToken == null)
-        {
-            getNextTokenKind();
-            return firstToken;
-        }
-        else
-        {
-            return curToken;
-        }
-    }
-    
-    /**
-     * set current token
-     */
-    public void setCurrentToken(Token token) throws ParserException
-    {
-        curToken = token;
-    }
-    
-    /**
-     * get kind of next token from current token
-     */
-    public int getNextTokenKind() throws ParserException
-    {
-        save();
-        Token token = toNextToken();
-        restore();
-        if(token != null)
-            return token.kind;
-        else
-            return -1;
-    }
-    
-    /**
-     * get kind of next token from specified token
-     */
-    public int getNextTokenKind(Token from) throws ParserException
-    {
-        save();
-        curToken = from;
-        Token token = toNextToken();
-        restore();
-        if(token != null)
-            return token.kind;
-        else
-            return -1;
-    }
-    
-    /**
-     * get kind of next several number token from current token
-     */
-    public int getNextTokenKind(int nextNum) throws ParserException
-    {
-        Token token = getNextToken(nextNum);
-        if(token != null)
-            return token.kind;
-        else
-            return -1;
-    }
-    
-    /**
-     * get next several number token from current token
-     */
-    public Token getNextToken(int nextNum) throws ParserException
-    {
-        save();
-        Token token = null;
-        if(nextNum <= 0)
-            return null;
-        for(int i = 0; i < nextNum; i++)
-            token = toNextToken();
-
-        restore();
-        return token;
-    }
-    
-    /**
-     * get kind of next several number token from specified token
-     */
-    public int getNextTokenKind(Token from, int nextNum) throws ParserException
-    {
-        Token token = getNextToken(from, nextNum);
-        if(token != null)
-            return token.kind;
-        else
-            return -1;
-    }
-    
-    /**
-     * get next several number token from specified token
-     */
-    public Token getNextToken(Token from, int nextNum) throws ParserException
-    {
-        save();
-        Token token = null;
-        curToken = from;
-        if(nextNum <= 0)
-            return null;
-        for(int i = 0; i < nextNum; i++)
-            token = toNextToken();
-        
-        restore();
-        return token;
-    }
-
-    /**
-     * scan next token from current token
-     * @param bscan
-     * @return
-     * @throws ParserException
-     */
-    public Token getNextToken() throws ParserException
-    {
-        save();
-        Token ret = toNextToken();
-        restore();
-        return ret;
-    }
-    
-    /**
-     * scan next token from specified token
-     * @param bscan
-     * @return
-     * @throws ParserException
-     */
-    public Token getNextToken(Token from) throws ParserException
-    {
-        save();
-        curToken = from;
-        Token ret = toNextToken();
-        restore();
-        return ret;
-    }
-    
-    /**
-     * go to next token<br>
-     * return null if reach the end of file or null stream<br>
-     * throw exception if meet invalid character
-     */
-    public Token toNextToken() throws ParserException
-    {
-        if(stream == null)
-            return null;
-        
-        if(curToken != lastToken) {
-            if(curToken == null) {
-                curToken = firstToken;
-            }else {
-                assert(curToken.next != null);
-                curToken = curToken.next;
-            }
-            return curToken;
-        }
-        
-        try {
-            if(!skipInvalid())
-            return null;
-        }catch (IOException e) {
-            throw new ParserException(curToken, "File Read Error!");
-        }
-        
-        // save current line and column
-        int curLine = line;
-        int curColumn = column + 1;
-        String image = getNextImage();
-        if(image == null)
-            return null;
-        
-        // fill token member
-        Token newToken = new Token();
-        newToken.image = image;
-        newToken.beginLine = curLine;
-        newToken.beginColumn = curColumn;
-        newToken.endLine = line;
-        newToken.endColumn = column;
-        newToken.kind = getTokenKind(image);
-        newToken.next = null;
-
-        if(curToken != null)
-            curToken.next = newToken;
-        newToken.prev = curToken;
-        curToken = newToken;
-        lastToken = curToken;
-        if(firstToken == null) {
-            firstToken = curToken;
-        }
-        return curToken;
-    }
-    
-    /**
-     * go to the first token<br>
-     * throw exception if meet invalid character
-     */
-    public Token toFirstToken() throws ParserException
-    {
-        curToken = firstToken;
-        return curToken;
-    }
-    
-    /**
-     * go to the last parsered token(may not be the last token of file)<br>
-     * throw exception if meet invalid character
-     */
-    public Token toLastToken() throws ParserException
-    {
-        curToken = lastToken;
-        return curToken;
-    }
-    
-    /**
-     * save current state
-     */
-    private void save()
-    {
-        savedToken = curToken;
-    }
-    
-    /**
-     * restore to last state, must use with save()
-     */
-    private void restore()
-    {
-        curToken = savedToken;
-    }
-    
     /** test TokenManager */
     public static void main(String[] argv)
     {
         try {
             String dir = System.getProperty("user.dir");
-            TokenManager tm = new TokenManager(
+            TokenManager tm = new VerilogTokenManager(
                     new BufferedReader(
                             new FileReader(dir + "\\ac97_top.v")), false);
             Token token = null;
             int kind = tm.getNextTokenKind();
             kind = tm.getNextTokenKind(2);
             kind = tm.getNextTokenKind(5);
-            System.out.print(kind);
+            //System.out.print(kind);
             
             int lastLine = 0x0fffffff;
             while(true) {

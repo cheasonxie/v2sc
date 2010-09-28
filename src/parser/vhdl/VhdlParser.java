@@ -15,7 +15,7 @@ import parser.Token;
 
 public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants, IVhdlType
 {
-    protected TokenManager tokenMgr = null;
+    protected VhdlTokenManager tokenMgr = null;
     protected LibraryManager libraryMgr = LibraryManager.getInstance();
     protected SymbolTable extSymbolTable = new SymbolTable();   // external symbols, define in use_clause
     protected SymbolTable symbolTable = null;
@@ -7374,7 +7374,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
             System.err.println("you must parse the file by call parse() firstly");
             return null;
         }
-        return tokenMgr.comments.toArray(new CommentBlock[tokenMgr.comments.size()]);
+        return tokenMgr.getComment();
     }
 
     @Override
@@ -7450,7 +7450,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
     public IASTNode parse(String path) throws ParserException {
         try {
             BufferedReader stream = new BufferedReader(new FileReader(path));
-            tokenMgr = new TokenManager(stream, parseSymbol);
+            tokenMgr = new VhdlTokenManager(stream, parseSymbol);
             return design_file();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -7461,7 +7461,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
     @Override
     public IASTNode parse(Reader reader) throws ParserException {
         BufferedReader stream = new BufferedReader(reader);
-        tokenMgr = new TokenManager(stream, parseSymbol);
+        tokenMgr = new VhdlTokenManager(stream, parseSymbol);
         return design_file();
     }
 
