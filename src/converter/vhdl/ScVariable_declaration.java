@@ -2,8 +2,8 @@ package converter.vhdl;
 
 import parser.vhdl.ASTNode;
 import java.util.StringTokenizer;
-import parser.vhdl.TokenManager;
 import parser.vhdl.Symbol;
+import parser.vhdl.VhdlTokenManager;
 
 
 /**
@@ -18,7 +18,7 @@ class ScVariable_declaration extends ScCommonDeclaration {
     
     protected boolean isTypeValid() {
         boolean ret = true;
-        StringTokenizer tkn = new StringTokenizer(sub.scString(), TokenManager.specialChar);
+        StringTokenizer tkn = new StringTokenizer(sub.scString(), VhdlTokenManager.specialChar);
         while(tkn.hasMoreTokens()) {
             String tmp = tkn.nextToken().trim();
             Symbol sym = (Symbol)parser.getSymbol(curNode, tmp);

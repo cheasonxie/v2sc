@@ -77,7 +77,7 @@ public class VhdlTokenManager extends TokenManager implements VhdlTokenConstants
         super(stream, parseSymbol);
     }
     
-    static final String specialChar = "&()*+,-./:;<>=|[]!$%@?";
+    public static final String specialChar = "&()*+,-./:;<>=|[]!$%@?";
     static final char singleQuote = '\'';
     static final char doubleQuote = '\"';
     
