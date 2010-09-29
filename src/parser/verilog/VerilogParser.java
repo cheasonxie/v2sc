@@ -143,79 +143,56 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
     
     /**
-     * always_construct ::= <b>always</b> statement 
+     * always_statement <br>
+     *     ::= <b>always</b> <statement> 
      */
-    void always_construct(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTALWAYS_CONSTRUCT);
+    void always_statement(IASTNode p, Token endToken) throws ParserException {
+        ASTNode node = new ASTNode(p, ASTALWAYS_STATEMENT);
         openNodeScope(node);
-        consumeToken(ALWAYS);
-        statement(node, endToken);
         closeNodeScope(node);
     }
 
     /**
-     * binary_base ::= ¡¯b | ¡¯B 
+     * assignment <br>
+     *     ::= <lvalue> = <expression> 
      */
-//    void binary_base(IASTNode p, Token endToken) throws ParserException {
-//        ASTNode node = new ASTNode(p, ASTBINARY_BASE);
-//        openNodeScope(node);
-//        closeNodeScope(node);
-//    }
+    void assignment(IASTNode p, Token endToken) throws ParserException {
+        ASTNode node = new ASTNode(p, ASTASSIGNMENT);
+        openNodeScope(node);
+        closeNodeScope(node);
+    }
 
     /**
-     * binary_digit ::= x | X | z | Z | 0 | 1 
+     * block_declaration <br>
+     *     ::= <parameter_declaration> <br>
+     *     ||= <reg_declaration> <br>
+     *     ||= <integer_declaration> <br>
+     *     ||= <real_declaration> <br>
+     *     ||= <time_declaration> <br>
+     *     ||= <event_declaration> 
      */
-//    void binary_digit(IASTNode p, Token endToken) throws ParserException {
-//        ASTNode node = new ASTNode(p, ASTBINARY_DIGIT);
-//        openNodeScope(node);
-//        closeNodeScope(node);
-//    }
+    void block_declaration(IASTNode p, Token endToken) throws ParserException {
+        ASTNode node = new ASTNode(p, ASTBLOCK_DECLARATION);
+        openNodeScope(node);
+        closeNodeScope(node);
+    }
 
     /**
-     * binary_number ::= [ size ] binary_base binary_digit { _ | binary_digit } 
-     */
-//    void binary_number(IASTNode p, Token endToken) throws ParserException {
-//        ASTNode node = new ASTNode(p, ASTBINARY_NUMBER);
-//        openNodeScope(node);
-//        closeNodeScope(node);
-//    }
-
-    /**
-     * binary_operator ::= <br>
-     *         + | - | * | / | % | == | != | === | !== | && | || <br>
-     *         | < | <= | > | >= | & | | | ^ | ^~ | ~^ | >> | << 
-     */
-//    void binary_operator(IASTNode p, Token endToken) throws ParserException {
-//        ASTNode node = new ASTNode(p, ASTBINARY_OPERATOR);
-//        openNodeScope(node);
-//        closeNodeScope(node);
-//    }
-
-    /**
-     * blocking assignment ::= reg_lvalue = [ delay_or_event_control ] expression 
+     * blocking_assignment <br>
+     *     ::= <lvalue> = <expression> <br>
+     *     ||= <lvalue> = <delay_or_event_control> <expression> ; 
      */
     void blocking_assignment(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTBLOCKING_ASSIGNMENT);
         openNodeScope(node);
-        Token tmpToken = findToken(EQ, endToken);
-        reg_lvalue(node, tmpToken);
         closeNodeScope(node);
     }
 
     /**
-     * block_item_declaration ::= parameter_declaration | reg_declaration <br>
-     *                         | integer_declaration | real_declaration | time_declaration <br>
-     *                         | realtime_declaration | event_declaration 
-     */
-    void block_item_declaration(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTBLOCK_ITEM_DECLARATION);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
-
-    /**
-     * case_item ::= expression { , expression } : statement_or_null <br>
-     *             | <b>default<b> [ : ] statement_or_null 
+     * case_item <br>
+     *     ::= <expression> <,<expression>>* : <statement_or_null> <br>
+     *     ||= <b>default</b> : <statement_or_null> <br>
+     *     ||= <b>default</b> <statement_or_null> 
      */
     void case_item(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTCASE_ITEM);
@@ -224,18 +201,10 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * case_statement ::= <b>case</b> ( expression ) case_item { case_item } <b>endcase</b> <br>
-     *                 | <b>casez</b> ( expression ) case_item { case_item } <b>endcase</b> <br>
-     *                 | <b>casex</b> ( expression ) case_item { case_item } <b>endcase</b> 
-     */
-    void case_statement(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTCASE_STATEMENT);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
-
-    /**
-     * charge_strength ::= ( <b>small</b> ) | ( <b>medium</b> ) | ( <b>large</b> ) 
+     * charge_strength <br>
+     *     ::= ( <b>small</b> ) <br>
+     *     ||= ( <b>medium</b> ) <br>
+     *     ||= ( <b>large</b> ) 
      */
     void charge_strength(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTCHARGE_STRENGTH);
@@ -244,35 +213,8 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * cmos_switchtype ::= <b>cmos</b> | <b>rcmos</b> 
-     */
-    void cmos_switchtype(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTCMOS_SWITCHTYPE);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
-
-    /**
-     * cmos_switch_instance ::= ( output_terminal , input_terminal , <br>
-     *                             ncontrol_terminal , pcontrol_terminal ) 
-     */
-    void cmos_switch_instance(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTCMOS_SWITCH_INSTANCE);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
-
-    /**
-     * combinational_body ::= <b>table</b> combinational_entry { combinational_entry } <b>endtable</b> 
-     */
-    void combinational_body(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTCOMBINATIONAL_BODY);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
-
-    /**
-     * combinational_entry ::= level_input_list : output_symbol ; 
+     * combinational_entry <br>
+     *     ::= <level_input_list> : <OUTPUT_SYMBOL> ; 
      */
     void combinational_entry(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTCOMBINATIONAL_ENTRY);
@@ -281,7 +223,8 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * concatenation ::= { expression { , expression } } 
+     * concatenation <br>
+     *     ::= { <expression> <,<expression>>* } 
      */
     void concatenation(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTCONCATENATION);
@@ -290,20 +233,20 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * conditional_statement ::= <b>if</b> ( expression ) statement_or_null [ <b>else</b> statement_or_null ] 
+     * conditional_port_expression <br>
+     *     ::= <port_reference> <br>
+     *     ||= <UNARY_OPERATOR><port_reference> <br>
+     *     ||= <port_reference><BINARY_OPERATOR><port_reference> 
      */
-    void conditional_statement(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTCONDITIONAL_STATEMENT);
+    void conditional_port_expression(IASTNode p, Token endToken) throws ParserException {
+        ASTNode node = new ASTNode(p, ASTCONDITIONAL_PORT_EXPRESSION);
         openNodeScope(node);
         closeNodeScope(node);
     }
 
     /**
-     * constant_expression ::= constant_primary <br>
-     *                     | unary_operator constant_primary <br>
-     *                     | constant_expression binary_operator constant_expression <br>
-     *                     | constant_expression ? constant_expression : constant_expression <br>
-     *                     | string 
+     * constant_expression <br>
+     *     ::=<expression> 
      */
     void constant_expression(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTCONSTANT_EXPRESSION);
@@ -312,27 +255,9 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * constant_mintypmax_expression ::= constant_expression <br>
-     *                             | constant_expression : constant_expression : constant_expression 
-     */
-    void constant_mintypmax_expression(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTCONSTANT_MINTYPMAX_EXPRESSION);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
-
-    /**
-     * constant_primary ::= number | <b>parameter</b> _identifier <br>
-     *                 | constant _concatenation | constant _multiple_concatenation 
-     */
-    void constant_primary(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTCONSTANT_PRIMARY);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
-
-    /**
-     * continuous_assign ::= <b>assign</b> [ drive_strength ] [ delay3 ] list_of_net_assignments ; 
+     * continuous_assign <br>
+     *     ::= <b>assign</b> <drive_strength>? <delay>? <list_of_assignments> ; <br>
+     *     ||= <NETTYPE> <drive_strength>? <expandrange>? <delay>? <list_of_assignments> ; 
      */
     void continuous_assign(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTCONTINUOUS_ASSIGN);
@@ -341,8 +266,9 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * controlled_timing_check_event ::= timing_check_event_control <br>
-     *                         specify_terminal_descriptor [ &&& timing_check_condition ] 
+     * controlled_timing_check_event <br>
+     *     ::= <timing_check_event_control> <specify_terminal_descriptor> <br>
+     *         <&&& <timing_check_condition>>? 
      */
     void controlled_timing_check_event(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTCONTROLLED_TIMING_CHECK_EVENT);
@@ -351,16 +277,10 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * current_state ::= level_symbol 
-     */
-    void current_state(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTCURRENT_STATE);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
-
-    /**
-     * data_source_expression ::= expression 
+     * data_source_expression <br>
+     *     Any expression, including constants <b>and</b> lists. Its width must be one bit <b>or</b> <br>
+     *     equal to the destination's width. If the destination is a list, the data <br>
+     *     source must be as wide as the sum of the bits of the members. 
      */
     void data_source_expression(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTDATA_SOURCE_EXPRESSION);
@@ -369,53 +289,33 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * decimal_base ::= ¡¯d | ¡¯D 
+     * decimal_number <br>
+     *     ::= A number containing a set of any of the following characters, optionally preceded by + <b>or</b> - <br>
+     *          0123456789_ 
      */
-    void decimal_base(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTDECIMAL_BASE);
+    void decimal_number(IASTNode p, Token endToken) throws ParserException {
+        ASTNode node = new ASTNode(p, ASTDECIMAL_NUMBER);
         openNodeScope(node);
         closeNodeScope(node);
     }
 
     /**
-     * decimal_digit ::= 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 0 
+     * delay <br>
+     *     ::= # <number> <br>
+     *     ||= # <identifier> <br>
+     *     ||= # (<mintypmax_expression> <,<mintypmax_expression>>? <,<mintypmax_expression>>?) 
      */
-    void decimal_digit(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTDECIMAL_DIGIT);
+    void delay(IASTNode p, Token endToken) throws ParserException {
+        ASTNode node = new ASTNode(p, ASTDELAY);
         openNodeScope(node);
         closeNodeScope(node);
     }
 
     /**
-     * decimal_number ::= [ sign ] unsigned_number <br>
-     *                 | [ size ] decimal_base unsigned_number 
-     */
-//    void decimal_number(IASTNode p, Token endToken) throws ParserException {
-//        ASTNode node = new ASTNode(p, ASTDECIMAL_NUMBER);
-//        openNodeScope(node);
-//        closeNodeScope(node);
-//    }
-
-    /**
-     * delay2 ::= # delay_value | # ( delay_value [ , delay_value ] ) 
-     */
-    void delay2(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTDELAY2);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
-
-    /**
-     * delay3 ::= # delay_value | # ( delay_value [ , delay_value [ , delay_value ] ] ) 
-     */
-    void delay3(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTDELAY3);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
-
-    /**
-     * delay_control ::= # delay_value | # ( mintypmax_expression ) 
+     * delay_control <br>
+     *     ::= # <number> <br>
+     *     ||= # <identifier> <br>
+     *     ||= # ( <mintypmax_expression> ) 
      */
     void delay_control(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTDELAY_CONTROL);
@@ -424,7 +324,10 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * delay_or_event_control ::= delay_control | event_control | <b>repeat</b> ( expression ) event_control 
+     * delay_or_event_control <br>
+     *     ::= <delay_control> <br>
+     *     ||= <event_control> <br>
+     *     ||= <b>repeat</b> ( <expression> ) <event_control> 
      */
     void delay_or_event_control(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTDELAY_OR_EVENT_CONTROL);
@@ -433,16 +336,9 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * delay_value ::= unsigned_number | parameter_identifier | constant_mintypmax_expression 
-     */
-    void delay_value(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTDELAY_VALUE);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
-
-    /**
-     * description ::= module_declaration | udp_declaration 
+     * description <br>
+     *     ::= <module> <br>
+     *     ||= <udp> 
      */
     void description(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTDESCRIPTION);
@@ -451,18 +347,9 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * disable_statement ::= <b>disable</b> <b>task</b> _identifier ; | <b>disable</b> block _identifier ; 
-     */
-    void disable_statement(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTDISABLE_STATEMENT);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
-
-    /**
-     * drive_strength ::= ( strength0 , strength1 ) | ( strength1 , strength0 ) <br>
-     *                 | ( strength0 , <b>highz1</b> ) | ( strength1 , <b>highz0</b> ) <br>
-     *                 | ( <b>highz1</b> , strength0 ) | ( <b>highz0</b> , strength1 ) 
+     * drive_strength <br>
+     *     ::= ( <STRENGTH0> , <STRENGTH1> ) <br>
+     *     ||= ( <STRENGTH1> , <STRENGTH0> ) 
      */
     void drive_strength(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTDRIVE_STRENGTH);
@@ -471,7 +358,19 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * edge_control_specifier ::= [ edge_descriptor [ , edge_descriptor ] ] 
+     * <b>edge</b> <br>
+     *     ::= ( <LEVEL_SYMBOL> <LEVEL_SYMBOL> ) <br>
+     *     ||= <EDGE_SYMBOL> 
+     */
+    void edge(IASTNode p, Token endToken) throws ParserException {
+        ASTNode node = new ASTNode(p, ASTEDGE);
+        openNodeScope(node);
+        closeNodeScope(node);
+    }
+
+    /**
+     * edge_control_specifier <br>
+     *     ::= <b>edge</b> [ <edge_descriptor><,<edge_descriptor>>*] 
      */
     void edge_control_specifier(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTEDGE_CONTROL_SPECIFIER);
@@ -480,7 +379,13 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * edge_descriptor ::= 01 | 10 | 0x | x1 | 1x | x0 
+     * edge_descriptor <br>
+     *     ::= 01 <br>
+     *     ||= 10 <br>
+     *     ||= 0x <br>
+     *     ||= x1 <br>
+     *     ||= 1x <br>
+     *     ||= x0 
      */
     void edge_descriptor(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTEDGE_DESCRIPTOR);
@@ -489,7 +394,9 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * edge_identifier ::= <b>posedge</b> | <b>negedge</b> 
+     * edge_identifier <br>
+     *     ::= <b>posedge</b> <br>
+     *     ||= <b>negedge</b> 
      */
     void edge_identifier(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTEDGE_IDENTIFIER);
@@ -498,16 +405,8 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * edge_indicator ::= ( level_symbol level_symbol ) | edge_symbol 
-     */
-    void edge_indicator(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTEDGE_INDICATOR);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
-
-    /**
-     * edge_input_list ::= { level_symbol } edge_indicator { level_symbol } 
+     * edge_input_list <br>
+     *     ::= <LEVEL_SYMBOL>* <edge> <LEVEL_SYMBOL>* 
      */
     void edge_input_list(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTEDGE_INPUT_LIST);
@@ -516,8 +415,15 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * edge_sensitive_path_declaration ::= parallel_edge_sensitive_path_description = path_delay_value <br>
-     *                                 | full_edge_sensitive_path_description = path_delay_value 
+     * edge_sensitive_path_declaration <br>
+     *     ::= <if (<expression>)>? (<edge_identifier>? <br>
+     *         <specify_input_terminal_descriptor> => <br>
+     *         (<specify_output_terminal_descriptor> <polarity_operator>? <br>
+     *         : <data_source_expression>)) = <path_delay_value>; <br>
+     *     ||= <if (<expression>)>? (<edge_identifier>? <br>
+     *         <specify_input_terminal_descriptor> *> <br>
+     *         (<list_of_path_outputs> <polarity_operator>? <br>
+     *         : <data_source_expression>)) =<path_delay_value>; 
      */
     void edge_sensitive_path_declaration(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTEDGE_SENSITIVE_PATH_DECLARATION);
@@ -526,53 +432,9 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * edge_symbol ::= r | R | f | F | p | P | n | N | * 
-     */
-    void edge_symbol(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTEDGE_SYMBOL);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
-
-    /**
-     * enable_gatetype ::= <b>bufif0</b> | <b>bufif1</b> | <b>notif0</b> | <b>notif1</b> 
-     */
-    void enable_gatetype(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTENABLE_GATETYPE);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
-
-    /**
-     * enable_gate_instance ::= [ name_of_gate_instance ] <br>
-     *                         ( output_terminal , input_terminal , enable_terminal ) 
-     */
-    void enable_gate_instance(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTENABLE_GATE_INSTANCE);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
-
-    /**
-     * enable_terminal ::= scalar _expression 
-     */
-    void enable_terminal(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTENABLE_TERMINAL);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
-
-    /**
-     * escaped_identifier ::= \ {Any_ASCII_character_except_white_space} white_space 
-     */
-    void escaped_identifier(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTESCAPED_IDENTIFIER);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
-
-    /**
-     * event_control ::= @ <b>event</b> _identifier | @ ( event_expression ) 
+     * event_control <br>
+     *     ::= @ <identifier> <br>
+     *     ||= @ ( <event_expression> ) 
      */
     void event_control(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTEVENT_CONTROL);
@@ -581,7 +443,8 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * event_declaration ::= <b>event</b> <b>event</b> _identifier { , <b>event</b> _identifier } ; 
+     * event_declaration <br>
+     *     ::= <b>event</b> <name_of_event> <,<name_of_event>>* ; 
      */
     void event_declaration(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTEVENT_DECLARATION);
@@ -590,9 +453,11 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * event_expression ::= expression | <b>event</b> _identifier <br>
-     *                 | <b>posedge</b> expression | <b>negedge</b> expression <br>
-     *                 | event_expression <b>or</b> event_expression 
+     * event_expression <br>
+     *     ::= <expression> <br>
+     *     ||= <b>posedge</b> <scalar_event_expression> <br>
+     *     ||= <b>negedge</b> <scalar_event_expression> <br>
+     *     ||= <event_expression> <b>or</b> <event_expression> 
      */
     void event_expression(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTEVENT_EXPRESSION);
@@ -601,19 +466,24 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * event_trigger ::= -> <b>event</b> _identifier ; 
+     * expandrange <br>
+     *     ::= <range> <br>
+     *     ||= <b>scalared</b> <range> <br>
+     *     ||= <b>vectored</b> <range> 
      */
-    void event_trigger(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTEVENT_TRIGGER);
+    void expandrange(IASTNode p, Token endToken) throws ParserException {
+        ASTNode node = new ASTNode(p, ASTEXPANDRANGE);
         openNodeScope(node);
         closeNodeScope(node);
     }
 
     /**
-     * expression ::= primary | unary_operator primary <br>
-     *             | expression binary_operator expression | expression ? expression : expression <br>
-     *             | string <br>
-     *             
+     * expression <br>
+     *     ::= <primary> <br>
+     *     ||= <UNARY_OPERATOR> <primary> <br>
+     *     ||= <expression> <BINARY_OPERATOR> <expression> <br>
+     *     ||= <expression> <QUESTION_MARK> <expression> : <expression> <br>
+     *     ||= <string> 
      */
     void expression(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTEXPRESSION);
@@ -622,28 +492,23 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * full_edge_sensitive_path_description ::= ( [ edge_identifier ] list_of_path_inputs *> <br>
-     *                                     list_of_path_outputs <br>
-     *                                     [ polarity_operator ] : data_source_expression ) ) 
+     * <b>function</b> <br>
+     *     ::= <b>function</b> <range_or_type>? <name_of_function> ; <br>
+     *         <tf_declaration>+ <br>
+     *         <statement> <br>
+     *         <b>endfunction</b> 
      */
-    void full_edge_sensitive_path_description(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTFULL_EDGE_SENSITIVE_PATH_DESCRIPTION);
+    void function(IASTNode p, Token endToken) throws ParserException {
+        ASTNode node = new ASTNode(p, ASTFUNCTION);
         openNodeScope(node);
         closeNodeScope(node);
     }
 
     /**
-     * full_path_description ::= ( list_of_path_inputs [ polarity_operator ] *> list_of_path_outputs ) 
-     */
-    void full_path_description(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTFULL_PATH_DESCRIPTION);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
-
-    /**
-     * function_call ::= <b>function</b> _identifier ( expression { , expression} ) <br>
-     *             | name_of_system_function [ ( expression { , expression} ) ] 
+     * function_call <br>
+     *     ::= <name_of_function> ( <expression> <,<expression>>* ) <br>
+     *     ||= <name_of_system_function> ( <expression> <,<expression>>* ) <br>
+     *     ||= <name_of_system_function> 
      */
     void function_call(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTFUNCTION_CALL);
@@ -652,82 +517,29 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * function_declaration ::= <b>function</b> [ range_or_type ] <b>function</b> _identifier ; <br>
-     *                             function_item_declaration { function_item_declaration } <br>
-     *                             statement <br>
-     *                         <b>endfunction</b> 
+     * gate_declaration <br>
+     *     ::= <GATETYPE> <drive_strength>? <delay>? <gate_instance> <,<gate_instance>>* ; 
      */
-    void function_declaration(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTFUNCTION_DECLARATION);
+    void gate_declaration(IASTNode p, Token endToken) throws ParserException {
+        ASTNode node = new ASTNode(p, ASTGATE_DECLARATION);
         openNodeScope(node);
         closeNodeScope(node);
     }
 
     /**
-     * function_item_declaration ::= block_item_declaration | input_declaration 
+     * gate_instance <br>
+     *     ::= <name_of_gate_instance>? ( <terminal> <,<terminal>>* ) 
      */
-    void function_item_declaration(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTFUNCTION_ITEM_DECLARATION);
+    void gate_instance(IASTNode p, Token endToken) throws ParserException {
+        ASTNode node = new ASTNode(p, ASTGATE_INSTANCE);
         openNodeScope(node);
         closeNodeScope(node);
     }
 
     /**
-     * gate_instantiation ::= n_input_gatetype [ drive_strength ] <br>
-     *                         [delay2] n_input_gate_instance { , n_input_gate_instance } ; <br>
-     *                     | n_output_gatetype [ drive_strength ] [ delay2 ] <br>
-     *                         n_output_gate_instance { , n_output_gate_instance } ; <br>
-     *                     | enable_gatetype [ drive_strength ] [ delay3 ] <br>
-     *                         enable_gate_instance { , enable_gate_instance} ; <br>
-     *                     | mos_switchtype [ delay3 ] <br>
-     *                         mos_switch_instance { , mos_switch_instance } ; <br>
-     *                     | pass_switchtype pass_switch_instance { , pass_switch_instance } ; <br>
-     *                     | pass_en_switchtype [ delay3 ] <br>
-     *                         pass_en_switch_instance { , pass_en_switch_instance } ; <br>
-     *                     | cmos_switchtype [ delay3 ] <br>
-     *                         cmos_switch_instance { , cmos_switch_instance } ; <br>
-     *                     | <b>pullup</b> [ pullup_strength ] <br>
-     *                         pull_gate_instance { , pull_gate_instance } ; <br>
-     *                     | <b>pulldown</b> [ pulldown_strength ] <br>
-     *                         pull_gate_instance { , pull_gate_instance } ; 
-     */
-    void gate_instantiation(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTGATE_INSTANTIATION);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
-
-    /**
-     * hex_base ::= ¡¯h | ¡¯H 
-     */
-//    void hex_base(IASTNode p, Token endToken) throws ParserException {
-//        ASTNode node = new ASTNode(p, ASTHEX_BASE);
-//        openNodeScope(node);
-//        closeNodeScope(node);
-//    }
-
-    /**
-     * hex_digit ::= x | X | z | Z | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 <br>
-     *             | a | b | c | d | e | f | A | B | C | D | E | F 
-     */
-//    void hex_digit(IASTNode p, Token endToken) throws ParserException {
-//        ASTNode node = new ASTNode(p, ASTHEX_DIGIT);
-//        openNodeScope(node);
-//        closeNodeScope(node);
-//    }
-
-    /**
-     * hex_number ::= [ size ] hex_base hex_digit { _ | hex_digit } 
-     */
-//    void hex_number(IASTNode p, Token endToken) throws ParserException {
-//        ASTNode node = new ASTNode(p, ASTHEX_NUMBER);
-//        openNodeScope(node);
-//        closeNodeScope(node);
-//    }
-
-    /**
-     * identifier ::= IDENTIFIER [ { . IDENTIFIER } ] <br>
-     *         The period in identifier may <b>not</b> be preceded <b>or</b> followed by a space. 
+     * identifier <br>
+     *     ::= <IDENTIFIER><.<IDENTIFIER>>* <br>
+     *     (Note: the period may <b>not</b> be preceded <b>or</b> followed by a space.) 
      */
     void identifier(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTidentifier);
@@ -736,25 +548,35 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * IDENTIFIER ::= simple_identifier | escaped_identifier 
+     * IDENTIFIER <br>
+     *     An identifier is any sequence of letters, digits, dollar signs ($), <b>and</b> <br>
+     *     underscore (_) symbol, except that the first must be a letter <b>or</b> the <br>
+     *     underscore; the first character may <b>not</b> be a digit <b>or</b> $. Upper <b>and</b> lower <b>case</b> <br>
+     *     letters are considered to be different. Identifiers may be up to 1024 <br>
+     *     characters long. Some Verilog-based tools do <b>not</b> recognize identifier <br>
+     *     characters beyond the 1024th as a significant part of the identifier. Escaped <br>
+     *     identifiers start with the backslash character (\) <b>and</b> may include any <br>
+     *     printable ASCII character. An escaped identifier ends with white space. The <br>
+     *     leading backslash character is <b>not</b> considered to be part of the identifier. 
      */
-//    void IDENTIFIER(IASTNode p, Token endToken) throws ParserException {
-//        ASTNode node = new ASTNode(p, ASTIDENTIFIER);
-//        openNodeScope(node);
-//        closeNodeScope(node);
-//    }
-
-    /**
-     * initial_construct ::= <b>initial</b> statement 
-     */
-    void initial_construct(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTINITIAL_CONSTRUCT);
+    void IDENTIFIER(IASTNode p, Token endToken) throws ParserException {
+        ASTNode node = new ASTNode(p, ASTIDENTIFIER);
         openNodeScope(node);
         closeNodeScope(node);
     }
 
     /**
-     * init_val ::= 1¡¯b0 | 1¡¯b1 | 1¡¯bx | 1¡¯bX | 1¡¯B0 | 1¡¯B1 | 1¡¯Bx | 1¡¯BX | 1 | 0 
+     * init_val <br>
+     *     ::= 1'b0 <br>
+     *     ||= 1'b1 <br>
+     *     ||= 1'bx <br>
+     *     ||= 1'bX <br>
+     *     ||= 1'B0 <br>
+     *     ||= 1'B1 <br>
+     *     ||= 1'Bx <br>
+     *     ||= 1'BX <br>
+     *     ||= 1 <br>
+     *     ||= 0 
      */
     void init_val(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTINIT_VAL);
@@ -763,7 +585,18 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * inout_declaration ::= <b>inout</b> [ range ] list_of_port_identifiers ; 
+     * initial_statement <br>
+     *     ::= <b>initial</b> <statement> 
+     */
+    void initial_statement(IASTNode p, Token endToken) throws ParserException {
+        ASTNode node = new ASTNode(p, ASTINITIAL_STATEMENT);
+        openNodeScope(node);
+        closeNodeScope(node);
+    }
+
+    /**
+     * inout_declaration <br>
+     *     ::= <b>inout</b> <range>? <list_of_variables> ; 
      */
     void inout_declaration(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTINOUT_DECLARATION);
@@ -772,16 +605,8 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * inout_terminal ::= terminal _identifier | terminal _identifier [ constant_expression ] 
-     */
-    void inout_terminal(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTINOUT_TERMINAL);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
-
-    /**
-     * input_declaration ::= <b>input</b> [ range ] list_of_port_identifiers ; 
+     * input_declaration <br>
+     *     ::= <b>input</b> <range>? <list_of_variables> ; 
      */
     void input_declaration(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTINPUT_DECLARATION);
@@ -790,7 +615,8 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * input_identifier ::= input_port _identifier | inout_port _identifier 
+     * input_identifier <br>
+     *     ::= the <IDENTIFIER> of a <b>module</b> <b>input</b> <b>or</b> <b>inout</b> terminal 
      */
     void input_identifier(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTINPUT_IDENTIFIER);
@@ -799,16 +625,19 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * input_terminal ::= scalar _expression 
+     * input_list <br>
+     *     ::= <level_input_list> <br>
+     *     ||= <edge_input_list> 
      */
-    void input_terminal(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTINPUT_TERMINAL);
+    void input_list(IASTNode p, Token endToken) throws ParserException {
+        ASTNode node = new ASTNode(p, ASTINPUT_LIST);
         openNodeScope(node);
         closeNodeScope(node);
     }
 
     /**
-     * integer_declaration ::= <b>integer</b> list_of_register_identifiers ; 
+     * integer_declaration <br>
+     *     ::= <b>integer</b> <list_of_register_variables> ; 
      */
     void integer_declaration(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTINTEGER_DECLARATION);
@@ -817,7 +646,8 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * level_input_list ::= level_symbol { level_symbol } 
+     * level_input_list <br>
+     *     ::= <LEVEL_SYMBOL>+ 
      */
     void level_input_list(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTLEVEL_INPUT_LIST);
@@ -826,26 +656,36 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * level_symbol ::= 0 | 1 | x | X | ? | b | B 
+     * level_sensitive_path_declaration <br>
+     *     ::= <b>if</b> (<conditional_port_expression>) <br>
+     *         (<specify_input_terminal_descriptor> <polarity_operator>? => <br>
+     *         <specify_output_terminal_descriptor>) = <path_delay_value>; <br>
+     *     ||= <b>if</b> (<conditional_port_expression>) <br>
+     *         (<list_of_path_inputs> <polarity_operator>? *> <br>
+     *         <list_of_path_outputs>) = <path_delay_value>; <br>
+     *     (Note: The following two symbols are literal symbols, <b>not</b> syntax description conventions:) <br>
+     *         *> => 
      */
-    void level_symbol(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTLEVEL_SYMBOL);
+    void level_sensitive_path_declaration(IASTNode p, Token endToken) throws ParserException {
+        ASTNode node = new ASTNode(p, ASTLEVEL_SENSITIVE_PATH_DECLARATION);
         openNodeScope(node);
         closeNodeScope(node);
     }
 
     /**
-     * limit_value ::= constant_mintypmax_expression 
+     * list_of_assignments <br>
+     *     ::= <assignment> <,<assignment>>* 
      */
-    void limit_value(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTLIMIT_VALUE);
+    void list_of_assignments(IASTNode p, Token endToken) throws ParserException {
+        ASTNode node = new ASTNode(p, ASTLIST_OF_ASSIGNMENTS);
         openNodeScope(node);
         closeNodeScope(node);
     }
 
     /**
-     * list_of_module_connections ::= ordered_port_connection { , ordered_port_connection } <br>
-     *                             | named_port_connection { , named_port_connection } 
+     * list_of_module_connections <br>
+     *     ::= <module_port_connection> <,<module_port_connection>>* <br>
+     *     ||= <named_port_connection> <,<named_port_connection>>* 
      */
     void list_of_module_connections(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTLIST_OF_MODULE_CONNECTIONS);
@@ -854,34 +694,8 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * list_of_net_assignments ::= net_assignment { , net_assignment } 
-     */
-    void list_of_net_assignments(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTLIST_OF_NET_ASSIGNMENTS);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
-
-    /**
-     * list_of_net_decl_assignments ::= net_decl_assignment { , net_decl_assignment } 
-     */
-    void list_of_net_decl_assignments(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTLIST_OF_NET_DECL_ASSIGNMENTS);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
-
-    /**
-     * list_of_net_identifiers ::= net _identifier { , net _identifier } 
-     */
-    void list_of_net_identifiers(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTLIST_OF_NET_IDENTIFIERS);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
-
-    /**
-     * list_of_param_assignments ::= param_assignment { , param_assignment } 
+     * list_of_param_assignments <br>
+     *     ::=<param_assignment><,<param_assignment>* 
      */
     void list_of_param_assignments(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTLIST_OF_PARAM_ASSIGNMENTS);
@@ -890,24 +704,8 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * list_of_path_delay_expressions ::= t _path_delay_expression <br>
-     *                                 | trise _path_delay_expression , tfall _path_delay_expression <br>
-     *                                 | trise _path_delay_expression , tfall _path_delay_expression , tz _path_delay_expression <br>
-     *                                 | t01 _path_delay_expression , t10 _path_delay_expression , t0z _path_delay_expression , <br>
-     *                                     tz1 _path_delay_expression , t1z _path_delay_expression , tz0 _path_delay_expression <br>
-     *                                 | t01 _path_delay_expression , t10 _path_delay_expression , t0z _path_delay_expression , <br>
-     *                                     tz1 _path_delay_expression , t1z _path_delay_expression , tz0 _path_delay_expression , <br>
-     *                                     t0x _path_delay_expression , tx1 _path_delay_expression , t1x _path_delay_expression , <br>
-     *                                     tx0 _path_delay_expression , txz _path_delay_expression , tzx _path_delay_expression 
-     */
-    void list_of_path_delay_expressions(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTLIST_OF_PATH_DELAY_EXPRESSIONS);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
-
-    /**
-     * list_of_path_inputs ::= specify_input_terminal_descriptor { , specify_input_terminal_descriptor } 
+     * list_of_path_inputs <br>
+     *     ::= <specify_input_terminal_descriptor> <,<specify_input_terminal_descriptor>>* 
      */
     void list_of_path_inputs(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTLIST_OF_PATH_INPUTS);
@@ -916,7 +714,8 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * list_of_path_outputs ::= specify_output_terminal_descriptor { , specify_output_terminal_descriptor } 
+     * list_of_path_outputs <br>
+     *     ::= <specify_output_terminal_descriptor> <,<specify_output_terminal_descriptor>>* 
      */
     void list_of_path_outputs(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTLIST_OF_PATH_OUTPUTS);
@@ -925,7 +724,8 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * list_of_ports ::= ( port { , port } ) 
+     * list_of_ports <br>
+     *     ::= ( <port> <,<port>>* ) 
      */
     void list_of_ports(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTLIST_OF_PORTS);
@@ -934,56 +734,42 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * list_of_port_identifiers ::= port _identifier { , port _identifier } 
+     * list_of_register_variables <br>
+     *     ::= <register_variable> <,<register_variable>>* 
      */
-    void list_of_port_identifiers(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTLIST_OF_PORT_IDENTIFIERS);
+    void list_of_register_variables(IASTNode p, Token endToken) throws ParserException {
+        ASTNode node = new ASTNode(p, ASTLIST_OF_REGISTER_VARIABLES);
         openNodeScope(node);
         closeNodeScope(node);
     }
 
     /**
-     * list_of_real_identifiers ::= real _identifier { , real _identifier } 
+     * list_of_variables <br>
+     *     ||= <NETTYPE> <drive_strength>? <expandrange>? <delay>? <list_of_assignments> ; 
      */
-    void list_of_real_identifiers(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTLIST_OF_REAL_IDENTIFIERS);
+    void list_of_variables(IASTNode p, Token endToken) throws ParserException {
+        ASTNode node = new ASTNode(p, ASTLIST_OF_VARIABLES);
         openNodeScope(node);
         closeNodeScope(node);
     }
 
     /**
-     * list_of_register_identifiers ::= register_name { , register_name } 
+     * lvalue <br>
+     *     ::= <identifier> <br>
+     *     ||= <identifier> [ <expression> ] <br>
+     *     ||= <identifier> [ <constant_expression> : <constant_expression> ] <br>
+     *     ||= <concatenation> 
      */
-    void list_of_register_identifiers(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTLIST_OF_REGISTER_IDENTIFIERS);
+    void lvalue(IASTNode p, Token endToken) throws ParserException {
+        ASTNode node = new ASTNode(p, ASTLVALUE);
         openNodeScope(node);
         closeNodeScope(node);
     }
 
     /**
-     * list_of_specparam_assignments ::= specparam_assignment { , specparam_assignment } 
-     */
-    void list_of_specparam_assignments(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTLIST_OF_SPECPARAM_ASSIGNMENTS);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
-
-    /**
-     * loop_statement ::= <b>forever</b> statement <br>
-     *                 | <b>repeat</b> ( expression ) statement <br>
-     *                 | <b>while</b> ( expression ) statement <br>
-     *                 | <b>for</b> ( reg_assignment ; expression ; reg_assignment ) statement 
-     */
-    void loop_statement(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTLOOP_STATEMENT);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
-
-    /**
-     * mintypmax_expression ::= expression <br>
-     *                     | expression : expression : expression 
+     * mintypmax_expression <br>
+     *     ::= <expression> <br>
+     *     ||= <expression> : <expression> : <expression> 
      */
     void mintypmax_expression(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTMINTYPMAX_EXPRESSION);
@@ -992,17 +778,23 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * module_declaration ::= module_keyword <b>module</b> _identifier <br>
-     *                         [ list_of_ports ] ; {module_item } <b>endmodule</b> 
+     * <b>module</b> <br>
+     *     ::= <b>module</b> <name_of_module> <list_of_ports>? ; <br>
+     *         <module_item>* <br>
+     *         <b>endmodule</b> <br>
+     *     ||= <b>macromodule</b> <name_of_module> <list_of_ports>? ; <br>
+     *         <module_item>* <br>
+     *         <b>endmodule</b> 
      */
-    void module_declaration(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTMODULE_DECLARATION);
+    void module(IASTNode p, Token endToken) throws ParserException {
+        ASTNode node = new ASTNode(p, ASTMODULE);
         openNodeScope(node);
         closeNodeScope(node);
     }
 
     /**
-     * module_instance ::= name_of_instance ( [ list_of_module_connections ] ) 
+     * module_instance <br>
+     *     ::= <name_of_instance> ( <list_of_module_connections>? ) 
      */
     void module_instance(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTMODULE_INSTANCE);
@@ -1011,8 +803,9 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * module_instantiation ::= <b>module</b> _identifier [ parameter_value_assignment ] <br>
-     *                         module_instance { , module_instance } ; 
+     * module_instantiation <br>
+     *     ::= <name_of_module> <parameter_value_assignment>? <br>
+     *         <module_instance> <,<module_instance>>* ; 
      */
     void module_instantiation(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTMODULE_INSTANTIATION);
@@ -1021,10 +814,27 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * module_item ::= module_item_declaration | parameter_override <br>
-     *             | continuous_assign | gate_instantiation | udp_instantiation <br>
-     *             | module_instantiation | specify_block | initial_construct <br>
-     *             | always_construct 
+     * module_item <br>
+     *     ::= <parameter_declaration> <br>
+     *     ||= <input_declaration> <br>
+     *     ||= <output_declaration> <br>
+     *     ||= <inout_declaration> <br>
+     *     ||= <net_declaration> <br>
+     *     ||= <reg_declaration> <br>
+     *     ||= <time_declaration> <br>
+     *     ||= <integer_declaration> <br>
+     *     ||= <real_declaration> <br>
+     *     ||= <event_declaration> <br>
+     *     ||= <gate_declaration> <br>
+     *     ||= <udp_instantiation> <br>
+     *     ||= <module_instantiation> <br>
+     *     ||= <parameter_override> <br>
+     *     ||= <continuous_assign> <br>
+     *     ||= <specify_block> <br>
+     *     ||= <initial_statement> <br>
+     *     ||= <always_statement> <br>
+     *     ||= <task> <br>
+     *     ||= <function> 
      */
     void module_item(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTMODULE_ITEM);
@@ -1033,47 +843,19 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * module_item_declaration ::= parameter_declaration | input_declaration <br>
-     *                         | output_declaration | inout_declaration | net_declaration <br>
-     *                         | reg_declaration | integer_declaration | real_declaration <br>
-     *                         | time_declaration | realtime_declaration | event_declaration <br>
-     *                         | task_declaration | function_declaration 
+     * module_port_connection <br>
+     *     ::= <expression> <br>
+     *     ||= <NULL> 
      */
-    void module_item_declaration(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTMODULE_ITEM_DECLARATION);
+    void module_port_connection(IASTNode p, Token endToken) throws ParserException {
+        ASTNode node = new ASTNode(p, ASTMODULE_PORT_CONNECTION);
         openNodeScope(node);
         closeNodeScope(node);
     }
 
     /**
-     * module_keyword ::= <b>module</b> | <b>macromodule</b> 
-     */
-    void module_keyword(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTMODULE_KEYWORD);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
-
-    /**
-     * mos_switchtype ::= <b>nmos</b> | <b>pmos</b> | <b>rnmos</b> | <b>rpmos</b> 
-     */
-    void mos_switchtype(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTMOS_SWITCHTYPE);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
-
-    /**
-     * mos_switch_instance ::= [ name_of_gate_instance ] ( output_terminal , input_terminal , enable_terminal ) 
-     */
-    void mos_switch_instance(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTMOS_SWITCH_INSTANCE);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
-
-    /**
-     * multiple_concatenation ::= { expression { expression { , expression } } } 
+     * multiple_concatenation <br>
+     *     ::= { <expression> { <expression> <,<expression>>* } } 
      */
     void multiple_concatenation(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTMULTIPLE_CONCATENATION);
@@ -1082,16 +864,38 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * named_port_connection ::= . port _identifier ( [ expression ] ) 
+     * name_of_block <br>
+     *     ::= <IDENTIFIER> 
      */
-    void named_port_connection(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTNAMED_PORT_CONNECTION);
+    void name_of_block(IASTNode p, Token endToken) throws ParserException {
+        ASTNode node = new ASTNode(p, ASTNAME_OF_BLOCK);
         openNodeScope(node);
         closeNodeScope(node);
     }
 
     /**
-     * name_of_gate_instance ::= gate_instance _identifier [ range ] 
+     * name_of_event <br>
+     *     ::= <IDENTIFIER> 
+     */
+    void name_of_event(IASTNode p, Token endToken) throws ParserException {
+        ASTNode node = new ASTNode(p, ASTNAME_OF_EVENT);
+        openNodeScope(node);
+        closeNodeScope(node);
+    }
+
+    /**
+     * name_of_function <br>
+     *     ::= <IDENTIFIER> 
+     */
+    void name_of_function(IASTNode p, Token endToken) throws ParserException {
+        ASTNode node = new ASTNode(p, ASTNAME_OF_FUNCTION);
+        openNodeScope(node);
+        closeNodeScope(node);
+    }
+
+    /**
+     * name_of_gate_instance <br>
+     *     ::= <IDENTIFIER><range>? 
      */
     void name_of_gate_instance(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTNAME_OF_GATE_INSTANCE);
@@ -1100,7 +904,8 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * name_of_instance ::= module_instance _identifier [ range ] 
+     * name_of_instance <br>
+     *     ::= <IDENTIFIER><range>? 
      */
     void name_of_instance(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTNAME_OF_INSTANCE);
@@ -1109,8 +914,49 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * name_of_system_function ::= $ identifier <br>
-     *                 Note: the $ in name_of_system_function may <b>not</b> be followed by a space. 
+     * name_of_memory <br>
+     *     ::= <IDENTIFIER> 
+     */
+    void name_of_memory(IASTNode p, Token endToken) throws ParserException {
+        ASTNode node = new ASTNode(p, ASTNAME_OF_MEMORY);
+        openNodeScope(node);
+        closeNodeScope(node);
+    }
+
+    /**
+     * name_of_module <br>
+     *     ::= <IDENTIFIER> 
+     */
+    void name_of_module(IASTNode p, Token endToken) throws ParserException {
+        ASTNode node = new ASTNode(p, ASTNAME_OF_MODULE);
+        openNodeScope(node);
+        closeNodeScope(node);
+    }
+
+    /**
+     * name_of_port <br>
+     *     ::= <IDENTIFIER> 
+     */
+    void name_of_port(IASTNode p, Token endToken) throws ParserException {
+        ASTNode node = new ASTNode(p, ASTNAME_OF_PORT);
+        openNodeScope(node);
+        closeNodeScope(node);
+    }
+
+    /**
+     * name_of_register <br>
+     *     ::= <IDENTIFIER> 
+     */
+    void name_of_register(IASTNode p, Token endToken) throws ParserException {
+        ASTNode node = new ASTNode(p, ASTNAME_OF_REGISTER);
+        openNodeScope(node);
+        closeNodeScope(node);
+    }
+
+    /**
+     * name_of_system_function <br>
+     *     ::= $<system_identifier> <br>
+     *     (Note: the $ may <b>not</b> be followed by a space.) 
      */
     void name_of_system_function(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTNAME_OF_SYSTEM_FUNCTION);
@@ -1119,7 +965,38 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * name_of_udp_instance ::= udp_instance _identifier [ range ] 
+     * name_of_system_task <br>
+     *     ::= $<system_identifier> (Note: the $ may <b>not</b> be followed by a space.) 
+     */
+    void name_of_system_task(IASTNode p, Token endToken) throws ParserException {
+        ASTNode node = new ASTNode(p, ASTNAME_OF_SYSTEM_TASK);
+        openNodeScope(node);
+        closeNodeScope(node);
+    }
+
+    /**
+     * name_of_task <br>
+     *     ::= <IDENTIFIER> 
+     */
+    void name_of_task(IASTNode p, Token endToken) throws ParserException {
+        ASTNode node = new ASTNode(p, ASTNAME_OF_TASK);
+        openNodeScope(node);
+        closeNodeScope(node);
+    }
+
+    /**
+     * name_of_udp <br>
+     *     ::= <IDENTIFIER> 
+     */
+    void name_of_udp(IASTNode p, Token endToken) throws ParserException {
+        ASTNode node = new ASTNode(p, ASTNAME_OF_UDP);
+        openNodeScope(node);
+        closeNodeScope(node);
+    }
+
+    /**
+     * name_of_udp_instance <br>
+     *     ::= <IDENTIFIER><range>? 
      */
     void name_of_udp_instance(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTNAME_OF_UDP_INSTANCE);
@@ -1128,29 +1005,29 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * ncontrol_terminal ::= scalar _expression 
+     * name_of_variable <br>
+     *     ::= <IDENTIFIER> 
      */
-    void ncontrol_terminal(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTNCONTROL_TERMINAL);
+    void name_of_variable(IASTNode p, Token endToken) throws ParserException {
+        ASTNode node = new ASTNode(p, ASTNAME_OF_VARIABLE);
         openNodeScope(node);
         closeNodeScope(node);
     }
 
     /**
-     * net_assignment ::= net_lvalue = expression 
+     * named_port_connection <br>
+     *     ::= .< IDENTIFIER> ( <expression> ) 
      */
-    void net_assignment(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTNET_ASSIGNMENT);
+    void named_port_connection(IASTNode p, Token endToken) throws ParserException {
+        ASTNode node = new ASTNode(p, ASTNAMED_PORT_CONNECTION);
         openNodeScope(node);
         closeNodeScope(node);
     }
 
     /**
-     * net_declaration ::= net_type [ <b>vectored</b> | <b>scalared</b> ] [ range ] [ delay3 ] list_of_net_identifiers ; <br>
-     *                 | <b>trireg</b> [ <b>vectored</b> | <b>scalared</b> ] <br>
-     *                     [ charge_strength ] [ range ] [ delay3 ] list_of_net_identifiers ; <br>
-     *                 | net_type [ <b>vectored</b> | <b>scalared</b> ] <br>
-     *                     [drive_strength] [range] [delay3] list_of_net_decl_assignments ; 
+     * net_declaration <br>
+     *     ::= <NETTYPE> <expandrange>? <delay>? <list_of_variables> ; <br>
+     *     ||= <b>trireg</b> <charge_strength>? <expandrange>? <delay>? 
      */
     void net_declaration(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTNET_DECLARATION);
@@ -1159,36 +1036,9 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * net_decl_assignment ::= net _identifier = expression 
-     */
-    void net_decl_assignment(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTNET_DECL_ASSIGNMENT);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
-
-    /**
-     * net_lvalue ::= net _identifier | net _identifier [ expression ] <br>
-     *             | net _identifier [ msb _constant_expression : lsb _constant_expression ] <br>
-     *             | net _concatenation 
-     */
-    void net_lvalue(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTNET_LVALUE);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
-
-    /**
-     * net_type ::= <b>wire</b> | <b>tri</b> | <b>tri1</b> | <b>supply0</b> | <b>wand</b> | <b>triand</b> | <b>tri0</b> | <b>supply1</b> | <b>wor</b> | <b>trior</b> 
-     */
-    void net_type(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTNET_TYPE);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
-
-    /**
-     * next_state ::= output_symbol | - 
+     * next_state <br>
+     *     ::= <OUTPUT_SYMBOL> <br>
+     *     ||= - (This is a literal hyphen, see Chapter 5 <b>for</b> details). 
      */
     void next_state(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTNEXT_STATE);
@@ -1197,7 +1047,9 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * non-blocking assignment ::= reg_lvalue <= [ delay_or_event_control ] expression 
+     * non_blocking_assignment <br>
+     *     ::= <lvalue> <= <expression> <br>
+     *     ||= <lvalue> = <delay_or_event_control> <expression> ; 
      */
     void non_blocking_assignment(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTNON_BLOCKING_ASSIGNMENT);
@@ -1206,7 +1058,8 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * notify_register ::= register _identifier 
+     * notify_register <br>
+     *     ::= <identifier> 
      */
     void notify_register(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTNOTIFY_REGISTER);
@@ -1215,88 +1068,37 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * number ::= decimal_number | octal_number | binary_number | hex_number | real_number 
+     * NULL <br>
+     *     ::= nothing - this form covers the <b>case</b> of an empty item in a list - <b>for</b> example: <br>
+     *           (a, b, , d) 
      */
-//    void number(IASTNode p, Token endToken) throws ParserException {
-//        ASTNode node = new ASTNode(p, ASTNUMBER);
-//        openNodeScope(node);
-//        closeNodeScope(node);
-//    }
-
-    /**
-     * n_input_gatetype ::= <b>and</b> | <b>nand</b> | <b>or</b> | <b>nor</b> | <b>xor</b> | <b>xnor</b> 
-     */
-    void n_input_gatetype(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTN_INPUT_GATETYPE);
+    void NULL(IASTNode p, Token endToken) throws ParserException {
+        ASTNode node = new ASTNode(p, ASTNULL);
         openNodeScope(node);
         closeNodeScope(node);
     }
 
     /**
-     * n_input_gate_instance ::= [ name_of_gate_instance ] ( output_terminal , input_terminal { , input_terminal } ) 
+     * number <br>
+     *     ::= <decimal_number> <br>
+     *     ||= <unsigned_number>? <BASE> <unsigned_number> <br>
+     *     ||= <decimal_number>.<unsigned_number> <br>
+     *     ||= <decimal_number><.<unsigned_number>>? <br>
+     *         E<decimal_number> <br>
+     *     ||= <decimal_number><.<unsigned_number>>? <br>
+     *         e<decimal_number> <br>
+     *     (Note: embedded spaces are illegal in Verilog numbers, but embedded underscore <br>
+     *     characters can be used <b>for</b> spacing in any type of number.) 
      */
-    void n_input_gate_instance(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTN_INPUT_GATE_INSTANCE);
+    void number(IASTNode p, Token endToken) throws ParserException {
+        ASTNode node = new ASTNode(p, ASTNUMBER);
         openNodeScope(node);
         closeNodeScope(node);
     }
 
     /**
-     * n_output_gatetype ::= <b>buf</b> | <b>not</b> 
-     */
-    void n_output_gatetype(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTN_OUTPUT_GATETYPE);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
-
-    /**
-     * n_output_gate_instance ::= [ name_of_gate_instance ] ( output_terminal { , output_terminal } , input_terminal ) 
-     */
-    void n_output_gate_instance(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTN_OUTPUT_GATE_INSTANCE);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
-
-    /**
-     * octal_base ::= ¡¯o | ¡¯O 
-     */
-//    void octal_base(IASTNode p, Token endToken) throws ParserException {
-//        ASTNode node = new ASTNode(p, ASTOCTAL_BASE);
-//        openNodeScope(node);
-//        closeNodeScope(node);
-//    }
-
-    /**
-     * octal_digit ::= x | X | z | Z | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 
-     */
-//    void octal_digit(IASTNode p, Token endToken) throws ParserException {
-//        ASTNode node = new ASTNode(p, ASTOCTAL_DIGIT);
-//        openNodeScope(node);
-//        closeNodeScope(node);
-//    }
-
-    /**
-     * octal_number ::= [ size ] octal_base octal_digit { _ | octal_digit} 
-     */
-//    void octal_number(IASTNode p, Token endToken) throws ParserException {
-//        ASTNode node = new ASTNode(p, ASTOCTAL_NUMBER);
-//        openNodeScope(node);
-//        closeNodeScope(node);
-//    }
-
-    /**
-     * ordered_port_connection ::= [ expression ] 
-     */
-    void ordered_port_connection(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTORDERED_PORT_CONNECTION);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
-
-    /**
-     * output_declaration ::= <b>output</b> [ range ] list_of_port_identifiers ; 
+     * output_declaration <br>
+     *     ::= <b>output</b> <range>? <list_of_variables> ; 
      */
     void output_declaration(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTOUTPUT_DECLARATION);
@@ -1305,7 +1107,8 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * output_identifier ::= output_port _identifier | inout_port _identifier 
+     * output_identifier <br>
+     *     ::= the <IDENTIFIER> of a <b>module</b> <b>output</b> <b>or</b> <b>inout</b> terminal. 
      */
     void output_identifier(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTOUTPUT_IDENTIFIER);
@@ -1314,82 +1117,19 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * output_symbol ::= 0 | 1 | x | X 
+     * output_terminal_name <br>
+     *     ::= <name_of_variable> 
      */
-    void output_symbol(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTOUTPUT_SYMBOL);
+    void output_terminal_name(IASTNode p, Token endToken) throws ParserException {
+        ASTNode node = new ASTNode(p, ASTOUTPUT_TERMINAL_NAME);
         openNodeScope(node);
         closeNodeScope(node);
     }
 
     /**
-     * output_terminal ::= terminal _identifier | terminal _identifier [ constant_expression ] 
-     */
-    void output_terminal(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTOUTPUT_TERMINAL);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
-
-    /**
-     * parallel_edge_sensitive_path_description ::= ( [ edge_identifier ] specify_input_terminal_descriptor => <br>
-     *                                         specify_output_terminal_descriptor <br>
-     *                                         [ polarity_operator ] : data_source_expression ) ) 
-     */
-    void parallel_edge_sensitive_path_description(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTPARALLEL_EDGE_SENSITIVE_PATH_DESCRIPTION);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
-
-    /**
-     * parallel_path_description ::= ( specify_input_terminal_descriptor <br>
-     *                             [ polarity_operator ] => specify_output_terminal_descriptor ) 
-     */
-    void parallel_path_description(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTPARALLEL_PATH_DESCRIPTION);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
-
-    /**
-     * parameter_declaration ::= <b>parameter</b> list_of_param_assignments ; 
-     */
-    void parameter_declaration(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTPARAMETER_DECLARATION);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
-
-    /**
-     * parameter_override ::= <b>defparam</b> list_of_param_assignments ; 
-     */
-    void parameter_override(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTPARAMETER_OVERRIDE);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
-
-    /**
-     * parameter_value_assignment ::= # ( expression { , expression } ) 
-     */
-    void parameter_value_assignment(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTPARAMETER_VALUE_ASSIGNMENT);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
-
-    /**
-     * param_assignment ::= <b>parameter</b> _identifier = constant_expression 
-     */
-    void param_assignment(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTPARAM_ASSIGNMENT);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
-
-    /**
-     * par_block ::= <b>fork</b> [ : block _identifier { block_item_declaration } ] { statement } <b>join</b> 
+     * par_block <br>
+     *     ::= <b>fork</b> <statement>* <b>join</b> <br>
+     *     ||= <b>fork</b> : <name_of_block> <block_declaration>* <statement>* <b>join</b> 
      */
     void par_block(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTPAR_BLOCK);
@@ -1398,44 +1138,48 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * pass_enable_switch_instance ::= [ name_of_gate_instance ] ( inout_terminal , inout_terminal , enable_terminal ) 
+     * param_assignment <br>
+     *     ::=<identifier> = <constant_expression> 
      */
-    void pass_enable_switch_instance(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTPASS_ENABLE_SWITCH_INSTANCE);
+    void param_assignment(IASTNode p, Token endToken) throws ParserException {
+        ASTNode node = new ASTNode(p, ASTPARAM_ASSIGNMENT);
         openNodeScope(node);
         closeNodeScope(node);
     }
 
     /**
-     * pass_en_switchtype ::= <b>tranif0</b> | <b>tranif1</b> | <b>rtranif1</b> | <b>rtranif0</b> 
+     * parameter_declaration <br>
+     *     ::= <b>parameter</b> <list_of_param_assignments> ; 
      */
-    void pass_en_switchtype(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTPASS_EN_SWITCHTYPE);
+    void parameter_declaration(IASTNode p, Token endToken) throws ParserException {
+        ASTNode node = new ASTNode(p, ASTPARAMETER_DECLARATION);
         openNodeScope(node);
         closeNodeScope(node);
     }
 
     /**
-     * pass_switchtype ::= <b>tran</b> | <b>rtran</b> 
+     * parameter_override <br>
+     *     ::= <b>defparam</b> <list_of_param_assignments> ; 
      */
-    void pass_switchtype(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTPASS_SWITCHTYPE);
+    void parameter_override(IASTNode p, Token endToken) throws ParserException {
+        ASTNode node = new ASTNode(p, ASTPARAMETER_OVERRIDE);
         openNodeScope(node);
         closeNodeScope(node);
     }
 
     /**
-     * pass_switch_instance ::= [ name_of_gate_instance ] ( inout_terminal , inout_terminal ) 
+     * parameter_value_assignment <br>
+     *     ::= # ( <expression> <,<expression>>* ) 
      */
-    void pass_switch_instance(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTPASS_SWITCH_INSTANCE);
+    void parameter_value_assignment(IASTNode p, Token endToken) throws ParserException {
+        ASTNode node = new ASTNode(p, ASTPARAMETER_VALUE_ASSIGNMENT);
         openNodeScope(node);
         closeNodeScope(node);
     }
 
     /**
-     * path_declaration ::= simple_path_declaration ; <br>
-     *                     | edge_sensitive_path_declaration ; | state-dependent_path_declaration ; 
+     * path_declaration <br>
+     *     ::= <path_description> = <path_delay_value> ; 
      */
     void path_declaration(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTPATH_DECLARATION);
@@ -1444,7 +1188,8 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * path_delay_expression ::= constant_mintypmax_expression 
+     * path_delay_expression <br>
+     *     ::= <mintypmax_expression> 
      */
     void path_delay_expression(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTPATH_DELAY_EXPRESSION);
@@ -1453,7 +1198,20 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * path_delay_value ::= list_of_path_delay_expressions | ( list_of_path_delay_expressions ) 
+     * path_delay_value <br>
+     *     ::= <path_delay_expression> <br>
+     *     ||= ( <path_delay_expression>, <path_delay_expression> ) <br>
+     *     ||= ( <path_delay_expression>, <path_delay_expression>, <br>
+     *         <path_delay_expression>) <br>
+     *     ||= ( <path_delay_expression>, <path_delay_expression>, <br>
+     *         <path_delay_expression>, <path_delay_expression>, <br>
+     *         <path_delay_expression>, <path_delay_expression> ) <br>
+     *     ||= ( <path_delay_expression>, <path_delay_expression>, <br>
+     *         <path_delay_expression>, <path_delay_expression>, <br>
+     *         <path_delay_expression>, <path_delay_expression>, <br>
+     *         <path_delay_expression>, <path_delay_expression>, <br>
+     *         <path_delay_expression>, <path_delay_expression>, <br>
+     *         <path_delay_expression>, <path_delay_expression> ) 
      */
     void path_delay_value(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTPATH_DELAY_VALUE);
@@ -1462,16 +1220,20 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * pcontrol_terminal ::= scalar _expression 
+     * path_description <br>
+     *     ::= ( <specify_input_terminal_descriptor> => <specify_output_terminal_descriptor> ) <br>
+     *     ||= ( <list_of_path_inputs> *> <list_of_path_outputs> ) 
      */
-    void pcontrol_terminal(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTPCONTROL_TERMINAL);
+    void path_description(IASTNode p, Token endToken) throws ParserException {
+        ASTNode node = new ASTNode(p, ASTPATH_DESCRIPTION);
         openNodeScope(node);
         closeNodeScope(node);
     }
 
     /**
-     * polarity_operator ::= + | - 
+     * polarity_operator <br>
+     *     ::= + <br>
+     *     ||= - 
      */
     void polarity_operator(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTPOLARITY_OPERATOR);
@@ -1480,7 +1242,9 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * port ::= [ port_expression ] | . port _identifier ( [ port_expression ] ) 
+     * port <br>
+     *     ::= <port_expression>? <br>
+     *     ||= . <name_of_port> ( <port_expression>? ) 
      */
     void port(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTPORT);
@@ -1489,7 +1253,9 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * port_expression ::= port_reference | { port_reference { , port_reference } } 
+     * port_expression <br>
+     *     ::= <port_reference> <br>
+     *     ||= { <port_reference> <,<port_reference>>* } 
      */
     void port_expression(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTPORT_EXPRESSION);
@@ -1498,9 +1264,10 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * port_reference ::= port _identifier <br>
-     *                 | port _identifier [ constant_expression ] <br>
-     *                 | port _identifier [ msb _constant_expression : lsb _constant_expression ] 
+     * port_reference <br>
+     *     ::= <name_of_variable> <br>
+     *     ||= <name_of_variable> [ <constant_expression> ] <br>
+     *     ||= <name_of_variable> [ <constant_expression> :<constant_expression> ] 
      */
     void port_reference(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTPORT_REFERENCE);
@@ -1509,10 +1276,15 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * primary ::= number | identifier | identifier [ expression ] <br>
-     *         | identifier [ msb _constant_expression : lsb _constant_expression ] <br>
-     *         | concatenation | multiple_concatenation | function_call <br>
-     *         | ( mintypmax_expression ) 
+     * primary <br>
+     *     ::= <number> <br>
+     *     ||= <identifier> <br>
+     *     ||= <identifier> [ <expression> ] <br>
+     *     ||= <identifier> [ <constant_expression> : <constant_expression> ] <br>
+     *     ||= <concatenation> <br>
+     *     ||= <multiple_concatenation> <br>
+     *     ||= <function_call> <br>
+     *     ||= ( <mintypmax_expression> ) 
      */
     void primary(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTPRIMARY);
@@ -1521,68 +1293,8 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * procedural_continuous_assignment ::= <b>assign</b> reg_assignment ; <br>
-     *                                     | <b>deassign</b> reg_lvalue ; | <b>force</b> reg_assignment ; <br>
-     *                                     | <b>force</b> net_assignment ; | <b>release</b> reg_lvalue ; <br>
-     *                                     | <b>release</b> net_lvalue ; 
-     */
-    void procedural_continuous_assignment(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTPROCEDURAL_CONTINUOUS_ASSIGNMENT);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
-
-    /**
-     * procedural_timing_control_statement ::= delay_or_event_control statement_or_null 
-     */
-    void procedural_timing_control_statement(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTPROCEDURAL_TIMING_CONTROL_STATEMENT);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
-
-    /**
-     * pulldown_strength ::= ( strength0 , strength1 ) <br>
-     *                     | ( strength1 , strength0 ) | ( strength0 ) 
-     */
-    void pulldown_strength(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTPULLDOWN_STRENGTH);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
-
-    /**
-     * pullup_strength ::= ( strength0 , strength1 ) <br>
-     *                 | ( strength1 , strength0 ) | ( strength1 ) 
-     */
-    void pullup_strength(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTPULLUP_STRENGTH);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
-
-    /**
-     * pull_gate_instance ::= [ name_of_gate_instance ] ( output_terminal ) 
-     */
-    void pull_gate_instance(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTPULL_GATE_INSTANCE);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
-
-    /**
-     * pulse_control_specparam ::= PATHPULSE$ = ( reject _limit_value [ , error _limit_value ] ) ; <br>
-     *                 | PATHPULSE$ specify_input_terminal_descriptor $ specify_output_terminal_descriptor <br>
-     *                     = ( reject _limit_value [ , error _limit_value ] ) ; 
-     */
-    void pulse_control_specparam(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTPULSE_CONTROL_SPECPARAM);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
-
-    /**
-     * range ::= [ msb _constant_expression : lsb _constant_expression ] 
+     * range <br>
+     *     ::= [ <constant_expression> : <constant_expression> ] 
      */
     void range(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTRANGE);
@@ -1591,7 +1303,10 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * range_or_type ::= range | <b>integer</b> | real | realtime | <b>time</b> 
+     * range_or_type <br>
+     *     ::= <range> <br>
+     *     ||= <b>integer</b> <br>
+     *     ||= real 
      */
     void range_or_type(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTRANGE_OR_TYPE);
@@ -1600,16 +1315,8 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * realtime_declaration ::= realtime list_of_real_identifiers ; 
-     */
-    void realtime_declaration(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTREALTIME_DECLARATION);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
-
-    /**
-     * real_declaration ::= real list_of_real_identifiers ; 
+     * real_declaration <br>
+     *     ::= real <list_of_variables> ; 
      */
     void real_declaration(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTREAL_DECLARATION);
@@ -1618,38 +1325,8 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * real_number ::= [ sign ] unsigned_number . unsigned_number <br>
-     *             | [ sign ] unsigned_number [ . unsigned_number] e [ sign ] unsigned_number <br>
-     *             | [ sign ] unsigned_number [ . unsigned_number] e [ sign ] unsigned_number 
-     */
-//    void real_number(IASTNode p, Token endToken) throws ParserException {
-//        ASTNode node = new ASTNode(p, ASTREAL_NUMBER);
-//        openNodeScope(node);
-//        closeNodeScope(node);
-//    }
-
-    /**
-     * register_name ::= register _identifier <br>
-     *                 | memory _identifier [ upper_limit _constant_expression : <br>
-     *                     lower_limit _constant_expression ] 
-     */
-    void register_name(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTREGISTER_NAME);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
-
-    /**
-     * reg_assignment ::= reg_lvalue = expression 
-     */
-    void reg_assignment(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTREG_ASSIGNMENT);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
-
-    /**
-     * reg_declaration ::= <b>reg</b> [ range ] list_of_register_identifiers ; 
+     * reg_declaration <br>
+     *     ::= <b>reg</b> <range>? <list_of_register_variables> ; 
      */
     void reg_declaration(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTREG_DECLARATION);
@@ -1658,18 +1335,28 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * reg_lvalue ::= <b>reg</b> _identifier | <b>reg</b> _identifier [ expression ] <br>
-     *             | <b>reg</b> _identifier [ msb _constant_expression : lsb _constant_expression ] <br>
-     *             | <b>reg</b> _concatenation 
+     * register_variable <br>
+     *     ::= <name_of_register> <br>
+     *     ||= <name_of_memory> [ <constant_expression> : <constant_expression> ] 
      */
-    void reg_lvalue(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTREG_LVALUE);
+    void register_variable(IASTNode p, Token endToken) throws ParserException {
+        ASTNode node = new ASTNode(p, ASTREGISTER_VARIABLE);
         openNodeScope(node);
         closeNodeScope(node);
     }
 
     /**
-     * scalar_constant ::= 1¡¯b0 | 1¡¯b1 | 1¡¯B0 | 1¡¯B1 | ¡¯b0 | ¡¯b1 | ¡¯B0 | ¡¯B1 | 1 | 0 
+     * scalar_constant <br>
+     *     ::= 1'b0 <br>
+     *     ||= 1'b1 <br>
+     *     ||= 1'B0 <br>
+     *     ||= 1'B1 <br>
+     *     ||= 'b0 <br>
+     *     ||= 'b1 <br>
+     *     ||= 'B0 <br>
+     *     ||= 'B1 <br>
+     *     ||= 1 <br>
+     *     ||= 0 
      */
     void scalar_constant(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTSCALAR_CONSTANT);
@@ -1678,11 +1365,34 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * scalar_timing_check_condition ::= expression <br>
-     *                             | ~ expression | expression == scalar_constant <br>
-     *                             | expression === scalar_constant <br>
-     *                             | expression != scalar_constant <br>
-     *                             | expression !== scalar_constant 
+     * scalar_event_expression <br>
+     *     Scalar <b>event</b> expression is an expression that resolves to a one bit value. <br>
+     * </PRE> 
+     */
+    void scalar_event_expression(IASTNode p, Token endToken) throws ParserException {
+        ASTNode node = new ASTNode(p, ASTSCALAR_EVENT_EXPRESSION);
+        openNodeScope(node);
+        closeNodeScope(node);
+    }
+
+    /**
+     * scalar_expression <br>
+     *     A scalar expression is a one bit net <b>or</b> a bit-select of an expanded vector net. 
+     */
+    void scalar_expression(IASTNode p, Token endToken) throws ParserException {
+        ASTNode node = new ASTNode(p, ASTSCALAR_EXPRESSION);
+        openNodeScope(node);
+        closeNodeScope(node);
+    }
+
+    /**
+     * scalar_timing_check_condition <br>
+     *     ::= <scalar_expression> <br>
+     *     ||= ~<scalar_expression> <br>
+     *     ||= <scalar_expression> == <scalar_constant> <br>
+     *     ||= <scalar_expression> === <scalar_constant> <br>
+     *     ||= <scalar_expression> != <scalar_constant> <br>
+     *     ||= <scalar_expression> !== <scalar_constant> 
      */
     void scalar_timing_check_condition(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTSCALAR_TIMING_CHECK_CONDITION);
@@ -1691,28 +1401,30 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * sequential_body ::= [ udp_initial_statement ] <br>
-     *                 <b>table</b> sequential_entry { sequential_entry } <b>endtable</b> 
+     * sdpd <br>
+     *     ::=if(<sdpd_conditional_expression>)<path_description>=<path_delay_value>; 
      */
-    void sequential_body(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTSEQUENTIAL_BODY);
+    void sdpd(IASTNode p, Token endToken) throws ParserException {
+        ASTNode node = new ASTNode(p, ASTSDPD);
         openNodeScope(node);
         closeNodeScope(node);
     }
 
     /**
-     * sequential_entry ::= seq_input_list : current_state : next_state ; 
+     * sdpd_conditional_expresssion <br>
+     *     ::=<expression><BINARY_OPERATOR><expression> <br>
+     *     ||=<UNARY_OPERATOR><expression> 
      */
-    void sequential_entry(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTSEQUENTIAL_ENTRY);
+    void sdpd_conditional_expresssion(IASTNode p, Token endToken) throws ParserException {
+        ASTNode node = new ASTNode(p, ASTSDPD_CONDITIONAL_EXPRESSSION);
         openNodeScope(node);
         closeNodeScope(node);
     }
 
     /**
-     * seq_block ::= <b>begin</b> [ : block _identifier <br>
-     *                 { block_item_declaration } ] { statement } <br>
-     *               <b>end</b> 
+     * seq_block <br>
+     *     ::= <b>begin</b> <statement>* <b>end</b> <br>
+     *     ||= <b>begin</b> : <name_of_block> <block_declaration>* <statement>* <b>end</b> 
      */
     void seq_block(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTSEQ_BLOCK);
@@ -1721,53 +1433,18 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * seq_input_list ::= level_input_list | edge_input_list 
+     * sequential_entry <br>
+     *     ::= <input_list> : <state> : <next_state> ; 
      */
-    void seq_input_list(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTSEQ_INPUT_LIST);
+    void sequential_entry(IASTNode p, Token endToken) throws ParserException {
+        ASTNode node = new ASTNode(p, ASTSEQUENTIAL_ENTRY);
         openNodeScope(node);
         closeNodeScope(node);
     }
 
     /**
-     * sign ::= + | - 
-     */
-    void sign(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTSIGN);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
-
-    /**
-     * simple_identifier ::= [ a-zA-Z_ ][ a-zA-Z_$0-9 ] 
-     */
-    void simple_identifier(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTSIMPLE_IDENTIFIER);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
-
-    /**
-     * simple_path_declaration ::= parallel_path_description = path_delay_value <br>
-     *                         | full_path_description = path_delay_value 
-     */
-    void simple_path_declaration(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTSIMPLE_PATH_DECLARATION);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
-
-    /**
-     * size ::= unsigned_number 
-     */
-    void size(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTSIZE);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
-
-    /**
-     * source_text ::= { description } 
+     * source_text <br>
+     *     ::= <description>* 
      */
     void source_text(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTSOURCE_TEXT);
@@ -1776,7 +1453,8 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * specify_block ::= <b>specify</b> [ specify_item ] <b>endspecify</b> 
+     * specify_block <br>
+     *     ::= <b>specify</b> <specify_item>* <b>endspecify</b> 
      */
     void specify_block(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTSPECIFY_BLOCK);
@@ -1785,9 +1463,10 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * specify_input_terminal_descriptor ::= input_identifier <br>
-     *                             | input_identifier [ constant_expression ] <br>
-     *                             | input_identifier [ msb _constant_expression : lsb _constant_expression ] 
+     * specify_input_terminal_descriptor <br>
+     *     ::= <input_identifier> <br>
+     *     ||= <input_identifier> [ <constant_expression> ] <br>
+     *     ||= <input_identifier> [ <constant_expression> : <constant_expression> ] 
      */
     void specify_input_terminal_descriptor(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTSPECIFY_INPUT_TERMINAL_DESCRIPTOR);
@@ -1796,7 +1475,13 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * specify_item ::= specparam_declaration | path_declaration | system_timing_check 
+     * specify_item <br>
+     *     ::= <specparam_declaration> <br>
+     *     ||= <path_declaration> <br>
+     *     ||= <level_sensitive_path_declaration> <br>
+     *     ||= <edge_sensitive_path_declaration> <br>
+     *     ||= <system_timing_check> <br>
+     *     ||= <sdpd> 
      */
     void specify_item(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTSPECIFY_ITEM);
@@ -1805,9 +1490,10 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * specify_output_terminal_descriptor ::= output_identifier <br>
-     *                             | output_identifier [ constant_expression ] <br>
-     *                             | output_identifier [ msb _constant_expression : lsb _constant_expression ] 
+     * specify_output_terminal_descriptor <br>
+     *     ::= <output_identifier> <br>
+     *     ||= <output_identifier> [ <constant_expression> ] <br>
+     *     ||= <output_identifier> [ <constant_expression> : <constant_expression> ] 
      */
     void specify_output_terminal_descriptor(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTSPECIFY_OUTPUT_TERMINAL_DESCRIPTOR);
@@ -1816,8 +1502,9 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * specify_terminal_descriptor ::= specify_input_terminal_descriptor <br>
-     *                             | specify_output_terminal_descriptor 
+     * specify_terminal_descriptor <br>
+     *     ::= <specify_input_terminal_descriptor> <br>
+     *     ||=<specify_output_terminal_descriptor> 
      */
     void specify_terminal_descriptor(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTSPECIFY_TERMINAL_DESCRIPTOR);
@@ -1826,16 +1513,8 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * specparam_assignment ::= <b>specparam</b> _identifier = constant_expression | pulse_control_specparam 
-     */
-    void specparam_assignment(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTSPECPARAM_ASSIGNMENT);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
-
-    /**
-     * specparam_declaration ::= <b>specparam</b> list_of_specparam_assignments ; 
+     * specparam_declaration <br>
+     *     ::= <b>specparam</b> <list_of_param_assignments> ; 
      */
     void specparam_declaration(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTSPECPARAM_DECLARATION);
@@ -1844,12 +1523,41 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * statement ::= blocking_assignment ; | non_blocking assignment ; <br>
-     *             | procedural_continuous_assignments ; <br>
-     *             | procedural_timing_control_statement | conditional_statement <br>
-     *             | case_statement | loop_statement | wait_statement <br>
-     *             | disable_statement | event_trigger | seq_block | par_block <br>
-     *             | task_enable | system_task_enable 
+     * state <br>
+     *     ::= <LEVEL_SYMBOL> 
+     */
+    void state(IASTNode p, Token endToken) throws ParserException {
+        ASTNode node = new ASTNode(p, ASTSTATE);
+        openNodeScope(node);
+        closeNodeScope(node);
+    }
+
+    /**
+     * statement <br>
+     *     ::=<blocking_assignment> ; <br>
+     *     ||= <non_blocking_assignment> ; <br>
+     *     ||= <b>if</b> ( <expression> ) <statement_or_null> <br>
+     *     ||= <b>if</b> ( <expression> ) <statement_or_null> <b>else</b> <statement_or_null> <br>
+     *     ||= <b>case</b> ( <expression> ) <case_item>+ <b>endcase</b> <br>
+     *     ||= <b>casez</b> ( <expression> ) <case_item>+ <b>endcase</b> <br>
+     *     ||= <b>casex</b> ( <expression> ) <case_item>+ <b>endcase</b> <br>
+     *     ||= <b>forever</b> <statement> <br>
+     *     ||= <b>repeat</b> ( <expression> ) <statement> <br>
+     *     ||= <b>while</b> ( <expression> ) <statement> <br>
+     *     ||= <b>for</b> ( <assignment> ; <expression> ; <assignment> ) <statement> <br>
+     *     ||= <delay_or_event_control> <statement_or_null> <br>
+     *     ||= <b>wait</b> ( <expression> ) <statement_or_null> <br>
+     *     ||= -> <name_of_event> ; <br>
+     *     ||= <seq_block> <br>
+     *     ||= <par_block> <br>
+     *     ||= <task_enable> <br>
+     *     ||= <system_task_enable> <br>
+     *     ||= <b>disable</b> <name_of_task> ; <br>
+     *     ||= <b>disable</b> <name_of_block> ; <br>
+     *     ||= <b>assign</b> <assignment> ; <br>
+     *     ||= <b>deassign</b> <lvalue> ; <br>
+     *     ||= <b>force</b> <assignment> ; <br>
+     *     ||= <b>release</b> <lvalue> ; 
      */
     void statement(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTSTATEMENT);
@@ -1858,7 +1566,9 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * statement_or_null ::= statement | ; 
+     * statement_or_null <br>
+     *     ::= <statement> <br>
+     *     ||= ; 
      */
     void statement_or_null(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTSTATEMENT_OR_NULL);
@@ -1867,36 +1577,7 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * state_dependent_path_declaration ::= <b>if</b> ( conditional_expression ) simple_path_declaration <br>
-     *                                     | <b>if</b> ( conditional_expression ) edge_sensitive_path_declaration <br>
-     *                                     | ifnone simple_path_declaration 
-     */
-    void state_dependent_path_declaration(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTSTATE_DEPENDENT_PATH_DECLARATION);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
-
-    /**
-     * strength0 ::= <b>supply0</b> | <b>strong0</b> | <b>pull0</b> | <b>weak0</b> 
-     */
-    void strength0(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTSTRENGTH0);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
-
-    /**
-     * strength1 ::= <b>supply1</b> | <b>strong1</b> | <b>pull1</b> | <b>weak1</b> 
-     */
-    void strength1(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTSTRENGTH1);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
-
-    /**
-     * string ::= " { Any_ASCII_Characters_except_new_line } " 
+     * string 
      */
     void string(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTSTRING);
@@ -1905,7 +1586,19 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * system_task_enable ::= system_task_name [ ( expression { , expression } ) ] ; 
+     * system_identifier <br>
+     *     An <IDENTIFIER> assigned to an existing system <b>task</b> <b>or</b> <b>function</b> 
+     */
+    void system_identifier(IASTNode p, Token endToken) throws ParserException {
+        ASTNode node = new ASTNode(p, ASTSYSTEM_IDENTIFIER);
+        openNodeScope(node);
+        closeNodeScope(node);
+    }
+
+    /**
+     * system_task_enable <br>
+     *     ::= <name_of_system_task> ; <br>
+     *     ||= <name_of_system_task> ( <expression> <,<expression>>* ) ; 
      */
     void system_task_enable(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTSYSTEM_TASK_ENABLE);
@@ -1914,30 +1607,25 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * system_task_name ::= $ identifier <br>
-     *             Note: The $ may <b>not</b> be followed by a space. 
-     */
-    void system_task_name(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTSYSTEM_TASK_NAME);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
-
-    /**
-     * system_timing_check ::= $setup ( timing_check_event , timing_check_event , <br>
-     *                         timing_check_limit [ , notify_register ] ) ; <br>
-     *                     | $hold ( timing_check_event , timing_check_event , <br>
-     *                         timing_check_limit [ , notify_register ] ) ; <br>
-     *                     | $period ( controlled_timing_check_event , timing_check_limit <br>
-     *                         [ , notify_register ] ) ; <br>
-     *                     | $width ( controlled_timing_check_event , timing_check_limit , <br>
-     *                         constant_expression [ , notify_register ] ) ; <br>
-     *                     | $skew ( timing_check_event , timing_check_event , <br>
-     *                         timing_check_limit [ , notify_register ] ) ; <br>
-     *                     | $recovery ( controlled_timing_check_event , timing_check_event , <br>
-     *                         timing_check_limit [ , notify_register ] ) ; <br>
-     *                     | $setuphold ( timing_check_event , timing_check_event , <br>
-     *                         timing_check_limit , timing_check_limit [ , notify_register ] ) ; 
+     * system_timing_check <br>
+     *     ::= $setup( <timing_check_event>, <timing_check_event>, <br>
+     *         <timing_check_limit> <br>
+     *         <,<notify_register>>? ) ; <br>
+     *     ||= $hold( <timing_check_event>, <timing_check_event>, <br>
+     *         <timing_check_limit> <br>
+     *         <,<notify_register>>? ) ; <br>
+     *     ||= $period( <controlled_timing_check_event>, <timing_check_limit> <br>
+     *         <,<notify_register>>? ) ; <br>
+     *     ||= $width( <controlled_timing_check_event>, <timing_check_limit> <br>
+     *         <,<constant_expression>,<notify_register>>? ) ; <br>
+     *     ||= $skew( <timing_check_event>, <timing_check_event>, <br>
+     *         <timing_check_limit> <br>
+     *         <,<notify_register>>? ) ; <br>
+     *     ||= $recovery( <controlled_timing_check_event>, <br>
+     *         <timing_check_event>, <br>
+     *         <timing_check_limit> <,<notify_register>>? ) ; <br>
+     *     ||= $setuphold( <timing_check_event>, <timing_check_event>, <br>
+     *         <timing_check_limit>, <timing_check_limit> <,<notify_register>>? ) ; 
      */
     void system_timing_check(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTSYSTEM_TIMING_CHECK);
@@ -1946,28 +1634,43 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * task_argument_declaration ::= block_item_declaration | output_declaration | inout_declaration 
+     * table_definition <br>
+     *     ::= <b>table</b> <table_entries> <b>endtable</b> 
      */
-    void task_argument_declaration(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTTASK_ARGUMENT_DECLARATION);
+    void table_definition(IASTNode p, Token endToken) throws ParserException {
+        ASTNode node = new ASTNode(p, ASTTABLE_DEFINITION);
         openNodeScope(node);
         closeNodeScope(node);
     }
 
     /**
-     * task_declaration ::= <b>task</b> <b>task</b> _identifier ; {task_item_declaration} statement_or_null <b>endtask</b> 
+     * table_entries <br>
+     *     ::= <combinational_entry>+ <br>
+     *     ||= <sequential_entry>+ 
      */
-    void task_declaration(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTTASK_DECLARATION);
+    void table_entries(IASTNode p, Token endToken) throws ParserException {
+        ASTNode node = new ASTNode(p, ASTTABLE_ENTRIES);
         openNodeScope(node);
-        consumeToken(TASK);
-        Token tmpToken = findToken(SEMICOLON, endToken);
-        identifier(node, tmpToken);
         closeNodeScope(node);
     }
 
     /**
-     * task_enable ::= <b>task</b> _identifier [ ( expression { , expression } ) ] ; 
+     * <b>task</b> <br>
+     *     ::= <b>task</b> <name_of_task> ; <br>
+     *         <tf_declaration>* <br>
+     *         <statement_or_null> <br>
+     *         <b>endtask</b> 
+     */
+    void task(IASTNode p, Token endToken) throws ParserException {
+        ASTNode node = new ASTNode(p, ASTTASK);
+        openNodeScope(node);
+        closeNodeScope(node);
+    }
+
+    /**
+     * task_enable <br>
+     *     ::= <name_of_task> <br>
+     *     ||= <name_of_task> ( <expression> <,<expression>>* ) ; 
      */
     void task_enable(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTTASK_ENABLE);
@@ -1976,7 +1679,36 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * time_declaration ::= <b>time</b> list_of_register_identifiers ; 
+     * terminal <br>
+     *     ::= <expression> <br>
+     *     ||= <IDENTIFIER> 
+     */
+    void terminal(IASTNode p, Token endToken) throws ParserException {
+        ASTNode node = new ASTNode(p, ASTTERMINAL);
+        openNodeScope(node);
+        closeNodeScope(node);
+    }
+
+    /**
+     * tf_declaration <br>
+     *     ::= <parameter_declaration> <br>
+     *     ||= <input_declaration> <br>
+     *     ||= <output_declaration> <br>
+     *     ||= <inout_declaration> <br>
+     *     ||= <reg_declaration> <br>
+     *     ||= <time_declaration> <br>
+     *     ||= <integer_declaration> <br>
+     *     ||= <real_declaration> 
+     */
+    void tf_declaration(IASTNode p, Token endToken) throws ParserException {
+        ASTNode node = new ASTNode(p, ASTTF_DECLARATION);
+        openNodeScope(node);
+        closeNodeScope(node);
+    }
+
+    /**
+     * time_declaration <br>
+     *     ::= <b>time</b> <list_of_register_variables> ; 
      */
     void time_declaration(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTTIME_DECLARATION);
@@ -1985,7 +1717,9 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * timing_check_condition ::= scalar_timing_check_condition | ( scalar_timing_check_condition ) 
+     * timing_check_condition <br>
+     *     ::= <scalar_timing_check_condition> <br>
+     *     ||= ( <scalar_timing_check_condition> ) 
      */
     void timing_check_condition(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTTIMING_CHECK_CONDITION);
@@ -1994,8 +1728,9 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * timing_check_event ::= [ timing_check_event_control ] <br>
-     *                     specify_terminal_descriptor [ &&& timing_check_condition ] 
+     * timing_check_event <br>
+     *     ::= <timing_check_event_control>? <specify_terminal_descriptor> <br>
+     *         <&&& <timing_check_condition>>? 
      */
     void timing_check_event(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTTIMING_CHECK_EVENT);
@@ -2004,7 +1739,10 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * timing_check_event_control ::= <b>posedge</b> | <b>negedge</b> | edge_control_specifier 
+     * timing_check_event_control <br>
+     *     ::= <b>posedge</b> <br>
+     *     ||= <b>negedge</b> <br>
+     *     ||= <edge_control_specifier> 
      */
     void timing_check_event_control(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTTIMING_CHECK_EVENT_CONTROL);
@@ -2013,7 +1751,8 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * timing_check_limit ::= expression 
+     * timing_check_limit <br>
+     *     ::= <expression> 
      */
     void timing_check_limit(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTTIMING_CHECK_LIMIT);
@@ -2022,18 +1761,25 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * udp_body ::= combinational_body | sequential_body 
+     * udp <br>
+     *     ::= <b>primitive</b> <name_of_udp> ( <name_of_variable> <br>
+     *         <,<name_of_variable>>* ) ; <br>
+     *         <udp_declaration>+ <br>
+     *         <udp_initial_statement>? <br>
+     *         <table_definition> <br>
+     *         <b>endprimitive</b> 
      */
-    void udp_body(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTUDP_BODY);
+    void udp(IASTNode p, Token endToken) throws ParserException {
+        ASTNode node = new ASTNode(p, ASTUDP);
         openNodeScope(node);
         closeNodeScope(node);
     }
 
     /**
-     * udp_declaration ::= <b>primitive</b> udp _identifier ( udp_port_list ) ; <br>
-     *                 udp_port_declaration { udp_port_declaration } udp_body <br>
-     *                 <b>endprimitive</b> 
+     * udp_declaration <br>
+     *     ::= <output_declaration> <br>
+     *     ||= <reg_declaration> <br>
+     *     ||= <input_declaration> 
      */
     void udp_declaration(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTUDP_DECLARATION);
@@ -2042,7 +1788,8 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * udp_initial_statement ::= <b>initial</b> udp_output_port _identifier = init_val ; 
+     * udp_initial_statement <br>
+     *     ::= <b>initial</b> <output_terminal_name> = <init_val> ; 
      */
     void udp_initial_statement(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTUDP_INITIAL_STATEMENT);
@@ -2051,8 +1798,8 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * udp_instance ::= [ name_of_udp_instance ] <br>
-     *             ( output_port_connection , input_port_connection { , input_port_connection } ) 
+     * udp_instance <br>
+     *     ::= <name_of_udp_instance>? ( <terminal> <,<terminal>>* ) 
      */
     void udp_instance(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTUDP_INSTANCE);
@@ -2061,7 +1808,9 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * udp_instantiation ::= udp _identifier [ drive_strength ] [ delay2 ] udp_instance { , udp_instance } ; 
+     * udp_instantiation <br>
+     *     ::= <name_of_udp> <drive_strength>? <delay>? <br>
+     *     <udp_instance> <,<udp_instance>>* ; 
      */
     void udp_instantiation(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTUDP_INSTANTIATION);
@@ -2070,55 +1819,12 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * udp_port_declaration ::= output_declaration | input_declaration | reg_declaration 
-     */
-    void udp_port_declaration(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTUDP_PORT_DECLARATION);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
-
-    /**
-     * udp_port_list ::= output_port _identifier , input_port _identifier { , input_port _identifier } 
-     */
-    void udp_port_list(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTUDP_PORT_LIST);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
-
-    /**
-     * unary_operator ::= + | - | ! | ~ | & | ~& | | | ~| | ^ | ~^ | ^~ 
-     */
-    void unary_operator(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTUNARY_OPERATOR);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
-
-    /**
-     * unsigned_number ::= decimal_digit { _ | decimal_digit } 
+     * unsigned_number <br>
+     *     ::= A number containing a set of any of the following characters: <br>
+     *             0123456789_ 
      */
     void unsigned_number(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTUNSIGNED_NUMBER);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
-
-    /**
-     * wait_statement ::= <b>wait</b> ( expression ) statement_or_null 
-     */
-    void wait_statement(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTWAIT_STATEMENT);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
-
-    /**
-     * white_space ::= space | tab | newline 
-     */
-    void white_space(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTWHITE_SPACE);
         openNodeScope(node);
         closeNodeScope(node);
     }
