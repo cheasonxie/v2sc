@@ -117,7 +117,7 @@ public class VerilogTokenManager extends TokenManager implements VerilogTokenCon
         super(stream, parseSymbol);
     }
     
-    public static final String specialChar = "&()*+,-./:;<>=|[]!$%@?~^{}";
+    public static final String specialChar = "&()*+,-./:;<>=|[]!%@?~^{}#";
     static final char singleQuote = '\'';
     static final char doubleQuote = '\"';
     static final char backSlash = '\\';

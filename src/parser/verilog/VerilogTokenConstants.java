@@ -163,6 +163,7 @@ public interface VerilogTokenConstants
     static final int LBRACKET      = 146;   // [
     static final int RBRACKET      = 147;   // ]
     static final int POINT         = 148;   // .
+    static final int EQ            = 149;   // =
     
     static final int string_lexical = 201;
     static final int number_lexical = 202;
@@ -322,5 +323,6 @@ public interface VerilogTokenConstants
         "[",
         "]",
         ".",
+        "=",
     };
 }

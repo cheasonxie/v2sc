@@ -81,51 +81,115 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
     
     /**
+     * check whether specified token is behind base token
+     */
+    boolean checkLateComming(Token token, Token base) throws ParserException {
+        if(base == null) { return false; }
+        if(token == null) { return true; }
+        if(token.beginLine > base.beginLine 
+            || (token.beginLine == base.beginLine
+                && token.beginColumn > base.beginColumn)) {
+            return true;
+        }else {
+            return false;
+        }
+    }
+    
+    /**
+     * find token in block between "from" and "to" (including "from", but not "to")
+     * before call this function, you must in one block(after keyword token)
+     */
+    Token findTokenInBlock(Token from, int kind, Token to) throws ParserException {
+        //TODO: add here
+        return null;
+    }
+    
+    /**
+     * find token in block between current token and "to" (not including and "to")
+     * <br> ignore blocks in this bolck
+     * <br>before call this function, you must in one block(after keyword token)
+     */
+    Token findTokenInBlock(int kind, Token to) throws ParserException {
+        return findTokenInBlock(tokenMgr.getNextToken(), kind, to);
+    }
+    
+    /**
+     * find token in block between "from" token and "to" (including "from", but not "to")
+     * no ignore
+     */
+    Token findToken(Token from, int kind, Token to) throws ParserException {
+        Token token = from;
+        Token ret = null;
+        while(token != null)
+        {
+            if(checkLateComming(token, to) || token == to) {
+                break;
+            } else if(token.kind == kind) {
+                ret = token;
+                break;
+            }
+            
+            token = tokenMgr.getNextToken(token);
+        }
+        return ret;
+    }
+    
+    /**
+     * find token in block between current token and "to" (not including and "to")
+     * no ignore
+     */
+    Token findToken(int kind, Token to) throws ParserException {
+        return findToken(tokenMgr.getNextToken(), kind, to);
+    }
+    
+    /**
      * always_construct ::= <b>always</b> statement 
      */
     void always_construct(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTALWAYS_CONSTRUCT);
         openNodeScope(node);
+        consumeToken(ALWAYS);
+        statement(node, endToken);
         closeNodeScope(node);
     }
 
     /**
      * binary_base ::= ¡¯b | ¡¯B 
      */
-    void binary_base(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTBINARY_BASE);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
+//    void binary_base(IASTNode p, Token endToken) throws ParserException {
+//        ASTNode node = new ASTNode(p, ASTBINARY_BASE);
+//        openNodeScope(node);
+//        closeNodeScope(node);
+//    }
 
     /**
      * binary_digit ::= x | X | z | Z | 0 | 1 
      */
-    void binary_digit(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTBINARY_DIGIT);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
+//    void binary_digit(IASTNode p, Token endToken) throws ParserException {
+//        ASTNode node = new ASTNode(p, ASTBINARY_DIGIT);
+//        openNodeScope(node);
+//        closeNodeScope(node);
+//    }
 
     /**
      * binary_number ::= [ size ] binary_base binary_digit { _ | binary_digit } 
      */
-    void binary_number(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTBINARY_NUMBER);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
+//    void binary_number(IASTNode p, Token endToken) throws ParserException {
+//        ASTNode node = new ASTNode(p, ASTBINARY_NUMBER);
+//        openNodeScope(node);
+//        closeNodeScope(node);
+//    }
 
     /**
      * binary_operator ::= <br>
      *         + | - | * | / | % | == | != | === | !== | && | || <br>
      *         | < | <= | > | >= | & | | | ^ | ^~ | ~^ | >> | << 
      */
-    void binary_operator(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTBINARY_OPERATOR);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
+//    void binary_operator(IASTNode p, Token endToken) throws ParserException {
+//        ASTNode node = new ASTNode(p, ASTBINARY_OPERATOR);
+//        openNodeScope(node);
+//        closeNodeScope(node);
+//    }
 
     /**
      * blocking assignment ::= reg_lvalue = [ delay_or_event_control ] expression 
@@ -133,6 +197,8 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     void blocking_assignment(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTBLOCKING_ASSIGNMENT);
         openNodeScope(node);
+        Token tmpToken = findToken(EQ, endToken);
+        reg_lvalue(node, tmpToken);
         closeNodeScope(node);
     }
 
@@ -324,11 +390,11 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
      * decimal_number ::= [ sign ] unsigned_number <br>
      *                 | [ size ] decimal_base unsigned_number 
      */
-    void decimal_number(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTDECIMAL_NUMBER);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
+//    void decimal_number(IASTNode p, Token endToken) throws ParserException {
+//        ASTNode node = new ASTNode(p, ASTDECIMAL_NUMBER);
+//        openNodeScope(node);
+//        closeNodeScope(node);
+//    }
 
     /**
      * delay2 ::= # delay_value | # ( delay_value [ , delay_value ] ) 
@@ -634,30 +700,30 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     /**
      * hex_base ::= ¡¯h | ¡¯H 
      */
-    void hex_base(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTHEX_BASE);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
+//    void hex_base(IASTNode p, Token endToken) throws ParserException {
+//        ASTNode node = new ASTNode(p, ASTHEX_BASE);
+//        openNodeScope(node);
+//        closeNodeScope(node);
+//    }
 
     /**
      * hex_digit ::= x | X | z | Z | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 <br>
      *             | a | b | c | d | e | f | A | B | C | D | E | F 
      */
-    void hex_digit(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTHEX_DIGIT);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
+//    void hex_digit(IASTNode p, Token endToken) throws ParserException {
+//        ASTNode node = new ASTNode(p, ASTHEX_DIGIT);
+//        openNodeScope(node);
+//        closeNodeScope(node);
+//    }
 
     /**
      * hex_number ::= [ size ] hex_base hex_digit { _ | hex_digit } 
      */
-    void hex_number(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTHEX_NUMBER);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
+//    void hex_number(IASTNode p, Token endToken) throws ParserException {
+//        ASTNode node = new ASTNode(p, ASTHEX_NUMBER);
+//        openNodeScope(node);
+//        closeNodeScope(node);
+//    }
 
     /**
      * identifier ::= IDENTIFIER [ { . IDENTIFIER } ] <br>
@@ -672,11 +738,11 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     /**
      * IDENTIFIER ::= simple_identifier | escaped_identifier 
      */
-    void IDENTIFIER(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTIDENTIFIER);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
+//    void IDENTIFIER(IASTNode p, Token endToken) throws ParserException {
+//        ASTNode node = new ASTNode(p, ASTIDENTIFIER);
+//        openNodeScope(node);
+//        closeNodeScope(node);
+//    }
 
     /**
      * initial_construct ::= <b>initial</b> statement 
@@ -1151,11 +1217,11 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     /**
      * number ::= decimal_number | octal_number | binary_number | hex_number | real_number 
      */
-    void number(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTNUMBER);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
+//    void number(IASTNode p, Token endToken) throws ParserException {
+//        ASTNode node = new ASTNode(p, ASTNUMBER);
+//        openNodeScope(node);
+//        closeNodeScope(node);
+//    }
 
     /**
      * n_input_gatetype ::= <b>and</b> | <b>nand</b> | <b>or</b> | <b>nor</b> | <b>xor</b> | <b>xnor</b> 
@@ -1196,29 +1262,29 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     /**
      * octal_base ::= ¡¯o | ¡¯O 
      */
-    void octal_base(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTOCTAL_BASE);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
+//    void octal_base(IASTNode p, Token endToken) throws ParserException {
+//        ASTNode node = new ASTNode(p, ASTOCTAL_BASE);
+//        openNodeScope(node);
+//        closeNodeScope(node);
+//    }
 
     /**
      * octal_digit ::= x | X | z | Z | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 
      */
-    void octal_digit(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTOCTAL_DIGIT);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
+//    void octal_digit(IASTNode p, Token endToken) throws ParserException {
+//        ASTNode node = new ASTNode(p, ASTOCTAL_DIGIT);
+//        openNodeScope(node);
+//        closeNodeScope(node);
+//    }
 
     /**
      * octal_number ::= [ size ] octal_base octal_digit { _ | octal_digit} 
      */
-    void octal_number(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTOCTAL_NUMBER);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
+//    void octal_number(IASTNode p, Token endToken) throws ParserException {
+//        ASTNode node = new ASTNode(p, ASTOCTAL_NUMBER);
+//        openNodeScope(node);
+//        closeNodeScope(node);
+//    }
 
     /**
      * ordered_port_connection ::= [ expression ] 
@@ -1556,11 +1622,11 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
      *             | [ sign ] unsigned_number [ . unsigned_number] e [ sign ] unsigned_number <br>
      *             | [ sign ] unsigned_number [ . unsigned_number] e [ sign ] unsigned_number 
      */
-    void real_number(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTREAL_NUMBER);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
+//    void real_number(IASTNode p, Token endToken) throws ParserException {
+//        ASTNode node = new ASTNode(p, ASTREAL_NUMBER);
+//        openNodeScope(node);
+//        closeNodeScope(node);
+//    }
 
     /**
      * register_name ::= register _identifier <br>
@@ -1894,6 +1960,9 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     void task_declaration(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTTASK_DECLARATION);
         openNodeScope(node);
+        consumeToken(TASK);
+        Token tmpToken = findToken(SEMICOLON, endToken);
+        identifier(node, tmpToken);
         closeNodeScope(node);
     }
 
