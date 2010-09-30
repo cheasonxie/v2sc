@@ -132,8 +132,8 @@ public class extratVerilog {
                 
                 str += "    /**\r\n";
                 for(int j = 0; j < astArray.get(i).content.size(); j++) {
-                    String tmp = lowerName(astArray, astArray.get(i).content.get(j));
-                    str += "     * " + addBold(tmp);
+                    String tmp = addBold(astArray.get(i).content.get(j));
+                    str += "     * " + lowerName(astArray, tmp);
                     if(j < astArray.get(i).content.size() - 1)
                         str += "<br>";
                     str += "\r\n";
@@ -290,6 +290,10 @@ public class extratVerilog {
         "wor",
         "xnor",
         "xor",
+        "{",
+        "}",
+        "[",
+        "]",
     };
     
     
@@ -303,7 +307,7 @@ public class extratVerilog {
          *     ::= &lt;<A href="#REF3">module</A>&gt;
          *     ||= &lt;<A href="#REF12">UDP</A>&gt;
          */
-        String validLine = "<A name=\"REF[a-zA-Z0-9</>_= \"]+<A href=\"#REF[a-zA-Z0-9&;.</>_= \"]+";
+        String validLine = "<A name=\"REF[a-zA-Z0-9</>_= \"]+<A href=\"#REF[a-zA-Z0-9&;.:</>_= \"]+";
         
         String str = "<A name=\"REF1\"></A><B><A href=\"#REF1\">&lt;source_text&gt;</A></B>";
         if(str.matches(validLine))
@@ -368,22 +372,96 @@ public class extratVerilog {
         return ret;
     }
     
+    /*
+     * Definition of Items in Formal Syntax Specifications:
++-----------------------+------------------------------------------------------------+
+|      Item            |               Meaning                                     |
++-----------------------+------------------------------------------------------------+
+| White space           | may be used to separate lexical tokens                     |
++-----------------------+------------------------------------------------------------+
+| Angle brackets        | surround each description item and are not literal sym-    |
+|                       | bols. That is, they do not appear in the source descrip-   |
+|                       | tion. Any text outside angle brackets is literal.          |
++-----------------------+------------------------------------------------------------+
+| <name> in lower case  | is a syntax construct item                                 |
++-----------------------+------------------------------------------------------------+
+| <NAME> in upper case  | is a lexical token item. Its definition is a terminal node |
+|                       | in the description hierarchy -- that is, its definition    |
+|                       | does not contain any syntax construct items                |
++-----------------------+------------------------------------------------------------+
+| <name>?               | is an optional item                                        |
++-----------------------+------------------------------------------------------------+
+| <name>*               | is zero, one, or more items                                |
++-----------------------+------------------------------------------------------------+
+| <name>+               | is one or more items                                       |
++-----------------------+------------------------------------------------------------+
+| <name><,<name>>*      | is a comma-separated list of items with at least one       |
+|                       | item in the list                                           |
++-----------------------+------------------------------------------------------------+
+| <name>::=             | gives a syntax definition to an item                       |
++-----------------------+------------------------------------------------------------+
+| ||=                   | introduces an alternative syntax definition                |
++-----------------------+------------------------------------------------------------+
+     */
     static String lowerName(ArrayList<AstNode> astArray, String str)
     {
         String ret = str;
+        String oldStr = str;
         str = str.toUpperCase();
+        int index;
         for(int i = 0; i < astArray.size(); i++) {
-            if(!astArray.get(i).name.equalsIgnoreCase("identifier")
-                    && !astArray.get(i).name.equalsIgnoreCase("null"))
-            {
-                String tmp = "<" + astArray.get(i).name.toUpperCase() + ">";
-                String tmp1 = "<" + astArray.get(i).name.toLowerCase() + ">";
-                int index = str.indexOf(tmp);
-                if(index >= 0) {
-                    String tmp2 = ret.substring(index, index+tmp.length());
-                    ret = ret.replaceAll(tmp2, tmp1);
+                String tmp = "";
+                String tmp1 = "", tmp2;
+                if(!astArray.get(i).name.equalsIgnoreCase("identifier")
+                        && !astArray.get(i).name.equalsIgnoreCase("null")) {
+                    tmp = "<" + astArray.get(i).name.toUpperCase() + ">";
+                    tmp1 = " " + astArray.get(i).name.toLowerCase() + " ";
+                } else {
+                    tmp = "<" + astArray.get(i).name + ">";
+                    tmp1 = " " + astArray.get(i).name + " ";
                 }
-            }
+                
+                String tmp_q = tmp + "?";
+                String tmp_q1 = "[" + tmp1 + "]";
+                
+                String tmp_m = tmp + "*";
+                String tmp_m1 = "{" + tmp1 + "}";
+                
+                String tmp_a = tmp + "+";
+                String tmp_a1 = "{" + tmp1 + "}+";
+                
+                String tmp_aa = "<," + tmp + ">*";
+                String tmp_aa1 = "{," + tmp1 + "}";
+                
+                index = str.indexOf(tmp_aa);
+                if(index >= 0) {
+                    tmp2 = oldStr.substring(index, index+tmp_aa.length());
+                    ret = ret.replace(tmp2, tmp_aa1);
+                }
+                
+                index = str.indexOf(tmp_a);
+                if(index >= 0) {
+                    tmp2 = oldStr.substring(index, index+tmp_a.length());
+                    ret = ret.replace(tmp2, tmp_a1);
+                }
+                
+                index = str.indexOf(tmp_m);
+                if(index >= 0) {
+                    tmp2 = oldStr.substring(index, index+tmp_m.length());
+                    ret = ret.replace(tmp2, tmp_m1);
+                }
+                
+                index = str.indexOf(tmp_q);
+                if(index >= 0) {
+                    tmp2 = oldStr.substring(index, index+tmp_q.length());
+                    ret = ret.replace(tmp2, tmp_q1);
+                }
+                
+                index = str.indexOf(tmp);
+                if(index >= 0) {
+                    tmp2 = oldStr.substring(index, index+tmp.length());
+                    ret = ret.replace(tmp2, tmp1);
+                }
         }
         return ret;
     }
