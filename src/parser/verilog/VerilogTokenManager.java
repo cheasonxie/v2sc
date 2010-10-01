@@ -278,13 +278,19 @@ public class VerilogTokenManager extends TokenManager implements VerilogTokenCon
             // allow continuous specialChar
             if(!first && specialChar.indexOf(c) >= 0 && specialChar.indexOf(lastChar) >= 0)
             {
+                // &&&
                 // ===, !==
                 // >=, <=, ==, !=
                 // ~&, && 
                 // ~|, ||
                 // ^~, ~^
                 // <<, >>
-                if((column < max-2) && (c == '=') && (strLine.charAt(column+1) == '=') 
+                if((column < max-2) && (c == '&') && (strLine.charAt(column+1) == '&')
+                    && (lastChar == '&')) {
+                    ret += c;
+                    ret += strLine.charAt(column+1);
+                    column += 2;
+                }else if((column < max-2) && (c == '=') && (strLine.charAt(column+1) == '=') 
                                   && ((lastChar == '!') || (lastChar == '='))) {
                     ret += c;
                     ret += strLine.charAt(column+1);

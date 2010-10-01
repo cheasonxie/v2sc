@@ -128,19 +128,19 @@ public interface VerilogTokenConstants
     static final int LOGIC_NEQ     = 115;   // !=
     static final int CASE_EQ       = 116;   // ===
     static final int CASE_NEQ      = 117;   // !==
-    static final int BIT_NEQ       = 118;   // ~
+    static final int BIT_NEG       = 118;   // ~
     static final int BIT_AND       = 119;   // &
     static final int BIT_OR        = 120;   // |
     static final int BIT_XOR       = 121;   // ^
     static final int BIT_XORN      = 122;   // ^~
     static final int BIT_NXOR      = 123;   // ~^
-    static final int REDUCE_AND    = 124;   // &
+    //static final int REDUCE_AND    = 124;   // &(!!NOT USED!!)
     static final int REDUCE_NAND   = 125;   // ~&
-    static final int REDUCE_OR     = 126;   // |
+    //static final int REDUCE_OR     = 126;   // |(!!NOT USED!!)
     static final int REDUCE_NOR    = 127;   // ~|
-    static final int REDUCE_XOR    = 128;   // ^
-    static final int REDUCE_NXOR   = 129;   // ~^
-    static final int REDUCE_XORN   = 130;   // ^~
+    //static final int REDUCE_XOR    = 128;   // ^(!!NOT USED!!)
+    //static final int REDUCE_NXOR   = 129;   // ~^(!!NOT USED!!)
+    //static final int REDUCE_XORN   = 130;   // ^~(!!NOT USED!!)
     static final int SHIFT_LEFT    = 131;   // <<
     static final int SHIFT_RIGHT   = 132;   // >>
     static final int QUESTION      = 133;   // ?
@@ -157,13 +157,30 @@ public interface VerilogTokenConstants
     static final int ACCENT_GRAVE  = 140;   // `
     static final int AT            = 141;   // @
     static final int DOLLAR        = 142;   // $
-    static final int WELL          = 143;   // #
+    static final int PARA          = 143;   // #
     static final int LPARENTHES    = 144;   // (
     static final int RPARENTHES    = 145;   // )
-    static final int LBRACKET      = 146;   // [
-    static final int RBRACKET      = 147;   // ]
+    static final int LSQUARE_BRACKET  = 146;   // [
+    static final int RSQUARE_BRACKET  = 147;   // ]
     static final int POINT         = 148;   // .
     static final int EQ            = 149;   // =
+    
+    static final int TRI_AND       = 150;   // &&&
+    static final int REAL          = 151;   // real
+    
+    // edge
+    //    01 transition from 0 to 1
+    //    0x transition from 0 to x
+    //    10 transition from 1 to 0
+    //    1x transition from 1 to x
+    //    x0 transition from x to 0
+    //    x1 transition from x to 1
+    static final int EDGE_01 = 152;
+    static final int EDGE_0x = 153;
+    static final int EDGE_10 = 154;
+    static final int EDGE_1x = 155;
+    static final int EDGE_x0 = 156;
+    static final int EDGE_x1 = 157;
     
     static final int string_lexical = 201;
     static final int number_lexical = 202;
@@ -324,5 +341,14 @@ public interface VerilogTokenConstants
         "]",
         ".",
         "=",
+        "&&&",
+        "real",
+        
+        "01",
+        "0x",
+        "10",
+        "1x",
+        "x0",
+        "x1",
     };
 }

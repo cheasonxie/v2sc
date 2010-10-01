@@ -156,6 +156,7 @@ public interface VerilogASTConstants
     static final int ASTUDP_INSTANTIATION = 151;
     static final int ASTUNARY_OPERATOR = 152;
     static final int ASTUNSIGNED_NUMBER = 153;
+    static final int ASTVERILOG_TOKEN = 154;
 
     static final String[] ASTNodeName =
     {
@@ -313,5 +314,6 @@ public interface VerilogASTConstants
         "udp_instantiation",
         "unary_operator",
         "unsigned_number",
+        "verilog_token",
     };
 }

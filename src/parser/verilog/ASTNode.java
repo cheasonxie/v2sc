@@ -160,3 +160,20 @@ public class ASTNode implements IASTNode
         return (other == this);
     }
 }
+
+class ASTtoken extends ASTNode
+{
+    String image = "";
+    public ASTtoken(IASTNode p, String image) {
+        super(p, VerilogASTConstants.ASTVERILOG_TOKEN);
+        this.image = image;
+    }
+    
+    public String toString() {
+        return image;
+    }
+    public String firstTokenImage() {
+        return image;
+    }
+}
+

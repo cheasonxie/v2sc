@@ -80,6 +80,82 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
         throw new ParserException(oldToken);
     }
     
+    boolean is_unary_operator() throws ParserException {
+        int kind = tokenMgr.getNextTokenKind();
+        if(kind == ADD || kind == SUB || kind == LOGIC_NEG || kind == BIT_NEG
+                || kind == BIT_AND || kind == BIT_OR || kind == BIT_XOR
+                || kind == BIT_XORN || kind == BIT_NXOR || kind == REDUCE_NAND
+                || kind == REDUCE_NOR) {
+            return true;
+        }
+        return false;
+    }
+    
+    boolean is_binary_operator() throws ParserException {
+        int kind = tokenMgr.getNextTokenKind();
+        if(kind == ADD || kind == SUB || kind == MUL || kind == DIV
+                || kind == MOD || kind == LOGIC_EQ || kind == LOGIC_NEQ
+                || kind == CASE_EQ || kind == CASE_NEQ || kind == LOGIC_AND
+                || kind == LOGIC_OR || kind == LO || kind == LE || kind == GT
+                || kind == GE || kind == BIT_AND || kind == BIT_OR || kind == BIT_XOR
+                || kind == BIT_XORN || kind == BIT_NXOR || kind == SHIFT_LEFT
+                || kind == SHIFT_RIGHT) {
+            return true;
+        }
+        return false;
+    }
+    
+    Token find_binary_operator(Token endToken) throws ParserException {
+        final int[] kinds = {ADD, SUB, MUL, DIV, MOD, LOGIC_EQ, LOGIC_NEQ,
+                CASE_EQ, CASE_NEQ, LOGIC_AND, LOGIC_OR, LO, LE, GT, GE,
+                BIT_AND, BIT_OR, BIT_XOR, BIT_XORN, BIT_NXOR, SHIFT_LEFT,
+                SHIFT_RIGHT};
+        Token ret = null;
+        for(int i = 0; i < kinds.length; i++) {
+            if((ret = findTokenInBlock(kinds[i], endToken)) != null) {
+                break;
+            }
+        }
+        return ret;
+    }
+    
+    boolean is_strength0() throws ParserException {
+        int kind = tokenMgr.getNextTokenKind();
+        if(kind == SUPPLY0 || kind == STRONG0 || kind == PULL0 || kind == WEAK0
+                || kind == HIGHZ0) {
+            return true;
+        }
+        return false;
+    }
+    
+    boolean is_strength1() throws ParserException {
+        int kind = tokenMgr.getNextTokenKind();
+        if(kind == SUPPLY1 || kind == STRONG1 || kind == PULL1 || kind == WEAK1
+                || kind == HIGHZ1) {
+            return true;
+        }
+        return false;
+    }
+    
+    boolean is_range_or_type() throws ParserException {
+        int kind = tokenMgr.getNextTokenKind();
+        range(null, null);
+        if(kind == LSQUARE_BRACKET || kind == INTEGER || kind == REAL) {
+            return true;
+        }
+        return false;
+    }
+    
+    boolean is_tf_declaration() throws ParserException {
+        int kind = tokenMgr.getNextTokenKind();
+        range(null, null);
+        if(kind == INTEGER || kind == REAL || kind == PARAMETER || kind == INPUT
+                || kind == OUTPUT || kind == INOUT || kind == REG 
+                || kind == TIME) {
+            return true;
+        }
+        return false;
+    }    
     /**
      * check whether specified token is behind base token
      */
@@ -100,8 +176,100 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
      * before call this function, you must in one block(after keyword token)
      */
     Token findTokenInBlock(Token from, int kind, Token to) throws ParserException {
-        //TODO: add here
-        return null;
+        Token token = from;
+        Token ret = null;
+        
+        while(token != null)
+        {
+            if(checkLateComming(token, to) || token == to) {
+                break;
+            }
+            if(token != from && from.beginLine > token.beginLine) {
+                break;
+            }
+            if(token.kind == kind) {
+                ret = token;
+                break;
+            }
+            
+            Token nextToken = tokenMgr.getNextToken(token);
+            if(nextToken == null) {
+                break;
+            }
+            
+            Token tmp1 = null;
+            switch(token.kind)
+            {
+            case LSQUARE_BRACKET:
+                tmp1 = findTokenInBlock(nextToken, RSQUARE_BRACKET, to);
+                nextToken = tokenMgr.getNextToken(tmp1); // ignore block
+                break;
+                
+            case LBRACE:
+                tmp1 = findTokenInBlock(nextToken, RBRACE, to);
+                nextToken = tokenMgr.getNextToken(tmp1); // ignore block
+                break;
+                
+            case LPARENTHES:
+                tmp1 = findTokenInBlock(nextToken, RPARENTHES, to);
+                nextToken = tokenMgr.getNextToken(tmp1); // ignore block
+                break;
+                
+            case MODULE:
+            case MACROMODULE:
+                tmp1 = findTokenInBlock(nextToken, ENDMODULE, to);
+                nextToken = tokenMgr.getNextToken(tmp1); // ignore block
+                break;
+                
+            case PRIMITIVE:
+                tmp1 = findTokenInBlock(nextToken, ENDPRIMITIVE, to);
+                nextToken = tokenMgr.getNextToken(tmp1); // ignore block
+                break;
+                
+            case TABLE:
+                tmp1 = findTokenInBlock(nextToken, ENDTABLE, to);
+                nextToken = tokenMgr.getNextToken(tmp1); // ignore block
+                break;
+                
+            case TASK:
+                tmp1 = findTokenInBlock(nextToken, ENDTASK, to);
+                nextToken = tokenMgr.getNextToken(tmp1); // ignore block
+                break;
+                
+            case FUNCTION:
+                tmp1 = findTokenInBlock(nextToken, ENDFUNCTION, to);
+                nextToken = tokenMgr.getNextToken(tmp1); // ignore block
+                break;
+                
+            case CASE:
+            case CASEX:
+            case CASEZ:
+                tmp1 = findTokenInBlock(nextToken, ENDCASE, to);
+                nextToken = tokenMgr.getNextToken(tmp1); // ignore block
+                break;
+                
+            case BEGIN:
+                tmp1 = findTokenInBlock(nextToken, END, to);
+                nextToken = tokenMgr.getNextToken(tmp1); // ignore block
+                break;
+                
+            case FORK:
+                tmp1 = findTokenInBlock(nextToken, JOIN, to);
+                nextToken = tokenMgr.getNextToken(tmp1); // ignore block
+                break;
+                
+            case SPECIFY:
+                tmp1 = findTokenInBlock(nextToken, ENDSPECIFY, to);
+                nextToken = tokenMgr.getNextToken(tmp1); // ignore block
+                break;
+                
+            default:
+                break;
+            }
+            token = nextToken;
+        }
+        
+        return ret;
     }
     
     /**
@@ -169,7 +337,7 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * base <br>
+     * base  is one of the following tokens: <br>
      *     'b 'B 'o 'O 'd 'D 'h 'H 
      */
 //    void base(IASTNode p, Token endToken) throws ParserException {
@@ -179,15 +347,16 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
 //    }
 
     /**
-     * binary_operator <br>
+     * binary_operator  is one of the following tokens: <br>
      *     + - * / % == != === !== && || < <= > >= & | ^ ^~ >> << 
      */
-//    void binary_operator(IASTNode p, Token endToken) throws ParserException {
-//        ASTNode node = new ASTNode(p, ASTBINARY_OPERATOR);
-//        openNodeScope(node);
-//        closeNodeScope(node);
-//    }
-
+    void binary_operator(IASTNode p, Token endToken) throws ParserException {
+        ASTNode node = new ASTNode(p, ASTBINARY_OPERATOR);
+        openNodeScope(node);
+        tokenMgr.toNextToken();
+        closeNodeScope(node);
+    }
+    
     /**
      * block_declaration <br>
      *     ::=  parameter_declaration  <br>
@@ -232,6 +401,18 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     void blocking_assignment(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTBLOCKING_ASSIGNMENT);
         openNodeScope(node);
+        Token tmpToken = findToken(EQ, endToken);
+        lvalue(node, tmpToken);
+        consumeToken(EQ);
+
+        tmpToken = findToken(SEMICOLON, endToken);
+        if(tmpToken != null) {
+            delay_or_event_control(node, tmpToken); //TODO: endToken ?
+            expression(node, endToken);
+            consumeToken(SEMICOLON);
+        }else {
+            expression(node, endToken);
+        }
         closeNodeScope(node);
     }
 
@@ -244,6 +425,29 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     void case_item(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTCASE_ITEM);
         openNodeScope(node);
+        if(tokenMgr.getNextTokenKind() == DEFAULT) {
+            new ASTtoken(node, tokenImage[DEFAULT]);
+            consumeToken(DEFAULT);
+            if(tokenMgr.getNextTokenKind(2) == COLON) {
+                new ASTtoken(node, tokenImage[COLON]);
+                consumeToken(COLON);
+            }
+            statement_or_null(node, endToken);
+        }else {
+            while(true) {
+                Token tmpToken = findTokenInBlock(COMMA, endToken);
+                if(tmpToken == null) {
+                    tmpToken = findTokenInBlock(COLON, endToken);
+                }
+                expression(node, tmpToken);
+                if(tokenMgr.getNextTokenKind() == COLON) {
+                    break;
+                }
+            }
+            new ASTtoken(node, tokenImage[COLON]);
+            consumeToken(COLON);
+            statement_or_null(node, endToken);
+        }
         closeNodeScope(node);
     }
 
@@ -256,6 +460,15 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     void charge_strength(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTCHARGE_STRENGTH);
         openNodeScope(node);
+        consumeToken(LPARENTHES);
+        Token token = tokenMgr.getNextToken();
+        if(token == null || !(token.kind == SMALL || token.kind == MEDIUM 
+                || token.kind == LARGE)) {
+            throw new ParserException(tokenMgr.getCurrentToken());
+        }
+        new ASTtoken(node, token.image);
+        consumeToken(token.kind);
+        consumeToken(RPARENTHES);
         closeNodeScope(node);
     }
 
@@ -266,6 +479,12 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     void combinational_entry(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTCOMBINATIONAL_ENTRY);
         openNodeScope(node);
+        Token tmpToken = findTokenInBlock(COLON, endToken);
+        level_input_list(node, tmpToken);
+        consumeToken(COLON);
+        endToken = findTokenInBlock(SEMICOLON, endToken);
+        output_symbol(node, endToken);
+        consumeToken(SEMICOLON);
         closeNodeScope(node);
     }
 
@@ -276,6 +495,20 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     void concatenation(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTCONCATENATION);
         openNodeScope(node);
+        consumeToken(LBRACE);
+        
+        endToken = findTokenInBlock(RBRACE, endToken);
+        while(true) {
+            Token tmpToken = findTokenInBlock(COMMA, endToken);
+            if(tmpToken == null)
+                tmpToken = endToken;
+            expression(node, tmpToken);
+            if(tokenMgr.getNextTokenKind() != COMMA) {
+                break;
+            }
+            consumeToken(COMMA);
+        }
+        consumeToken(RBRACE);
         closeNodeScope(node);
     }
 
@@ -288,6 +521,16 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     void conditional_port_expression(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTCONDITIONAL_PORT_EXPRESSION);
         openNodeScope(node);
+        if(is_unary_operator()) {
+            unary_operator(node, endToken);
+            port_reference(node, endToken);
+        }else {
+            port_reference(node, endToken);
+            if(is_binary_operator()) {
+                binary_operator(node, endToken);
+                port_reference(node, endToken);
+            }
+        }
         closeNodeScope(node);
     }
 
@@ -298,6 +541,7 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     void constant_expression(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTCONSTANT_EXPRESSION);
         openNodeScope(node);
+        expression(node, endToken);
         closeNodeScope(node);
     }
 
@@ -309,6 +553,37 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     void continuous_assign(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTCONTINUOUS_ASSIGN);
         openNodeScope(node);
+        Token tmpToken = null;
+        
+        if(tokenMgr.getNextTokenKind() == ASSIGN) {
+            new ASTtoken(node, tokenImage[ASSIGN]);
+            consumeToken(ASSIGN);
+            if(tokenMgr.getNextTokenKind() == LPARENTHES) {
+                tmpToken = findTokenInBlock(RPARENTHES, endToken);
+                drive_strength(node, tmpToken);
+            }
+            if(tokenMgr.getNextTokenKind() == PARA) {
+                delay(node, endToken);
+            }
+            list_of_assignments(node, endToken);
+            consumeToken(SEMICOLON);
+        }else {
+            nettype(node, endToken);
+            if(tokenMgr.getNextTokenKind() == LPARENTHES) {
+                tmpToken = findTokenInBlock(RPARENTHES, endToken);
+                drive_strength(node, tmpToken);
+            }
+            
+            int kind = tokenMgr.getNextTokenKind();
+            if(kind == SCALARED || kind == VECTORED || kind == LSQUARE_BRACKET) {
+                expandrange(node, endToken);
+            }
+            if(tokenMgr.getNextTokenKind() == PARA) {
+                delay(node, endToken);
+            }
+            list_of_assignments(node, endToken);
+            consumeToken(SEMICOLON);
+        }
         closeNodeScope(node);
     }
 
@@ -320,6 +595,11 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     void controlled_timing_check_event(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTCONTROLLED_TIMING_CHECK_EVENT);
         openNodeScope(node);
+        timing_check_event_control(node, endToken);
+        specify_terminal_descriptor(node, endToken);
+        if(tokenMgr.getNextTokenKind() == TRI_AND) {
+            timing_check_condition(node, endToken);
+        }
         closeNodeScope(node);
     }
 
@@ -332,6 +612,8 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     void data_source_expression(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTDATA_SOURCE_EXPRESSION);
         openNodeScope(node);
+        //TODO:add here
+        System.out.println("data_source_expression not finished");
         closeNodeScope(node);
     }
 
@@ -340,11 +622,11 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
      *     ::= A number containing a set of any of the following characters, optionally preceded by + <b>or</b> - <br>
      *          0123456789_ 
      */
-    void decimal_number(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTDECIMAL_NUMBER);
-        openNodeScope(node);
-        closeNodeScope(node);
-    }
+//    void decimal_number(IASTNode p, Token endToken) throws ParserException {
+//        ASTNode node = new ASTNode(p, ASTDECIMAL_NUMBER);
+//        openNodeScope(node);
+//        closeNodeScope(node);
+//    }
 
     /**
      * delay <br>
@@ -355,6 +637,21 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     void delay(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTDELAY);
         openNodeScope(node);
+        consumeToken(PARA);
+        if(tokenMgr.getNextTokenKind() == LPARENTHES) {
+            consumeToken(LPARENTHES);
+            Token tmpToken = findTokenInBlock(RPARENTHES, endToken);
+            mintypmax_expression(node, tmpToken);
+            if(tokenMgr.getNextTokenKind() == COMMA) {
+                mintypmax_expression(node, tmpToken);
+            }
+            if(tokenMgr.getNextTokenKind() == COMMA) {
+                mintypmax_expression(node, tmpToken);
+            }
+            consumeToken(RPARENTHES);
+        }else {
+            tokenMgr.toNextToken(); // number or IDENTIFIER
+        }
         closeNodeScope(node);
     }
 
@@ -367,6 +664,15 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     void delay_control(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTDELAY_CONTROL);
         openNodeScope(node);
+        consumeToken(PARA);
+        if(tokenMgr.getNextTokenKind() == LPARENTHES) {
+            consumeToken(LPARENTHES);
+            Token tmpToken = findTokenInBlock(RPARENTHES, endToken);
+            mintypmax_expression(node, tmpToken);
+            consumeToken(RPARENTHES);
+        }else {
+            tokenMgr.toNextToken(); // number or IDENTIFIER
+        }
         closeNodeScope(node);
     }
 
@@ -379,6 +685,20 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     void delay_or_event_control(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTDELAY_OR_EVENT_CONTROL);
         openNodeScope(node);
+        int kind = tokenMgr.getNextTokenKind();
+        if(kind == PARA) {
+            delay_control(node, endToken);
+        }else if(kind == REPEAT) {
+            new ASTtoken(node, tokenImage[REPEAT]);
+            consumeToken(REPEAT);
+            consumeToken(LPARENTHES);
+            Token tmpToken = findTokenInBlock(RPARENTHES, endToken);
+            expression(node, tmpToken);
+            consumeToken(RPARENTHES);
+            event_control(node, endToken);
+        }else {
+            event_control(node, endToken);
+        }
         closeNodeScope(node);
     }
 
@@ -390,6 +710,11 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     void description(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTDESCRIPTION);
         openNodeScope(node);
+        if(tokenMgr.getNextTokenKind() == PRIMITIVE) {
+            udp(node, endToken);
+        }else {
+            module(node, endToken);
+        }
         closeNodeScope(node);
     }
 
@@ -401,6 +726,17 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     void drive_strength(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTDRIVE_STRENGTH);
         openNodeScope(node);
+        consumeToken(LPARENTHES);
+        endToken = findTokenInBlock(RPARENTHES, endToken);
+        Token tmpToken = findTokenInBlock(COMMA, endToken);
+        if(is_strength0()) {
+            strength0(node, tmpToken);
+            strength1(node, endToken);
+        }else {
+            strength1(node, tmpToken);
+            strength0(node, endToken);
+        }
+        consumeToken(RPARENTHES);
         closeNodeScope(node);
     }
 
@@ -412,16 +748,39 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     void edge(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTEDGE);
         openNodeScope(node);
+        if(tokenMgr.getNextTokenKind() == LPARENTHES) {
+            consumeToken(LPARENTHES);
+            endToken = findTokenInBlock(RPARENTHES, endToken);
+            level_symbol(node, endToken);
+            level_symbol(node, endToken);
+            consumeToken(RPARENTHES);
+        }else {
+            edge_symbol(node, endToken);
+        }
         closeNodeScope(node);
     }
 
     /**
      * edge_control_specifier <br>
-     *     ::= <b>edge</b> <b>[</b>  edge_descriptor {, edge_descriptor }] 
+     *     ::= <b>edge</b> <b>[</b>  edge_descriptor {, edge_descriptor } <b>]</b> 
      */
     void edge_control_specifier(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTEDGE_CONTROL_SPECIFIER);
         openNodeScope(node);
+        consumeToken(EDGE);
+        consumeToken(LSQUARE_BRACKET);
+        endToken = findTokenInBlock(RSQUARE_BRACKET, endToken);
+        while(true) {
+            Token tmpToken = findTokenInBlock(COMMA, endToken);
+            if(tmpToken == null)
+                tmpToken = endToken;
+            edge_descriptor(node, tmpToken);
+            if(tokenMgr.getNextTokenKind() != COMMA) {
+                break;
+            }
+            consumeToken(COMMA);
+        }
+        consumeToken(RSQUARE_BRACKET);
         closeNodeScope(node);
     }
 
@@ -437,6 +796,7 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     void edge_descriptor(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTEDGE_DESCRIPTOR);
         openNodeScope(node);
+        tokenMgr.toNextToken();
         closeNodeScope(node);
     }
 
@@ -448,6 +808,7 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     void edge_identifier(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTEDGE_IDENTIFIER);
         openNodeScope(node);
+        tokenMgr.toNextToken();
         closeNodeScope(node);
     }
 
@@ -479,7 +840,7 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * edge_symbol <br>
+     * edge_symbol  is one of the following characters: <br>
      *     r R f F p P n N * 
      */
     void edge_symbol(IASTNode p, Token endToken) throws ParserException {
@@ -496,6 +857,16 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     void event_control(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTEVENT_CONTROL);
         openNodeScope(node);
+        consumeToken(AT);
+        if(tokenMgr.getNextTokenKind() == LPARENTHES) {
+            consumeToken(LPARENTHES);
+            endToken = findTokenInBlock(RPARENTHES, endToken);
+            event_expression(node, endToken);
+            consumeToken(RPARENTHES);
+        }else {
+            new ASTtoken(node, tokenMgr.getNextToken().image);  // IDENTIFIER
+            tokenMgr.toNextToken();
+        }
         closeNodeScope(node);
     }
 
@@ -506,6 +877,19 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     void event_declaration(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTEVENT_DECLARATION);
         openNodeScope(node);
+        consumeToken(EVENT);
+        endToken = findTokenInBlock(SEMICOLON, endToken);;
+        while(true) {
+            Token tmpToken = findTokenInBlock(COMMA, endToken);
+            if(tmpToken == null)
+                tmpToken = endToken;
+            name_of_event(node, tmpToken);
+            if(tokenMgr.getNextTokenKind() != COMMA) {
+                break;
+            }
+            consumeToken(COMMA);
+        }
+        consumeToken(SEMICOLON);
         closeNodeScope(node);
     }
 
@@ -519,6 +903,20 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     void event_expression(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTEVENT_EXPRESSION);
         openNodeScope(node);
+        int kind = tokenMgr.getNextTokenKind();
+        Token tmpToken = findTokenInBlock(OR, endToken);
+        if(tmpToken != null) {
+            event_expression(node, tmpToken);
+            new ASTtoken(node, tokenImage[OR]);
+            consumeToken(OR);
+            event_expression(node, endToken);
+        }else if(kind == POSEDGE || kind == NEGEDGE) {
+            new ASTtoken(node, tokenImage[kind]);
+            consumeToken(kind);
+            scalar_event_expression(node, endToken);
+        }else {
+            expression(node, endToken);
+        }
         closeNodeScope(node);
     }
 
@@ -531,6 +929,12 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     void expandrange(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTEXPANDRANGE);
         openNodeScope(node);
+        int kind = tokenMgr.getNextTokenKind();
+        if(kind == SCALARED || kind == VECTORED) {
+            new ASTtoken(node, tokenMgr.getNextToken().image);
+            consumeToken(kind);
+        }
+        range(node, endToken);
         closeNodeScope(node);
     }
 
@@ -539,12 +943,35 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
      *     ::=  primary  <br>
      *     ||=  unary_operator   primary  <br>
      *     ||=  expression   binary_operator   expression  <br>
-     *     ||=  expression  <QUESTION_MARK>  expression  :  expression  <br>
+     *     ||=  expression  ?  expression  :  expression  <br>
      *     ||=  string  
      */
     void expression(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTEXPRESSION);
         openNodeScope(node);
+        Token tmpToken = null;
+        if(is_unary_operator()) {
+            unary_operator(node, endToken);
+            primary(node, endToken);
+        }else if((tmpToken = findTokenInBlock(QUESTION, endToken)) != null) {
+            expression(node, tmpToken);
+            new ASTtoken(node, tokenImage[QUESTION]);
+            consumeToken(QUESTION);
+            tmpToken = findTokenInBlock(COLON, endToken);
+            expression(node, tmpToken);
+            new ASTtoken(node, tokenImage[COLON]);
+            consumeToken(COLON);
+            expression(node, endToken);
+        }else if((tmpToken = find_binary_operator(endToken)) != null) {
+            expression(node, tmpToken);
+            binary_operator(node, endToken);
+            expression(node, endToken);
+        }else if(tokenMgr.getNextTokenKind() == string_lexical) {
+            new ASTtoken(node, tokenMgr.getNextToken().image);
+            tokenMgr.toNextToken(); 
+        }else {
+            primary(node, endToken);
+        }
         closeNodeScope(node);
     }
 
@@ -558,6 +985,24 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     void function(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTFUNCTION);
         openNodeScope(node);
+        consumeToken(FUNCTION);        
+        endToken = findTokenInBlock(ENDFUNCTION, endToken);
+        
+        if(is_range_or_type()) {
+            range_or_type(node, endToken);
+        }
+        
+        Token tmpToken = findTokenInBlock(SEMICOLON, endToken);
+        name_of_function(node, tmpToken);
+        consumeToken(SEMICOLON);
+        while(is_tf_declaration()) {
+            tmpToken = findTokenInBlock(SEMICOLON, endToken);
+            tf_declaration(node, tmpToken);
+        }
+        
+        statement(node, endToken);
+        
+        consumeToken(ENDFUNCTION);
         closeNodeScope(node);
     }
 
@@ -594,7 +1039,7 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * gatetype <br>
+     * gatetype  is one of the following keywords: <br>
      *     <b>and</b> <b>nand</b> <b>or</b> <b>nor</b> <b>xor</b> <b>xnor</b> <b>buf</b> <b>bufif0</b> <b>bufif1</b> <b>not</b> <b>notif0</b> <b>notif1</b> <b>pulldown</b> <b>pullup</b> <br>
      *     <b>nmos</b> <b>rnmos</b> <b>pmos</b> <b>rpmos</b> <b>cmos</b> <b>rcmos</b> <b>tran</b> <b>rtran</b> <b>tranif0</b> <b>rtranif0</b> <b>tranif1</b> <b>rtranif1</b> 
      */
@@ -741,12 +1186,13 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * level_symbol <br>
+     * level_symbol  is one of the following characters: <br>
      *     0 1 x X ? b B 
      */
     void level_symbol(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTLEVEL_SYMBOL);
         openNodeScope(node);
+        tokenMgr.toNextToken();
         closeNodeScope(node);
     }
 
@@ -757,6 +1203,7 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     void list_of_assignments(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTLIST_OF_ASSIGNMENTS);
         openNodeScope(node);
+        
         closeNodeScope(node);
     }
 
@@ -1114,7 +1561,7 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * nettype <br>
+     * nettype  is one of the following keywords: <br>
      *     <b>wire</b> <b>tri</b> <b>tri1</b> <b>supply0</b> <b>wand</b> <b>triand</b> <b>tri0</b> <b>supply1</b> <b>wor</b> <b>trior</b> <b>trireg</b> 
      */
     void nettype(IASTNode p, Token endToken) throws ParserException {
@@ -1205,7 +1652,7 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * output_symbol <br>
+     * output_symbol  is one of the following characters: <br>
      *     0 1 x X 
      */
     void output_symbol(IASTNode p, Token endToken) throws ParserException {
@@ -1411,7 +1858,7 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
         openNodeScope(node);
         closeNodeScope(node);
     }
-
+    
     /**
      * real_declaration <br>
      *     ::= real  list_of_variables  ; 
@@ -1607,6 +2054,8 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     void specify_terminal_descriptor(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTSPECIFY_TERMINAL_DESCRIPTOR);
         openNodeScope(node);
+        //specify_input_terminal_descriptor(node, endToken);
+        //specify_output_terminal_descriptor(node, endToken);
         closeNodeScope(node);
     }
 
@@ -1675,7 +2124,7 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * strength0 <br>
+     * strength0  is one of the following keywords: <br>
      *     <b>supply0</b> <b>strong0</b> <b>pull0</b> <b>weak0</b> <b>highz0</b> 
      */
     void strength0(IASTNode p, Token endToken) throws ParserException {
@@ -1683,9 +2132,9 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
         openNodeScope(node);
         closeNodeScope(node);
     }
-
+    
     /**
-     * strength1 <br>
+     * strength1  is one of the following keywords: <br>
      *     <b>supply1</b> <b>strong1</b> <b>pull1</b> <b>weak1</b> <b>highz1</b> 
      */
     void strength1(IASTNode p, Token endToken) throws ParserException {
@@ -1695,7 +2144,7 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * string 
+     * string is text enclosed in "" and contained on one line.
      */
     void string(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTSTRING);
@@ -1937,15 +2386,16 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     }
 
     /**
-     * unary_operator <br>
+     * unary_operator  is one of the following tokens: <br>
      *     + - ! ~ & ~& | ^| ^ ~^ 
      */
     void unary_operator(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTUNARY_OPERATOR);
         openNodeScope(node);
+        tokenMgr.toNextToken();
         closeNodeScope(node);
     }
-
+    
     /**
      * unsigned_number <br>
      *     ::= A number containing a set of any of the following characters: <br>

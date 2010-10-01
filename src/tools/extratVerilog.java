@@ -334,7 +334,7 @@ public class extratVerilog {
                     }
                     AstNode newNode = new AstNode();
                     newNode.name = name;
-                    newNode.content.add(name);
+                    newNode.content.add(removeUnused(line));
                     while(true) {
                         line = reader.readLine();
                         if(line == null || line.matches(validLine) || line.isEmpty()) {
@@ -348,6 +348,10 @@ public class extratVerilog {
                     line = reader.readLine();
                 }
             }
+            
+            AstNode newNode = new AstNode();
+            newNode.name = "verilog_token";
+            astArray.add(newNode);
             
             Collections.sort(astArray, new SortByName());
             writeInterface(dir, "VerilogASTConstants", astArray);
@@ -416,47 +420,7 @@ public class extratVerilog {
         }
         return index;
     }
-    
-    static boolean isBold(String str, int id1, int id2) {
-        if(id1 < 0 || id2 < 0)
-            return false;
-        if((id2 == id1 + 2 && str.charAt(id1 + 1) == 'b')
-                || (id2 == id1 + 3 && str.charAt(id1 + 1) == '/' && str.charAt(id1 + 2) == 'b')) {
-            return true;
-        }
-        return false;
-    }
-    
-    static boolean isOption(String str) {
-        int index1 = str.indexOf('<');
-        if(index1 < 0)
-            return false;
-        int index2 = getRAngleBracket(str, index1);
-        if(index2 < str.length() - 1 && str.charAt(index2+1) == '?')
-            return true;
-        return false;
-    }
-    
-    static boolean isMore0(String str) {
-        int index1 = str.indexOf('<');
-        if(index1 < 0)
-            return false;
-        int index2 = getRAngleBracket(str, index1);
-        if(index2 < str.length() - 1 && str.charAt(index2+1) == '*')
-            return true;
-        return false;
-    }
-    
-    static boolean isMore1(String str) {
-        int index1 = str.indexOf('<');
-        if(index1 < 0)
-            return false;
-        int index2 = getRAngleBracket(str, index1);
-        if(index2 < str.length() - 1 && str.charAt(index2+1) == '+')
-            return true;
-        return false;
-    }
-    
+
     static String parseBNF(ArrayList<AstNode> astArray, String str)
     {
         String ret = str;
