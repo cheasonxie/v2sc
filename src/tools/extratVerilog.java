@@ -131,9 +131,12 @@ public class extratVerilog {
             for(int i = 0; i < astArray.size(); i++) {
                 
                 str += "    /**\r\n";
+                if(astArray.get(i).name.equals("delay")) {
+                    System.out.println();
+                }
                 for(int j = 0; j < astArray.get(i).content.size(); j++) {
                     String tmp = addBold(astArray.get(i).content.get(j));
-                    str += "     * " + lowerName(astArray, tmp);
+                    str += "     * " + parseBNF(astArray, tmp);
                     if(j < astArray.get(i).content.size() - 1)
                         str += "<br>";
                     str += "\r\n";
@@ -323,7 +326,7 @@ public class extratVerilog {
         String dir = System.getProperty("user.dir");
         ArrayList<AstNode> astArray = new ArrayList<AstNode>();
         try {
-            BufferedReader reader = new BufferedReader(new FileReader(dir + "\\src\\b.htm"));
+            BufferedReader reader = new BufferedReader(new FileReader(dir + "\\src\\verilog_syntax.htm"));
             String line = reader.readLine();
             while(line != null) {
                 if(line.matches(validLine)) {
@@ -403,15 +406,16 @@ public class extratVerilog {
 | ||=                   | introduces an alternative syntax definition                |
 +-----------------------+------------------------------------------------------------+
      */
-    static String lowerName(ArrayList<AstNode> astArray, String str)
+    static String parseBNF(ArrayList<AstNode> astArray, String str)
     {
         String ret = str;
         String oldStr = str;
         str = str.toUpperCase();
         int index;
+        String tmp = "";
+        String tmp1 = "", tmp2;
+        
         for(int i = 0; i < astArray.size(); i++) {
-                String tmp = "";
-                String tmp1 = "", tmp2;
                 if(!astArray.get(i).name.equalsIgnoreCase("identifier")
                         && !astArray.get(i).name.equalsIgnoreCase("null")) {
                     tmp = "<" + astArray.get(i).name.toUpperCase() + ">";
@@ -430,14 +434,14 @@ public class extratVerilog {
                 String tmp_a = tmp + "+";
                 String tmp_a1 = "{" + tmp1 + "}+";
                 
-                String tmp_aa = "<," + tmp + ">*";
-                String tmp_aa1 = "{," + tmp1 + "}";
+                //String tmp_aa = "<," + tmp + ">*";
+                //String tmp_aa1 = "{," + tmp1 + "}";
                 
-                index = str.indexOf(tmp_aa);
-                if(index >= 0) {
-                    tmp2 = oldStr.substring(index, index+tmp_aa.length());
-                    ret = ret.replace(tmp2, tmp_aa1);
-                }
+                //index = str.indexOf(tmp_aa);
+                //if(index >= 0) {
+                //    tmp2 = oldStr.substring(index, index+tmp_aa.length());
+                //    ret = ret.replace(tmp2, tmp_aa1);
+                //}
                 
                 index = str.indexOf(tmp_a);
                 if(index >= 0) {
@@ -462,7 +466,22 @@ public class extratVerilog {
                     tmp2 = oldStr.substring(index, index+tmp.length());
                     ret = ret.replace(tmp2, tmp1);
                 }
+                
         }
+
+        index = ret.indexOf(">?");
+        int index1 = ret.indexOf("<,");
+        int index2 = ret.indexOf(">*");
+        if(index > 0 && index1 < 0) {
+            ret = ret.replace("<", "[");
+            ret = ret.replace(">?", "]");
+        }else if(index2 >= 0) {
+            ret = ret.replace("<", "{");
+        }else {
+            ret = ret.replace(">?", "}");
+        }
+        ret = ret.replace("<,", "{,");
+        ret = ret.replace(">*", "}");
         return ret;
     }
     

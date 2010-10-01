@@ -244,7 +244,7 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
 
     /**
      * concatenation <br>
-     *     ::= <b>{</b>  expression  {, expression } <b>}</b> 
+     *     ::= {b>{{/b>  expression  {, expression } {b>}{/b> 
      */
     void concatenation(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTCONCATENATION);
@@ -288,7 +288,7 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     /**
      * controlled_timing_check_event <br>
      *     ::=  timing_check_event_control   specify_terminal_descriptor  <br>
-     *         <&&&  timing_check_condition >? 
+     *         [&&&  timing_check_condition ] 
      */
     void controlled_timing_check_event(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTCONTROLLED_TIMING_CHECK_EVENT);
@@ -323,7 +323,7 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
      * delay <br>
      *     ::= #  number  <br>
      *     ||= #  IDENTIFIER  <br>
-     *     ||= # ( mintypmax_expression  <, mintypmax_expression >? <, mintypmax_expression >?) 
+     *     ||= # ( mintypmax_expression  {, mintypmax_expression } {, mintypmax_expression }) 
      */
     void delay(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTDELAY);
@@ -390,7 +390,7 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
 
     /**
      * edge_control_specifier <br>
-     *     ::= <b>edge</b> <b>[</b>  edge_descriptor {, edge_descriptor }] 
+     *     ::= {b>edge{/b> {b>[{/b>  edge_descriptor {, edge_descriptor }] 
      */
     void edge_control_specifier(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTEDGE_CONTROL_SPECIFIER);
@@ -436,11 +436,11 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
 
     /**
      * edge_sensitive_path_declaration <br>
-     *     ::= <if ( expression )>? ([ edge_identifier ] <br>
+     *     ::= [if ( expression )] ([ edge_identifier ] <br>
      *          specify_input_terminal_descriptor  => <br>
      *         ( specify_output_terminal_descriptor  [ polarity_operator ] <br>
      *         :  data_source_expression )) =  path_delay_value ; <br>
-     *     ||= <if ( expression )>? ([ edge_identifier ] <br>
+     *     ||= [if ( expression )] ([ edge_identifier ] <br>
      *          specify_input_terminal_descriptor  *> <br>
      *         ( list_of_path_outputs  [ polarity_operator ] <br>
      *         :  data_source_expression )) = path_delay_value ; 
@@ -474,7 +474,7 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
 
     /**
      * event_declaration <br>
-     *     ::= <b>event</b>  name_of_event  {, name_of_event } ; 
+     *     ::= {b>event{/b>  name_of_event  {, name_of_event } ; 
      */
     void event_declaration(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTEVENT_DECLARATION);
@@ -579,7 +579,7 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
 
     /**
      * identifier <br>
-     *     ::=  IDENTIFIER <. IDENTIFIER >* <br>
+     *     ::=  IDENTIFIER {. IDENTIFIER } <br>
      *     (Note: the period may <b>not</b> be preceded <b>or</b> followed by a space.) 
      */
     void identifier(IASTNode p, Token endToken) throws ParserException {
@@ -746,7 +746,7 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
 
     /**
      * list_of_param_assignments <br>
-     *     ::= param_assignment <,{ param_assignment } 
+     *     ::= param_assignment {,{ param_assignment } 
      */
     void list_of_param_assignments(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTLIST_OF_PARAM_ASSIGNMENTS);
@@ -906,7 +906,7 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
 
     /**
      * multiple_concatenation <br>
-     *     ::= <b>{</b>  expression  <b>{</b>  expression  {, expression } <b>}</b> <b>}</b> 
+     *     ::= {b>{{/b>  expression  {b>{{/b>  expression  {, expression } {b>}{/b> {b>}{/b> 
      */
     void multiple_concatenation(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTMULTIPLE_CONCATENATION);
@@ -1067,7 +1067,7 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
 
     /**
      * named_port_connection <br>
-     *     ::= .IDENTIFIER (  expression  ) 
+     *     ::= . IDENTIFIER  (  expression  ) 
      */
     void named_port_connection(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTNAMED_PORT_CONNECTION);
@@ -1144,9 +1144,9 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
      *     ::=  decimal_number  <br>
      *     ||= [ unsigned_number ]  base   unsigned_number  <br>
      *     ||=  decimal_number . unsigned_number  <br>
-     *     ||=  decimal_number <. unsigned_number >? <br>
+     *     ||=  decimal_number [. unsigned_number ] <br>
      *         E decimal_number  <br>
-     *     ||=  decimal_number <. unsigned_number >? <br>
+     *     ||=  decimal_number [. unsigned_number ] <br>
      *         e decimal_number  <br>
      *     (Note: embedded spaces are illegal in Verilog numbers, but embedded underscore <br>
      *     characters can be used <b>for</b> spacing in any type of number.) 
@@ -1326,7 +1326,7 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     /**
      * port_expression <br>
      *     ::=  port_reference  <br>
-     *     ||= <b>{</b>  port_reference  {, port_reference } <b>}</b> 
+     *     ||= {b>{{/b>  port_reference  {, port_reference } {b>}{/b> 
      */
     void port_expression(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTPORT_EXPRESSION);
@@ -1701,22 +1701,22 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
      * system_timing_check <br>
      *     ::= $setup(  timing_check_event ,  timing_check_event , <br>
      *          timing_check_limit  <br>
-     *         <, notify_register >? ) ; <br>
+     *         {, notify_register } ) ; <br>
      *     ||= $hold(  timing_check_event ,  timing_check_event , <br>
      *          timing_check_limit  <br>
-     *         <, notify_register >? ) ; <br>
+     *         {, notify_register } ) ; <br>
      *     ||= $period(  controlled_timing_check_event ,  timing_check_limit  <br>
-     *         <, notify_register >? ) ; <br>
+     *         {, notify_register } ) ; <br>
      *     ||= $width(  controlled_timing_check_event ,  timing_check_limit  <br>
-     *         <, constant_expression , notify_register >? ) ; <br>
+     *         {, constant_expression ,  notify_register } ) ; <br>
      *     ||= $skew(  timing_check_event ,  timing_check_event , <br>
      *          timing_check_limit  <br>
-     *         <, notify_register >? ) ; <br>
+     *         {, notify_register } ) ; <br>
      *     ||= $recovery(  controlled_timing_check_event , <br>
      *          timing_check_event , <br>
-     *          timing_check_limit  <, notify_register >? ) ; <br>
+     *          timing_check_limit  {, notify_register } ) ; <br>
      *     ||= $setuphold(  timing_check_event ,  timing_check_event , <br>
-     *          timing_check_limit ,  timing_check_limit  <, notify_register >? ) ; 
+     *          timing_check_limit ,  timing_check_limit  {, notify_register } ) ; 
      */
     void system_timing_check(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTSYSTEM_TIMING_CHECK);
@@ -1821,7 +1821,7 @@ public class VerilogParser implements IParser, VerilogTokenConstants, VerilogAST
     /**
      * timing_check_event <br>
      *     ::= [ timing_check_event_control ]  specify_terminal_descriptor  <br>
-     *         <&&&  timing_check_condition >? 
+     *         [&&&  timing_check_condition ] 
      */
     void timing_check_event(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTTIMING_CHECK_EVENT);
