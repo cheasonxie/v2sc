@@ -131,9 +131,6 @@ public class extratVerilog {
             for(int i = 0; i < astArray.size(); i++) {
                 
                 str += "    /**\r\n";
-                if(astArray.get(i).name.equals("delay")) {
-                    System.out.println();
-                }
                 for(int j = 0; j < astArray.get(i).content.size(); j++) {
                     String tmp = addBold(astArray.get(i).content.get(j));
                     str += "     * " + parseBNF(astArray, tmp);
@@ -406,6 +403,60 @@ public class extratVerilog {
 | ||=                   | introduces an alternative syntax definition                |
 +-----------------------+------------------------------------------------------------+
      */
+    
+    static int getRAngleBracket(String str, int from) {
+        int index = from + 1;
+        while(index < str.length()) {
+            if(str.charAt(index) == '>') {
+                break;
+            }else if(str.charAt(index) == '<') {
+                index = getRAngleBracket(str, index) + 1;
+            }
+            index ++;
+        }
+        return index;
+    }
+    
+    static boolean isBold(String str, int id1, int id2) {
+        if(id1 < 0 || id2 < 0)
+            return false;
+        if((id2 == id1 + 2 && str.charAt(id1 + 1) == 'b')
+                || (id2 == id1 + 3 && str.charAt(id1 + 1) == '/' && str.charAt(id1 + 2) == 'b')) {
+            return true;
+        }
+        return false;
+    }
+    
+    static boolean isOption(String str) {
+        int index1 = str.indexOf('<');
+        if(index1 < 0)
+            return false;
+        int index2 = getRAngleBracket(str, index1);
+        if(index2 < str.length() - 1 && str.charAt(index2+1) == '?')
+            return true;
+        return false;
+    }
+    
+    static boolean isMore0(String str) {
+        int index1 = str.indexOf('<');
+        if(index1 < 0)
+            return false;
+        int index2 = getRAngleBracket(str, index1);
+        if(index2 < str.length() - 1 && str.charAt(index2+1) == '*')
+            return true;
+        return false;
+    }
+    
+    static boolean isMore1(String str) {
+        int index1 = str.indexOf('<');
+        if(index1 < 0)
+            return false;
+        int index2 = getRAngleBracket(str, index1);
+        if(index2 < str.length() - 1 && str.charAt(index2+1) == '+')
+            return true;
+        return false;
+    }
+    
     static String parseBNF(ArrayList<AstNode> astArray, String str)
     {
         String ret = str;
@@ -416,72 +467,70 @@ public class extratVerilog {
         String tmp1 = "", tmp2;
         
         for(int i = 0; i < astArray.size(); i++) {
-                if(!astArray.get(i).name.equalsIgnoreCase("identifier")
-                        && !astArray.get(i).name.equalsIgnoreCase("null")) {
-                    tmp = "<" + astArray.get(i).name.toUpperCase() + ">";
-                    tmp1 = " " + astArray.get(i).name.toLowerCase() + " ";
-                } else {
-                    tmp = "<" + astArray.get(i).name + ">";
-                    tmp1 = " " + astArray.get(i).name + " ";
-                }
-                
-                String tmp_q = tmp + "?";
-                String tmp_q1 = "[" + tmp1 + "]";
-                
-                String tmp_m = tmp + "*";
-                String tmp_m1 = "{" + tmp1 + "}";
-                
-                String tmp_a = tmp + "+";
-                String tmp_a1 = "{" + tmp1 + "}+";
-                
-                //String tmp_aa = "<," + tmp + ">*";
-                //String tmp_aa1 = "{," + tmp1 + "}";
-                
-                //index = str.indexOf(tmp_aa);
-                //if(index >= 0) {
-                //    tmp2 = oldStr.substring(index, index+tmp_aa.length());
-                //    ret = ret.replace(tmp2, tmp_aa1);
-                //}
-                
-                index = str.indexOf(tmp_a);
-                if(index >= 0) {
-                    tmp2 = oldStr.substring(index, index+tmp_a.length());
-                    ret = ret.replace(tmp2, tmp_a1);
-                }
-                
-                index = str.indexOf(tmp_m);
-                if(index >= 0) {
-                    tmp2 = oldStr.substring(index, index+tmp_m.length());
-                    ret = ret.replace(tmp2, tmp_m1);
-                }
-                
-                index = str.indexOf(tmp_q);
-                if(index >= 0) {
-                    tmp2 = oldStr.substring(index, index+tmp_q.length());
-                    ret = ret.replace(tmp2, tmp_q1);
-                }
-                
-                index = str.indexOf(tmp);
-                if(index >= 0) {
-                    tmp2 = oldStr.substring(index, index+tmp.length());
-                    ret = ret.replace(tmp2, tmp1);
-                }
-                
+            if(!astArray.get(i).name.equalsIgnoreCase("identifier")
+                    && !astArray.get(i).name.equalsIgnoreCase("null")) {
+                tmp = "<" + astArray.get(i).name.toUpperCase() + ">";
+                tmp1 = " " + astArray.get(i).name.toLowerCase() + " ";
+            } else {
+                tmp = "<" + astArray.get(i).name + ">";
+                tmp1 = " " + astArray.get(i).name + " ";
+            }
+            
+            String tmp_q = tmp + "?";
+            String tmp_q1 = "[" + tmp1 + "]";
+            
+            String tmp_m = tmp + "*";
+            String tmp_m1 = "{" + tmp1 + "}";
+            
+            String tmp_a = tmp + "+";
+            String tmp_a1 = "{" + tmp1 + "}+";
+            
+            index = str.indexOf(tmp_a);
+            if(index >= 0) {
+                tmp2 = oldStr.substring(index, index+tmp_a.length());
+                ret = ret.replace(tmp2, tmp_a1);
+            }
+            
+            index = str.indexOf(tmp_m);
+            if(index >= 0) {
+                tmp2 = oldStr.substring(index, index+tmp_m.length());
+                ret = ret.replace(tmp2, tmp_m1);
+            }
+            
+            index = str.indexOf(tmp_q);
+            if(index >= 0) {
+                tmp2 = oldStr.substring(index, index+tmp_q.length());
+                ret = ret.replace(tmp2, tmp_q1);
+            }
+            
+            index = str.indexOf(tmp);
+            if(index >= 0) {
+                tmp2 = oldStr.substring(index, index+tmp.length());
+                ret = ret.replace(tmp2, tmp1);
+            }
         }
-
-        index = ret.indexOf(">?");
-        int index1 = ret.indexOf("<,");
-        int index2 = ret.indexOf(">*");
-        if(index > 0 && index1 < 0) {
-            ret = ret.replace("<", "[");
-            ret = ret.replace(">?", "]");
-        }else if(index2 >= 0) {
-            ret = ret.replace("<", "{");
-        }else {
-            ret = ret.replace(">?", "}");
+        
+        index = ret.indexOf('<');
+        while(index >= 0) {
+            int index2 = getRAngleBracket(ret, index);
+            if(index2 < 0)
+                break;
+            if(index2 < ret.length() - 1 && ret.charAt(index2+1) == '?') {
+                ret = ret.substring(0, index) + "[" + ret.substring(index+1, index2) + "]"
+                        + ret.substring(index2+2);
+            }
+            
+            if(index2 < ret.length() - 1 && ret.charAt(index2+1) == '*') {
+                ret = ret.substring(0, index) + "{" + ret.substring(index+1, index2) + "}"
+                        + ret.substring(index2+2);
+            }
+            
+            if(index2 < ret.length() - 1 && ret.charAt(index2+1) == '+') {
+                ret = ret.substring(0, index) + "{" + ret.substring(index+1, index2) + "}+"
+                        + ret.substring(index2+2);
+            }
+            index = ret.indexOf('<', index+1);
         }
-        ret = ret.replace("<,", "{,");
-        ret = ret.replace(">*", "}");
         return ret;
     }
     
