@@ -285,6 +285,7 @@ public class VerilogTokenManager extends TokenManager implements VerilogTokenCon
                 // ~|, ||
                 // ^~, ~^
                 // <<, >>
+                // =>, *>
                 if((column < max-2) && (c == '&') && (strLine.charAt(column+1) == '&')
                     && (lastChar == '&')) {
                     ret += c;
@@ -302,7 +303,8 @@ public class VerilogTokenManager extends TokenManager implements VerilogTokenCon
                         || (c == '^' && lastChar=='~')
                         || (c == '~' && lastChar=='^')
                         || (c == '>' && lastChar=='>')
-                        || (c == '<' && lastChar=='<')   ) {
+                        || (c == '<' && lastChar=='<')
+                        || (c == '>' && (lastChar=='=' || lastChar=='*')) ) {
                     ret += c;
                     column ++;
                 }

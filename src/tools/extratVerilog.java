@@ -290,6 +290,7 @@ public class extratVerilog {
         "wor",
         "xnor",
         "xor",
+        "real",
         "{",
         "}",
         "[",
@@ -323,7 +324,8 @@ public class extratVerilog {
         String dir = System.getProperty("user.dir");
         ArrayList<AstNode> astArray = new ArrayList<AstNode>();
         try {
-            BufferedReader reader = new BufferedReader(new FileReader(dir + "\\src\\verilog_syntax.htm"));
+            BufferedReader reader = new BufferedReader(
+                    new FileReader(dir + "\\src\\verilog_syntax.htm"));
             String line = reader.readLine();
             while(line != null) {
                 if(line.matches(validLine)) {

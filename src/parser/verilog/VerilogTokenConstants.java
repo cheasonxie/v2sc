@@ -146,6 +146,7 @@ public interface VerilogTokenConstants
     static final int QUESTION      = 133;   // ?
     static final int COLON         = 134;   // :
     
+    
     // comment
     static final int BLOCK_COMMENT_START  = 135;   // /*
     static final int BLOCK_COMMENT_END    = 136;   // */
@@ -158,15 +159,18 @@ public interface VerilogTokenConstants
     static final int AT            = 141;   // @
     static final int DOLLAR        = 142;   // $
     static final int PARA          = 143;   // #
-    static final int LPARENTHES    = 144;   // (
-    static final int RPARENTHES    = 145;   // )
+    static final int LPARENTHESIS  = 144;   // (
+    static final int RPARENTHESIS  = 145;   // )
     static final int LSQUARE_BRACKET  = 146;   // [
     static final int RSQUARE_BRACKET  = 147;   // ]
     static final int POINT         = 148;   // .
     static final int EQ            = 149;   // =
+
+    static final int EQ_ARROW      = 150;   // =>
+    static final int STAR_ARROW    = 151;   // *>
     
-    static final int TRI_AND       = 150;   // &&&
-    static final int REAL          = 151;   // real
+    static final int TRI_AND       = 152;   // &&&
+    static final int REAL          = 153;   // real
     
     // edge
     //    01 transition from 0 to 1
@@ -175,17 +179,18 @@ public interface VerilogTokenConstants
     //    1x transition from 1 to x
     //    x0 transition from x to 0
     //    x1 transition from x to 1
-    static final int EDGE_01 = 152;
-    static final int EDGE_0x = 153;
-    static final int EDGE_10 = 154;
-    static final int EDGE_1x = 155;
-    static final int EDGE_x0 = 156;
-    static final int EDGE_x1 = 157;
+    static final int EDGE_01 = 154;
+    static final int EDGE_0x = 155;
+    static final int EDGE_10 = 156;
+    static final int EDGE_1x = 157;
+    static final int EDGE_x0 = 158;
+    static final int EDGE_x1 = 159;
     
     static final int string_lexical = 201;
     static final int number_lexical = 202;
     static final int IDENTIFIER     = 203;
     static final int compiler_directive = 204;
+    static final int level_symbol_array = 205;
     
     /** Literal token values. */
     static final String[] tokenImage =
@@ -341,6 +346,8 @@ public interface VerilogTokenConstants
         "]",
         ".",
         "=",
+        "=>",
+        "*>",
         "&&&",
         "real",
         
