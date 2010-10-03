@@ -168,9 +168,10 @@ public interface VerilogTokenConstants
 
     static final int EQ_ARROW      = 150;   // =>
     static final int STAR_ARROW    = 151;   // *>
+    static final int HYPHEN_ARROW  = 152;   // ->
     
-    static final int TRI_AND       = 152;   // &&&
-    static final int REAL          = 153;   // real
+    static final int TRI_AND       = 153;   // &&&
+    static final int REAL          = 154;   // real
     
     // edge
     //    01 transition from 0 to 1
@@ -179,12 +180,12 @@ public interface VerilogTokenConstants
     //    1x transition from 1 to x
     //    x0 transition from x to 0
     //    x1 transition from x to 1
-    static final int EDGE_01 = 154;
-    static final int EDGE_0x = 155;
-    static final int EDGE_10 = 156;
-    static final int EDGE_1x = 157;
-    static final int EDGE_x0 = 158;
-    static final int EDGE_x1 = 159;
+    static final int EDGE_01 = 155;
+    static final int EDGE_0x = 156;
+    static final int EDGE_10 = 157;
+    static final int EDGE_1x = 158;
+    static final int EDGE_x0 = 159;
+    static final int EDGE_x1 = 160;
     
     static final int string_lexical = 201;
     static final int number_lexical = 202;
@@ -348,6 +349,7 @@ public interface VerilogTokenConstants
         "=",
         "=>",
         "*>",
+        "->",
         "&&&",
         "real",
         

@@ -285,7 +285,7 @@ public class VerilogTokenManager extends TokenManager implements VerilogTokenCon
                 // ~|, ||
                 // ^~, ~^
                 // <<, >>
-                // =>, *>
+                // =>, *>, ->
                 if((column < max-2) && (c == '&') && (strLine.charAt(column+1) == '&')
                     && (lastChar == '&')) {
                     ret += c;
@@ -304,7 +304,8 @@ public class VerilogTokenManager extends TokenManager implements VerilogTokenCon
                         || (c == '~' && lastChar=='^')
                         || (c == '>' && lastChar=='>')
                         || (c == '<' && lastChar=='<')
-                        || (c == '>' && (lastChar=='=' || lastChar=='*')) ) {
+                        || (c == '>' && (lastChar=='=' || lastChar=='*' || lastChar=='-'))
+                        ) {
                     ret += c;
                     column ++;
                 }
@@ -403,7 +404,7 @@ public class VerilogTokenManager extends TokenManager implements VerilogTokenCon
     public static void main(String[] argv)
     {
         try {
-            String dir = System.getProperty("user.dir");
+            String dir = SystemConstants.getProperty("user.dir");
             TokenManager tm = new VerilogTokenManager(
                     new BufferedReader(
                             new FileReader(dir + "\\ac97_top.v")), false);
@@ -420,9 +421,9 @@ public class VerilogTokenManager extends TokenManager implements VerilogTokenCon
                     break;
                 }
                 if(lastLine < token.beginLine) {
-                    System.out.println();
+                    System.SystemConstants.println();
                 }
-                System.out.print(" " + token.image);
+                System.SystemConstants.print(" " + token.image);
                 lastLine = token.endLine;
             }
         } catch (FileNotFoundException e) {

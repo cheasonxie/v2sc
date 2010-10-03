@@ -157,6 +157,23 @@ public interface VerilogASTConstants
     static final int ASTUNARY_OPERATOR = 152;
     static final int ASTUNSIGNED_NUMBER = 153;
     static final int ASTVERILOG_TOKEN = 154;
+    
+    // additional nodes(statements)
+    static final int ASTIF_STATEMENT = 155;
+    static final int ASTCASE_STATEMENT = 156;
+    static final int ASTLOOP_STATEMENT = 157;
+    static final int ASTWAIT_STATEMENT = 158;
+    static final int ASTDELAY_OR_EVENT_STATEMENT = 159;
+    static final int ASTDISABLE_TASK_OR_BLOCK = 160;
+    static final int ASTASSIGN_ASSIGNMENT = 161;
+    static final int ASTFORCE_ASSIGNMENT = 162;
+    static final int ASTDEASSIGN_LVALUE = 163;
+    static final int ASTRELEASE_LVALUE = 164;
+    static final int ASTEVENT_TRIGGER_STATEMENT = 165;
+    static final int ASTBLOCK_ASSIGNMENT_STATEMENT = 166;
+    static final int ASTNON_BLOCK_ASSIGNMENT_STATEMENT = 167;
+    
+    
 
     static final String[] ASTNodeName =
     {
@@ -315,5 +332,20 @@ public interface VerilogASTConstants
         "unary_operator",
         "unsigned_number",
         "verilog_token",
+        
+        "if_statement",
+        "case_statement",
+        "loop_statement",
+        "wait_statement",
+        "delay_or_event_statement",
+        "disable_task",
+        "disable_block",
+        "assign_assignment",
+        "force_assignment",
+        "deassign_lvalue",
+        "release_lvalue",
+        "event_trigger_statement",
+        "block_assignment_statement",
+        "non_block_assignment_statement",
     };
 }
