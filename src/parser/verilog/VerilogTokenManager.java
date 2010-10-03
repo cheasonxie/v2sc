@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
 
 import parser.CommentBlock;
 import parser.ParserException;
@@ -404,7 +403,7 @@ public class VerilogTokenManager extends TokenManager implements VerilogTokenCon
     public static void main(String[] argv)
     {
         try {
-            String dir = SystemConstants.getProperty("user.dir");
+            String dir = System.getProperty("user.dir");
             TokenManager tm = new VerilogTokenManager(
                     new BufferedReader(
                             new FileReader(dir + "\\ac97_top.v")), false);
@@ -421,9 +420,9 @@ public class VerilogTokenManager extends TokenManager implements VerilogTokenCon
                     break;
                 }
                 if(lastLine < token.beginLine) {
-                    System.SystemConstants.println();
+                    System.out.println();
                 }
-                System.SystemConstants.print(" " + token.image);
+                System.out.print(" " + token.image);
                 lastLine = token.endLine;
             }
         } catch (FileNotFoundException e) {
