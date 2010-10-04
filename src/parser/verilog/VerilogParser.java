@@ -1,5 +1,8 @@
 package parser.verilog;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.Reader;
 
 import parser.CommentBlock;
@@ -9,7 +12,6 @@ import parser.ISymbol;
 import parser.ISymbolTable;
 import parser.ParserException;
 import parser.Token;
-import parser.vhdl.ASTNode;
 
 public class VerilogParser implements IParser, VerilogTokenConstants, 
           VerilogASTConstants, SystemConstants
@@ -556,9 +558,10 @@ public class VerilogParser implements IParser, VerilogTokenConstants,
                     tmpToken = findTokenInBlock(COLON, endToken);
                 }
                 expression(node, tmpToken);
-                if(tokenMgr.getNextTokenKind() == COLON) {
+                if(tokenMgr.getNextTokenKind() != COMMA) {
                     break;
                 }
+                consumeToken(COMMA);
             }
             new ASTtoken(node, tokenImage[COLON]);
             consumeToken(COLON);
@@ -3084,10 +3087,6 @@ public class VerilogParser implements IParser, VerilogTokenConstants,
         openNodeScope(node);
         int kind = tokenMgr.getNextTokenKind();
         
-        task_enable(node, endToken);
-        system_task_enable(node, endToken);
-        blocking_assignment(node, endToken);
-        non_blocking_assignment(node, endToken);
         switch(kind)
         {
         case IF:
@@ -3101,16 +3100,27 @@ public class VerilogParser implements IParser, VerilogTokenConstants,
             break;
             
         case FOREVER:
-        case REPEAT:
         case FOR:
         case WHILE:
             loop_statement(node, endToken);
             break;
             
+        case REPEAT:
+            endToken = findTokenInBlock(SEMICOLON, endToken);
+            if(findTokenInBlock(AT, endToken) != null 
+                    || findTokenInBlock(PARA, endToken) != null) {
+                delay_or_event_statement(node, endToken);
+            }else {
+                loop_statement(node, endToken);
+            }
+            break;
+            
         case WAIT:
+            wait_statement(node, endToken);
             break;
             
         case HYPHEN_ARROW:
+            event_trigger_statement(node, endToken);
             break;
             
         case BEGIN:
@@ -3122,18 +3132,42 @@ public class VerilogParser implements IParser, VerilogTokenConstants,
             break;
             
         case DISABLE:
+            disable_task_or_block(node, endToken);
             break;
+            
         case ASSIGN:
+            assign_assignment(node, endToken);
             break;
+            
         case DEASSIGN:
+            deassign_lvalue(node, endToken);
             break;
+            
         case FORCE:
+            force_assignment(node, endToken);
             break;
+            
         case RELEASE:
+            release_lvalue(node, endToken);
             break;
+            
         default:
+            endToken = findTokenInBlock(SEMICOLON, endToken);
+            if(findTokenInBlock(AT, endToken) != null 
+                    || findTokenInBlock(PARA, endToken) != null) {
+                delay_or_event_statement(node, endToken);
+            }else if(findTokenInBlock(LE, endToken) != null) {
+                non_blocking_assignment(node, endToken);
+            }else if(findTokenInBlock(EQ, endToken) != null) {
+                blocking_assignment(node, endToken);
+            }else if(tokenMgr.getNextToken().image.startsWith(tokenImage[DOLLAR])) {
+                system_task_enable(node, endToken);
+            }else {
+                task_enable(node, endToken);
+            }
             break;
         }
+
         closeNodeScope(node);
     }
 
@@ -3256,9 +3290,77 @@ public class VerilogParser implements IParser, VerilogTokenConstants,
         ASTNode node = new ASTNode(p, ASTSYSTEM_TIMING_CHECK);
         openNodeScope(node);
         String image = tokenMgr.getNextToken().image;
-        if(image.equals(SYS_SETUP) || image.equals(SYS_HOLD)) {
+        Token tmpToken = null;
+        
+        new ASTtoken(node, image);
+        tokenMgr.toNextToken();
+        consumeToken(LPARENTHESIS);
+        endToken = findTokenInBlock(RPARENTHESIS, endToken);
+        
+        if(image.equals(SYS_SETUP) || image.equals(SYS_HOLD)
+                || image.equals(SYS_SKEW) || image.equals(SYS_SETUPHOLD)) {
             
+            tmpToken = findTokenInBlock(COMMA, endToken);
+            timing_check_event(node, tmpToken);
+            consumeToken(COMMA);
+            
+            tmpToken = findTokenInBlock(COMMA, endToken);
+            timing_check_event(node, tmpToken);
+            consumeToken(COMMA);
+            
+            tmpToken = findTokenInBlock(COMMA, endToken);
+            if(tmpToken == null)
+                tmpToken = endToken;
+            timing_check_limit(node, tmpToken);
+            
+            if(image.equals(SYS_SETUPHOLD)) {
+                consumeToken(COMMA);
+                tmpToken = findTokenInBlock(COMMA, endToken);
+                if(tmpToken == null)
+                    tmpToken = endToken;
+                timing_check_limit(node, tmpToken);
+            }
+        }else if(image.equals(SYS_PERIOD) || image.equals(SYS_RECOVERY)) {
+            tmpToken = findTokenInBlock(COMMA, endToken);
+            controlled_timing_check_event(node, tmpToken);
+            consumeToken(COMMA);
+            
+            if(image.equals(SYS_RECOVERY)) {
+                tmpToken = findTokenInBlock(COMMA, endToken);
+                timing_check_event(node, tmpToken);
+                consumeToken(COMMA);
+            }
+            
+            tmpToken = findTokenInBlock(COMMA, endToken);
+            if(tmpToken == null)
+                tmpToken = endToken;
+            timing_check_limit(node, tmpToken);
+            
+        }else if(image.equals(SYS_WIDTH)) {
+            tmpToken = findTokenInBlock(COMMA, endToken);
+            controlled_timing_check_event(node, tmpToken);
+            consumeToken(COMMA);
+            
+            tmpToken = findTokenInBlock(COMMA, endToken);
+            if(tmpToken == null)
+                tmpToken = endToken;
+            timing_check_limit(node, tmpToken);
+            
+            if(tokenMgr.getNextTokenKind() == COMMA) {
+                consumeToken(COMMA);
+                tmpToken = findTokenInBlock(COMMA, endToken);
+                constant_expression(node, tmpToken);
+            }
+        }else {
+            throw new ParserException(tokenMgr.getNextToken());
         }
+        
+        if(tokenMgr.getNextTokenKind() == COMMA) {
+            consumeToken(COMMA);
+            notify_register(node, endToken);
+        }
+        consumeToken(RPARENTHESIS);
+        consumeToken(SEMICOLON);
         closeNodeScope(node);
     }
 
@@ -3668,118 +3770,301 @@ public class VerilogParser implements IParser, VerilogTokenConstants,
 //    }
     
     
+    ///////////////////////////////////////////////////////////////////////////
     // additional nodes(statements)
+    ///////////////////////////////////////////////////////////////////////////
+
+    /**
+     *  <b>if</b> (  expression  )  statement_or_null  <br>
+     *  <b>if</b> (  expression  )  statement_or_null  <b>else</b>  statement_or_null
+     */
     void if_statement(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTIF_STATEMENT);
         openNodeScope(node);
+        consumeToken(IF);
+        consumeToken(LPARENTHESIS);
+        Token tmpToken = findTokenInBlock(RPARENTHESIS, endToken);
+        expression(node, tmpToken);
+        consumeToken(RPARENTHESIS);
+        
+        tmpToken = findTokenInBlock(ELSE, endToken);
+        if(tmpToken == null)
+            tmpToken = endToken;
+        statement_or_null(node, tmpToken);
+        if(tokenMgr.getNextTokenKind() == ELSE) {
+            consumeToken(ELSE);
+            statement_or_null(node, endToken);
+        }
         closeNodeScope(node);
     }
     
+    /**
+     *  <b>case</b> (  expression  ) { case_item }+ <b>endcase</b> <br>
+     *  <b>casez</b> (  expression  ) { case_item }+ <b>endcase</b> <br>
+     *  <b>casex</b> (  expression  ) { case_item }+ <b>endcase</b>
+     */
     void case_statement(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTCASE_STATEMENT);
         openNodeScope(node);
+        new ASTtoken(node, tokenMgr.getNextToken().image);
+        tokenMgr.toNextToken();
+        endToken = findTokenInBlock(ENDCASE, endToken);
+        
+        Token tmpToken = findTokenInBlock(RPARENTHESIS, endToken);
+        expression(node, tmpToken);
+        consumeToken(RPARENTHESIS);
+        
+        while(tokenMgr.getNextTokenKind() != ENDCASE) {
+            case_item(node, endToken);
+        }
+        
+        consumeToken(ENDCASE);
         closeNodeScope(node);
     }
     
+    /**
+     *   <b>forever</b>  statement  <br>
+     *   <b>repeat</b> (  expression  )  statement  <br>
+     *   <b>while</b> (  expression  )  statement  <br>
+     *   <b>for</b> (  assignment  ;  expression  ;  assignment  )  statement
+     */
     void loop_statement(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTLOOP_STATEMENT);
         openNodeScope(node);
+        Token tmpToken = null;
+        int kind = tokenMgr.getNextTokenKind();
+        new ASTtoken(node, tokenImage[kind]);
+        consumeToken(kind);
+        
+        if(kind == FOREVER) {
+            statement(node, endToken);
+        }else if(kind == REPEAT || kind == WHILE) {
+            consumeToken(LPARENTHESIS);
+            tmpToken = findTokenInBlock(RPARENTHESIS, endToken);
+            expression(node, tmpToken);
+            consumeToken(RPARENTHESIS);
+            statement(node, endToken);
+        }else if(kind == FOR) {
+            consumeToken(LPARENTHESIS);
+            tmpToken = findTokenInBlock(SEMICOLON, endToken);
+            assignment(node, tmpToken);
+            tmpToken = findTokenInBlock(SEMICOLON, endToken);
+            expression(node, tmpToken);
+            tmpToken = findTokenInBlock(RPARENTHESIS, endToken);
+            assignment(node, tmpToken);
+            
+            consumeToken(RPARENTHESIS);
+            statement(node, endToken);
+        }else {
+            throw new ParserException(tokenMgr.getNextToken());
+        }
+
         closeNodeScope(node);
     }
     
+    /**
+     *   <b>wait</b> (  expression  )  statement_or_null
+     */
     void wait_statement(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTWAIT_STATEMENT);
         openNodeScope(node);
+        consumeToken(WAIT);
+        consumeToken(LPARENTHESIS);
+        Token tmpToken = findTokenInBlock(RPARENTHESIS, endToken);
+        expression(node, tmpToken);
+        consumeToken(RPARENTHESIS);
+        
+        tmpToken = findTokenInBlock(ELSE, endToken);
+        if(tmpToken == null)
+            tmpToken = endToken;
+        statement_or_null(node, tmpToken);
         closeNodeScope(node);
     }
     
+    /**
+     *   delay_or_event_control   statement_or_null
+     */
     void delay_or_event_statement(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTDELAY_OR_EVENT_STATEMENT);
         openNodeScope(node);
+        delay_or_event_control(node, endToken);
+        statement_or_null(node, endToken);
         closeNodeScope(node);
     }
     
+    /**
+     *   <b>disable</b>  name_of_task  ; <br>
+     *   <b>disable</b>  name_of_block  ;
+     */
     void disable_task_or_block(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTDISABLE_TASK_OR_BLOCK);
         openNodeScope(node);
+        consumeToken(DISABLE);
+        endToken = findTokenInBlock(SEMICOLON, endToken);
+        name_of_task(node, endToken);   //TODO: check task/block name
+        consumeToken(SEMICOLON);
         closeNodeScope(node);
     }
     
+    /**
+     *   <b>assign</b>  assignment  ;
+     */
     void assign_assignment(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTASSIGN_ASSIGNMENT);
         openNodeScope(node);
+        consumeToken(ASSIGN);
+        endToken = findTokenInBlock(SEMICOLON, endToken);
+        assignment(node, endToken);
+        consumeToken(SEMICOLON);
         closeNodeScope(node);
     }
     
+    /**
+     *   <b>force</b>  assignment  ;
+     */
     void force_assignment(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTFORCE_ASSIGNMENT);
         openNodeScope(node);
+        consumeToken(FORCE);
+        endToken = findTokenInBlock(SEMICOLON, endToken);
+        assignment(node, endToken);
+        consumeToken(SEMICOLON);
         closeNodeScope(node);
     }
     
+    /**
+     *   <b>deassign</b>  lvalue  ;
+     */
     void deassign_lvalue(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTDEASSIGN_LVALUE);
         openNodeScope(node);
+        consumeToken(DEASSIGN);
+        endToken = findTokenInBlock(SEMICOLON, endToken);
+        lvalue(node, endToken);
+        consumeToken(SEMICOLON);
         closeNodeScope(node);
     }
     
+    /**
+     *   <b>release</b>  lvalue  ; 
+     */
     void release_lvalue(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTRELEASE_LVALUE);
         openNodeScope(node);
+        consumeToken(RELEASE);
+        endToken = findTokenInBlock(SEMICOLON, endToken);
+        lvalue(node, endToken);
+        consumeToken(SEMICOLON);
         closeNodeScope(node);
     }
     
+    /**
+     *   ->  name_of_event  ;
+     */
     void event_trigger_statement(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTEVENT_TRIGGER_STATEMENT);
         openNodeScope(node);
+        consumeToken(HYPHEN_ARROW);
+        endToken = findTokenInBlock(SEMICOLON, endToken);
+        name_of_event(node, endToken);
+        consumeToken(SEMICOLON);
         closeNodeScope(node);
     }
     
+    /**
+     *   blocking_assignment  ;
+     */
     void block_assignment_statement(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTBLOCK_ASSIGNMENT_STATEMENT);
         openNodeScope(node);
+        endToken = findTokenInBlock(SEMICOLON, endToken);
+        blocking_assignment(node, endToken);
+        consumeToken(SEMICOLON);
         closeNodeScope(node);
     }
     
+    /**
+     *   non_blocking_assignment  ;
+     */
     void non_block_assignment_statement(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTNON_BLOCK_ASSIGNMENT_STATEMENT);
         openNodeScope(node);
+        endToken = findTokenInBlock(SEMICOLON, endToken);
+        non_blocking_assignment(node, endToken);
+        consumeToken(SEMICOLON);
         closeNodeScope(node);
     }
 
     @Override
     public CommentBlock[] getComment() {
-        return null;
+        if(tokenMgr == null) {
+            System.err.println("you must parse the file by call parse() firstly");
+            return null;
+        }
+        return tokenMgr.getComment();
     }
 
     @Override
     public IASTNode getRoot() {
-        return null;
+        return sourceText;
     }
 
     @Override
     public ISymbol getSymbol(IASTNode node, String name) {
+        if(node == null) {
+            System.err.println("null parameter");
+            return null;
+        }
+        if(tokenMgr == null) {
+            System.err.println("you must parse the file by calling parse() firstly");
+            return null;
+        }
         return null;
     }
 
     @Override
     public IASTNode parse(String path) throws ParserException {
-        return null;
+        try {
+            BufferedReader stream = new BufferedReader(new FileReader(path));
+            tokenMgr = new VerilogTokenManager(stream, parseSymbol);
+            return source_text();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
-
+    
     @Override
     public IASTNode parse(Reader reader) throws ParserException {
-        return null;
+        BufferedReader stream = new BufferedReader(reader);
+        tokenMgr = new VerilogTokenManager(stream, parseSymbol);
+        return source_text();
     }
 
     @Override
     public ISymbol getSymbol(IASTNode node, String[] names) {
+        if(node == null) {
+            System.err.println("null parameter");
+            return null;
+        }
+        if(tokenMgr == null) {
+            System.err.println("you must parse the file by calling parse() firstly");
+            return null;
+        }
         return null;
     }
 
     @Override
     public ISymbolTable getTableOfSymbol(IASTNode node, String name)
     {
+        if(node == null) {
+            System.err.println("null parameter");
+            return null;
+        }
+        if(tokenMgr == null) {
+            System.err.println("you must parse the file by calling parse() firstly");
+            return null;
+        }
         return null;
     }
 
