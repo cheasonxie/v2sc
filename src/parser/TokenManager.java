@@ -192,9 +192,6 @@ public abstract class TokenManager
 
     /**
      * scan next token from current token
-     * @param bscan
-     * @return
-     * @throws ParserException
      */
     public Token getNextToken() throws ParserException
     {
@@ -206,9 +203,6 @@ public abstract class TokenManager
     
     /**
      * scan next token from specified token
-     * @param bscan
-     * @return
-     * @throws ParserException
      */
     public Token getNextToken(Token from) throws ParserException
     {
