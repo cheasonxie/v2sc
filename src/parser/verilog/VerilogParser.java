@@ -22,9 +22,6 @@ public class VerilogParser implements IParser, VerilogTokenConstants,
     protected ASTNode lastNode = null;      // last parsed node
     protected ASTNode sourceText = null;   // source text node
     
-    protected TimeScale timeScale= null;
-    protected Define define = new Define();
-    
     /**
      *  true -- just only parse symbols(if exist)<br>
      *  false -- parse all AST
@@ -299,6 +296,22 @@ public class VerilogParser implements IParser, VerilogTokenConstants,
     boolean is_edge_identifier() throws ParserException {
         int kind = tokenMgr.getNextTokenKind();
         if(kind == POSEDGE || kind == NEGEDGE) {
+            return true;
+        }
+        return false;
+    }
+    
+    boolean is_compiler_directives() throws ParserException {
+        Token token = tokenMgr.getNextToken();
+        if(token != null && token.image.startsWith("`")) {
+            return true;
+        }
+        return false;
+    }
+    
+    boolean is_ifdef() throws ParserException {
+        Token token = tokenMgr.getNextToken();
+        if(token != null && token.image.equals(cdStrings[CD_IFDEF])) {
             return true;
         }
         return false;
@@ -753,8 +766,8 @@ public class VerilogParser implements IParser, VerilogTokenConstants,
     void data_source_expression(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTDATA_SOURCE_EXPRESSION);
         openNodeScope(node);
-        //TODO:add here
-        System.out.println("data_source_expression not finished");
+        //TODO:fix here
+        expression(node, endToken);
         closeNodeScope(node);
     }
 
@@ -1863,6 +1876,7 @@ public class VerilogParser implements IParser, VerilogTokenConstants,
     void module_item(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTMODULE_ITEM);
         openNodeScope(node);
+       
         int kind = tokenMgr.getNextTokenKind();
         switch(kind)
         {
@@ -2993,8 +3007,8 @@ public class VerilogParser implements IParser, VerilogTokenConstants,
         while(tokenMgr.getNextToken() != null) {
             if(is_description()) {
                 description(node, null);
-            }else if(tokenMgr.getNextToken().image.startsWith("`")){
-                compiler_directive();
+            }else if(is_compiler_directives()){
+                compiler_directives(node, null);
             }
         }
         closeNodeScope(node);
@@ -4085,38 +4099,126 @@ public class VerilogParser implements IParser, VerilogTokenConstants,
         closeNodeScope(node);
     }
     
-    void compiler_directive() throws ParserException {
+    ////////////////////////////////////////////////////////
+    // compiler directives
+    ////////////////////////////////////////////////////////
+    void compiler_directives(IASTNode p, Token endToken) throws ParserException {
+        ASTNode node = new ASTNode(p, ASTCOMPILER_DIRECTIVE);
+        openNodeScope(node);
+        
         String image = tokenMgr.getNextToken().image;
-        if(image.equals(CD_DEFINE)) {
-            tokenMgr.toNextToken();
-            String name = tokenMgr.getNextToken().image;
-            String value = "";
-            int line = tokenMgr.getCurrentToken().beginLine;
-            while(true) {
-                value += tokenMgr.getNextToken().image;
-                tokenMgr.toNextToken();
-                if(tokenMgr.getNextToken().beginLine > line) {
-                    break;
-                }
-                value += " ";
+        int index = -1;
+        for(int i = 0; i < cdStrings.length; i++) {
+            if(image.equals(cdStrings[i])) {
+                index = i;
+                break;
             }
-            define.put(name, value);
-        }else if(image.equals(CD_TIMESCALE)) {
-            tokenMgr.toNextToken();
-            int unitNum = Integer.parseInt(tokenMgr.getNextToken().image);
-            tokenMgr.toNextToken();
-            String unit = tokenMgr.getNextToken().image;
-            tokenMgr.toNextToken();
-            consumeToken(DIV);
-            int precisionNum = Integer.parseInt(tokenMgr.getNextToken().image);
-            tokenMgr.toNextToken();
-            String precision = tokenMgr.getNextToken().image;
-            tokenMgr.toNextToken();
-            
-            timeScale = new TimeScale(unitNum, unit, precisionNum, precision);
         }
+        
+        if(index < 0)
+            return;
+        
+        switch(index)
+        {
+        case CD_DEFAULT_NETTYPE:
+            cd_default_nettype(p, endToken);
+            break;
+        case CD_DEFINE:
+            cd_define(p, endToken);
+            break;
+        case CD_IFDEF:
+            cd_ifdef(p, endToken);
+            break;
+        case CD_INCLUDE:
+            cd_include(p, endToken);
+            break;
+        case CD_TIMESCALE:
+            cd_timescale(p, endToken);
+            break;
+        default:
+            new ASTtoken(node, image);
+            tokenMgr.toNextToken();
+            break;
+        }
+        closeNodeScope(node);
     }
+    
+    void cd_default_nettype(IASTNode p, Token endToken) throws ParserException {
+        ASTNode node = new ASTNode(p, ASTCD_DEFAULT_NETTYPE);
+        openNodeScope(node);
+        new ASTtoken(node, tokenMgr.getNextToken().image);
+        tokenMgr.toNextToken();
+        new ASTtoken(node, tokenMgr.getNextToken().image);
+        tokenMgr.toNextToken();
+        closeNodeScope(node);
+    }
+    
+    void cd_define(IASTNode p, Token endToken) throws ParserException {
+        ASTNode node = new ASTNode(p, ASTCD_DEFINE);
+        openNodeScope(node);
+        new ASTtoken(node, tokenMgr.getNextToken().image);
+        tokenMgr.toNextToken();
+        new ASTtoken(node, tokenMgr.getNextToken().image);
+        String value = "";
+        int line = tokenMgr.getCurrentToken().beginLine;
+        while(true) {
+            value += tokenMgr.getNextToken().image;
+            tokenMgr.toNextToken();
+            if(tokenMgr.getNextToken().beginLine > line) {
+                break;
+            }
+            value += " ";
+        }
+        new ASTtoken(node, value);
+        closeNodeScope(node);
+    }
+    
+    void cd_ifdef(IASTNode p, Token endToken) throws ParserException {
+        ASTNode node = new ASTNode(p, ASTCD_IFDEF);
+        openNodeScope(node);
+        new ASTtoken(node, tokenMgr.getNextToken().image);
+        tokenMgr.toNextToken();
+        new ASTtoken(node, tokenMgr.getNextToken().image);
+        tokenMgr.toNextToken();
+        closeNodeScope(node);
+    }
+    
+    void cd_include(IASTNode p, Token endToken) throws ParserException {
+        ASTNode node = new ASTNode(p, ASTCD_INCLUDE);
+        openNodeScope(node);
+        new ASTtoken(node, tokenMgr.getNextToken().image);
+        tokenMgr.toNextToken();
+        new ASTtoken(node, tokenMgr.getNextToken().image);
+        tokenMgr.toNextToken();
+        closeNodeScope(node);
+    }
+    
+    void cd_timescale(IASTNode p, Token endToken) throws ParserException {
+        ASTNode node = new ASTNode(p, ASTCD_TIMESCALE);
+        openNodeScope(node);
+        new ASTtoken(node, tokenMgr.getNextToken().image);
+        tokenMgr.toNextToken();
+        new ASTtoken(node, tokenMgr.getNextToken().image);
+        tokenMgr.toNextToken();
+        new ASTtoken(node, tokenMgr.getNextToken().image);
+        tokenMgr.toNextToken();
+        if(tokenMgr.getNextTokenKind() != VerilogTokenConstants.DIV) {
+            throw new ParserException(tokenMgr.getCurrentToken());
+        }
+        tokenMgr.toNextToken();
+        new ASTtoken(node, tokenMgr.getNextToken().image);
+        tokenMgr.toNextToken();
+        new ASTtoken(node, tokenMgr.getNextToken().image);
+        tokenMgr.toNextToken();
+        closeNodeScope(node);
+    }
+    
 
+    
+    public VerilogTokenManager getTokenManager() {
+        return tokenMgr;
+    }
+    
     @Override
     public CommentBlock[] getComment() {
         if(tokenMgr == null) {

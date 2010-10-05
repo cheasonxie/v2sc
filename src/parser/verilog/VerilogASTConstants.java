@@ -173,7 +173,13 @@ public interface VerilogASTConstants
     static final int ASTBLOCK_ASSIGNMENT_STATEMENT = 166;
     static final int ASTNON_BLOCK_ASSIGNMENT_STATEMENT = 167;
     
-    
+    //compiler directive
+    static final int ASTCOMPILER_DIRECTIVE       = 168;
+    static final int ASTCD_DEFAULT_NETTYPE       = 169;
+    static final int ASTCD_DEFINE                = 170;
+    static final int ASTCD_IFDEF                 = 171;
+    static final int ASTCD_INCLUDE               = 172;
+    static final int ASTCD_TIMESCALE             = 173;
 
     static final String[] ASTNodeName =
     {
@@ -347,5 +353,12 @@ public interface VerilogASTConstants
         "event_trigger_statement",
         "block_assignment_statement",
         "non_block_assignment_statement",
+        
+        "compiler_directive",
+        "cd_default_nettype",
+        "cd_define",
+        "cd_ifdef",
+        "cd_include",
+        "cd_timescale",
     };
 }
