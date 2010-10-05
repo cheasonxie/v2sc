@@ -271,9 +271,7 @@ csatt@sgi.com<BR>
 
 <A name="REF44"></A><B><A href="#REF44">&lt;net_declaration&gt;</A></B>
 	::= &lt;<A href="#REF46">NETTYPE</A>&gt; &lt;<A href="#REF47">expandrange</A>&gt;? &lt;<A href="#REF171">delay</A>&gt;? &lt;<A href="#REF55">list_of_variables</A>&gt; ;
-	||= trireg &lt;<A href="#REF62">charge_strength</A>&gt;? &lt;<A href="#REF47">expandrange</A>&gt;? &lt;<A href="#REF171">delay</A>&gt;?
-
-<A name="REF45"></A><B><A href="#REF45">&lt;list_of_variables&gt;</A></B> ;
+	||= trireg &lt;<A href="#REF62">charge_strength</A>&gt;? &lt;<A href="#REF47">expandrange</A>&gt;? &lt;<A href="#REF171">delay</A>&gt;?&lt;<A href="#REF55">list_of_variables</A>&gt; ;
 	||= &lt;<A href="#REF46">NETTYPE</A>&gt; &lt;<A href="#REF63">drive_strength</A>&gt;? &lt;<A href="#REF47">expandrange</A>&gt;? &lt;<A href="#REF171">delay</A>&gt;? &lt;<A href="#REF67">list_of_assignments</A>&gt; ;
 
 <A name="REF46"></A><B><A href="#REF46">&lt;NETTYPE&gt;</A></B> is one of the following keywords:
@@ -472,7 +470,7 @@ csatt@sgi.com<BR>
 
 <A name="REF96"></A><B><A href="#REF96">&lt;non_blocking_assignment&gt;</A></B>
 	::= &lt;<A href="#REF145">lvalue</A>&gt; &lt;= &lt;<A href="#REF148">expression</A>&gt;
-	||= &lt;<A href="#REF145">lvalue</A>&gt; = &lt;<A href="#REF97">delay_or_event_control</A>&gt; &lt;<A href="#REF148">expression</A>&gt; ;
+	||= &lt;<A href="#REF145">lvalue</A>&gt; &lt;= &lt;<A href="#REF97">delay_or_event_control</A>&gt; &lt;<A href="#REF148">expression</A>&gt; ;
 
 <A name="REF97"></A><B><A href="#REF97">&lt;delay_or_event_control&gt;</A></B>
 	::= &lt;<A href="#REF172">delay_control</A>&gt;
