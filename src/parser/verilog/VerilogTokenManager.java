@@ -100,7 +100,7 @@ class RegExp
      * simple_identifier ::= [a-zA-Z_]{[a-zA-Z_$0-9]}
      * escaped_identifier ::= \ {Any_ASCII_character_except_white_space} white_space
      */
-    static final String _simple_identifier = "[a-zA-Z_][a-zA-Z_$0-9]*";
+    static final String _simple_identifier = "[`a-zA-Z_][`a-zA-Z_$0-9]*";
     static final String _escaped_identifier = "\\" + "[A-Za-z0-9" + " \r\n\t\b"
                                         + "`~!@#$%\\^&*\\(\\)_+|=\\-"
                                         + ",\\.:<>?\";\'/]*";
@@ -182,6 +182,7 @@ public class VerilogTokenManager extends TokenManager implements VerilogTokenCon
                         
                         column = strLine.indexOf("*/");
                         if(column >= 0) {
+                            column += 2;    // skip comment end
                             break;
                         }
                         

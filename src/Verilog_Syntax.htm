@@ -466,11 +466,11 @@ csatt@sgi.com<BR>
 
 <A name="REF95"></A><B><A href="#REF95">&lt;blocking_assignment&gt;</A></B>
 	::= &lt;<A href="#REF145">lvalue</A>&gt; = &lt;<A href="#REF148">expression</A>&gt;
-	||= &lt;<A href="#REF145">lvalue</A>&gt; = &lt;<A href="#REF97">delay_or_event_control</A>&gt; &lt;<A href="#REF148">expression</A>&gt; ;
+	||= &lt;<A href="#REF145">lvalue</A>&gt; = &lt;<A href="#REF97">delay_or_event_control</A>&gt; &lt;<A href="#REF148">expression</A>&gt;
 
 <A name="REF96"></A><B><A href="#REF96">&lt;non_blocking_assignment&gt;</A></B>
 	::= &lt;<A href="#REF145">lvalue</A>&gt; &lt;= &lt;<A href="#REF148">expression</A>&gt;
-	||= &lt;<A href="#REF145">lvalue</A>&gt; &lt;= &lt;<A href="#REF97">delay_or_event_control</A>&gt; &lt;<A href="#REF148">expression</A>&gt; ;
+	||= &lt;<A href="#REF145">lvalue</A>&gt; &lt;= &lt;<A href="#REF97">delay_or_event_control</A>&gt; &lt;<A href="#REF148">expression</A>&gt;
 
 <A name="REF97"></A><B><A href="#REF97">&lt;delay_or_event_control&gt;</A></B>
 	::= &lt;<A href="#REF172">delay_control</A>&gt;
@@ -502,7 +502,7 @@ csatt@sgi.com<BR>
 	||= &lt;<A href="#REF52">event_declaration</A>&gt;
 
 <A name="REF103"></A><B><A href="#REF103">&lt;task_enable&gt;</A></B>
-	::= &lt;<A href="#REF32">name_of_task</A>&gt;
+	::= &lt;<A href="#REF32">name_of_task</A>&gt; ;
 	||= &lt;<A href="#REF32">name_of_task</A>&gt; ( &lt;<A href="#REF148">expression</A>&gt; &lt;,&lt;<A href="#REF148">expression</A>&gt;&gt;* ) ;
 
 <A name="REF104"></A><B><A href="#REF104">&lt;system_task_enable&gt;</A></B>
