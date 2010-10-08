@@ -126,7 +126,7 @@ public class testParser implements VerilogASTConstants
         try {
             String dir = System.getProperty("user.dir");
             VerilogParser parser = new VerilogParser(false);
-            String name = "ddr2";
+            String name = "ac97_top";
             ASTNode designFile = (ASTNode)parser.parse(dir + "\\" + name + ".v");
             testParser vhdl = new testParser();
             vhdl.initDebugStream(name + ".txt");

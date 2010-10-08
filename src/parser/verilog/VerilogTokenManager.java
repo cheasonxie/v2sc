@@ -111,9 +111,12 @@ class RegExp
 
 public class VerilogTokenManager extends TokenManager implements VerilogTokenConstants
 {
-    public VerilogTokenManager(BufferedReader stream, boolean parseSymbol)
+    VerilogParser parser = null;
+    public VerilogTokenManager(BufferedReader stream, boolean parseSymbol, 
+                    VerilogParser parser)
     {
         super(stream, parseSymbol);
+        this.parser = parser;
     }
     
     public static final String specialChar = "&()*+,-./:;<>=|[]!%@?~^{}#";
@@ -347,20 +350,70 @@ public class VerilogTokenManager extends TokenManager implements VerilogTokenCon
         }
         
         if(error) {
-            Token token = new Token();
-            token.image = ret;
-            token.beginLine = line;
-            token.beginColumn = curColumn;
-            token.endLine = line;
-            token.endColumn = column;
-            token.kind = -1;
-            token.next = null;
-            throw new ParserException(token);
+            throw new ParserException(newOneToken(ret, curColumn));
         }
 
         if(ret.isEmpty())
             return null;
+        
+        // check macro define
+        if(parser != null && ret.startsWith("`")) {
+            int index = -1;
+            for(int i = 0; i < CompilerDirectives.cdStrings.length; i++) {
+                if(ret.equals(CompilerDirectives.cdStrings[i])) {
+                    index = i;
+                    break;
+                }
+            }
+            
+            if(index < 0) {
+                // extract the content of macro
+                ret = ret.substring(1);
+                ASTNode node = parser.getMacroContent(ret);
+                if(node == null) {
+                    throw new ParserException(newOneToken(ret, curColumn), 
+                            "macro \"" + ret + "\" not defined");
+                }
+                
+                // the first token is `define
+                // the second token is macro name
+                // content start from the third token
+                Token token = node.getFirstToken().next.next;
+                Token lToken = node.getLastToken();
+                if(token != lToken) {
+                    while(token != null) {
+                        Token newToken = newOneToken(token.image, curColumn);
+                        newToken.endColumn = column;
+                        newToken.kind = token.kind;
+                        newToken.prev = lastToken;
+                        lastToken.next = newToken;
+                        lastToken = newToken;
+                        if(token == lToken)
+                            break;
+                        
+                        token = token.next;
+                    }
+                    ret = null;
+                }else {
+                    // only one token in the macro content, just return it
+                    ret = token.image;
+                }
+            }
+        }
+        
         return ret;
+    }
+    
+    private Token newOneToken(String image, int column) {
+        Token token = new Token();
+        token.image = image;
+        token.beginLine = line;
+        token.beginColumn = column;
+        token.endLine = line;
+        token.endColumn = column;
+        token.kind = -1;
+        token.next = null;
+        return token;
     }
     
     /**
@@ -407,7 +460,7 @@ public class VerilogTokenManager extends TokenManager implements VerilogTokenCon
             String dir = System.getProperty("user.dir");
             TokenManager tm = new VerilogTokenManager(
                     new BufferedReader(
-                            new FileReader(dir + "\\ac97_top.v")), false);
+                            new FileReader(dir + "\\ac97_top.v")), false, null);
             Token token = null;
             int kind = tm.getNextTokenKind();
             kind = tm.getNextTokenKind(2);

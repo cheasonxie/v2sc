@@ -410,6 +410,9 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         boolean ret = false;
         if(token == null)
             return ret;
+        if(token.image.equalsIgnoreCase(strVhdlType[TYPE_STD_LOGIC_VECTOR])){
+            return true;
+        }
         Symbol sym = (Symbol)getSymbol(node, token.image);  //TODO check selected name
         if((sym != null) && (sym.kind == FUNCTION || sym.kind == PROCEDURE)) {
             Token tmpToken = findLastLBracketToken(endToken);

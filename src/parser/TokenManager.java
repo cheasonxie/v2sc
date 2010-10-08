@@ -244,8 +244,20 @@ public abstract class TokenManager
         int curLine = line;
         int curColumn = column + 1;
         String image = getNextImage();
-        if(image == null)
-            return null;
+        if(image == null) {
+            if(curToken != lastToken) {
+                // macro has been extracted into several(more than one) token
+                if(curToken == null) {
+                    curToken = firstToken;
+                }else {
+                    assert(curToken.next != null);
+                    curToken = curToken.next;
+                }
+                return curToken;
+            }else {
+                return null;
+            }
+        }
         
         // fill token member
         Token newToken = new Token();

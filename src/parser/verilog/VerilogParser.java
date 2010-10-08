@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.Reader;
+import java.util.HashMap;
 
 import parser.CommentBlock;
 import parser.IASTNode;
@@ -21,6 +22,8 @@ public class VerilogParser implements IParser, VerilogTokenConstants,
     protected ASTNode curNode = null;       // current parsing node
     protected ASTNode lastNode = null;      // last parsed node
     protected ASTNode sourceText = null;   // source text node
+    
+    protected HashMap<String, ASTNode> defineMap = null;
     
     /**
      *  true -- just only parse symbols(if exist)<br>
@@ -322,9 +325,10 @@ public class VerilogParser implements IParser, VerilogTokenConstants,
     boolean checkLateComming(Token token, Token base) throws ParserException {
         if(base == null) { return false; }
         if(token == null) { return true; }
+        if(token == base) { return true; }
         if(token.beginLine > base.beginLine 
             || (token.beginLine == base.beginLine
-                && token.beginColumn > base.beginColumn)) {
+                && token.beginColumn >= base.beginColumn)) {
             return true;
         }else {
             return false;
@@ -4197,20 +4201,27 @@ public class VerilogParser implements IParser, VerilogTokenConstants,
     void cd_define(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTCD_DEFINE);
         openNodeScope(node);
+        if(defineMap == null) {
+            defineMap = new HashMap<String, ASTNode>();
+        }
+        
         new ASTtoken(node, tokenMgr.getNextToken().image);
         tokenMgr.toNextToken();
-        new ASTtoken(node, tokenMgr.getNextToken().image);
-        String value = "";
+        
         int line = tokenMgr.getCurrentToken().beginLine;
-        while(true) {
+        String name = tokenMgr.getNextToken().image;
+        new ASTtoken(node, name);
+        tokenMgr.toNextToken();
+        
+        String value = "";
+        while(tokenMgr.getNextToken().beginLine <= line) {
             value += tokenMgr.getNextToken().image;
             tokenMgr.toNextToken();
-            if(tokenMgr.getNextToken().beginLine > line) {
-                break;
-            }
             value += " ";
         }
-        new ASTtoken(node, value);
+        new ASTtoken(node, value.trim());
+
+        defineMap.put(name, node);
         closeNodeScope(node);
     }
     
@@ -4254,10 +4265,16 @@ public class VerilogParser implements IParser, VerilogTokenConstants,
         closeNodeScope(node);
     }
     
-
     
     public VerilogTokenManager getTokenManager() {
         return tokenMgr;
+    }
+
+    public ASTNode getMacroContent(String image) {
+        if(defineMap == null) {
+            return null;
+        }
+        return defineMap.get(image);
     }
     
     @Override
@@ -4291,7 +4308,7 @@ public class VerilogParser implements IParser, VerilogTokenConstants,
     public IASTNode parse(String path) throws ParserException {
         try {
             BufferedReader stream = new BufferedReader(new FileReader(path));
-            tokenMgr = new VerilogTokenManager(stream, parseSymbol);
+            tokenMgr = new VerilogTokenManager(stream, parseSymbol, this);
             return source_text();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -4302,7 +4319,7 @@ public class VerilogParser implements IParser, VerilogTokenConstants,
     @Override
     public IASTNode parse(Reader reader) throws ParserException {
         BufferedReader stream = new BufferedReader(reader);
-        tokenMgr = new VerilogTokenManager(stream, parseSymbol);
+        tokenMgr = new VerilogTokenManager(stream, parseSymbol, this);
         return source_text();
     }
 
