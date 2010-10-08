@@ -328,7 +328,7 @@ public class VerilogParser implements IParser, VerilogTokenConstants,
         if(token == base) { return true; }
         if(token.beginLine > base.beginLine 
             || (token.beginLine == base.beginLine
-                && token.beginColumn >= base.beginColumn)) {
+                && token.beginColumn > base.beginColumn)) {
             return true;
         }else {
             return false;
@@ -1757,6 +1757,10 @@ public class VerilogParser implements IParser, VerilogTokenConstants,
         Token tmpToken = findTokenInBlock(COLON, endToken);
         if(tmpToken == null)
             tmpToken = endToken;
+        else
+            tmpToken = findTokenInBlock(tokenMgr.getNextToken(tmpToken), COLON, endToken);
+        if(tmpToken == null)
+            tmpToken = endToken;
         expression(node, tmpToken);
         
         if(tokenMgr.getNextTokenKind() == COLON) {
@@ -1956,6 +1960,9 @@ public class VerilogParser implements IParser, VerilogTokenConstants,
         }
 
         closeNodeScope(node);
+        while(is_compiler_directives()) {
+            compiler_directives(p, endToken);
+        }
     }
 
     /**
@@ -1966,7 +1973,7 @@ public class VerilogParser implements IParser, VerilogTokenConstants,
     void module_port_connection(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTMODULE_PORT_CONNECTION);
         openNodeScope(node);
-        if(tokenMgr.getNextTokenKind() != COMMA) {
+        if(tokenMgr.getNextToken() != endToken) {
             expression(node, endToken);
         }else {
             NULL(node, endToken);   // null always before comma
@@ -2197,7 +2204,7 @@ public class VerilogParser implements IParser, VerilogTokenConstants,
 
     /**
      * named_port_connection <br>
-     *     ::= . IDENTIFIER  (  expression  ) 
+     *     ::= . IDENTIFIER  (  [ expression ]  ) 
      */
     void named_port_connection(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTNAMED_PORT_CONNECTION);
@@ -2208,7 +2215,9 @@ public class VerilogParser implements IParser, VerilogTokenConstants,
         
         consumeToken(LPARENTHESIS);
         endToken = findTokenInBlock(RPARENTHESIS, endToken);
-        expression(node, endToken);
+        if(tokenMgr.getNextToken() != endToken) {
+            expression(node, endToken);
+        }
         consumeToken(RPARENTHESIS);
         closeNodeScope(node);
     }
