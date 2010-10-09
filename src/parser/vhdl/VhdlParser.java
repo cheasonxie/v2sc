@@ -410,7 +410,8 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         boolean ret = false;
         if(token == null)
             return ret;
-        if(token.image.equalsIgnoreCase(strVhdlType[TYPE_STD_LOGIC_VECTOR])){
+        if(node.isDescendantOf(ASTEXPRESSION)
+            && token.image.equalsIgnoreCase(strVhdlType[TYPE_STD_LOGIC_VECTOR])){
             return true;
         }
         Symbol sym = (Symbol)getSymbol(node, token.image);  //TODO check selected name
@@ -7388,6 +7389,10 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
     protected Symbol getNamesSymbol(SymbolTable curTab, String[] names) {
         SymbolTable tab0, tab1;
         Symbol sym = null;
+        if(curTab == null || names == null) {
+            System.out.println("VhdlParser.getNamesSymbol: null pointer");
+            return null;
+        }
 
         tab0 = curTab;
         for(int i = 0; i < names.length; i++)
@@ -7398,6 +7403,9 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
                 if((tab1 = tab0.getTableOfSymbol(sym.type)) == null)
                     return null;
                 tab0 = tab1.getSubtable(sym.type);
+                if(tab0 == null) {
+                    return null;
+                }
             }
         }
         return sym;

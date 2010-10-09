@@ -73,13 +73,9 @@ class ScAggregate extends ScVhdl {
         
         int max = 1;
         if(isArray) {
-            int v1 = getIntValue(arrayRange[0]);
-            int v2 = getIntValue(arrayRange[2]);
-            max = (v1 > v2) ? (v1-v2+1) : (v2-v1+1);
+            max = getWidth(arrayRange[0], arrayRange[2]);
         }else if(typeRange != null) {
-            int v1 = getIntValue(typeRange[0]);
-            int v2 = getIntValue(typeRange[2]);
-            max = (v1 > v2) ? (v1-v2+1) : (v2-v1+1);
+            max = getWidth(typeRange[0], typeRange[2]);
         }
         
         if(elementList.size() == 1 && elementList.get(0).choices.isOthers())
@@ -89,9 +85,8 @@ class ScAggregate extends ScVhdl {
             for(int i = 0; i < elementList.size(); i++) {
                 int width = max-num;
                 if(recordTable != null && recordTable.get(i).typeRange != null) {
-                    int v1 = getIntValue(recordTable.get(i).typeRange[0]);
-                    int v2 = getIntValue(recordTable.get(i).typeRange[2]);
-                    width = (v1 > v2) ? (v1-v2+1) : (v2-v1+1);
+                    width = getWidth(recordTable.get(i).typeRange[0], 
+                                recordTable.get(i).typeRange[2]);
                 }
                 ret += elementList.get(i).toBitString(width, isArray);
                 num += elementList.get(i).getBitWidth();

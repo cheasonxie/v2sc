@@ -410,16 +410,28 @@ public class ScVhdl implements ScVhdlConstants, VhdlTokenConstants,
         return ret;
     }
     
-    int getIntValue(String str) {
+    static int getIntValue(String str) throws NumberFormatException {
         if(str.isEmpty())
             return 0;
         if(Character.isDigit(str.charAt(0))) {
-            return Integer.parseInt(str);
+            Integer.parseInt(str);
         }else {
             //Symbol sym = (Symbol)parser.getSymbol(curNode, str);
             //TODO get value
         }
         return 0;
+    }
+    
+    int getWidth(String str1, String str2) {
+        try {
+            int v1 = getIntValue(str1);
+            int v2 = getIntValue(str2);
+            return (v1 > v2) ? (v1-v2+1) : (v2-v1+1);
+        }catch(NumberFormatException e) {
+            System.out.println("line -- " + curNode.getFirstToken().beginLine
+                    + ": width calculation not correct");
+            return 1;
+        }
     }
     
     public int getBitWidth() {

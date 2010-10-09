@@ -42,9 +42,7 @@ class ScRange extends ScVhdl {
     }
     
     public int getBitWidth() {
-        int v1 = getIntValue(simple_exp1.scString());
-        int v2 = getIntValue(simple_exp2.scString());
-        return (v1 > v2) ? (v1-v2+1) : (v2-v1+1);
+        return getWidth(simple_exp1.scString(), simple_exp2.scString());
     }
     
     public String getMin() {

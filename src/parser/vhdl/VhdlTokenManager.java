@@ -267,6 +267,8 @@ public class VhdlTokenManager extends TokenManager implements VhdlTokenConstants
 
         if(ret.isEmpty())
             return null;
+        if(RegExp.is_identifier(ret))
+            ret = ret.toLowerCase();
         return ret;
     }
     

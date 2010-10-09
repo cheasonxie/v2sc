@@ -245,15 +245,24 @@ public class LibraryManager extends VhdlArrayList<LibraryEntry>
         token = token.next;
         while(!token.image.equals(".")) {
             pkgName += token.image;
+            if(token == node.last_token) {
+                break;
+            }
             token = token.next;
+            if(token == null) {
+                System.out.println();
+            }
         }
         
-        token = token.next;
-        while(token != node.last_token) {
-            symbolName += token.image;
+        if(token != node.last_token) {
             token = token.next;
+            while(token != node.last_token) {
+                symbolName += token.image;
+                token = token.next;
+            }
+            symbolName += token.image;
         }
-        symbolName += token.image;
+        
         ret[0] = libName;
         ret[1] = pkgName;
         ret[2] = symbolName;

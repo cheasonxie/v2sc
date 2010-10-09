@@ -35,7 +35,7 @@ public class SymbolTable extends VhdlArrayList<Symbol> implements ISymbolTable
         if(subTable == null) {
             subTable = new HashMap<String, SymbolTable>();
         }
-        subTable.put(name, table);
+        subTable.put(name.toLowerCase(), table);
     }
     
     /**
@@ -55,7 +55,7 @@ public class SymbolTable extends VhdlArrayList<Symbol> implements ISymbolTable
             String name = symbols[i].getName();
             SymbolTable child = other.getSubtable(name);
             if(child != null) {
-                subTable.put(name, child);
+                subTable.put(name.toLowerCase(), child);
             }
         }
     }
@@ -84,13 +84,17 @@ public class SymbolTable extends VhdlArrayList<Symbol> implements ISymbolTable
         if(name == null || name.isEmpty() || subTable == null) {
             return null;
         }
-        return subTable.get(name);
+        return subTable.get(name.toLowerCase());
     }
     
     /**
      * get symbol from subtable
      */
     private Symbol getSubtableSymbol(String name) {
+        if(name == null || name.isEmpty()) {
+            return null;
+        }
+
         Symbol ret = null;
         if(subTable == null) {
             return null;
@@ -113,12 +117,29 @@ public class SymbolTable extends VhdlArrayList<Symbol> implements ISymbolTable
      * get a symbol from the symbol table of specified name
      */
     public Symbol getSymbol(String name) {
+        if(name == null || name.isEmpty()) {
+            return null;
+        }
+        
         Symbol ret = get(name);
         if(ret != null)
             return ret;
         
-        if((ret = getSubtableSymbol(name)) != null) {
-            return ret;
+        if(subTable != null) {
+            // search my symbol firstly
+            for(int i = size()-1; i >= 0; i--) {
+                String name0 = get(i).name;
+                SymbolTable tab = subTable.get(get(i).name);
+                if(tab != null) {
+                    if((ret = tab.get(name)) != null) {
+                        return ret;
+                    }
+                }
+            }
+            
+            if((ret = getSubtableSymbol(name)) != null) {
+                return ret;
+            }
         }
         
         if(parent != null) {

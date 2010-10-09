@@ -19,9 +19,7 @@ class ScCommonIdentifier extends ScVhdl {
         if(sym != null) {
             String[] range = sym.typeRange;
             if(range != null) {
-                int v1 = getIntValue(sym.typeRange[0]);
-                int v2 = getIntValue(sym.typeRange[2]);
-                return (v1 > v2) ? (v1-v2+1) : (v2-v1+1);
+                return getWidth(sym.typeRange[0], sym.typeRange[2]);
             }
         }
         return 0;

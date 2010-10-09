@@ -51,11 +51,11 @@ class ScTerm extends ScVhdl {
         ASTNode dNode = (ASTNode)curNode.getDescendant(ASTFUNCTION_CALL);
         if(dNode != null) {
             ScFunction_call func = new ScFunction_call(dNode);
-            if(func.name.scString().equals("tost")) {
-                System.out.println();
-            }
             Symbol sym = (Symbol)parser.getSymbol(dNode, func.name.scString());
             assert(sym != null && sym.kind == FUNCTION);
+            if(sym == null || sym.type == null) {
+                return false;
+            }
             return sym.type.equalsIgnoreCase("string");
         }
         return false;

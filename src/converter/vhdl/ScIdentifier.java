@@ -11,6 +11,6 @@ class ScIdentifier extends ScCommonIdentifier {
     public ScIdentifier(ASTNode node) {
         super(node);
         assert(node.getId() == ASTIDENTIFIER);
-        identifier = node.firstTokenImage();
+        identifier = node.firstTokenImage().toLowerCase();
     }
 }

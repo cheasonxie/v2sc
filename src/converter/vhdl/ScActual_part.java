@@ -38,6 +38,13 @@ class ScActual_part extends ScVhdl {
 
     public String scString() {
         String ret = "";
+        if(item != null) {
+            return item.scString();
+        }
+        
+        if(designator == null) {
+            System.out.println();
+        }
         if(((ScActual_designator)designator).isOpen) {
             warning("token open ignored");
         }
