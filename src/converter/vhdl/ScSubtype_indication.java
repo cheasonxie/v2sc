@@ -1,6 +1,7 @@
 package converter.vhdl;
 
 import parser.vhdl.ASTNode;
+import parser.vhdl.Symbol;
 
 
 /**
@@ -39,6 +40,67 @@ class ScSubtype_indication extends ScVhdl {
     
     public int getBitWidth() {
         return type_mark.getBitWidth();
+    }
+    
+    public String getMin() {
+        String ret = "0";
+        if(constraint != null){
+            ret = constraint.getMin();
+        }else {
+            //TODO: get subtype range
+            Symbol sym = (Symbol)parser.getSymbol(curNode, type_mark.scString());
+            if(sym != null && sym.typeRange != null) {
+                String[] range = sym.typeRange;
+                if(range[1].equalsIgnoreCase(RANGE_DOWNTO)) {
+                    ret = range[2];
+                }
+            }
+        }
+        return ret;
+    }
+    public String getMax() {
+        String ret = "0";
+        if(constraint != null){
+            ret = constraint.getMax();
+        }else {
+          //TODO: get subtype range
+            Symbol sym = (Symbol)parser.getSymbol(curNode, type_mark.scString());
+            if(sym != null && sym.typeRange != null) {
+                String[] range = sym.typeRange;
+                if(range[1].equalsIgnoreCase(RANGE_DOWNTO)) {
+                    ret = range[0];
+                }
+            }
+        }
+        return ret;
+    }
+    
+    public boolean isDownto() {
+        boolean ret = false;
+        if(constraint != null){
+            ret = constraint.isDownto();
+        }else {
+            Symbol sym = (Symbol)parser.getSymbol(curNode, type_mark.scString());
+            if(sym != null && sym.typeRange != null) {
+                String[] range = sym.typeRange;
+                ret = range[1].equalsIgnoreCase(RANGE_DOWNTO);
+            }
+        }
+        return ret;
+    }
+    
+    public String[] getRange() {
+        String[] ret = null;
+        if(constraint != null){
+            ret = constraint.getRange();
+        }else {
+            //TODO: get subtype range
+            Symbol sym = (Symbol)parser.getSymbol(curNode, type_mark.scString());
+            if(sym != null) {
+                ret = sym.typeRange;
+            }
+        }
+        return ret;
     }
     
     public String scString() {

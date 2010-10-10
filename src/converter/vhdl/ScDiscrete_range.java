@@ -38,8 +38,8 @@ class ScDiscrete_range extends ScVhdl {
         String ret = "0";
         if(range != null) {
             ret = range.getMin();
-        }else if(subtype.constraint != null){
-            ret = subtype.constraint.getMin();
+        }else {
+            ret = subtype.getMin();
         }
         return ret;
     }
@@ -47,8 +47,8 @@ class ScDiscrete_range extends ScVhdl {
         String ret = "0";
         if(range != null) {
             ret = range.getMax();
-        }else if(subtype.constraint != null){
-            ret = subtype.constraint.getMax();
+        }else {
+            ret = subtype.getMax();
         }
         return ret;
     }
@@ -56,8 +56,8 @@ class ScDiscrete_range extends ScVhdl {
         boolean ret = false;
         if(range != null) {
             ret = range.isDownto();
-        }else if(subtype.constraint != null){
-            ret = subtype.constraint.isDownto();
+        }else {
+            ret = subtype.isDownto();
         }
         return ret;
     }
@@ -66,8 +66,8 @@ class ScDiscrete_range extends ScVhdl {
         String[] ret = null;
         if(range != null) {
             ret = range.getRange();
-        }else if(subtype.constraint != null){
-            ret = subtype.constraint.getRange();
+        }else {
+            ret = subtype.getRange();
         }
         return ret;
     }
