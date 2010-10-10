@@ -27,10 +27,6 @@ class ScType_mark extends ScVhdl {
     }
 
     public String scString() {
-        //Symbol sym = (Symbol)parser.getSymbol(curNode, name.getNameSegments());
-        String[] range = null;
-        //if(sym != null)
-        //    range = sym.typeRange;
-        return getReplaceType(name.scString(), range);
+        return getReplaceType(name.scString(), null);
     }
 }

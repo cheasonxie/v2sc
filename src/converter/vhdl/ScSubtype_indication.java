@@ -43,13 +43,15 @@ class ScSubtype_indication extends ScVhdl {
     
     public String scString() {
         String ret = "";
-        ret += type_mark.scString();
         if(constraint != null) {
             String[] range = constraint.getRange();
             ret += "/* ";
             ret += range[0] + " " + range[1] + " " + range[2];
             ret += " */";
             //warning("constraint ignored");
+            ret += getReplaceType(type_mark.name.scString(), constraint.getRange());
+        }else {
+            ret += type_mark.scString();
         }
         if(tolerance != null) {
             warning("tolerance ignored");

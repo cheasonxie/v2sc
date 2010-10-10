@@ -161,8 +161,8 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
                 break;
                 
             case ARCHITECTURE:
-            case ENTITY:
-            case PACKAGE:
+            //case ENTITY:
+            //case PACKAGE:
                 tmp1 = findTokenInBlock(nextToken, END, to);
                 nextToken = tokenMgr.getNextToken(tmp1); // ignore block
                 break;
@@ -4717,11 +4717,11 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
                 }
                 break;
             case ATTRIBUTE:
-                tmpToken = findTokenInBlock(tokenMgr.getNextToken(), SEMICOLON, endToken);
+                tmpToken = findToken(tokenMgr.getNextToken(), SEMICOLON, endToken);
                 if(tmpToken == null) {
                     throw new ParserException(tokenMgr.getNextToken());
                 }
-                tmpToken1 = findToken(IS, endToken);
+                tmpToken1 = findToken(IS, tmpToken);
                 if(tmpToken1 != null && checkLateComming(tmpToken, tmpToken1)) {
                     attribute_specification(p, endToken);
                 }else {
@@ -5723,7 +5723,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
             endToken = findTokenInBlock(tokenMgr.getNextToken(2), END, endToken);
             Token semToken = findToken(endToken, SEMICOLON, null);
             if(semToken == null) {
-                throw new ParserException(endToken);
+                throw new ParserException(tokenMgr.getNextToken());
             }
             tokenMgr.setCurrentToken(semToken);
             closeNodeScope(node);
@@ -6931,17 +6931,19 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
             || tokenMgr.getNextTokenKind(2) == identifier) {
             //name(node, endToken);   //TODO check resolution function name
         }
-        Token tmpToken = findTokenInBlock(RANGE, endToken);
+        
+        Token tmpToken = findToken(LBRACKET, endToken);
         if(tmpToken == null)
-            tmpToken = findTokenInBlock(TO, endToken);
+            tmpToken = findToken(RANGE, endToken);
         if(tmpToken == null)
-            tmpToken = findTokenInBlock(DOWNTO, endToken);
+            tmpToken = findToken(TO, endToken);
+        if(tmpToken == null)
+            tmpToken = findToken(DOWNTO, endToken);
         if(tmpToken == null)
             tmpToken = endToken;
         type_mark(node, tmpToken);
-        if(findToken(RANGE, endToken) != null
-                || findToken(TO, endToken) != null
-                || findToken(DOWNTO, endToken) != null) {
+        if(tokenMgr.getNextTokenKind() != TOLERANCE
+                && tmpToken != endToken) {
             constraint(node, endToken);
         }
         
