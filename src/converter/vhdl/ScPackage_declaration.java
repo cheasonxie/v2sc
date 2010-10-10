@@ -66,6 +66,7 @@ class ScPackage_declaration extends ScCommonIdentifier implements IScStatementBl
         if(body == null) {
             warning("no package body");
         }
+        className = getName();
         ret += "namespace " + identifier;
         ret += "\r\n{\r\n";
         startIntentBlock();
@@ -80,6 +81,7 @@ class ScPackage_declaration extends ScCommonIdentifier implements IScStatementBl
 
     @Override
     public String getImplements() {
+        className = getName();
         if(body != null)
             return body.getImplements();
         else
@@ -88,6 +90,7 @@ class ScPackage_declaration extends ScCommonIdentifier implements IScStatementBl
 
     @Override
     public String getInitCode() {
+        className = getName();
         String ret = "";
         return ret;
     }

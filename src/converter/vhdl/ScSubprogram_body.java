@@ -12,9 +12,9 @@ import parser.vhdl.ASTNode;
  *   </ul> <b>end</b> [ subprogram_kind ] [ designator ] ;
  */
 class ScSubprogram_body extends ScVhdl {
-    ScVhdl spec = null;
-    ScVhdl declarative_part = null;
-    ScVhdl statement_part = null;
+    ScSubprogram_specification spec = null;
+    ScSubprogram_declarative_part declarative_part = null;
+    ScSubprogram_statement_part statement_part = null;
     public ScSubprogram_body(ASTNode node) {
         super(node);
         assert(node.getId() == ASTSUBPROGRAM_BODY);
@@ -40,7 +40,7 @@ class ScSubprogram_body extends ScVhdl {
     public String scString() {
         String ret = "";
         String tmp = "";
-        ret += spec.toString() + "\r\n";
+        ret += spec.specString(true) + "\r\n";
         ret += intent() + "{\r\n";
         startIntentBlock();
         tmp = declarative_part.toString();

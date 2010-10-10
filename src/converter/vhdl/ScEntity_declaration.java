@@ -93,6 +93,7 @@ class ScEntity_declaration extends ScCommonIdentifier implements IScStatementBlo
             return "";  //TODO no entity body, ignore
         }
         String ret = "";
+        className = getName();
         ret += intent() + "SC_CTOR(" + getName() + ")\r\n";
         ret += intent() + "{\r\n";
         startIntentBlock();
@@ -109,6 +110,7 @@ class ScEntity_declaration extends ScCommonIdentifier implements IScStatementBlo
         if(body == null) {
             return "";  //TODO no entity body, ignore
         }
+        className = getName();
         if(header.generic != null) {
             ret += "template<\r\n";
             startIntentBlock();
@@ -133,6 +135,7 @@ class ScEntity_declaration extends ScCommonIdentifier implements IScStatementBlo
         if(body == null) {
             return "";  //TODO no entity body, ignore
         }
+        className = getName();
         if(statement_part != null) {
             ret += statement_part.toString() + "\r\n";
         }

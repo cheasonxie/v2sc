@@ -47,8 +47,12 @@ class ScGenerate_statement extends ScCommonIdentifier implements IScStatementBlo
     private String getName() {
         return "process_generate_" + identifier;
     }
-    private String getSpec() {
-        return intent() + "void " + getName() + "(void)";
+    
+    private String getSpec(boolean individual) {
+        String ret = intent() + "void ";
+        if(individual)
+            ret += className + "::";
+        return ret + getName() + "(void)";
     }
 
     public String scString() {
@@ -59,7 +63,7 @@ class ScGenerate_statement extends ScCommonIdentifier implements IScStatementBlo
     public String getDeclaration() {
         String ret = "";
         ret += statement_part.getDeclaration() + "\r\n";
-        ret += getSpec() + ";";
+        ret += getSpec(false) + ";";
         return ret;
     }
 
@@ -67,7 +71,7 @@ class ScGenerate_statement extends ScCommonIdentifier implements IScStatementBlo
     public String getImplements() {
         String ret = "";
         ret += addPrevComment();
-        ret += getSpec() + "\r\n";
+        ret += getSpec(individual) + "\r\n";
         ret += intent() + "{\r\n";
         startIntentBlock();
         ret += scheme.toString() + "\r\n";

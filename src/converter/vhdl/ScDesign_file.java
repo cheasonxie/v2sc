@@ -178,7 +178,9 @@ class ScDesign_file extends ScVhdl implements IScFile {
     {
         String ret = "";
         for(int i = 0; i < design_units.size(); i++) {
-            ret += design_units.get(i).getImplements() + "\r\n";
+            String tmp = design_units.get(i).getImplements();
+            if(!tmp.isEmpty())
+                ret += tmp + "\r\n";
         }
         return ret;
     }

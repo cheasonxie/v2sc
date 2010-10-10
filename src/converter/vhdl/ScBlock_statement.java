@@ -48,12 +48,15 @@ class ScBlock_statement extends ScCommonIdentifier implements IScStatementBlock 
     private String getName() {
         return "process_block_" + identifier;
     }
-    private String getSpec() {
-        return intent() + "void " + getName() + "(void)";
+    private String getSpec(boolean individual) {
+        String ret = intent() + "void ";
+        if(individual)
+            ret += className + "::";
+        return ret + getName() + "(void)";
     }
 
     public String scString() {
-        String ret = getSpec() + "\r\n";
+        String ret = getSpec(individual) + "\r\n";
         ret += intent() + "{";
         startIntentBlock();
         ret += intent() + header.toString() + "\r\n";
@@ -66,7 +69,7 @@ class ScBlock_statement extends ScCommonIdentifier implements IScStatementBlock 
 
     @Override
     public String getDeclaration() {
-        String ret = getSpec() + ";";
+        String ret = getSpec(false) + ";";
         return ret;
     }
 

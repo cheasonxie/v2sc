@@ -45,8 +45,12 @@ class ScComponent_instantiation_statement extends ScCommonIdentifier implements 
     private String getName() {
         return "process_comp_" + identifier;
     }
-    private String getSpec() {
-        return intent() + "void " + getName() + "(void)";
+    
+    private String getSpec(boolean individual) {
+        String ret = intent() + "void ";
+        if(individual)
+            ret += className + "::";
+        return ret + getName() + "(void)";
     }
     
     public String scString() {
@@ -65,13 +69,13 @@ class ScComponent_instantiation_statement extends ScCommonIdentifier implements 
             name = "comp_" + name;
             ret += " " + name + "(\"" + name + "\");\r\n";
         }
-        ret += getSpec() + ";";
+        ret += getSpec(false) + ";";
         return ret;
     }
 
     @Override
     public String getImplements() {
-        String ret = getSpec() + "\r\n";
+        String ret = getSpec(individual) + "\r\n";
         ret += intent() + "{\r\n";
         startIntentBlock();
         if(port_map != null) {

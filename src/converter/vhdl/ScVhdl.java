@@ -22,7 +22,10 @@ public class ScVhdl implements ScVhdlConstants, VhdlTokenConstants,
     protected static CommentManager commentMgr = null;
     /** entities and packages in this design file */
     protected static ArrayList<ScCommonIdentifier> units = null;
-    protected static int curLevel = 0;    // intent level    
+    protected static int curLevel = 0;    // intent level
+    
+    protected static String className = "entity"; // current entity or package name
+    protected static final boolean individual = true;  // whether create .cpp&.h or .h only 
     
     protected ASTNode curNode = null;
     protected int beginLine = 0;
@@ -31,7 +34,6 @@ public class ScVhdl implements ScVhdlConstants, VhdlTokenConstants,
     protected ArrayList<CommentBlock> myPrevComment = null;
     protected CommentBlock myPostComment = null;
     protected boolean needComment = true;
-    
     
     /**
      * constructor

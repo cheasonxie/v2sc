@@ -43,13 +43,16 @@ class ScSubprogram_specification extends ScVhdl {
             }
         }
     }
-
-    public String scString() {
+    
+    public String specString(boolean isBody) {
         String ret = intent();
         if(type_mark != null) {     // type_mark appear only in function
             ret += type_mark.scString() + " ";
         }else {
             ret += "void ";
+        }
+        if(isBody && individual) {
+            ret += className + "::";
         }
         ret += designator.scString();
         if(parameter_list != null) {
@@ -58,5 +61,9 @@ class ScSubprogram_specification extends ScVhdl {
             ret += "()";
         }
         return ret;
+    }
+
+    public String scString() {
+        return specString(false);
     }
 }
