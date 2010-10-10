@@ -279,6 +279,10 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
                 }
                 break;
                 
+            case ATTRIBUTE:
+                tmp1 = findToken(nextToken, SEMICOLON, to);
+                nextToken = tokenMgr.getNextToken(tmp1); // ignore block
+                break;
             default:
                 break;
             }
@@ -424,6 +428,31 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         }
         return ret;
     }
+    
+    boolean isType_conversion(ASTNode node, Token endToken) throws ParserException {
+        Token token = tokenMgr.getNextToken();
+        if(token == null)
+            return false;
+        token = tokenMgr.getNextToken(2);
+        if(token == null || token.kind != LBRACKET) {
+            return false;
+        }
+        
+        // check buildin type
+        for(int i = 0; i < strVhdlType.length; i++) {
+            if(token.image.equalsIgnoreCase(strVhdlType[i])) {
+                return true;
+            }
+        }
+
+        // user define type
+        Symbol sym = (Symbol)getSymbol(node, token.image);  //TODO check selected name
+        if((sym != null) && (sym.kind == TYPE || sym.kind == SUBTYPE)) {
+            return true;
+        }
+        return false;
+    }
+    
     
     
     /**
@@ -923,7 +952,16 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
     void attribute_name(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTATTRIBUTE_NAME);
         openNodeScope(node);
-        Token tk = findToken(SQUOTE, endToken);
+        Token tk = null;
+        if(tokenMgr.getNextToken(2).image.equalsIgnoreCase("range")) {
+            tk = tokenMgr.getNextToken(3);
+            prefix(node, tk);
+            attribute_designator(node, endToken);
+            closeNodeScope(node);
+            return;
+        }
+        
+        tk = findToken(SQUOTE, endToken);
         prefix(node, tk);
         if(tokenMgr.getNextTokenKind() != SQUOTE) {
             signature(node, tk);
@@ -4268,9 +4306,11 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
     void name(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTNAME);
         openNodeScope(node);
+        
         Token lastPoint = findLastTokenInBlock(POINT, endToken);
         Token lastSQuote = findLastTokenInBlock(SQUOTE, endToken);
         Token lastLbracket = findLastLBracketToken(endToken);
+        
         
         Token tmpToken = lastPoint;
         if(tmpToken == null || (lastSQuote != null 
@@ -4910,7 +4950,9 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         ASTNode node = new ASTNode(p, ASTPRIMARY);
         openNodeScope(node);
         int kind = tokenMgr.getNextTokenKind();
-        if(isFunction_call(node, endToken)) {
+        if(isType_conversion(node, endToken)) {
+            type_conversion(node, endToken);
+        }else if(isFunction_call(node, endToken)) {
             function_call(node, endToken);
         }else {
             if(kind == character_literal || kind == decimal_literal
@@ -4940,7 +4982,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
                     tokenMgr.toNextToken();     // ")"
                 }
             }else {
-                name(node, endToken); // contain "function_call", "type_conversion"
+                name(node, endToken);
             }
         }
         closeNodeScope(node);
@@ -4963,7 +5005,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
             endToken = findTokenInBlock(tokenMgr.getNextToken(2), END, endToken);
             Token semToken = findToken(endToken, SEMICOLON, null);
             if(semToken == null) {
-                throw new ParserException(endToken);
+                throw new ParserException(tokenMgr.getCurrentToken());
             }
             tokenMgr.setCurrentToken(semToken);
             closeNodeScope(node);
@@ -5444,7 +5486,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
     void range(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTRANGE);
         openNodeScope(node);
-        if(findToken(TO, endToken) != null
+        if(findTokenInBlock(TO, endToken) != null
             || findToken(DOWNTO, endToken) != null) {
             Token tmpToken = findToken(TO, endToken);
             if(tmpToken == null)
@@ -6113,6 +6155,13 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
             literal(node, endToken);
             closeNodeScope(node);
             return;
+        }
+        
+        //TODO: ????
+        if(node.isDescendantOf(ASTRANGE) 
+                && tokenMgr.getNextToken(2).image.equalsIgnoreCase("range")) {
+            tokenMgr.toNextToken();
+            tokenMgr.toNextToken();
         }
         
         int kind = tokenMgr.getNextTokenKind();

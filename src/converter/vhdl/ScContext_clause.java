@@ -2,7 +2,6 @@ package converter.vhdl;
 
 import java.util.ArrayList;
 
-import converter.IScStatementBlock;
 import converter.IncludePath;
 import parser.vhdl.ASTNode;
 

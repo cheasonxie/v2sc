@@ -127,7 +127,6 @@ public class SymbolTable extends VhdlArrayList<Symbol> implements ISymbolTable
         if(subTable != null) {
             // search my symbol firstly
             for(int i = size()-1; i >= 0; i--) {
-                String name0 = get(i).name;
                 SymbolTable tab = subTable.get(get(i).name);
                 if(tab != null) {
                     if((ret = tab.get(name)) != null) {

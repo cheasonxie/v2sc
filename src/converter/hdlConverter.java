@@ -7,13 +7,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.Reader;
-import java.util.ArrayList;
-import java.util.Stack;
 
-import parser.IASTNode;
-import parser.IParser;
 import parser.ParserException;
-import parser.vhdl.ASTNode;
 
 public abstract class hdlConverter implements ScConstants
 {

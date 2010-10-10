@@ -9,10 +9,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import parser.IASTNode;
-import parser.ParserException;
-import parser.Token;
-
 public class regexp1
 { 
     static final int TEST_COMMON = 0;

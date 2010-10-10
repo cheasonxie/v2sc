@@ -11,11 +11,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.StringTokenizer;
 
-import parser.IASTNode;
-import parser.IParser;
-import parser.Token;
-import parser.vhdl.VhdlASTConstants;
-import parser.vhdl.VhdlTokenConstants;
 
 public class extratVerilog {
     public static void main(String[] args)

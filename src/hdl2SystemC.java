@@ -16,9 +16,26 @@ public class hdl2SystemC
     {
         if(testDir) {
             hdlConverter conv = new Vhdl();
-            String baseDir = "grlib-gpl-1.0.21-b3848";
-            conv.addLibary(baseDir+"\\lib\\grlib", "grlib");
-            conv.convertDir(baseDir+"\\lib\\grlib", baseDir + "\\SystemC\\lib\\grlib");
+            String baseDir = "D:\\xzs\\grlib-gpl-1.0.21-b3848\\lib";
+            //conv.addLibary(baseDir+"\\contrib", "contrib");
+            //conv.addLibary(baseDir+"\\cypress", "cypress");
+            //conv.addLibary(baseDir+"\\esa", "esa");
+            //conv.addLibary(baseDir+"\\eth", "eth");
+            //conv.addLibary(baseDir+"\\fmf", "fmf");
+            //conv.addLibary(baseDir+"\\gaisler", "gaisler");
+            //conv.addLibary(baseDir+"\\gleichmann", "gleichmann");
+            //conv.addLibary(baseDir+"\\grlib", "grlib");
+            //conv.addLibary(baseDir+"\\gsi", "gsi");
+            conv.addLibary(baseDir+"\\hynix", "hynix");
+            conv.addLibary(baseDir+"\\micron", "micron");
+            conv.addLibary(baseDir+"\\openchip", "openchip");
+            conv.addLibary(baseDir+"\\opencores", "opencores");
+            conv.addLibary(baseDir+"\\spansion", "spansion");
+            conv.addLibary(baseDir+"\\spw", "spw");
+            conv.addLibary(baseDir+"\\synplify", "synplify");
+            conv.addLibary(baseDir+"\\tech", "tech");
+            conv.addLibary(baseDir+"\\techmap", "techmap");
+            conv.convertDir(baseDir, baseDir + "\\SystemC");
         }else {
             try
             {

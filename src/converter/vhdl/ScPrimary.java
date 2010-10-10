@@ -29,6 +29,9 @@ class ScPrimary extends ScVhdl {
             case ASTFUNCTION_CALL:
                 item = new ScFunction_call(c);
                 break;
+            case ASTTYPE_CONVERSION:
+                item = new ScType_conversion(c);
+                break;
             case ASTLITERAL:
                 item = new ScLiteral(c);
                 break;
