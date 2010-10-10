@@ -37,6 +37,9 @@ class ScCommonDeclaration extends ScVhdl {
             case ASTSIGNAL_KIND:
                 signal_kind = new ScSignal_kind(c);
                 break;
+            case ASTELEMENT_SUBTYPE_DEFINITION:
+                sub = new ScElement_subtype_definition(c);  // only in record type
+                break;
             default:
                 break;
             }
