@@ -19,9 +19,11 @@ public class ASTSymbolNode extends ASTNode
     private boolean isParsed = false;
 
     private SymbolTable mySymTab = new SymbolTable();
+    protected VhdlParser parser = null;
     
-    public ASTSymbolNode(IASTNode p, int id) {
+    public ASTSymbolNode(IASTNode p, int id, VhdlParser parser) {
         super(p, id);
+        this.parser = parser;
     }
     
     // wild node, only used to parse symbol(must not in ast)
@@ -95,6 +97,9 @@ public class ASTSymbolNode extends ASTNode
     }
     private String[] getRange(ASTNode rangeNode) {
         String range[] = null;
+        if(rangeNode == null || rangeNode.getChild(0) == null) {
+            return null;
+        }
         if(rangeNode.getChild(0).getId() == ASTSIMPLE_EXPRESSION) {
             range = new String[3];
             range[0] = getSimpleExpression((ASTNode)rangeNode.getChild(0));
@@ -120,6 +125,34 @@ public class ASTSymbolNode extends ASTNode
         return range;
     }
     
+    private Symbol getSubtype_indication(ASTNode subNode) {
+        if(subNode == null) {
+            return null;
+        }
+        Symbol sym = new Symbol();
+        ASTNode tmpNode0, tmpNode1;
+        
+        tmpNode1 = (ASTNode)subNode.getChildById(ASTTYPE_MARK);
+        sym.type = tmpNode1.getName();
+        
+        tmpNode1 = (ASTNode)subNode.getChildById(ASTCONSTRAINT);
+        if(tmpNode1 != null) {
+            ASTNode rangeNode = null;
+            tmpNode0 = (ASTNode)tmpNode1.getDescendant(ASTRANGE_CONSTRAINT);
+            if(tmpNode0 != null) {
+                // type range(children of range_constraint)
+                rangeNode = (ASTNode)tmpNode0.getDescendant(ASTRANGE);
+                sym.typeRange = getRange(rangeNode);
+            }else {
+                // value range(children of range_constraint)
+                tmpNode0 = (ASTNode)tmpNode1.getDescendant(ASTINDEX_CONSTRAINT);
+                rangeNode = (ASTNode)tmpNode0.getDescendant(ASTRANGE);
+                sym.range = getRange(rangeNode);
+            }
+        }
+        return sym;
+    }
+    
     private boolean parseSymbol(int kind) {
         if(isParsed) {
             return true;
@@ -128,6 +161,7 @@ public class ASTSymbolNode extends ASTNode
         int i = 0, j = 0;
         ASTNode tmpNode0 = null, tmpNode1 = null;
         ASTSymbolNode child = null;
+        Symbol tmpSym = null;
         
         int nodeKind = getNodeKind(kind);
         Symbol sym = new Symbol();
@@ -159,12 +193,6 @@ public class ASTSymbolNode extends ASTNode
             tmpNode0 = (ASTNode)tmpNode0.getChildById(ASTTYPE_MARK);
             if(tmpNode0 != null) {
                 sym.type = tmpNode0.getName();
-                
-                // type range(children of type_mark)
-                tmpNode0 = (ASTNode)tmpNode0.getDescendant(ASTRANGE);
-                if(tmpNode0 != null) {
-                    sym.typeRange = getRange(tmpNode0);
-                }
             }
             
             mySymTab.add(sym);
@@ -176,7 +204,7 @@ public class ASTSymbolNode extends ASTNode
                 child = new ASTSymbolNode(tmpNode0.getChild(i));
                 SymbolTable table = child.getParsedSymbolTable(VARIABLE);
                 for(j = 0; j < table.size(); j++) {
-                    Symbol tmpSym = table.get(j);
+                    tmpSym = table.get(j);
                     tmpSym.kind = kind;
                     mySymTab.add(tmpSym);
                 }
@@ -200,14 +228,12 @@ public class ASTSymbolNode extends ASTNode
                         }
                     }
                     
-                    tmpNode1 = (ASTNode)tmpNode0.getChildById(ASTSUBTYPE_INDICATION);
-                    tmpNode1 = (ASTNode)tmpNode1.getChildById(ASTTYPE_MARK);
-                    sym.type = tmpNode1.getName();
-                    
-                    // type range(children of type_mark)
-                    tmpNode1 = (ASTNode)tmpNode1.getDescendant(ASTRANGE);
-                    if(tmpNode1 != null) {
-                        sym.typeRange = getRange(tmpNode1);
+                    tmpNode0 = (ASTNode)tmpNode0.getChildById(ASTSUBTYPE_INDICATION);
+                    tmpSym = getSubtype_indication(tmpNode0);
+                    if(tmpSym != null) {
+                        sym.type = tmpSym.type;
+                        sym.typeRange = tmpSym.typeRange;
+                        sym.range = tmpSym.range;
                     }
                 }else {
                     // record type
@@ -223,20 +249,11 @@ public class ASTSymbolNode extends ASTNode
             
             // get type and range
             tmpNode0 = (ASTNode)getDescendant(ASTSUBTYPE_INDICATION);
-            tmpNode1 = (ASTNode)tmpNode0.getChildById(ASTTYPE_MARK);
-            sym.type = tmpNode1.getName();
-            
-            // type range(children of type_mark)
-            tmpNode1 = (ASTNode)tmpNode1.getDescendant(ASTRANGE);
-            if(tmpNode1 != null) {
-                sym.typeRange = getRange(tmpNode1);
-            }
-            
-            // value range
-            tmpNode1 = (ASTNode)tmpNode0.getChildById(ASTCONSTRAINT);
-            if(tmpNode1 != null) {
-                ASTNode rangeNode = (ASTNode)tmpNode1.getDescendant(ASTRANGE);
-                sym.range = getRange(rangeNode);
+            tmpSym = getSubtype_indication(tmpNode0);
+            if(tmpSym != null) {
+                sym.type = tmpSym.type;
+                sym.typeRange = tmpSym.typeRange;
+                sym.range = tmpSym.range;
             }
             mySymTab.add(sym);
             break;
@@ -250,19 +267,11 @@ public class ASTSymbolNode extends ASTNode
             
             // get type and range
             tmpNode0 = (ASTNode)getDescendant(ASTSUBTYPE_INDICATION);
-            tmpNode1 = (ASTNode)tmpNode0.getChildById(ASTTYPE_MARK);
-            sym.type = tmpNode1.getName();
-            
-            // type range(children of type_mark)
-            tmpNode1 = (ASTNode)tmpNode1.getDescendant(ASTRANGE);
-            if(tmpNode1 != null) {
-                sym.typeRange = getRange(tmpNode1);
-            }
-            
-            tmpNode1 = (ASTNode)tmpNode0.getChildById(ASTCONSTRAINT);
-            if(tmpNode1 != null) {
-                ASTNode rangeNode = (ASTNode)tmpNode1.getDescendant(ASTRANGE);
-                sym.range = getRange(rangeNode);
+            tmpSym = getSubtype_indication(tmpNode0);
+            if(tmpSym != null) {
+                sym.type = tmpSym.type;
+                sym.typeRange = tmpSym.typeRange;
+                sym.range = tmpSym.range;
             }
             
             // get value
@@ -276,7 +285,7 @@ public class ASTSymbolNode extends ASTNode
             tmpNode0 = (ASTNode)getDescendant(ASTIDENTIFIER_LIST);
             for(i = 0; i < tmpNode0.getChildrenNum(); i++) {
                 ASTNode idNode = (ASTNode)tmpNode0.getChild(i);
-                Symbol tmpSym = sym.clone();
+                tmpSym = sym.clone();
                 tmpSym.name = idNode.getName();
                 mySymTab.add(tmpSym);
             }

@@ -633,7 +633,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
      *   <dd> <b>alias</b> alias_designator [ : alias_indication ] <b>is</b> name [ signature ] ;
      */
     void alias_declaration(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTSymbolNode(p, ASTALIAS_DECLARATION);
+        ASTNode node = new ASTSymbolNode(p, ASTALIAS_DECLARATION, this);
         openNodeScope(node);
         consumeToken(ALIAS);
         endToken = findToken(SEMICOLON, endToken);
@@ -922,7 +922,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
      *   <dd> <b>attribute</b> identifier : type_mark ;
      */
     void attribute_declaration(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTSymbolNode(p, ASTATTRIBUTE_DECLARATION);
+        ASTNode node = new ASTSymbolNode(p, ASTATTRIBUTE_DECLARATION, this);
         openNodeScope(node);
         endToken = findToken(SEMICOLON, endToken);
         consumeToken(ATTRIBUTE);
@@ -989,7 +989,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
      *   <dd> <b>attribute</b> attribute_designator <b>of</b> entity_specification <b>is</b> expression ;
      */
     void attribute_specification(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTSymbolNode(p, ASTATTRIBUTE_SPECIFICATION);
+        ASTNode node = new ASTSymbolNode(p, ASTATTRIBUTE_SPECIFICATION, this);
         openNodeScope(node);
         consumeToken(ATTRIBUTE);
         endToken = findToken(SEMICOLON, endToken);
@@ -1657,7 +1657,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
      *   </ul> <b>end</b> <b>component</b> [ <i>component_</i>simple_name ] ;
      */
     void component_declaration(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTSymbolNode(p, ASTCOMPONENT_DECLARATION);
+        ASTNode node = new ASTSymbolNode(p, ASTCOMPONENT_DECLARATION, this);
         openNodeScope(node);
         startBlock();
         
@@ -2178,7 +2178,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
      *   <dd> <b>constant</b> identifier_list : subtype_indication [ := expression ] ;
      */
     void constant_declaration(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTSymbolNode(p, ASTCONSTANT_DECLARATION);
+        ASTNode node = new ASTSymbolNode(p, ASTCONSTANT_DECLARATION, this);
         openNodeScope(node);
         endToken = findToken(SEMICOLON, endToken);
         
@@ -2550,7 +2550,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
      *   <dd> identifier_list : element_subtype_definition ;
      */
     void element_declaration(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTSymbolNode(p, ASTELEMENT_DECLARATION);
+        ASTNode node = new ASTSymbolNode(p, ASTELEMENT_DECLARATION, this);
         openNodeScope(node);
         endToken = findToken(SEMICOLON, endToken);
         
@@ -3036,7 +3036,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
      *   <dd> ( enumeration_literal { , enumeration_literal } )
      */
     void enumeration_type_definition(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTSymbolNode(p, ASTENUMERATION_TYPE_DEFINITION);
+        ASTNode node = new ASTSymbolNode(p, ASTENUMERATION_TYPE_DEFINITION, this);
         openNodeScope(node);
         consumeToken(LBRACKET);
         endToken = findTokenInBlock(RBRACKET, endToken);
@@ -3193,7 +3193,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
      *   <dd> <b>file</b> identifier_list : subtype_indication [ file_open_information ] ;
      */
     void file_declaration(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTSymbolNode(p, ASTFILE_DECLARATION);
+        ASTNode node = new ASTSymbolNode(p, ASTFILE_DECLARATION, this);
         openNodeScope(node);
         endToken = findToken(SEMICOLON, endToken);
         
@@ -3275,7 +3275,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
      *   <dd> <i>parameter_</i>interface_list
      */
     void formal_parameter_list(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTSymbolNode(p, ASTFORMAL_PARAMETER_LIST);
+        ASTNode node = new ASTSymbolNode(p, ASTFORMAL_PARAMETER_LIST, this);
         openNodeScope(node);
         interface_list(node, endToken);
         closeNodeScope(node);
@@ -3472,7 +3472,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
      *   <dd> <i>generic_</i>interface_list
      */
     void generic_list(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTSymbolNode(p, ASTGENERIC_LIST);
+        ASTNode node = new ASTSymbolNode(p, ASTGENERIC_LIST, this);
         openNodeScope(node);
         interface_list(node, endToken);
         closeNodeScope(node);
@@ -3543,7 +3543,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
      *   <dd> <b>group</b> identifier : <i>group_template_</i>name ( group_constituent_list ) ;
      */
     void group_declaration(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTSymbolNode(p, ASTGROUP_DECLARATION);
+        ASTNode node = new ASTSymbolNode(p, ASTGROUP_DECLARATION, this);
         openNodeScope(node);
         endToken = findToken(SEMICOLON, endToken);
         
@@ -3567,7 +3567,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
      *   <dd> <b>group</b> identifier <b>is</b> ( entity_class_entry_list ) ;
      */
     void group_template_declaration(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTSymbolNode(p, ASTGROUP_TEMPLATE_DECLARATION);
+        ASTNode node = new ASTSymbolNode(p, ASTGROUP_TEMPLATE_DECLARATION, this);
         openNodeScope(node);
         endToken = findToken(SEMICOLON, endToken);
         
@@ -3968,7 +3968,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
      *   <dd> interface_element { ; interface_element }
      */
     void interface_list(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTSymbolNode(p, ASTINTERFACE_LIST);
+        ASTNode node = new ASTSymbolNode(p, ASTINTERFACE_LIST, this);
         openNodeScope(node);
         while(true) {
             Token tmpToken = findToken(SEMICOLON, endToken);
@@ -4361,7 +4361,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
      *   <dd> <b>nature</b> identifier <b>is</b> nature_definition ;
      */
     void nature_declaration(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTSymbolNode(p, ASTNATURE_DECLARATION);
+        ASTNode node = new ASTSymbolNode(p, ASTNATURE_DECLARATION, this);
         openNodeScope(node);
         endToken = findToken(SEMICOLON, endToken);
         
@@ -4841,7 +4841,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
      *   </ul> <b>end</b> <b>units</b> [ <i>physical_type_</i>simple_name ] </ul>
      */
     void physical_type_definition(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTSymbolNode(p, ASTPHYSICAL_TYPE_DEFINITION);
+        ASTNode node = new ASTSymbolNode(p, ASTPHYSICAL_TYPE_DEFINITION, this);
         openNodeScope(node);
         startBlock();
         
@@ -4896,7 +4896,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
      *   <dd> <i>port_</i>interface_list
      */
     void port_list(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTSymbolNode(p, ASTPORT_LIST);
+        ASTNode node = new ASTSymbolNode(p, ASTPORT_LIST, this);
         openNodeScope(node);
         interface_list(node, endToken);
         closeNodeScope(node);
@@ -5421,7 +5421,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
      *   <br> | source_quantity_declaration
      */
     void quantity_declaration(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTSymbolNode(p, ASTQUANTITY_DECLARATION);
+        ASTNode node = new ASTSymbolNode(p, ASTQUANTITY_DECLARATION, this);
         openNodeScope(node);
         if(findToken(SPECTRUM, endToken) != null 
                 || findToken(NOISE, endToken) != null) {
@@ -6043,7 +6043,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
      *   <dd> <b>signal</b> identifier_list : subtype_indication [ signal_kind ] [ := expression ] ;
      */
     void signal_declaration(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTSymbolNode(p, ASTSIGNAL_DECLARATION);
+        ASTNode node = new ASTSymbolNode(p, ASTSIGNAL_DECLARATION, this);
         openNodeScope(node);
         endToken = findToken(SEMICOLON, endToken);
         
@@ -6607,7 +6607,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
      *   <dd> <b>subnature</b> identifier <b>is</b> subnature_indication ;
      */
     void subnature_declaration(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTSymbolNode(p, ASTSUBNATURE_DECLARATION);
+        ASTNode node = new ASTSymbolNode(p, ASTSUBNATURE_DECLARATION, this);
         openNodeScope(node);
         endToken = findToken(SEMICOLON, endToken);
         
@@ -6673,7 +6673,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
      *   <dd> <b>procedure</b> | <b>function</b>
      */
     void subprogram_body(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTSymbolNode(p, ASTSUBPROGRAM_BODY);
+        ASTNode node = new ASTSymbolNode(p, ASTSUBPROGRAM_BODY, this);
         openNodeScope(node);
         startBlock();
         
@@ -6718,7 +6718,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
      *   <dd> subprogram_specification ;
      */
     void subprogram_declaration(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTSymbolNode(p, ASTSUBPROGRAM_DECLARATION);
+        ASTNode node = new ASTSymbolNode(p, ASTSUBPROGRAM_DECLARATION, this);
         openNodeScope(node);
         startBlock();
         endToken = findTokenInBlock(SEMICOLON, endToken);
@@ -6908,7 +6908,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
      *   <dd> <b>subtype</b> identifier <b>is</b> subtype_indication ;
      */
     void subtype_declaration(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTSymbolNode(p, ASTSUBTYPE_DECLARATION);
+        ASTNode node = new ASTSymbolNode(p, ASTSUBTYPE_DECLARATION, this);
         openNodeScope(node);
         endToken = findToken(SEMICOLON, endToken);
         
@@ -7048,7 +7048,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
      *   <dd> <b>terminal</b> identifier_list : subnature_indication ;
      */
     void terminal_declaration(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTSymbolNode(p, ASTTERMINAL_DECLARATION);
+        ASTNode node = new ASTSymbolNode(p, ASTTERMINAL_DECLARATION, this);
         openNodeScope(node);
         endToken = findToken(SEMICOLON, endToken);
         
@@ -7135,7 +7135,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
      *   <br> | incomplete_type_declaration
      */
     void type_declaration(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTSymbolNode(p, ASTTYPE_DECLARATION);
+        ASTNode node = new ASTSymbolNode(p, ASTTYPE_DECLARATION, this);
         openNodeScope(node);
         endToken = findToken(SEMICOLON, endToken);
         endToken = tokenMgr.getNextToken(endToken);
@@ -7309,7 +7309,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
      *        : subtype_indication [ := expression ] ;
      */
     void variable_declaration(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTSymbolNode(p, ASTVARIABLE_DECLARATION);
+        ASTNode node = new ASTSymbolNode(p, ASTVARIABLE_DECLARATION, this);
         openNodeScope(node);
         endToken = findToken(SEMICOLON, endToken);
         

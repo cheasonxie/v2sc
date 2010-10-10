@@ -126,24 +126,24 @@ public class Symbol implements ISymbol, Cloneable
             if(!ret)
                 return false;
             ret = (kind == oth.kind && type.equalsIgnoreCase(oth.type));
-            String msg = "two functions: " + name + ", have the same name, " +
-            		"but they are not overload";
+            //String msg = "two functions: " + name + ", have the same name, " +
+            //		"but they are not overload";
             if(!ret) {
-                System.err.println(msg);
+                //System.err.println(msg);
                 return false;
             }
             
             // check typeRange
             if((typeRange == null && oth.typeRange != null) 
                     || (typeRange != null && oth.typeRange == null)) {
-                System.err.println(msg);
+                //System.err.println(msg);
                 return false;
             }
             if(typeRange != null && oth.typeRange != null) {
                 if(!(typeRange[0].equalsIgnoreCase(oth.typeRange[0])
                         || typeRange[1].equalsIgnoreCase(oth.typeRange[1])
                         || typeRange[2].equalsIgnoreCase(oth.typeRange[2]))) {
-                    System.err.println(msg);
+                    //System.err.println(msg);
                     return false;
                 }
             }
