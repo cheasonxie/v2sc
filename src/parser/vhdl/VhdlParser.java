@@ -83,6 +83,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
     
     void closeNodeScope(ASTNode n) throws ParserException  {
         n.setLastToken(tokenMgr.getCurrentToken());
+        
         lastNode = curNode;
         curNode = (ASTNode)n.getParent();
     }
@@ -2399,6 +2400,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
             }
         }
         closeNodeScope(node);
+        
         designFile = node;
         return node;
     }
@@ -7421,6 +7423,11 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
             System.err.println("you must parse the file by calling parse() firstly");
             return null;
         }
+        
+        if(((ASTNode)node).getSymbolTable() == null) {
+            return null;
+        }
+        
         Symbol sym = ((ASTNode)node).getSymbolTable().getSymbol(name);
         if(sym != null) {
             return sym;

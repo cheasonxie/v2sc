@@ -186,7 +186,6 @@ public class ASTNode implements IASTNode
             }
         }
 
-        name = name.toLowerCase();
         return name;
     }
 

@@ -81,6 +81,8 @@ public class VhdlTokenManager extends TokenManager implements VhdlTokenConstants
     static final char singleQuote = '\'';
     static final char doubleQuote = '\"';
     
+    ArrayList<String> constArray = new ArrayList<String>();
+    
     /**
      * skip space and tabulation and comment
      * @return true if success, false if end of file
@@ -267,8 +269,21 @@ public class VhdlTokenManager extends TokenManager implements VhdlTokenConstants
 
         if(ret.isEmpty())
             return null;
-        if(RegExp.is_identifier(ret))
-            ret = ret.toLowerCase();
+        if(curToken != null && curToken.kind == CONSTANT) {
+            constArray.add(ret);
+        }else if(RegExp.is_identifier(ret)) {
+            int i = 0;
+            for(i = 0; i < constArray.size(); i++) {
+                if(ret.equalsIgnoreCase(constArray.get(i))) {
+                    ret = constArray.get(i);
+                    break;
+                }
+            }
+            
+            if(i >= constArray.size()) {
+                ret = ret.toLowerCase();
+            }
+        }
         return ret;
     }
     

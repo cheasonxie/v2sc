@@ -11,7 +11,6 @@ package parser.vhdl;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import parser.ISymbol;
 import parser.ISymbolTable;
 
 public class SymbolTable extends VhdlArrayList<Symbol> implements ISymbolTable
@@ -35,7 +34,7 @@ public class SymbolTable extends VhdlArrayList<Symbol> implements ISymbolTable
         if(subTable == null) {
             subTable = new HashMap<String, SymbolTable>();
         }
-        subTable.put(name.toLowerCase(), table);
+        subTable.put(name, table);
     }
     
     /**
@@ -55,7 +54,7 @@ public class SymbolTable extends VhdlArrayList<Symbol> implements ISymbolTable
             String name = symbols[i].getName();
             SymbolTable child = other.getSubtable(name);
             if(child != null) {
-                subTable.put(name.toLowerCase(), child);
+                subTable.put(name, child);
             }
         }
     }
@@ -84,7 +83,7 @@ public class SymbolTable extends VhdlArrayList<Symbol> implements ISymbolTable
         if(name == null || name.isEmpty() || subTable == null) {
             return null;
         }
-        return subTable.get(name.toLowerCase());
+        return subTable.get(name);
     }
     
     /**
