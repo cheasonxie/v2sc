@@ -14,7 +14,7 @@ public class Verilog extends hdlConverter
         
     }
 
-    public void convertDir(String srcDir)
+    public void convertDir(String srcDir, String dstDir)
     {
         
     }

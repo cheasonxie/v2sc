@@ -45,13 +45,20 @@ public abstract class hdlConverter implements ScConstants
     
     protected void createFile(String path, boolean replace) throws IOException
     {
+        path = path.replace('/', '\\');
+        int index = path.lastIndexOf("\\");
         File file = new File(path);
+        if(index > 0) {
+            String dir = path.substring(0, index);
+            file = new File(dir);
+            file.mkdirs();
+        }   
         if(file.exists() && !replace)
             return;
     }
     
     public abstract void convertFile(String srcPath, String dstPath) 
                 throws ParserException, FileNotFoundException, IOException;    
-    public abstract void convertDir(String srcDir);    
+    public abstract void convertDir(String srcDir, String dstDir);    
     public abstract void addLibary(String srcDir, String libName);
 }

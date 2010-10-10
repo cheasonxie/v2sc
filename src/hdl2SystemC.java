@@ -16,13 +16,14 @@ public class hdl2SystemC
     {
         if(testDir) {
             hdlConverter conv = new Vhdl();
-            conv.addLibary("grlib-gpl-1.0.21-b3848\\lib\\grlib", "grlib");
-            conv.convertDir("grlib-gpl-1.0.21-b3848\\lib\\grlib");
+            String baseDir = "grlib-gpl-1.0.21-b3848";
+            conv.addLibary(baseDir+"\\lib\\grlib", "grlib");
+            conv.convertDir(baseDir+"\\lib\\grlib", baseDir + "\\SystemC\\lib\\grlib");
         }else {
             try
             {
                 hdlConverter conv = null;
-                String name = "leaves";
+                String name = "amba";
                 //String name = "ahbctrl";
                 String path = name + ".vhd";
                 //String path = "ac97_top.v";

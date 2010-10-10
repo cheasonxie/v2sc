@@ -19,6 +19,8 @@ class ScFormal_parameter_list extends ScVhdl {
 
     public String scString() {
         String ret = "";
+        int level = curLevel;
+        curLevel = 0;
         ArrayList<ScInterface_element> items = interface_list.items;
         for(int i = 0; i < items.size(); i++) {
             ret += items.get(i).scString();
@@ -26,6 +28,7 @@ class ScFormal_parameter_list extends ScVhdl {
                 ret += ", ";
             }
         }
+        curLevel = level;
         return ret;
     }
 }

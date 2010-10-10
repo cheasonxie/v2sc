@@ -142,16 +142,22 @@ public class Vhdl extends hdlConverter {
     }
     
     @Override
-    public void convertDir(String srcDir)
+    public void convertDir(String srcDir, String dstDir)
     {
         FileList list = new FileList(srcDir, IParser.EXT_VHDL);
         for(int i = 0; i < list.getFileNum(); i++) {
-            String path = list.getFile(i);
-            path = path.toLowerCase();
-            int index = path.lastIndexOf(IParser.EXT_VHDL);
-            String dstPath = path.substring(0, index-1);
+            String filePath = list.getFile(i);
+            filePath = filePath.toLowerCase();
+            int index = filePath.lastIndexOf(IParser.EXT_VHDL);
+            int index2 = filePath.indexOf(srcDir);
+            String name = filePath;
+            if(index >= 0 && index2 >= 0) {
+                index2 += srcDir.length();
+                name = filePath.substring(index2+1, index-1);
+            }
+            String dstPath = dstDir + "\\" + name;
             try {
-                convertFile(path, dstPath);
+                convertFile(filePath, dstPath);
             } catch (Exception e) {
                 e.printStackTrace();
             }
