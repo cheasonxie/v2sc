@@ -52,6 +52,7 @@ class ScCommonDeclaration extends ScVhdl {
         if(signal_kind != null) {
             warning("signal kind ignored:" + signal_kind.token);
         }
+        isCommonDeclaration = true;
         String strType = sub.scString();
         String maxIndex = "";
         int index = strType.indexOf('<');
@@ -96,6 +97,7 @@ class ScCommonDeclaration extends ScVhdl {
                 ret += ",";
             }
         }
+        isCommonDeclaration = false;
         return ret;
     }
 }
