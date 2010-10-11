@@ -167,7 +167,12 @@ public class LibraryManager extends VhdlArrayList<LibraryEntry>
         
         if(libName == null || libName.isEmpty())
             libName = getFileName(dir);    // use dir name as library name
-        LibraryEntry lib = new LibraryEntry(libName);
+        LibraryEntry lib = get(libName);
+        boolean create = false;
+        if(lib == null) {
+            create = true;
+            lib = new LibraryEntry(libName);
+        }
         
         for(int i = 0; i < list.getFileNum(); i++)
         {
@@ -188,7 +193,8 @@ public class LibraryManager extends VhdlArrayList<LibraryEntry>
                 e.printStackTrace();
             }
         }
-        add(lib);
+        if(create)
+            add(lib);
         return true;
     }
     

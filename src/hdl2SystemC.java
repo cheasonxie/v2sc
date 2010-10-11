@@ -17,15 +17,15 @@ public class hdl2SystemC
         if(testDir) {
             hdlConverter conv = new Vhdl();
             String baseDir = "D:\\xzs\\grlib-gpl-1.0.21-b3848\\lib";
-            //conv.addLibary(baseDir+"\\contrib", "contrib");
-            //conv.addLibary(baseDir+"\\cypress", "cypress");
-            //conv.addLibary(baseDir+"\\esa", "esa");
-            //conv.addLibary(baseDir+"\\eth", "eth");
-            //conv.addLibary(baseDir+"\\fmf", "fmf");
-            //conv.addLibary(baseDir+"\\gaisler", "gaisler");
-            //conv.addLibary(baseDir+"\\gleichmann", "gleichmann");
-            //conv.addLibary(baseDir+"\\grlib", "grlib");
-            //conv.addLibary(baseDir+"\\gsi", "gsi");
+            conv.addLibary(baseDir+"\\contrib", "contrib");
+            conv.addLibary(baseDir+"\\cypress", "cypress");
+            conv.addLibary(baseDir+"\\esa", "esa");
+            conv.addLibary(baseDir+"\\eth", "eth");
+            conv.addLibary(baseDir+"\\fmf", "fmf");
+            conv.addLibary(baseDir+"\\gaisler", "gaisler");
+            conv.addLibary(baseDir+"\\gleichmann", "gleichmann");
+            conv.addLibary(baseDir+"\\grlib", "grlib");
+            conv.addLibary(baseDir+"\\gsi", "gsi");
             conv.addLibary(baseDir+"\\hynix", "hynix");
             conv.addLibary(baseDir+"\\micron", "micron");
             conv.addLibary(baseDir+"\\openchip", "openchip");
@@ -33,8 +33,46 @@ public class hdl2SystemC
             conv.addLibary(baseDir+"\\spansion", "spansion");
             conv.addLibary(baseDir+"\\spw", "spw");
             conv.addLibary(baseDir+"\\synplify", "synplify");
-            conv.addLibary(baseDir+"\\tech", "tech");
-            conv.addLibary(baseDir+"\\techmap", "techmap");
+            //conv.addLibary(baseDir+"\\tech", "tech");
+            //conv.addLibary(baseDir+"\\techmap", "techmap");
+            
+            conv.addLibary(baseDir+"\\tech\\altera", "altera");
+            conv.addLibary(baseDir+"\\tech\\altera_mf", "altera_mf");
+            conv.addLibary(baseDir+"\\tech\\apa", "apa");
+            conv.addLibary(baseDir+"\\tech\\atc18", "atc18");
+            conv.addLibary(baseDir+"\\tech\\axcelerator", "axcelerator");
+            conv.addLibary(baseDir+"\\tech\\cycloneiii", "cycloneiii");
+            conv.addLibary(baseDir+"\\tech\\dw02", "dw02");
+            conv.addLibary(baseDir+"\\tech\\ec", "ec");
+            conv.addLibary(baseDir+"\\tech\\eclipsee", "eclipsee");
+            conv.addLibary(baseDir+"\\tech\\proasic3", "proasic3");
+            conv.addLibary(baseDir+"\\tech\\simprim", "simprim");
+            conv.addLibary(baseDir+"\\tech\\snps", "snps");
+            conv.addLibary(baseDir+"\\tech\\stratixii", "stratixii");
+            conv.addLibary(baseDir+"\\tech\\stratixiii", "stratixiii");
+            conv.addLibary(baseDir+"\\tech\\umc18", "umc18");
+            conv.addLibary(baseDir+"\\tech\\unisim", "unisim");
+            conv.addLibary(baseDir+"\\tech\\virage", "virage");
+
+            conv.addLibary(baseDir+"\\techmap\\altera_mf", "altera_mf");
+            conv.addLibary(baseDir+"\\techmap\\apa", "apa");
+            conv.addLibary(baseDir+"\\techmap\\atc18", "atc18");
+            conv.addLibary(baseDir+"\\techmap\\axcelerator", "axcelerator");
+            conv.addLibary(baseDir+"\\techmap\\clocks", "clocks");
+            conv.addLibary(baseDir+"\\techmap\\cycloneiii", "cycloneiii");
+            conv.addLibary(baseDir+"\\techmap\\dw02", "dw02");
+            conv.addLibary(baseDir+"\\techmap\\ec", "ec");
+            conv.addLibary(baseDir+"\\techmap\\eclipsee", "eclipsee");
+            conv.addLibary(baseDir+"\\techmap\\gencomp", "gencomp");
+            conv.addLibary(baseDir+"\\techmap\\inferred", "inferred");
+            conv.addLibary(baseDir+"\\techmap\\maps", "maps");
+            conv.addLibary(baseDir+"\\techmap\\proasic3", "proasic3");
+            conv.addLibary(baseDir+"\\techmap\\stratixii", "stratixii");
+            conv.addLibary(baseDir+"\\techmap\\stratixiii", "stratixiii");
+            conv.addLibary(baseDir+"\\techmap\\umc18", "umc18");
+            conv.addLibary(baseDir+"\\techmap\\unisim", "unisim");
+            conv.addLibary(baseDir+"\\techmap\\virage", "virage");
+            
             conv.convertDir(baseDir, baseDir + "\\SystemC");
         }else {
             try
