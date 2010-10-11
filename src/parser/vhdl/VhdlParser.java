@@ -384,7 +384,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
     
     /** discrete_range different from other choice */
     boolean isDiscrete_range(Token endToken) throws ParserException {
-        final int[] tokens = {RANGE, DOWNTO, TO};
+        final int[] tokens = {RANGE, DOWNTO, TO, SQUOTE};
         return tokensExist(tokens, endToken);
     }
     

@@ -106,10 +106,16 @@ class ScSubtype_indication extends ScVhdl {
     public String scString() {
         String ret = "";
         if(constraint != null) {
+            if(constraint.getRange() == null) {
+                System.out.println();
+            }
+            
             String[] range = constraint.getRange();
-            ret += "/* ";
-            ret += range[0] + " " + range[1] + " " + range[2];
-            ret += " */";
+            if(curNode.isDescendantOf(ASTSUBTYPE_DECLARATION)) {
+                ret += "/* ";
+                ret += range[0] + " " + range[1] + " " + range[2];
+                ret += " */";
+            }
             //warning("constraint ignored");
             ret += getReplaceType(type_mark.name.scString(), constraint.getRange());
         }else {

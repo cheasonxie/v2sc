@@ -145,6 +145,8 @@ public class Vhdl extends hdlConverter {
     public void convertDir(String srcDir, String dstDir)
     {
         FileList list = new FileList(srcDir, IParser.EXT_VHDL);
+        srcDir = srcDir.toLowerCase();
+        dstDir = dstDir.toLowerCase();
         for(int i = 0; i < list.getFileNum(); i++) {
             String filePath = list.getFile(i);
             filePath = filePath.toLowerCase();

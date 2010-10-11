@@ -38,6 +38,9 @@ class ScPort_map_aspect extends ScVhdl {
         int i = 0;
 
         Symbol[] syms = getComponentChildSymbols(componentName, PORT);
+        if(syms.length == 0) {
+            System.out.println();
+        }
         ArrayList<ScAssociation_element> elements = association_list.elements;
         
         for(i = 0; i < elements.size(); i++) {

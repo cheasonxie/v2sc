@@ -323,10 +323,26 @@ public class ScVhdl implements ScVhdlConstants, VhdlTokenConstants,
         Symbol sym = (Symbol)parser.getSymbol(node, names);
         if(sym == null) { return null; }
         Symbol sym1 = (Symbol)parser.getSymbol(node, sym.type);
-        if(sym1 == null) { //TODO: only tow level here
+        if(sym1 != null) { //TODO: only tow level here
+            sym = sym1;
+        }
+        
+        if(sym.typeRange == null) {
+            String[] range = new String[3];
+            String name = "";
+            for(int i = 0; i < names.length; i++) {
+                name += names[i];
+                if(i < names.length - 1) {
+                    name += ".";
+                }
+            }
+            range[0] = name + ".range()-1";
+            range[1] = RANGE_DOWNTO;
+            range[2] = "0";
+            return range;
+        }else {
             return sym.typeRange;
-        }  
-        return sym1.typeRange;
+        }
     }
     
     String[] getArrayRange(ASTNode node, String[] names) {
