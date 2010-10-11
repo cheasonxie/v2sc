@@ -1190,11 +1190,11 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
                 }
                 break;
             case ATTRIBUTE:
-                tmpToken = findTokenInBlock(tokenMgr.getNextToken(), SEMICOLON, endToken);
+                tmpToken = findToken(tokenMgr.getNextToken(), SEMICOLON, endToken);
                 if(tmpToken == null) {
                     throw new ParserException(tokenMgr.getNextToken());
                 }
-                tmpToken1 = findToken(IS, endToken);
+                tmpToken1 = findToken(IS, tmpToken);
                 if(tmpToken1 != null && checkLateComming(tmpToken, tmpToken1)) {
                     attribute_specification(p, endToken);
                 }else {
@@ -2792,11 +2792,11 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
                 }
                 break;
             case ATTRIBUTE:
-                tmpToken = findTokenInBlock(tokenMgr.getNextToken(), SEMICOLON, endToken);
+                tmpToken = findToken(tokenMgr.getNextToken(), SEMICOLON, endToken);
                 if(tmpToken == null) {
                     throw new ParserException(tokenMgr.getNextToken());
                 }
-                tmpToken1 = findToken(IS, endToken);
+                tmpToken1 = findToken(IS, tmpToken);
                 if(tmpToken1 != null && checkLateComming(tmpToken, tmpToken1)) {
                     attribute_specification(p, endToken);
                 }else {
@@ -5087,11 +5087,11 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
                 }
                 break;
             case ATTRIBUTE:
-                tmpToken = findTokenInBlock(tokenMgr.getNextToken(), SEMICOLON, endToken);
+                tmpToken = findToken(tokenMgr.getNextToken(), SEMICOLON, endToken);
                 if(tmpToken == null) {
                     throw new ParserException(tokenMgr.getNextToken());
                 }
-                tmpToken1 = findToken(IS, endToken);
+                tmpToken1 = findToken(IS, tmpToken);
                 if(tmpToken1 != null && checkLateComming(tmpToken, tmpToken1)) {
                     attribute_specification(p, endToken);
                 }else {
@@ -5251,11 +5251,11 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
                 }
                 break;
             case ATTRIBUTE:
-                tmpToken = findTokenInBlock(tokenMgr.getNextToken(), SEMICOLON, endToken);
+                tmpToken = findToken(tokenMgr.getNextToken(), SEMICOLON, endToken);
                 if(tmpToken == null) {
                     throw new ParserException(tokenMgr.getNextToken());
                 }
-                tmpToken1 = findToken(IS, endToken);
+                tmpToken1 = findToken(IS, tmpToken);
                 if(tmpToken1 != null && checkLateComming(tmpToken, tmpToken1)) {
                     attribute_specification(p, endToken);
                 }else {
@@ -6778,11 +6778,11 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
                 }
                 break;
             case ATTRIBUTE:
-                tmpToken = findTokenInBlock(tokenMgr.getNextToken(), SEMICOLON, endToken);
+                tmpToken = findToken(tokenMgr.getNextToken(), SEMICOLON, endToken);
                 if(tmpToken == null) {
                     throw new ParserException(tokenMgr.getNextToken());
                 }
-                tmpToken1 = findToken(IS, endToken);
+                tmpToken1 = findToken(IS, tmpToken);
                 if(tmpToken1 != null && checkLateComming(tmpToken, tmpToken1)) {
                     attribute_specification(p, endToken);
                 }else {
