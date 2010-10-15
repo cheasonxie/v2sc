@@ -159,9 +159,19 @@ public class Vhdl extends hdlConverter {
             }
             String dstPath = dstDir + "\\" + name;
             try {
-                convertFile(filePath, dstPath);
+                //convertFile(filePath, dstPath);
+                System.out.println("parsing file:" + filePath);
+                VhdlParser parser = new VhdlParser(false);
+                if(filePath.indexOf("stratixiii_atoms.vhd") >= 0) {
+                    System.out.println();
+                }
+                parser.parse(filePath);
             } catch (Exception e) {
-                e.printStackTrace();
+                StackTraceElement[] stackEle = e.getStackTrace();
+                System.err.println("stackEle.length:" + stackEle.length);
+                if(stackEle.length > 7) {
+                    e.printStackTrace();
+                }
             }
             System.gc();    // force garbage collection, release memory
         }

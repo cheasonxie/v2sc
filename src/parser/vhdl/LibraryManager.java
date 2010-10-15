@@ -1,6 +1,7 @@
 package parser.vhdl;
 
 import java.io.File;
+import java.util.ArrayList;
 
 import parser.IASTNode;
 import parser.INameObject;
@@ -17,44 +18,37 @@ class PackageEntry implements INameObject
     String name = "";
     SymbolTable table = null;
     
-    public PackageEntry(String name)
-    {
+    public PackageEntry(String name) {
         this.name = name;
         table = new SymbolTable();
     }
     
-    public PackageEntry(String name, SymbolTable table)
-    {
+    public PackageEntry(String name, SymbolTable table) {
         this.name = name;
         this.table = table;
     }
     
-    public PackageEntry(ASTNode pkgNode)
-    {
+    public PackageEntry(ASTNode pkgNode) {
         assert(pkgNode.getId() == VhdlASTConstants.ASTPACKAGE_DECLARATION);
         name = pkgNode.getName();
         table = pkgNode.getSymbolTable();
     }
     
-    public String getName()
-    {
+    public String getName() {
         return name;
     }
     
-    public void setName(String name)
-    {
+    public void setName(String name) {
         this.name = name;
     }
     
-    public Symbol getSymbol(String symbolName)
-    {
+    public Symbol getSymbol(String symbolName) {
         if(table == null)
             return null;
         return table.getSymbol(symbolName);
     }
     
-    public Symbol[] getAllSymbols()
-    {
+    public Symbol[] getAllSymbols() {
         if(table == null || table.size() == 0)
             return null;
         return (Symbol[])table.toArray(new Symbol[table.size()]);
@@ -76,19 +70,17 @@ class LibraryEntry extends VhdlArrayList<PackageEntry> implements INameObject
 {
     private static final long serialVersionUID = 4599069745863337895L;
     String name = "";
+    ArrayList<String> dirs = new ArrayList<String>();
     
-    public LibraryEntry(String name)
-    {
+    public LibraryEntry(String name) {
         this.name = name;
     }
     
-    public String getName()
-    {
+    public String getName() {
         return name;
     }
     
-    public void setName(String name)
-    {
+    public void setName(String name) {
         this.name = name;
     }
 
@@ -117,8 +109,7 @@ public class LibraryManager extends VhdlArrayList<LibraryEntry>
         return libMgr;
     }
     
-    protected IASTNode[] getPackageNode(IASTNode node, int level)
-    {
+    protected IASTNode[] getPackageNode(IASTNode node, int level) {
         IASTNode[] ret = null;
         
         if(node == null || level >= 5)  //TODO modify the maximum level
@@ -146,8 +137,7 @@ public class LibraryManager extends VhdlArrayList<LibraryEntry>
         return ret;
     }
     
-    private String getFileName(String path)
-    {
+    private String getFileName(String path) {
         File file = new File(path);
         String ret = file.getName();
         file = null;
@@ -160,8 +150,7 @@ public class LibraryManager extends VhdlArrayList<LibraryEntry>
      * @param libName: library name
      * @return
      */
-    public boolean add(String dir, String libName)
-    {
+    public boolean add(String dir, String libName) {
         FileList list = new FileList(dir, IParser.EXT_VHDL);
         System.out.println("======file num:" + list.getFileNum() + "========");
         
@@ -174,8 +163,7 @@ public class LibraryManager extends VhdlArrayList<LibraryEntry>
             lib = new LibraryEntry(libName);
         }
         
-        for(int i = 0; i < list.getFileNum(); i++)
-        {
+        for(int i = 0; i < list.getFileNum(); i++) {
             String path = list.getFile(i);
             try {
                 System.out.println("index:" + i + ", file:" + path);
@@ -190,7 +178,11 @@ public class LibraryManager extends VhdlArrayList<LibraryEntry>
                 }
                 designFile = null;
             } catch (Exception e) {
-                e.printStackTrace();
+                StackTraceElement[] stackEle = e.getStackTrace();
+                System.err.println("stackEle.length:" + stackEle.length);
+                if(stackEle.length > 7) {
+                    e.printStackTrace();
+                }
             }
         }
         if(create)
@@ -219,14 +211,14 @@ public class LibraryManager extends VhdlArrayList<LibraryEntry>
         return true;
     }
     
-    public Symbol getSymbol(String symbolName) {
+    public Symbol getSymbol(ASTNode node, String symbolName) {
         String libName = "", pkgName = "";
         
         for(int i = 0; i < size(); i++) {
             libName = get(i).getName();
             for(int j = 0; j < get(i).size(); j++) {
                 pkgName = get(i).get(j).getName();
-                Symbol[] syms = getSymbols(libName, pkgName, symbolName);
+                Symbol[] syms = getSymbols(node, libName, pkgName, symbolName);
                 if(syms != null) {
                     return syms[0];
                 }
@@ -274,6 +266,67 @@ public class LibraryManager extends VhdlArrayList<LibraryEntry>
         ret[2] = symbolName;
         return ret;
     }
+    
+    /**
+     * which package is in this work directory ?
+     */
+    private PackageEntry getPackage(ASTNode node, String libName, String pkgName, 
+                            String symbolName) {
+        PackageEntry ret = null;
+        LibraryEntry lib = null;
+        
+        if(symbolName.isEmpty()) {
+            symbolName = pkgName;
+            pkgName = "";
+        }
+        
+        exitLoop:
+        if(libName.equalsIgnoreCase("work")) {
+            for(int i = 0; i < size(); i++) {
+                lib = get(i);
+                PackageEntry pkg = null;
+                if(pkgName.isEmpty()) {
+                    for(int j = 0; j < lib.size(); j++) {
+                        pkg = lib.get(j);
+                        Symbol tmpSym = pkg.getSymbol(symbolName);
+                        if(tmpSym != null) {
+                            ret = pkg;
+                            break exitLoop;
+                        }
+                    }
+                }else {
+                    pkg = lib.get(pkgName);
+                    if(pkg != null) {
+                        if(symbolName.equalsIgnoreCase("all")) {
+                            ret = pkg;
+                        }else {
+                            Symbol tmpSym = pkg.getSymbol(symbolName);
+                            if(tmpSym != null) {
+                                ret = pkg;
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+        }else {
+            lib = get(libName);
+            if(lib != null) {
+                PackageEntry pkg = lib.get(pkgName);
+                if(pkg != null) {
+                    if(symbolName.equalsIgnoreCase("all")) {
+                        ret = pkg;
+                    }else {
+                        Symbol tmpSym = pkg.getSymbol(symbolName);
+                        if(tmpSym != null) {
+                            ret = pkg;
+                        }
+                    }
+                }
+            }
+        }
+        return ret;
+    }
    
     public Symbol[] getSymbols(ASTNode node) {
         String[] names = getSelectedNames(node);
@@ -281,32 +334,27 @@ public class LibraryManager extends VhdlArrayList<LibraryEntry>
             return null;
         }
         
-        return getSymbols(names[0], names[1], names[2]);
+        return getSymbols(node, names[0], names[1], names[2]);
     }
     
-    protected Symbol[] getSymbols(String libName, String pkgName, String symbolName)
-    {
+    protected Symbol[] getSymbols(ASTNode node, String libName, String pkgName, 
+                            String symbolName) {
         Symbol[] ret = null;
-
-        for(int i = 0; i < size(); i++) {
-            LibraryEntry lib = get(i);
-            if(lib.getName().equalsIgnoreCase(libName)) {
-                PackageEntry pkg = lib.get(pkgName);
-                if(pkg != null) {
-                    if(symbolName.equalsIgnoreCase("all")) {
-                        ret = pkg.getAllSymbols();
-                    }else {
-                        Symbol tmpSym = pkg.getSymbol(symbolName);
-                        if(tmpSym != null) {
-                            Symbol[] syms = new Symbol[1];
-                            syms[0] = tmpSym;
-                            ret = syms;
-                        }
-                    }
-                    break;
+        
+        PackageEntry pkg = getPackage(node, libName, pkgName, symbolName);
+        if(pkg != null) {
+            if(symbolName.equalsIgnoreCase("all")) {
+                ret = pkg.getAllSymbols();
+            }else {
+                Symbol tmpSym = pkg.getSymbol(symbolName);
+                if(tmpSym != null) {
+                    Symbol[] syms = new Symbol[1];
+                    syms[0] = tmpSym;
+                    ret = syms;
                 }
             }
         }
+        
         return ret;
     }
     
@@ -316,27 +364,23 @@ public class LibraryManager extends VhdlArrayList<LibraryEntry>
             return null;
         }
         
-        return getSymbolTable(names[0], names[1], names[2]);
+        return getSymbolTable(node, names[0], names[1], names[2]);
     }
     
-    protected SymbolTable getSymbolTable(String libName, String pkgName, String symbolName)
-    {
+    protected SymbolTable getSymbolTable(ASTNode node, String libName, String pkgName, 
+                                String symbolName) {
         SymbolTable ret = null;
-
-        for(int i = 0; i < size(); i++) {
-            LibraryEntry lib = get(i);
-            if(lib.getName().equalsIgnoreCase(libName)) {
-                PackageEntry pkg = lib.get(pkgName);
-                if(pkg != null) {
-                    if(symbolName.equalsIgnoreCase("all")) {
-                        ret = pkg.table;
-                    }else {
-                        Symbol tmpSym = pkg.getSymbol(symbolName);
-                        if(tmpSym != null) {
-                            ret = pkg.table;    //TODO: create an symboltable
-                        }
-                    }
-                    break;
+        
+        PackageEntry pkg = getPackage(node, libName, pkgName, symbolName);
+        if(pkg != null) {
+            if(symbolName.equalsIgnoreCase("all")) {
+                ret = pkg.table;
+            }else {
+                Symbol tmpSym = pkg.getSymbol(symbolName);
+                if(tmpSym != null) {
+                    Symbol[] syms = new Symbol[1];
+                    syms[0] = tmpSym;
+                    ret = pkg.table;
                 }
             }
         }

@@ -41,6 +41,10 @@ class ScActual_designator extends ScVhdl {
         String ret = "";
         if(subNode != null)
             ret = subNode.scString();
+        else if(isOpen) {
+            warning("token open");
+            ret = "null";
+        }
         return ret;
     }
 }

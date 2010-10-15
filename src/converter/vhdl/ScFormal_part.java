@@ -10,7 +10,7 @@ import parser.vhdl.ASTNode;
  *   <br> | type_mark  ( formal_designator )
  */
 class ScFormal_part extends ScVhdl {
-    ScName name = null;
+    ScVhdl item = null;
     ScFormal_designator designator = null;
     public ScFormal_part(ASTNode node) {
         super(node);
@@ -20,7 +20,10 @@ class ScFormal_part extends ScVhdl {
             switch(c.getId())
             {
             case ASTNAME:
-                name = new ScName(c);
+                item = new ScName(c);
+                break;
+            case ASTTYPE_MARK:
+                item = new ScType_mark(c);
                 break;
             case ASTFORMAL_DESIGNATOR:
                 designator = new ScFormal_designator(c);
@@ -33,8 +36,8 @@ class ScFormal_part extends ScVhdl {
 
     public String scString() {
         String ret = "";
-        if(name != null) {
-            ret += name.scString();
+        if(item != null) {
+            ret += item.scString();
             ret += encloseBracket(designator.scString());
         }else {
             ret += designator.scString();

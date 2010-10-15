@@ -12,20 +12,18 @@ import parser.vhdl.ASTNode;
 class ScActual_part extends ScVhdl {
     ScVhdl item = null;
     ScActual_designator designator = null;
-    boolean isFirstBracket = false;
     public ScActual_part(ASTNode node) {
         super(node);
         assert(node.getId() == ASTACTUAL_PART);
-        isFirstBracket = (node.firstTokenImage().charAt(0) == '(');
         for(int i = 0; i < node.getChildrenNum(); i++) {
             ASTNode c = (ASTNode)node.getChild(i);
             switch(c.getId())
             {
-            case ASTFUNCTION_CALL:
-                item = new ScFunction_call(c);
+            case ASTNAME:
+                item = new ScName(c);
                 break;
-            case ASTAGGREGATE:
-                item = new ScAggregate(c);
+            case ASTTYPE_MARK:
+                item = new ScType_mark(c);
                 break;
             case ASTACTUAL_DESIGNATOR:
                 designator = new ScActual_designator(c);
@@ -39,23 +37,10 @@ class ScActual_part extends ScVhdl {
     public String scString() {
         String ret = "";
         if(item != null) {
-            return item.scString();
-        }
-        
-        if(designator == null) {
-            System.out.println();
-        }
-        if(((ScActual_designator)designator).isOpen) {
-            warning("token open ignored");
-        }
-        if(item != null) {
             ret += item.scString();
+            ret += encloseBracket(designator.scString());
         }else {
-            String tmp = designator.scString();
-            if(isFirstBracket)
-                ret += encloseBracket(tmp);
-            else
-                ret += tmp;
+            ret += designator.scString();
         }
         return ret;
     }

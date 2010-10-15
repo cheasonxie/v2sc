@@ -28,6 +28,8 @@ public class PredefinedPackage implements VhdlTokenConstants
     static final String NUMERIC_STD = "numeric_std";
     static final String MATH_REAL = "math_real";
     static final String MATH_COMPLEX = "math_complex";
+    static final String VITAL_TIMING = "vital_timing";
+    static final String VITAL_PRIMITIVES = "vital_primitives";
     
     static final Symbol[] standard_syms = 
     {
@@ -195,12 +197,124 @@ public class PredefinedPackage implements VhdlTokenConstants
         new Symbol("tanh", FUNCTION),
     };
     
+    static final Symbol[] vital_timing_syms =
+    {
+        new Symbol("vitaltransitiontype", TYPE),
+        new Symbol("vitaldelaytype", SUBTYPE),
+        new Symbol("vitaldelaytype01", TYPE, "time"),
+        new Symbol("vitaldelaytype01z", TYPE, "time"),
+        new Symbol("vitaldelaytype01zx", TYPE, "time"),
+        new Symbol("vitaldelayarraytype", TYPE, "vitaldelaytype"),
+        new Symbol("vitaldelayarraytype01", TYPE, "vitaldelaytype01"),
+        new Symbol("vitaldelayarraytype01z", TYPE, "of vitaldelaytype01z"),
+        new Symbol("vitaldelayarraytype01zx", TYPE, "vitaldelaytype01zx"),
+        new Symbol("vitalzerodelay", CONSTANT, "vitaldelaytype"),
+        new Symbol("vitalzerodelay01", CONSTANT, "vitaldelaytype01"),
+        new Symbol("vitalzerodelay01z", CONSTANT, "vitaldelaytype01z"),
+        new Symbol("vitalzerodelay01zx", CONSTANT, "vitaldelaytype01zx"),
+        new Symbol("vital_level0", ATTRIBUTE, "boolean"),
+        new Symbol("vital_level1", ATTRIBUTE, "boolean"),
+        new Symbol("std_logic_vector2", SUBTYPE),
+        new Symbol("std_logic_vector3", SUBTYPE),
+        new Symbol("std_logic_vector4", SUBTYPE),
+        new Symbol("std_logic_vector8", SUBTYPE),
+        new Symbol("vitaloutputmaptype", TYPE, "std_ulogic"),
+        new Symbol("vitalresultmaptype", TYPE, "std_ulogic"),
+        new Symbol("vitalresultzmaptype", TYPE, "std_ulogic"),    
+        new Symbol("vitaldefaultoutputmap", CONSTANT, "vitaloutputmaptype"),
+        new Symbol("vitaldefaultresultmap", CONSTANT, "vitalresultmaptype"),
+        new Symbol("vitaldefaultresultzmap", CONSTANT, "vitalresultzmaptype"),
+        new Symbol("vitaltimearrayt", TYPE, "time"),
+        new Symbol("vitaltimearraypt", TYPE, "access"),
+        new Symbol("vitalboolarrayt", TYPE, "boolean"),
+        new Symbol("vitalboolarraypt", TYPE, "access"),
+        new Symbol("vitallogicarraypt", TYPE, "access"),
+        new Symbol("vitaltimingdatatype", TYPE, "record"),
+        new Symbol("vitaltimingdatainit", FUNCTION, "vitaltimingdatatype"),
+        new Symbol("vitalperioddatatype", TYPE, "record"),
+        new Symbol("vitalperioddatainit", CONSTANT, "vitalperioddatatype"),
+        new Symbol("vitalglitchkindtype", TYPE),
+        new Symbol("vitalglitchdatatype", TYPE, "record"),
+        new Symbol("vitalglitchdataarraytype", TYPE, "vitalglitchdatatype"),
+        new Symbol("vitalpathtype", TYPE, "record"),
+        new Symbol("vitalpath01type", TYPE, "record"),
+        new Symbol("vitalpath01ztype", TYPE, "record"),
+        new Symbol("vitalpatharraytype", TYPE, "vitalpathtype"),
+        new Symbol("vitalpatharray01type", TYPE, "vitalpath01type"),
+        new Symbol("vitalpatharray01ztype", TYPE, "vitalpath01ztype"),
+        new Symbol("vitaltablesymboltype", TYPE),
+        new Symbol("vitaledgesymboltype", SUBTYPE, "vitaltablesymboltype"),
+        new Symbol("vitalextendtofilldelay", FUNCTION, "vitaldelaytype01z"),
+        new Symbol("vitalextendtofilldelay", FUNCTION, "vitaldelaytype01z"),
+        new Symbol("vitalextendtofilldelay", FUNCTION, "vitaldelaytype01z"),
+        new Symbol("vitalcalcdelay", FUNCTION, "time"),
+        new Symbol("vitalcalcdelay", FUNCTION, "time"),
+        new Symbol("vitalcalcdelay", FUNCTION, "time"),
+        new Symbol("vitalpathdelay", PROCEDURE),
+        new Symbol("vitalpathdelay01", PROCEDURE),
+        new Symbol("vitalpathdelay01z", PROCEDURE),
+        new Symbol("vitalwiredelay", PROCEDURE),
+        new Symbol("vitalwiredelay", PROCEDURE),
+        new Symbol("vitalwiredelay", PROCEDURE),
+        new Symbol("vitalsignaldelay", PROCEDURE),
+        new Symbol("vitalsetupholdcheck", PROCEDURE),
+        new Symbol("vitalsetupholdcheck", PROCEDURE),
+        new Symbol("vitalrecoveryremovalcheck", PROCEDURE),
+        new Symbol("vitalperiodpulsecheck", PROCEDURE),
+    };
+    
+    static final Symbol[] vital_primitives_syms =
+    {
+        new Symbol("VitalAND", FUNCTION, "std_ulogic"),
+        new Symbol("VitalAND2", FUNCTION, "std_ulogic"),
+        new Symbol("VitalAND3", FUNCTION, "std_ulogic"),
+        new Symbol("VitalAND4", FUNCTION, "std_ulogic"),
+        new Symbol("VitalOR", FUNCTION, "std_ulogic"),
+        new Symbol("VitalOR2", FUNCTION, "std_ulogic"),
+        new Symbol("VitalOR3", FUNCTION, "std_ulogic"),
+        new Symbol("VitalOR4", FUNCTION, "std_ulogic"),
+        new Symbol("VitalXOR", FUNCTION, "std_ulogic"),
+        new Symbol("VitalXOR2", FUNCTION, "std_ulogic"),
+        new Symbol("VitalXOR3", FUNCTION, "std_ulogic"),
+        new Symbol("VitalXOR4", FUNCTION, "std_ulogic"),
+        new Symbol("VitalNAND", FUNCTION, "std_ulogic"),
+        new Symbol("VitalNAND2", FUNCTION, "std_ulogic"),
+        new Symbol("VitalNAND3", FUNCTION, "std_ulogic"),
+        new Symbol("VitalNAND4", FUNCTION, "std_ulogic"),
+        new Symbol("VitalNOR", FUNCTION, "std_ulogic"),
+        new Symbol("VitalNOR2", FUNCTION, "std_ulogic"),
+        new Symbol("VitalNOR3", FUNCTION, "std_ulogic"),
+        new Symbol("VitalNOR4", FUNCTION, "std_ulogic"),
+        new Symbol("VitalXNOR", FUNCTION, "std_ulogic"),
+        new Symbol("VitalXNOR2", FUNCTION, "std_ulogic"),
+        new Symbol("VitalXNOR3", FUNCTION, "std_ulogic"),
+        new Symbol("VitalXNOR4", FUNCTION, "std_ulogic"),
+        new Symbol("VitalBUF", FUNCTION, "std_ulogic"),
+        new Symbol("VitalBufIf0", FUNCTION, "std_ulogic"),
+        new Symbol("VitalBufIf1", FUNCTION, "std_ulogic"),
+        new Symbol("VitalINV", FUNCTION, "std_ulogic"),
+        new Symbol("VitalInvIf0VitalInvIf1", FUNCTION, "std_ulogic"),
+        new Symbol("VitalMux", FUNCTION, "std_ulogic"),
+        new Symbol("VitalMux2", FUNCTION, "std_ulogic"),
+        new Symbol("VitalMux3", FUNCTION, "std_ulogic"),
+        new Symbol("VitalMux4", FUNCTION, "std_ulogic"),
+        new Symbol("VitalDecoder", FUNCTION, "std_ulogic"),
+        new Symbol("VitalDecoder2", FUNCTION, "std_ulogic"),
+        new Symbol("VitalDecoder4", FUNCTION, "std_ulogic"),
+        new Symbol("VitalDecoder8", FUNCTION, "std_ulogic"),
+        new Symbol("VitalIDENT", FUNCTION, "std_ulogic"),
+        new Symbol("VitalTruthTable", FUNCTION, "std_ulogic"),
+        new Symbol("VitalStateTable", FUNCTION, "std_ulogic"),
+    };
+    
     static final PrePkg pkg_std_logic_1164 = new PrePkg(IEEE, STD_LOGIC_1164, std_logic_1164_syms);
     static final PrePkg pkg_textio = new PrePkg(STD, TEXTIO, textio_syms);
     static final PrePkg pkg_numeric_bit = new PrePkg(IEEE, NUMERIC_BIT, numeric_bit_syms);
     static final PrePkg pkg_numeric_std = new PrePkg(IEEE, NUMERIC_STD, numeric_std_syms);
     static final PrePkg pkg_math_real = new PrePkg(IEEE, MATH_REAL, math_real_syms);
     static final PrePkg pkg_math_complex = new PrePkg(IEEE, MATH_COMPLEX, math_real_syms);
+    static final PrePkg pkg_vital_timing = new PrePkg(IEEE, VITAL_TIMING, vital_timing_syms);
+    static final PrePkg pkg_vital_primitives = new PrePkg(IEEE, VITAL_PRIMITIVES, vital_primitives_syms);
     
     static final PrePkg[] predefined_pkgs = 
     {
@@ -210,5 +324,7 @@ public class PredefinedPackage implements VhdlTokenConstants
         pkg_numeric_std,
         pkg_math_real,
         pkg_math_complex,
+        pkg_vital_timing,
+        pkg_vital_primitives,
     };
 }
