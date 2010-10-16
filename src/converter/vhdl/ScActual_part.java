@@ -10,7 +10,8 @@ import parser.vhdl.ASTNode;
  *   <br> | type_mark ( actual_designator )
  */
 class ScActual_part extends ScVhdl {
-    ScVhdl item = null;
+    ScFunction_call function_call = null;
+    ScType_mark type_mark = null;
     ScActual_designator designator = null;
     public ScActual_part(ASTNode node) {
         super(node);
@@ -19,11 +20,11 @@ class ScActual_part extends ScVhdl {
             ASTNode c = (ASTNode)node.getChild(i);
             switch(c.getId())
             {
-            case ASTNAME:
-                item = new ScName(c);
+            case ASTFUNCTION_CALL:
+                function_call = new ScFunction_call(c);
                 break;
             case ASTTYPE_MARK:
-                item = new ScType_mark(c);
+                type_mark = new ScType_mark(c);
                 break;
             case ASTACTUAL_DESIGNATOR:
                 designator = new ScActual_designator(c);
@@ -36,8 +37,10 @@ class ScActual_part extends ScVhdl {
 
     public String scString() {
         String ret = "";
-        if(item != null) {
-            ret += item.scString();
+        if(function_call != null) {
+            ret += function_call.scString();
+        }else if(type_mark != null) {
+            ret += type_mark.scString();
             ret += encloseBracket(designator.scString());
         }else {
             ret += designator.scString();

@@ -23,6 +23,10 @@ public class PredefinedPackage implements VhdlTokenConstants
     
     // package name
     static final String STD_LOGIC_1164 = "std_logic_1164";
+    static final String STD_LOGIC_ARITH = "std_logic_arith";
+    static final String STD_LOGIC_SIGNED = "std_logic_signed";
+    static final String STD_LOGIC_UNSIGNED = "std_logic_unsigned";
+    static final String STD_LOGIC_TEXTIO = "std_logic_textio";
     static final String TEXTIO = "textio";
     static final String NUMERIC_BIT = "numeric_bit";
     static final String NUMERIC_STD = "numeric_std";
@@ -56,7 +60,44 @@ public class PredefinedPackage implements VhdlTokenConstants
         new Symbol("rising_edge", FUNCTION, "boolean"),
         new Symbol("falling_edge", FUNCTION, "boolean"),
         new Symbol("is_x", FUNCTION, "boolean"),
-   };
+    };
+    
+    static final Symbol[] std_logic_arith_syms = 
+    {
+        new Symbol("unsigned", TYPE, "std_logic"),
+        new Symbol("signed", TYPE, "std_logic"),
+        new Symbol("small_int", SUBTYPE, "integer"),
+        new Symbol("shl", FUNCTION, "unsigned"),
+        new Symbol("shl", FUNCTION, "signed"),
+        new Symbol("shr", FUNCTION, "unsigned"),
+        new Symbol("shr", FUNCTION, "signed"),
+        new Symbol("conv_integer", FUNCTION, "integer"),
+        new Symbol("conv_integer", FUNCTION, "integer"),
+        new Symbol("conv_integer", FUNCTION, "integer"),
+        new Symbol("conv_integer", FUNCTION, "small_int"),
+        new Symbol("conv_unsigned", FUNCTION, "unsigned"),
+        new Symbol("conv_unsigned", FUNCTION, "unsigned"),
+        new Symbol("conv_unsigned", FUNCTION, "unsigned"),
+        new Symbol("conv_unsigned", FUNCTION, "unsigned"),
+        new Symbol("conv_signed", FUNCTION, "signed"),
+        new Symbol("conv_signed", FUNCTION, "signed"),
+        new Symbol("conv_signed", FUNCTION, "signed"),
+        new Symbol("conv_signed", FUNCTION, "signed"),
+
+        new Symbol("conv_std_logic_vector", FUNCTION, "std_logic_vector"),
+        new Symbol("conv_std_logic_vector", FUNCTION, "std_logic_vector"),
+        new Symbol("conv_std_logic_vector", FUNCTION, "std_logic_vector"),
+        new Symbol("conv_std_logic_vector", FUNCTION, "std_logic_vector"),
+        new Symbol("ext", FUNCTION, "std_logic_vector"),
+        new Symbol("sxt", FUNCTION, "std_logic_vector"),
+    };
+    
+    static final Symbol[] std_logic_signed_unsigned_syms =
+    {
+        new Symbol("shl", FUNCTION, "std_logic_vector"),
+        new Symbol("shr", FUNCTION, "std_logic_vector"),
+        new Symbol("conv_integer", FUNCTION, "integer"),
+    };
     
     static final Symbol[] textio_syms = 
     {
@@ -308,6 +349,10 @@ public class PredefinedPackage implements VhdlTokenConstants
     };
     
     static final PrePkg pkg_std_logic_1164 = new PrePkg(IEEE, STD_LOGIC_1164, std_logic_1164_syms);
+    static final PrePkg pkg_std_logic_arith = new PrePkg(IEEE, STD_LOGIC_ARITH, std_logic_arith_syms);
+    static final PrePkg pkg_std_logic_signed = new PrePkg(IEEE, STD_LOGIC_SIGNED, std_logic_signed_unsigned_syms);
+    static final PrePkg pkg_std_logic_unsigned = new PrePkg(IEEE, STD_LOGIC_UNSIGNED, std_logic_signed_unsigned_syms);
+    static final PrePkg pkg_std_logic_textio = new PrePkg(IEEE, STD_LOGIC_TEXTIO, textio_syms);
     static final PrePkg pkg_textio = new PrePkg(STD, TEXTIO, textio_syms);
     static final PrePkg pkg_numeric_bit = new PrePkg(IEEE, NUMERIC_BIT, numeric_bit_syms);
     static final PrePkg pkg_numeric_std = new PrePkg(IEEE, NUMERIC_STD, numeric_std_syms);
@@ -319,6 +364,10 @@ public class PredefinedPackage implements VhdlTokenConstants
     static final PrePkg[] predefined_pkgs = 
     {
         pkg_std_logic_1164,
+        pkg_std_logic_arith,
+        pkg_std_logic_signed,
+        pkg_std_logic_unsigned,
+        pkg_std_logic_textio,
         pkg_textio,
         pkg_numeric_bit,
         pkg_numeric_std,

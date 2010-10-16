@@ -162,9 +162,6 @@ public class Vhdl extends hdlConverter {
                 //convertFile(filePath, dstPath);
                 System.out.println("parsing file:" + filePath);
                 VhdlParser parser = new VhdlParser(false);
-                if(filePath.indexOf("stratixiii_atoms.vhd") >= 0) {
-                    System.out.println();
-                }
                 parser.parse(filePath);
             } catch (Exception e) {
                 StackTraceElement[] stackEle = e.getStackTrace();
