@@ -11,7 +11,7 @@ import parser.ParserException;
 
 public class hdl2SystemC
 {
-    public static boolean testDir = true;
+    public static boolean testDir = false;
     public static void main(String[] args)
     {
         if(testDir) {

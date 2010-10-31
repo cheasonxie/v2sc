@@ -14,7 +14,7 @@ public class ASTNode implements IASTNode
     protected int id;
     protected Token first_token = null;
     protected Token last_token = null;
-    protected SymbolTable symTab = null;
+    protected SymbolTableNode symTabNode = null;
     
     public ASTNode(IASTNode p, int id) {
         parent = p;
@@ -145,14 +145,6 @@ public class ASTNode implements IASTNode
         return ret;
     }
     
-    public void setSymbolTable(SymbolTable table) {
-        symTab = table;
-    }
-    
-    public SymbolTable getSymbolTable() {
-        return symTab;
-    }
-    
     public void setName(String name) {
         this.name = name;
     }
@@ -181,8 +173,13 @@ public class ASTNode implements IASTNode
                 }
             }
             
-            if(name.isEmpty()) {
+            if(name.isEmpty() && first_token.kind == VhdlTokenConstants.identifier) {
                 name = first_token.image;
+            }
+            
+            if(name.isEmpty()) {
+                name = String.format("%s_line%d", first_token.image, 
+                                first_token.beginLine);
             }
         }
 
@@ -192,6 +189,14 @@ public class ASTNode implements IASTNode
     @Override
     public boolean equals(INameObject other) {
         return (other == this);
+    }
+    
+    public SymbolTableNode getSymbolTable() {
+        return symTabNode;
+    }
+    
+    public void setSymbolTable(SymbolTableNode tab) {
+        symTabNode = tab;
     }
 }
 

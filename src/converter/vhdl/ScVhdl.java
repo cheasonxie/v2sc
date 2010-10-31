@@ -2,7 +2,7 @@ package converter.vhdl;
 
 import java.util.ArrayList;
 
-import common.printFileAndLineNumber;
+import common.MyDebug;
 import converter.CommentManager;
 
 import parser.CommentBlock;
@@ -11,7 +11,6 @@ import parser.Token;
 import parser.vhdl.ASTNode;
 import parser.vhdl.IVhdlType;
 import parser.vhdl.Symbol;
-import parser.vhdl.SymbolTable;
 import parser.vhdl.VhdlASTConstants;
 import parser.vhdl.VhdlTokenConstants;
 
@@ -140,12 +139,12 @@ public class ScVhdl implements ScVhdlConstants, VhdlTokenConstants,
     
     protected void error() {
         System.err.println("line--" + beginLine + ": ");
-        new printFileAndLineNumber("=========not support========");
+        MyDebug.printFileLine("=========not support========");
     }
     
     protected void error(String msg) {
         System.err.println("line--" + beginLine + ": ");
-        new printFileAndLineNumber(msg);
+        MyDebug.printFileLine(msg);
     }
     
     protected static void startIntentBlock() { curLevel ++; }
@@ -311,10 +310,14 @@ public class ScVhdl implements ScVhdlConstants, VhdlTokenConstants,
     }
     
     String[] getLoopVar() {
-        ArrayList<Symbol> syms = curNode.getSymbolTable().getKindSymbols(LOOP);
-        String[] ret = new String[syms.size()];
-        for(int i = 0; i < syms.size(); i++) {
-            ret[i] = syms.get(i).name;
+        Symbol[] syms = curNode.getSymbolTable().getKindSymbols(LOOP);
+        if(syms == null) {
+            return null;
+        }
+        
+        String[] ret = new String[syms.length];
+        for(int i = 0; i < syms.length; i++) {
+            ret[i] = syms[i].name;
         }
         return ret;
     }
@@ -457,9 +460,10 @@ public class ScVhdl implements ScVhdlConstants, VhdlTokenConstants,
         return 0;
     }
     
+    /*
     protected Symbol[] getComponentChildSymbols(String componentName, int kind) {
-        SymbolTable tmpTable = null;
-        tmpTable = (SymbolTable)parser.getTableOfSymbol(curNode, componentName);
+        SymbolTableNode tmpTable = null;
+        tmpTable = (SymbolTableNode)parser.getTableOfSymbol(curNode, componentName);
         if(tmpTable == null) {
             return null;
         }
@@ -483,6 +487,7 @@ public class ScVhdl implements ScVhdlConstants, VhdlTokenConstants,
         }
         return ret;
     }
+    */
     
     static private boolean isBracketEnclosed(String str) {
         if(str.isEmpty())

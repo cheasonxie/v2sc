@@ -2,8 +2,11 @@ package converter.vhdl;
 
 import java.util.ArrayList;
 
+import common.MyDebug;
+
 import parser.vhdl.ASTNode;
 import parser.vhdl.Symbol;
+import parser.vhdl.SymbolTableNode;
 
 
 /**
@@ -33,11 +36,17 @@ class ScPort_map_aspect extends ScVhdl {
      * @param componentName: name of component
      * @param entityName: name of entity
      */
-    public String mapString(String componentName, String entityName) {
+    public String mapString(String name, String entityName) {
         String ret = "";
         int i = 0;
 
-        Symbol[] syms = getComponentChildSymbols(componentName, PORT);
+        SymbolTableNode symTab = (SymbolTableNode)parser.getTableOfSymbol(curNode, name);
+        if(symTab == null) {
+            MyDebug.printFileLine("component not found:" + name);
+            return ret;
+        }
+        
+        Symbol[] syms = symTab.getKindSymbols(PORT);
         if(syms.length == 0) {
             System.out.println();
         }

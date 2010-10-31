@@ -2,8 +2,11 @@ package converter.vhdl;
 
 import java.util.ArrayList;
 
+import common.MyDebug;
+
 import parser.vhdl.ASTNode;
 import parser.vhdl.Symbol;
+import parser.vhdl.SymbolTableNode;
 
 
 /**
@@ -36,7 +39,13 @@ class ScGeneric_map_aspect extends ScVhdl {
         String ret = "";
         int i = 0;
 
-        Symbol[] syms = getComponentChildSymbols(name, GENERIC);
+        SymbolTableNode symTab = (SymbolTableNode)parser.getTableOfSymbol(curNode, name);
+        if(symTab == null) {
+            MyDebug.printFileLine("component not found:" + name);
+            return ret;
+        }
+        
+        Symbol[] syms = symTab.getKindSymbols(GENERIC);
         ArrayList<ScAssociation_element> elements = association_list.elements;
         
         for(i = 0; i < elements.size(); i++) {

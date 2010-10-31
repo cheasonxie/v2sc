@@ -17,9 +17,8 @@ import parser.Token;
 public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants, IVhdlType
 {
     protected VhdlTokenManager tokenMgr = null;
-    protected LibraryManager libraryMgr = LibraryManager.getInstance();
-    protected SymbolTable extSymbolTable = new SymbolTable();   // external symbols, define in use_clause
-    protected SymbolTable symbolTable = null;
+    protected ArrayList<SymbolTableNode> extSymbolTable = new ArrayList<SymbolTableNode>();
+    protected SymbolTableNode curSymbolTable = null;
     protected ASTNode curNode = null;       // current parsing node
     protected ASTNode lastNode = null;      // last parsed node
     protected ASTNode designFile = null;  // design file node
@@ -43,37 +42,18 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
      * token which has its own symbol table call this function to start<br>
      * use pair with endBlock
      */
-    void startBlock() {
-        SymbolTable newTab = new SymbolTable(symbolTable);
-        symbolTable = newTab;
-        curNode.setSymbolTable(symbolTable);
+    void startSymbolTable() {
+        SymbolTableNode newTab = new SymbolTableNode(curSymbolTable, curNode.getName());
+        curSymbolTable = newTab;
+        curNode.setSymbolTable(curSymbolTable);
     }
     
     /**
      * token which has its own symbol table call this function to end<br>
      * use pair with startBlock
      */
-    void endBlock() {
-        symbolTable = symbolTable.getParent();
-    }
-    
-    /**
-     * add symbols in an ast node to symbol table
-     * TODO: modify get type, range, names
-     */
-    boolean addSymbol(ASTNode node, int id) {
-        if(node instanceof ASTSymbolNode) {
-            return ((ASTSymbolNode)node).addSymbols(id);
-        }
-        return false;
-    }
-    
-    boolean addSymbol(ASTNode node, int id, String type) {
-        if(node.parent == null || ((ASTNode)node.parent).symTab == null) {
-            return false;
-        }
-        Symbol sym = new Symbol(node.getName(), id, type);
-        return ((ASTNode)node.parent).symTab.add(sym);
+    void endSymbolTable() {
+        curSymbolTable = curSymbolTable.getParent();
     }
     
     void openNodeScope(ASTNode n) throws ParserException  {
@@ -703,7 +683,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
      *   <dd> <b>alias</b> alias_designator [ : alias_indication ] <b>is</b> name [ signature ] ;
      */
     void alias_declaration(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTSymbolNode(p, ASTALIAS_DECLARATION, this);
+        ASTNode node = new ASTNode(p, ASTALIAS_DECLARATION);
         openNodeScope(node);
         consumeToken(ALIAS);
         endToken = findToken(SEMICOLON, endToken);
@@ -724,6 +704,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         }
         consumeToken(SEMICOLON);
         closeNodeScope(node);
+        SymbolParser.parseOtherKind(node, ALIAS, this);
     }
 
     /**
@@ -796,24 +777,25 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
     void architecture_body(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTARCHITECTURE_BODY);
         openNodeScope(node);
-        startBlock();
         consumeToken(ARCHITECTURE);
         endToken = findTokenInBlock(END, endToken);
         
         Token tmpToken = findToken(OF, endToken);
         identifier(node, tmpToken);        
         consumeToken(OF);
-        
+
         tmpToken = findToken(IS, endToken);
-        name(node, tmpToken);        
+        name(node, tmpToken);
         consumeToken(IS);
+        
+        startSymbolTable();
         
         String name = ((ASTNode)node.getChild(1)).firstTokenImage();
         for(int i = 0; i < localUnits.size(); i++) {
-            String tmpName = ((ASTNode)localUnits.get(i).getChild(0)).firstTokenImage();
+            String tmpName = ((ASTNode)localUnits.get(i)).getName();
             if(name.equalsIgnoreCase(tmpName)) {
-                SymbolTable table = localUnits.get(i).symTab;
-                node.symTab.addAllInTable(table);
+                SymbolTableNode table = localUnits.get(i).symTabNode;
+                node.symTabNode.addAll(table);
                 break;
             }
         }
@@ -837,8 +819,9 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
             }
         }
         consumeToken(SEMICOLON);
-        endBlock();
+        endSymbolTable();
         closeNodeScope(node);
+        SymbolParser.parseOtherKind(node, ARCHITECTURE, this);
     }
 
     /**
@@ -1002,7 +985,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
      *   <dd> <b>attribute</b> identifier : type_mark ;
      */
     void attribute_declaration(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTSymbolNode(p, ASTATTRIBUTE_DECLARATION, this);
+        ASTNode node = new ASTNode(p, ASTATTRIBUTE_DECLARATION);
         openNodeScope(node);
         endToken = findToken(SEMICOLON, endToken);
         consumeToken(ATTRIBUTE);
@@ -1012,6 +995,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         type_mark(node, endToken);
         consumeToken(SEMICOLON);
         closeNodeScope(node);
+        SymbolParser.parseOtherKind(node, ATTRIBUTE, this);
     }
 
     /**
@@ -1069,7 +1053,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
      *   <dd> <b>attribute</b> attribute_designator <b>of</b> entity_specification <b>is</b> expression ;
      */
     void attribute_specification(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTSymbolNode(p, ASTATTRIBUTE_SPECIFICATION, this);
+        ASTNode node = new ASTNode(p, ASTATTRIBUTE_SPECIFICATION);
         openNodeScope(node);
         consumeToken(ATTRIBUTE);
         endToken = findToken(SEMICOLON, endToken);
@@ -1347,10 +1331,6 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
                 exitLoop = true;
                 break;
             }
-            
-            if(!exitLoop) {
-                addSymbol(lastNode, kind);
-            }
         }
     }
 
@@ -1436,7 +1416,6 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
     void block_statement(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTBLOCK_STATEMENT);
         openNodeScope(node);
-        startBlock();
         
         Token tmpToken = findToken(COLON, endToken);
         identifier(node, tmpToken);   // label
@@ -1444,6 +1423,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         consumeToken(BLOCK);
         endToken = findTokenInBlock(END, endToken);
         
+        startSymbolTable();
         if(tokenMgr.getNextTokenKind() == LBRACKET) {
             consumeToken(LBRACKET);
             tmpToken = findTokenInBlock(RBRACKET, endToken);
@@ -1468,8 +1448,9 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
             }
         }
         consumeToken(SEMICOLON);
-        endBlock();
+        endSymbolTable();
         closeNodeScope(node);
+        SymbolParser.parseOtherKind(node, BLOCK, this);
     }
 
     /**
@@ -1735,9 +1716,8 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
      *   </ul> <b>end</b> <b>component</b> [ <i>component_</i>simple_name ] ;
      */
     void component_declaration(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTSymbolNode(p, ASTCOMPONENT_DECLARATION, this);
+        ASTNode node = new ASTNode(p, ASTCOMPONENT_DECLARATION);
         openNodeScope(node);
-        startBlock();
         
         consumeToken(COMPONENT);
         endToken = findTokenInBlock(END, endToken);
@@ -1747,6 +1727,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
             consumeToken(IS);
         }
         
+        startSymbolTable();
         Token tmpToken = endToken;
         if(tokenMgr.getNextTokenKind() == GENERIC) {
             tmpToken = findTokenInBlock(SEMICOLON, endToken);
@@ -1767,9 +1748,9 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
             }
         }
         consumeToken(SEMICOLON);
-        ((ASTNode)p).getSymbolTable().addSubtable(node.getName(), node.getSymbolTable());
-        endBlock();
+        endSymbolTable();
         closeNodeScope(node);
+        SymbolParser.parseOtherKind(node, COMPONENT, this);
     }
 
     /**
@@ -2271,7 +2252,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
      *   <dd> <b>constant</b> identifier_list : subtype_indication [ := expression ] ;
      */
     void constant_declaration(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTSymbolNode(p, ASTCONSTANT_DECLARATION, this);
+        ASTNode node = new ASTNode(p, ASTCONSTANT_DECLARATION);
         openNodeScope(node);
         endToken = findToken(SEMICOLON, endToken);
         
@@ -2288,6 +2269,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         }
         consumeToken(SEMICOLON);
         closeNodeScope(node);
+        SymbolParser.parseVariableKind(node, CONSTANT, this);
     }
 
     /**
@@ -2545,10 +2527,8 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
     void design_unit(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTDESIGN_UNIT);
         openNodeScope(node);
-        startBlock();
         context_clause(node, endToken);
         library_unit(node, endToken);
-        endBlock();
         closeNodeScope(node);
     }
 
@@ -2644,7 +2624,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
      *   <dd> identifier_list : element_subtype_definition ;
      */
     void element_declaration(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTSymbolNode(p, ASTELEMENT_DECLARATION, this);
+        ASTNode node = new ASTNode(p, ASTELEMENT_DECLARATION);
         openNodeScope(node);
         endToken = findToken(SEMICOLON, endToken);
         
@@ -2653,8 +2633,8 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         consumeToken(COLON);
         element_subtype_definition(node, endToken);
         consumeToken(SEMICOLON);
-        addSymbol(node, RECORD);
         closeNodeScope(node);
+        SymbolParser.parseVariableKind(node, RECORD, this);
     }
 
     /**
@@ -2796,7 +2776,6 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
     void entity_declaration(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTENTITY_DECLARATION);
         openNodeScope(node);
-        startBlock();
         
         consumeToken(ENTITY);
         endToken = findTokenInBlock(END, endToken);
@@ -2806,6 +2785,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
 
         consumeToken(IS);
         
+        startSymbolTable();
         tmpToken = findTokenInBlock(BEGIN, endToken);
         if(tmpToken == null)
             tmpToken = endToken;
@@ -2827,7 +2807,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
             }
         }
         consumeToken(SEMICOLON);
-        endBlock();
+        endSymbolTable();
         localUnits.add(node);
         closeNodeScope(node);
     }
@@ -2958,10 +2938,6 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
             default:    // not identified
                 exitLoop = true;
                 break;
-            }
-            
-            if(!exitLoop) {
-                addSymbol(lastNode, kind);
             }
         }
     }
@@ -3125,6 +3101,11 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
             throw new ParserException(tokenMgr.toNextToken());
         }
         closeNodeScope(node);
+        if(node.getAncestor(ASTENUMERATION_TYPE_DEFINITION) != null) {
+            // regard enum as constant integer 
+            SymbolParser.parseOtherKind(node, CONSTANT, strVhdlType[TYPE_INTEGER], this);
+        }
+
     }
 
     /**
@@ -3132,27 +3113,22 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
      *   <dd> ( enumeration_literal { , enumeration_literal } )
      */
     void enumeration_type_definition(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTSymbolNode(p, ASTENUMERATION_TYPE_DEFINITION, this);
+        ASTNode node = new ASTNode(p, ASTENUMERATION_TYPE_DEFINITION);
         openNodeScope(node);
         consumeToken(LBRACKET);
         endToken = findTokenInBlock(RBRACKET, endToken);
-        startBlock();
         
         while(true) {
             Token tmpToken = findTokenInBlock(COMMA, endToken);
             if(tmpToken == null)
                 tmpToken = endToken;
             enumeration_literal(node, tmpToken);
-            addSymbol(lastNode, CONSTANT, strVhdlType[TYPE_INTEGER]);   // regard enum as constant integer 
             if(tokenMgr.getNextTokenKind() != COMMA) {
                 break;
             }
             consumeToken(COMMA);
         }
         consumeToken(RBRACKET);
-        ASTNode typeNode = node.getAncestor(ASTTYPE_DECLARATION);
-        ((ASTNode)p).getSymbolTable().addSubtable(typeNode.getName(), node.getSymbolTable());
-        endBlock();
         closeNodeScope(node);
     }
 
@@ -3284,7 +3260,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
      *   <dd> <b>file</b> identifier_list : subtype_indication [ file_open_information ] ;
      */
     void file_declaration(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTSymbolNode(p, ASTFILE_DECLARATION, this);
+        ASTNode node = new ASTNode(p, ASTFILE_DECLARATION);
         openNodeScope(node);
         endToken = findToken(SEMICOLON, endToken);
         
@@ -3299,6 +3275,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         }
         consumeToken(SEMICOLON);
         closeNodeScope(node);
+        SymbolParser.parseVariableKind(node, FILE, this);
     }
 
     /**
@@ -3369,13 +3346,11 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
      *   <dd> <i>parameter_</i>interface_list
      */
     void formal_parameter_list(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTSymbolNode(p, ASTFORMAL_PARAMETER_LIST, this);
+        ASTNode node = new ASTNode(p, ASTFORMAL_PARAMETER_LIST);
         openNodeScope(node);
         interface_list(node, endToken);
         closeNodeScope(node);
-        for(int i = 0; i < node.getChildrenNum(); i++) {
-            addSymbol((ASTNode)node.getChild(i), VARIABLE);
-        }
+        SymbolParser.parseInterface_listKind(node, VARIABLE, this);
     }
 
     /**
@@ -3442,7 +3417,9 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         consumeToken(TYPE);
         identifier(node, tmpToken);
         consumeToken(IS);
+        startSymbolTable();
         type_definition(node, endToken);
+        endSymbolTable();
         consumeToken(SEMICOLON);
         closeNodeScope(node);
     }
@@ -3479,12 +3456,12 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
     void generate_statement(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTGENERATE_STATEMENT);
         openNodeScope(node);
-        startBlock();
         
         Token tmpToken = findToken(COLON, endToken);    // endToken must be END
         identifier(node, tmpToken);   // label
         consumeToken(COLON);
         
+        startSymbolTable();
         tmpToken = findToken(GENERATE, endToken);
         generation_scheme(node, tmpToken);
         consumeToken(GENERATE);        
@@ -3511,7 +3488,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
             }
         }
         consumeToken(SEMICOLON);
-        endBlock();
+        endSymbolTable();
         closeNodeScope(node);
     }
 
@@ -3560,11 +3537,11 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
      *   <dd> <i>generic_</i>interface_list
      */
     void generic_list(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTSymbolNode(p, ASTGENERIC_LIST, this);
+        ASTNode node = new ASTNode(p, ASTGENERIC_LIST);
         openNodeScope(node);
         interface_list(node, endToken);
         closeNodeScope(node);
-        addSymbol(node, GENERIC);
+        SymbolParser.parseInterface_listKind(node, GENERIC, this);
     }
 
     /**
@@ -3631,7 +3608,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
      *   <dd> <b>group</b> identifier : <i>group_template_</i>name ( group_constituent_list ) ;
      */
     void group_declaration(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTSymbolNode(p, ASTGROUP_DECLARATION, this);
+        ASTNode node = new ASTNode(p, ASTGROUP_DECLARATION);
         openNodeScope(node);
         endToken = findToken(SEMICOLON, endToken);
         
@@ -3648,6 +3625,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         consumeToken(RBRACKET);
         consumeToken(SEMICOLON);
         closeNodeScope(node);
+        SymbolParser.parseOtherKind(node, GROUP, this);
     }
 
     /**
@@ -3655,7 +3633,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
      *   <dd> <b>group</b> identifier <b>is</b> ( entity_class_entry_list ) ;
      */
     void group_template_declaration(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTSymbolNode(p, ASTGROUP_TEMPLATE_DECLARATION, this);
+        ASTNode node = new ASTNode(p, ASTGROUP_TEMPLATE_DECLARATION);
         openNodeScope(node);
         endToken = findToken(SEMICOLON, endToken);
         
@@ -3669,6 +3647,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         consumeToken(RBRACKET);
         consumeToken(SEMICOLON);
         closeNodeScope(node);
+        SymbolParser.parseOtherKind(node, GROUP, this);
     }
 
     /**
@@ -4056,7 +4035,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
      *   <dd> interface_element { ; interface_element }
      */
     void interface_list(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTSymbolNode(p, ASTINTERFACE_LIST, this);
+        ASTNode node = new ASTNode(p, ASTINTERFACE_LIST);
         openNodeScope(node);
         while(true) {
             Token tmpToken = findToken(SEMICOLON, endToken);
@@ -4203,7 +4182,8 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         }else if(kind == FOR) {
             new ASTtoken(node, tokenImage[FOR]);
             parameter_specification(node, endToken);
-            addSymbol(node, LOOP, strVhdlType[TYPE_INTEGER]);  // loop variable
+            // loop variable
+            SymbolParser.parseOtherKind(node, LOOP, strVhdlType[TYPE_INTEGER], this);
         }else {
             throw new ParserException(tokenMgr.toNextToken());
         }
@@ -4450,7 +4430,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
      *   <dd> <b>nature</b> identifier <b>is</b> nature_definition ;
      */
     void nature_declaration(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTSymbolNode(p, ASTNATURE_DECLARATION, this);
+        ASTNode node = new ASTNode(p, ASTNATURE_DECLARATION);
         openNodeScope(node);
         endToken = findToken(SEMICOLON, endToken);
         
@@ -4460,6 +4440,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         nature_definition(node, endToken);
         consumeToken(SEMICOLON);
         closeNodeScope(node);
+        SymbolParser.parseOtherKind(node, NATURE, this);
     }
 
     /**
@@ -4605,7 +4586,6 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
     void package_body(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTPACKAGE_BODY);
         openNodeScope(node);
-        startBlock();
         
         consumeToken(PACKAGE);
         consumeToken(BODY);
@@ -4614,12 +4594,13 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         Token tmpToken = findToken(IS, endToken);
         simple_name(node, tmpToken);
         
+        startSymbolTable();
         String name = ((ASTNode)node.getChild(0)).firstTokenImage();
         for(int i = 0; i < localUnits.size(); i++) {
             String tmpName = ((ASTNode)localUnits.get(i).getChild(0)).firstTokenImage();
             if(name.equalsIgnoreCase(tmpName)) {
-                SymbolTable table = localUnits.get(i).symTab;
-                node.symTab.addAllInTable(table);
+                SymbolTableNode table = localUnits.get(i).symTabNode;
+                node.symTabNode.addAll(table);
                 break;
             }
         }
@@ -4639,7 +4620,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
             }
         }
         consumeToken(SEMICOLON);
-        endBlock();
+        endSymbolTable();
         closeNodeScope(node);
     }
 
@@ -4728,10 +4709,6 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
                 exitLoop = true;
                 break;
             }
-            
-            if(!exitLoop) {
-                addSymbol(lastNode, kind);
-            }
         }
     }
 
@@ -4755,13 +4732,15 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
     void package_declaration(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTPACKAGE_DECLARATION);
         openNodeScope(node);
-        startBlock();
         consumeToken(PACKAGE);
         endToken = findTokenInBlock(END, endToken);
         
         Token tmpToken = findToken(IS, endToken);
         identifier(node, tmpToken);
         consumeToken(IS);
+        
+        startSymbolTable();
+        
         package_declarative_part(node, endToken);
         consumeToken(END);
         if(tokenMgr.getNextTokenKind() == PACKAGE) {
@@ -4775,7 +4754,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
             }
         }
         consumeToken(SEMICOLON);
-        endBlock();
+        endSymbolTable();
         localUnits.add(node);
         closeNodeScope(node);
     }
@@ -4886,10 +4865,6 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
                 exitLoop = true;
                 break;
             }
-            
-            if(!exitLoop) {
-                addSymbol(lastNode, kind);
-            }
         }
     }
 
@@ -4942,9 +4917,8 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
      *   </ul> <b>end</b> <b>units</b> [ <i>physical_type_</i>simple_name ] </ul>
      */
     void physical_type_definition(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTSymbolNode(p, ASTPHYSICAL_TYPE_DEFINITION, this);
+        ASTNode node = new ASTNode(p, ASTPHYSICAL_TYPE_DEFINITION);
         openNodeScope(node);
-        startBlock();
         
         Token tmpToken = findToken(UNITS, endToken);
         range_constraint(node, tmpToken);
@@ -4968,9 +4942,6 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
                 throw new ParserException(tokenMgr.getCurrentToken());
             }
         }
-        ASTNode typeNode = node.getAncestor(ASTTYPE_DECLARATION);
-        ((ASTNode)p).getSymbolTable().addSubtable(typeNode.getName(), node.getSymbolTable());
-        endBlock();
         closeNodeScope(node);
     }
 
@@ -4997,11 +4968,11 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
      *   <dd> <i>port_</i>interface_list
      */
     void port_list(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTSymbolNode(p, ASTPORT_LIST, this);
+        ASTNode node = new ASTNode(p, ASTPORT_LIST);
         openNodeScope(node);
         interface_list(node, endToken);
         closeNodeScope(node);
-        addSymbol(node, PORT);
+        SymbolParser.parseInterface_listKind(node, PORT, this);
     }
 
     /**
@@ -5122,8 +5093,8 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         endToken = findToken(SEMICOLON, endToken);
         identifier(node, endToken);
         consumeToken(SEMICOLON);
-        addSymbol(node, UNITS, strVhdlType[TYPE_PHYSICAL]);
         closeNodeScope(node);
+        SymbolParser.parseOtherKind(node, UNITS, strVhdlType[TYPE_PHYSICAL], this);
     }
 
     /**
@@ -5221,10 +5192,6 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
             default:    // not identified
                 exitLoop = true;
                 break;
-            }
-            
-            if(!exitLoop) {
-                addSymbol(lastNode, kind);
             }
         }
     }
@@ -5389,10 +5356,6 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
                 exitLoop = true;
                 break;
             }
-            
-            if(!exitLoop) {
-                addSymbol(lastNode, kind);
-            }
         }
     }
 
@@ -5419,7 +5382,6 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
     void process_statement(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTPROCESS_STATEMENT);
         openNodeScope(node);
-        startBlock();
         
         Token tmpToken = endToken;
         boolean hasLabel = false;
@@ -5429,6 +5391,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
             consumeToken(COLON);
             hasLabel = true;
         }
+        startSymbolTable();
         if(tokenMgr.getNextTokenKind() == POSTPONED) {
             consumeToken(POSTPONED);
             new ASTtoken(node, tokenImage[POSTPONED]);
@@ -5466,7 +5429,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
             }
         }
         consumeToken(SEMICOLON);
-        endBlock();
+        endSymbolTable();
         closeNodeScope(node);
     }
 
@@ -5509,7 +5472,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
      *   <br> | source_quantity_declaration
      */
     void quantity_declaration(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTSymbolNode(p, ASTQUANTITY_DECLARATION, this);
+        ASTNode node = new ASTNode(p, ASTQUANTITY_DECLARATION);
         openNodeScope(node);
         if(findToken(SPECTRUM, endToken) != null 
                 || findToken(NOISE, endToken) != null) {
@@ -5522,6 +5485,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
             free_quantity_declaration(node, endToken);
         }
         closeNodeScope(node);
+        SymbolParser.parseOtherKind(node,QUANTITY, this);
     }
 
     /**
@@ -5640,7 +5604,6 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         openNodeScope(node);        
         consumeToken(RECORD);
         endToken = findTokenInBlock(END, endToken);
-        startBlock();
         
         while(true) {
             element_declaration(node, endToken);
@@ -5654,9 +5617,6 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         if(tokenMgr.getNextTokenKind() == identifier) {
             tokenMgr.toNextToken();
         }
-        ASTNode typeNode = node.getAncestor(ASTTYPE_DECLARATION);
-        ((ASTNode)p).getSymbolTable().addSubtable(typeNode.getName(), node.getSymbolTable());
-        endBlock();
         closeNodeScope(node);
     }
 
@@ -5833,9 +5793,10 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         identifier(node, endToken);
         consumeToken(EQ);
         physical_literal(node, endToken);
-        addSymbol(node, UNITS, strVhdlType[TYPE_PHYSICAL]);
         consumeToken(SEMICOLON);
         closeNodeScope(node);
+        SymbolParser.parseOtherKind(node, UNITS, strVhdlType[TYPE_PHYSICAL], 
+                        lastNode.getName(), this);
     }
 
     /**
@@ -6121,7 +6082,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
      *   <dd> <b>signal</b> identifier_list : subtype_indication [ signal_kind ] [ := expression ] ;
      */
     void signal_declaration(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTSymbolNode(p, ASTSIGNAL_DECLARATION, this);
+        ASTNode node = new ASTNode(p, ASTSIGNAL_DECLARATION);
         openNodeScope(node);
         endToken = findToken(SEMICOLON, endToken);
         
@@ -6146,6 +6107,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         }
         consumeToken(SEMICOLON);
         closeNodeScope(node);
+        SymbolParser.parseVariableKind(node, SIGNAL, this);
     }
 
     /**
@@ -6464,7 +6426,6 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
     void simultaneous_procedural_statement(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTSIMULTANEOUS_PROCEDURAL_STATEMENT);
         openNodeScope(node);
-        startBlock();
         
         boolean hasLabel = false;
         Token tmpToken = endToken;
@@ -6477,6 +6438,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         consumeToken(PROCEDURAL);
         endToken = findTokenInBlock(END, endToken);
         
+        startSymbolTable();
         if(tokenMgr.getNextTokenKind() == IS) {
             consumeToken(IS);
         }
@@ -6501,7 +6463,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
             }
         }
         consumeToken(SEMICOLON);
-        endBlock();
+        endSymbolTable();
         closeNodeScope(node);
     }
 
@@ -6674,6 +6636,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         expression(node, endToken);
         consumeToken(SEMICOLON);
         closeNodeScope(node);
+        SymbolParser.parseOtherKind(node, LIMIT, this);
     }
 
     /**
@@ -6681,7 +6644,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
      *   <dd> <b>subnature</b> identifier <b>is</b> subnature_indication ;
      */
     void subnature_declaration(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTSymbolNode(p, ASTSUBNATURE_DECLARATION, this);
+        ASTNode node = new ASTNode(p, ASTSUBNATURE_DECLARATION);
         openNodeScope(node);
         endToken = findToken(SEMICOLON, endToken);
         
@@ -6692,6 +6655,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         subnature_indication(node, endToken);
         consumeToken(SEMICOLON);
         closeNodeScope(node);
+        SymbolParser.parseOtherKind(node, SUBNATURE, this);
     }
 
     /**
@@ -6747,9 +6711,8 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
      *   <dd> <b>procedure</b> | <b>function</b>
      */
     void subprogram_body(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTSymbolNode(p, ASTSUBPROGRAM_BODY, this);
+        ASTNode node = new ASTNode(p, ASTSUBPROGRAM_BODY);
         openNodeScope(node);
-        startBlock();
         
         int subkind = -1;
         if(tokenMgr.getNextTokenKind() == PROCEDURE)
@@ -6757,9 +6720,13 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         else
             subkind = FUNCTION;
 
+        startSymbolTable();
         Token tmpToken = findToken(IS, endToken);
         subprogram_specification(node, tmpToken);
         endToken = findTokenInBlock(END, endToken);
+        
+        // add parameter list symbols to subprogram body
+        curSymbolTable.addAll(((ASTNode)node.getChild(0)).getSymbolTable());
         
         consumeToken(IS);
         
@@ -6783,7 +6750,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
             designator(node, endToken);
         }
         consumeToken(SEMICOLON);
-        endBlock();
+        endSymbolTable();
         closeNodeScope(node);
     }
 
@@ -6792,13 +6759,11 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
      *   <dd> subprogram_specification ;
      */
     void subprogram_declaration(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTSymbolNode(p, ASTSUBPROGRAM_DECLARATION, this);
+        ASTNode node = new ASTNode(p, ASTSUBPROGRAM_DECLARATION);
         openNodeScope(node);
-        startBlock();
         endToken = findTokenInBlock(SEMICOLON, endToken);
         subprogram_specification(node, endToken);
         consumeToken(SEMICOLON);
-        endBlock();
         closeNodeScope(node);
     }
 
@@ -6902,10 +6867,6 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
                 exitLoop = true;
                 break;
             }
-            
-            if(!exitLoop) {
-                addSymbol(lastNode, kind);
-            }
         }
     }
 
@@ -6938,12 +6899,14 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
             if(tmpToken0 != null)
                 tmpToken = tmpToken0;
             designator(node, tmpToken);
+            startSymbolTable();
             if(tokenMgr.getNextTokenKind() == LBRACKET) {
                 consumeToken(LBRACKET);
                 tmpToken = findTokenInBlock(RBRACKET, endToken);
                 formal_parameter_list(node, tmpToken);
                 consumeToken(RBRACKET);
             }
+            endSymbolTable();
         }else if(kind == FUNCTION || kind == IMPURE || kind == PURE) {
             consumeToken(kind);
             new ASTtoken(node, tokenImage[kind]);
@@ -6959,18 +6922,25 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
             if(tmpToken0 != null)
                 tmpToken = tmpToken0;
             designator(node, tmpToken);
+            startSymbolTable();
             if(tokenMgr.getNextTokenKind() == LBRACKET) {
                 consumeToken(LBRACKET);
                 tmpToken = findTokenInBlock(RBRACKET, endToken);
                 formal_parameter_list(node, tmpToken);
                 consumeToken(RBRACKET);
             }
+            endSymbolTable();
             consumeToken(RETURN);
             type_mark(node, endToken);
         }else {
             throw new ParserException(tokenMgr.toNextToken());
         }
         closeNodeScope(node);
+        if(kind == PROCEDURE) {
+            SymbolParser.parseSubprogramKind(node, PROCEDURE, this);
+        }else {
+            SymbolParser.parseSubprogramKind(node, FUNCTION, this);
+        }
     }
 
     /**
@@ -6989,7 +6959,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
      *   <dd> <b>subtype</b> identifier <b>is</b> subtype_indication ;
      */
     void subtype_declaration(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTSymbolNode(p, ASTSUBTYPE_DECLARATION, this);
+        ASTNode node = new ASTNode(p, ASTSUBTYPE_DECLARATION);
         openNodeScope(node);
         endToken = findToken(SEMICOLON, endToken);
         
@@ -6999,6 +6969,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         subtype_indication(node, endToken);
         consumeToken(SEMICOLON);
         closeNodeScope(node);
+        SymbolParser.parseSubtypeKind(node, SUBTYPE, this);
     }
 
     /**
@@ -7123,7 +7094,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
      *   <dd> <b>terminal</b> identifier_list : subnature_indication ;
      */
     void terminal_declaration(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTSymbolNode(p, ASTTERMINAL_DECLARATION, this);
+        ASTNode node = new ASTNode(p, ASTTERMINAL_DECLARATION);
         openNodeScope(node);
         endToken = findToken(SEMICOLON, endToken);
         
@@ -7134,6 +7105,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         subnature_indication(node, endToken);
         consumeToken(SEMICOLON);
         closeNodeScope(node);
+        SymbolParser.parseOtherKind(node, TERMINAL, this);
     }
 
     /**
@@ -7210,7 +7182,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
      *   <br> | incomplete_type_declaration
      */
     void type_declaration(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTSymbolNode(p, ASTTYPE_DECLARATION, this);
+        ASTNode node = new ASTNode(p, ASTTYPE_DECLARATION);
         openNodeScope(node);
         endToken = findToken(SEMICOLON, endToken);
         endToken = tokenMgr.getNextToken(endToken);
@@ -7223,6 +7195,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
             incomplete_type_declaration(node, endToken);
         }
         closeNodeScope(node);
+        SymbolParser.parseTypeKind(node, TYPE, this);
     }
 
     /**
@@ -7325,6 +7298,46 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         subnature_indication(node, endToken);
         closeNodeScope(node);
     }
+    
+    private String[] getSelectedNames(ASTNode node) {
+        String[] ret = new String[3];
+        if(node.getId() != VhdlASTConstants.ASTSELECTED_NAME) {
+            return null;
+        }
+        
+        String libName = "", pkgName = "", symbolName = "";
+        Token token = node.first_token;
+        while(!token.image.equals(".")) {
+            libName += token.image;
+            token = token.next;
+        }
+        
+        token = token.next;
+        while(!token.image.equals(".")) {
+            pkgName += token.image;
+            if(token == node.last_token) {
+                break;
+            }
+            token = token.next;
+            if(token == null) {
+                System.out.println("error");
+            }
+        }
+        
+        if(token != node.last_token) {
+            token = token.next;
+            while(token != node.last_token) {
+                symbolName += token.image;
+                token = token.next;
+            }
+            symbolName += token.image;
+        }
+        
+        ret[0] = libName;
+        ret[1] = pkgName;
+        ret[2] = symbolName;
+        return ret;
+    }
 
     /**
      * <dl> use_clause ::=
@@ -7342,8 +7355,14 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
                 tmpToken = endToken;
             selected_name(node, tmpToken);
             if(!parseSymbol) {
-                SymbolTable table = libraryMgr.getSymbolTable(lastNode);
-                extSymbolTable.addAllInTable(table);
+                String[] selNames = getSelectedNames((ASTNode)node.getChild(
+                                                node.getChildrenNum() - 1));
+                SymbolTableNode symTab = new SymbolTableNode(null, selNames[0]);
+                symTab = new SymbolTableNode(symTab, selNames[1]);
+                if(!selNames[2].isEmpty()) {
+                    symTab = new SymbolTableNode(symTab, selNames[2]);
+                }
+                extSymbolTable.add(symTab);
             }
             if(tokenMgr.getNextTokenKind() != COMMA) {
                 break;
@@ -7384,7 +7403,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
      *        : subtype_indication [ := expression ] ;
      */
     void variable_declaration(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTSymbolNode(p, ASTVARIABLE_DECLARATION, this);
+        ASTNode node = new ASTNode(p, ASTVARIABLE_DECLARATION);
         openNodeScope(node);
         endToken = findToken(SEMICOLON, endToken);
         
@@ -7408,6 +7427,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         }
         consumeToken(SEMICOLON);
         closeNodeScope(node);
+        SymbolParser.parseVariableKind(node, VARIABLE, this);
     }
 
     /**
@@ -7519,29 +7539,22 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         return designFile;
     }
     
-    protected Symbol getNamesSymbol(SymbolTable curTab, String[] names) {
-        SymbolTable tab0, tab1;
-        Symbol sym = null;
+    protected Symbol getNamesSymbol(SymbolTableNode curTab, String[] names) {
+        String tabName = "";
+        Symbol[] sym = null;
         if(curTab == null || names == null) {
             System.err.println("VhdlParser.getNamesSymbol: null pointer");
             return null;
         }
 
-        tab0 = curTab;
+        tabName = curTab.getTableName();
         for(int i = 0; i < names.length; i++)
         {
-            if((sym = tab0.getSymbol(names[i])) == null)
+            if((sym = SymbolTableNode.db.retrive(tabName, names[i])) == null)
                 return null;
-            if(i < names.length - 1) {
-                if((tab1 = tab0.getTableOfSymbol(sym.type)) == null)
-                    return null;
-                tab0 = tab1.getSubtable(sym.type);
-                if(tab0 == null) {
-                    return null;
-                }
-            }
+            tabName = tabName + "#" + sym[0].type;
         }
-        return sym;
+        return sym[0];
     }
 
     @Override
@@ -7556,14 +7569,21 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         }
         
         if(((ASTNode)node).getSymbolTable() == null) {
+            //System.err.println("symbol table is null!");
             return null;
         }
         
-        Symbol sym = ((ASTNode)node).getSymbolTable().getSymbol(name);
+        ISymbol sym = ((ASTNode)node).getSymbolTable().getSymbol(name);
         if(sym != null) {
             return sym;
         }
-        return extSymbolTable.getSymbol(name);
+        
+        for(int i = 0; i < extSymbolTable.size(); i++) {
+            if((sym = extSymbolTable.get(i).getSymbol(name)) != null) {
+                return sym;
+            }
+        }
+        return null;
     }
     
     @Override
@@ -7582,17 +7602,29 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         if(ret != null)
             return ret;
         
-        return getNamesSymbol(extSymbolTable, names);
+        for(int i = 0; i < extSymbolTable.size(); i++) {
+            if((ret = getNamesSymbol(extSymbolTable.get(i), names)) != null) {
+                return ret;
+            }
+        }
+        return null;
     }
     
     @Override
     public ISymbolTable getTableOfSymbol(IASTNode node, String name)
     {
-        SymbolTable ret = ((ASTNode)node).getSymbolTable().getTableOfSymbol(name);
+        SymbolTableNode ret = ((ASTNode)node).getSymbolTable().getTableOfSymbol(name);
         if(ret != null) {
             return ret;
         }
-        return extSymbolTable.getTableOfSymbol(name);
+        
+        for(int i = 0; i < extSymbolTable.size(); i++) {
+            ret = extSymbolTable.get(i).getTableOfSymbol(name);
+            if(ret != null) {
+                return ret;
+            }
+        }
+        return null;
     }
 
     @Override
