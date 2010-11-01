@@ -7357,10 +7357,10 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
             if(!parseSymbol) {
                 String[] selNames = getSelectedNames((ASTNode)node.getChild(
                                                 node.getChildrenNum() - 1));
-                SymbolTable symTab = new SymbolTable(null, selNames[0]);
-                symTab = new SymbolTable(symTab, selNames[1]);
+                SymbolTable symTab = new SymbolTable(null, selNames[0], true);
+                symTab = new SymbolTable(symTab, selNames[1], true);
                 if(!selNames[2].isEmpty()) {
-                    symTab = new SymbolTable(symTab, selNames[2]);
+                    symTab = new SymbolTable(symTab, selNames[2], true);
                 }
                 extSymbolTable.add(symTab);
             }

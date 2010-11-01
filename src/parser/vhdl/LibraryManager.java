@@ -21,7 +21,7 @@ public class LibraryManager
     public static LibraryManager getInstance() {
         if(libMgr == null) {
             libMgr = new LibraryManager();
-            //libMgr.addPredefinedPackage();
+            libMgr.addPredefinedPackage();
         }
         return libMgr;
     }
@@ -70,6 +70,21 @@ public class LibraryManager
         return ret;
     }
     
+    private boolean addChildren(String tabName, SymbolTable tab) {
+        if(tabName == null || tabName.isEmpty() || tab == null || tab.chidren == null) {
+            return false;
+        }
+        
+        for(int i = 0; i < tab.chidren.size(); i++) {
+            SymbolTable tab1 = tab.chidren.get(i);
+            String tabName1 = tabName + "#" + tab1.getName(); 
+            dataBase.newTable(tabName1, true);
+            dataBase.insert(tabName1, (Symbol[])tab1.getAllSymbols());
+            addChildren(tabName1, tab1);
+        }
+        return true;
+    }
+    
     /**
      * add one library
      * @param dir: library directory
@@ -98,12 +113,13 @@ public class LibraryManager
                     for(int j = 0; j < pkgNodes.length; j++) {
                         String tabName = libName + "#" + pkgNodes[j].getName().toLowerCase();
                         tabNames.add(tabName);
-                        
-                        dataBase.newTable(tabName, true);
-                        SymbolTable node = pkgNodes[j].getSymbolTable();
-                        dataBase.insert(tabName, (Symbol[])node.getAllSymbols());
                         dataBase.insert(libName, new Symbol(pkgNodes[j].getName(), 
                                             VhdlTokenConstants.PACKAGE));
+                        
+                        dataBase.newTable(tabName, true);
+                        SymbolTable tab = pkgNodes[j].getSymbolTable();
+                        dataBase.insert(tabName, (Symbol[])tab.getAllSymbols());
+                        addChildren(tabName, tab);
                     }
                 }
                 
