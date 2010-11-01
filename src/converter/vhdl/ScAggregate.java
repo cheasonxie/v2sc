@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import parser.vhdl.ASTNode;
 import parser.IASTNode;
 import parser.vhdl.Symbol;
-import parser.vhdl.SymbolTableNode;
+import parser.vhdl.SymbolTable;
 
 
 /**
@@ -31,8 +31,8 @@ class ScAggregate extends ScVhdl {
         return ret;
     }
     
-    public SymbolTableNode getTargetTypeSymbolTable() {
-        SymbolTableNode ret = null;
+    public SymbolTable getTargetTypeSymbolTable() {
+        SymbolTable ret = null;
         ASTNode node = null;
         ScCommonDeclaration cd = null;
         if((node = curNode.getAncestor(ASTCONSTANT_DECLARATION)) != null) {
@@ -62,7 +62,7 @@ class ScAggregate extends ScVhdl {
     public String scString() {
         String[] typeRange = getTargetRange();
         String[] arrayRange = getTargetArrayRange();
-        SymbolTableNode recordTable = getTargetTypeSymbolTable();
+        SymbolTable recordTable = getTargetTypeSymbolTable();
         boolean isArray = (arrayRange != null);
         
         String ret = "";

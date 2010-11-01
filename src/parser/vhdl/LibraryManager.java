@@ -11,16 +11,16 @@ import common.FileList;
 /**
  * all libraries
  */
-public class SymbolManager
+public class LibraryManager
 {
     private static final long serialVersionUID = 5288877947661058435L;
     
-    static protected SymbolManager libMgr = null;
+    static protected LibraryManager libMgr = null;
     static protected VhdlDataBase dataBase = null;
     
-    public static SymbolManager getInstance() {
+    public static LibraryManager getInstance() {
         if(libMgr == null) {
-            libMgr = new SymbolManager();
+            libMgr = new LibraryManager();
             //libMgr.addPredefinedPackage();
         }
         return libMgr;
@@ -30,7 +30,7 @@ public class SymbolManager
         return dataBase;
     }
     
-    private SymbolManager() {
+    private LibraryManager() {
         dataBase = new VhdlDataBase();
         dataBase.init();
     }
@@ -76,7 +76,7 @@ public class SymbolManager
      * @param libName: library name
      * @return
      */
-    public boolean addLibrary(String dir, String libName) {
+    public boolean add(String dir, String libName) {
         FileList list = new FileList(dir, IParser.EXT_VHDL);
         System.out.println("======file num:" + list.getFileNum() + "========");
         
@@ -100,7 +100,7 @@ public class SymbolManager
                         tabNames.add(tabName);
                         
                         dataBase.newTable(tabName, true);
-                        SymbolTableNode node = pkgNodes[j].getSymbolTable();
+                        SymbolTable node = pkgNodes[j].getSymbolTable();
                         dataBase.insert(tabName, (Symbol[])node.getAllSymbols());
                         dataBase.insert(libName, new Symbol(pkgNodes[j].getName(), 
                                             VhdlTokenConstants.PACKAGE));
@@ -108,6 +108,7 @@ public class SymbolManager
                 }
                 
                 localEntities.addAll(parser.getLocalUnits());
+                parser.getLocalUnits().clear();
                 designFile = null;
                 System.gc();
             } catch (Exception e) {
@@ -139,7 +140,7 @@ public class SymbolManager
                 tabNames.add(tabName);
                 
                 dataBase.newTable(tabName, false);
-                SymbolTableNode node = localEntities.get(i).getSymbolTable();
+                SymbolTable node = localEntities.get(i).getSymbolTable();
                 dataBase.insert(tabName, (Symbol[])node.getAllSymbols());
             }
         }

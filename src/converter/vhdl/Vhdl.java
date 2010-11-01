@@ -8,7 +8,7 @@ import common.FileList;
 
 import parser.IParser;
 import parser.ParserException;
-import parser.vhdl.SymbolManager;
+import parser.vhdl.LibraryManager;
 import parser.vhdl.VhdlParser;
 import converter.hdlConverter;
 
@@ -177,6 +177,6 @@ public class Vhdl extends hdlConverter {
     @Override
     public void addLibary(String srcDir, String libName)
     {
-        SymbolManager.getInstance().addLibrary(srcDir, libName);
+        LibraryManager.getInstance().add(srcDir, libName);
     }
 }

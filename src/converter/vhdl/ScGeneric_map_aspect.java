@@ -6,7 +6,7 @@ import common.MyDebug;
 
 import parser.vhdl.ASTNode;
 import parser.vhdl.Symbol;
-import parser.vhdl.SymbolTableNode;
+import parser.vhdl.SymbolTable;
 
 
 /**
@@ -39,7 +39,7 @@ class ScGeneric_map_aspect extends ScVhdl {
         String ret = "";
         int i = 0;
 
-        SymbolTableNode symTab = (SymbolTableNode)parser.getTableOfSymbol(curNode, name);
+        SymbolTable symTab = (SymbolTable)parser.getTableOfSymbol(curNode, name);
         if(symTab == null) {
             MyDebug.printFileLine("component not found:" + name);
             return ret;

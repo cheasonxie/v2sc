@@ -5,18 +5,18 @@ import java.util.ArrayList;
 import parser.ISymbol;
 import parser.ISymbolTable;
 
-public class SymbolTableNode implements ISymbolTable
+public class SymbolTable implements ISymbolTable
 {
     private static final long serialVersionUID = -5606826108996410370L;
     
     String name = "";
-    SymbolTableNode parent = null;
+    SymbolTable parent = null;
     String tabName = "tabName";
     int symNum = 0;
     
-    static VhdlDataBase db = SymbolManager.getInstance().getDb();
+    static VhdlDataBase db = LibraryManager.getInstance().getDb();
     
-    public SymbolTableNode(SymbolTableNode p, String name) {
+    public SymbolTable(SymbolTable p, String name) {
         parent = p;
         this.name = name;
         tabName = getTableName();
@@ -27,17 +27,17 @@ public class SymbolTableNode implements ISymbolTable
         return name;
     }
     
-    public void setParent(SymbolTableNode p) {
+    public void setParent(SymbolTable p) {
         parent = p;
     }
     
-    public SymbolTableNode getParent() {
+    public SymbolTable getParent() {
         return parent;
     }
     
     public String getTableName() {
         String ret = name;
-        SymbolTableNode p = parent;
+        SymbolTable p = parent;
         while(p != null) {
             ret = p.name + "#" + ret;
             p = p.parent;
@@ -45,7 +45,7 @@ public class SymbolTableNode implements ISymbolTable
         return ret;
     }
     
-    public boolean addAll(SymbolTableNode other) {
+    public boolean addAll(SymbolTable other) {
         if(other == null)
             return false;
         ISymbol[] syms = other.getAllSymbols();
@@ -99,7 +99,7 @@ public class SymbolTableNode implements ISymbolTable
         }
     }
     
-    public SymbolTableNode getTableOfSymbol(String name) {
+    public SymbolTable getTableOfSymbol(String name) {
         Symbol[] ret = db.retrive(tabName, name);
         if(ret != null)
             return this;

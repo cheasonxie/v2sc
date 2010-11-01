@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import parser.Token;
 
-class SymbolParser implements VhdlTokenConstants, VhdlASTConstants, IVhdlType
+public class SymbolParser implements VhdlTokenConstants, VhdlASTConstants, IVhdlType
 {
     /**
      * parse interface list kind symbols(port, generic, supprogram parameter)
@@ -208,7 +208,7 @@ class SymbolParser implements VhdlTokenConstants, VhdlASTConstants, IVhdlType
      * parse other kind(alias, attribute, group, nature, subnature, component, etc.)
      * specified type
      */
-    public static void parseOtherKind(ASTNode node, int kind, String type, VhdlParser parser) {
+    public static void parseCommonKind(ASTNode node, int kind, String type, VhdlParser parser) {
         if(node == null) {
             System.err.println("parseOtherKind:null parameter!");
             return;
@@ -224,7 +224,7 @@ class SymbolParser implements VhdlTokenConstants, VhdlASTConstants, IVhdlType
      * parse other kind(alias, attribute, group, nature, subnature, component, etc.)
      * specified type and value
      */
-    public static void parseOtherKind(ASTNode node, int kind, String type, String value,
+    public static void parseCommonKind(ASTNode node, int kind, String type, String value,
                             VhdlParser parser) {
         if(node == null) {
             System.err.println("parseOtherKind:null parameter!");
