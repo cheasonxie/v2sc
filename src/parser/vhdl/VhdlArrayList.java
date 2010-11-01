@@ -2,6 +2,7 @@ package parser.vhdl;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Collection;
 
 import parser.INameObject;
 
@@ -57,6 +58,7 @@ public class VhdlArrayList<E extends INameObject> extends ArrayList<E>
     /**
      * get all elements which's name equals to specified name 
      */
+    @SuppressWarnings("unchecked")
     public E[] get(String name)
     {
         if(name == null || name.isEmpty()) {
