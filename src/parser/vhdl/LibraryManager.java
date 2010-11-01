@@ -160,6 +160,7 @@ public class LibraryManager
                 dataBase.newTable(tabName, false);
                 SymbolTable node = localEntities.get(i).getSymbolTable();
                 dataBase.insert(tabName, (Symbol[])node.getAllSymbols());
+                addChildren(tabName, localEntities.get(i).getSymbolTable());
             }
         }
         localEntities.clear();
