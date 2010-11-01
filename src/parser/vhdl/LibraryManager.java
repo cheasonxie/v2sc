@@ -7,6 +7,7 @@ import parser.IASTNode;
 import parser.IParser;
 
 import common.FileList;
+import common.MyDebug;
 
 /**
  * all libraries
@@ -102,6 +103,7 @@ public class LibraryManager
         
         ArrayList<String> tabNames = new ArrayList<String>();
         ArrayList<ASTNode> localEntities = new ArrayList<ASTNode>();
+        tabNames.add(libName);
         for(int i = 0; i < list.getFileNum(); i++) {
             String path = list.getFile(i);
             try {
@@ -129,7 +131,7 @@ public class LibraryManager
                 System.gc();
             } catch (Exception e) {
                 StackTraceElement[] stackEle = e.getStackTrace();
-                System.err.println("stackEle.length:" + stackEle.length);
+                MyDebug.printFileLine("stackEle.length:" + stackEle.length);
                 if(stackEle.length > 7) {
                     e.printStackTrace();
                 }
@@ -148,7 +150,7 @@ public class LibraryManager
             // not found in package
             if(j >= tabNames.size()) {
                 if(localEntities.get(i).id != VhdlASTConstants.ASTENTITY_DECLARATION) {
-                    System.err.println("not an entity error");
+                    MyDebug.printFileLine("not an entity error");
                 }
                 dataBase.insert(libName, new Symbol(name, VhdlTokenConstants.COMPONENT));
                 

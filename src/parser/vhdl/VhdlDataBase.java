@@ -9,6 +9,8 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
 
+import common.MyDebug;
+
 import parser.vhdl.Symbol;
 
 public class VhdlDataBase
@@ -101,7 +103,7 @@ public class VhdlDataBase
             createStr += ");";
             stmt.executeUpdate(createStr);
         } catch (SQLException e) {
-            System.out.println(e.getMessage() + ": " + createStr);
+            //System.out.println(e.getMessage() + ": " + createStr);
             //e.printStackTrace();
             return false;
         }
@@ -123,6 +125,15 @@ public class VhdlDataBase
         if(sym == null) {
             System.err.println("null parameter");
             return false;
+        }
+        
+        // check whether this symbol is already in table 
+        Symbol[] oldSyms = retrive(tabName, sym.name);
+        if(oldSyms != null) {
+            for(int i = 0; i < oldSyms.length; i++) {
+                if(oldSyms[i].equals(sym))
+                    return true;
+            }
         }
         
         String insertStr = "insert into \"" + tabName + "\" values(" +

@@ -7569,7 +7569,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         }
         
         if(((ASTNode)node).getSymbolTable() == null) {
-            System.err.println("symbol table is null!");
+            //System.err.println("symbol table is null!");
             return null;
         }
         

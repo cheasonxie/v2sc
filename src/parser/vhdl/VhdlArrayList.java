@@ -2,7 +2,6 @@ package parser.vhdl;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Collection;
 
 import parser.INameObject;
 
@@ -58,12 +57,12 @@ public class VhdlArrayList<E extends INameObject> extends ArrayList<E>
     /**
      * get all elements which's name equals to specified name 
      */
-    @SuppressWarnings("unchecked")
     public E[] get(String name)
     {
         if(name == null || name.isEmpty()) {
             return null;
         }
+
         ArrayList<E> eles = new ArrayList<E>();
         
         for(int i = 0; i < size(); i++) {
@@ -71,6 +70,8 @@ public class VhdlArrayList<E extends INameObject> extends ArrayList<E>
                 eles.add(get(i));
             }
         }
-        return eles.toArray((E[])new Object[eles.size()]);
+        if(eles.size() == 0)
+            return null;
+        return eles.toArray((E[])Array.newInstance(eles.get(0).getClass(), eles.size()));
     }
 }
