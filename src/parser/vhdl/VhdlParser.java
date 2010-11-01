@@ -7360,9 +7360,23 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
                 SymbolTable symTab = new SymbolTable(null, selNames[0], true);
                 symTab = new SymbolTable(symTab, selNames[1], true);
                 if(!selNames[2].isEmpty()) {
-                    symTab = new SymbolTable(symTab, selNames[2], true);
+                    if(selNames[2].equalsIgnoreCase("all")) {
+                        // get all symbols in first two segments
+                        Symbol[] allSyms = (Symbol[])symTab.getAllSymbols();
+                        if(allSyms != null) {
+                            for(int i = 0; i < allSyms.length; i++) {
+                                if(allSyms[i].kind == COMPONENT)
+                            }
+                        }
+                    }else {
+                        // three segments, specified symbol
+                        symTab = new SymbolTable(symTab, selNames[2], true);
+                        extSymbolTable.add(symTab);
+                    }
+                }else {
+                    // only two segments
+                    extSymbolTable.add(symTab);
                 }
-                extSymbolTable.add(symTab);
             }
             if(tokenMgr.getNextTokenKind() != COMMA) {
                 break;
