@@ -7541,7 +7541,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
     
     protected Symbol getNamesSymbol(SymbolTable curTab, String[] names) {
         String tabName = "";
-        Symbol[] sym = null;
+        Symbol sym = null;
         if(curTab == null || names == null) {
             System.err.println("VhdlParser.getNamesSymbol: null pointer");
             return null;
@@ -7550,11 +7550,11 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         tabName = curTab.getTableName();
         for(int i = 0; i < names.length; i++)
         {
-            if((sym = SymbolTable.db.retrive(tabName, names[i])) == null)
+            if((sym = SymbolTable.getSymbol(curTab, tabName, names[i])) == null)
                 return null;
-            tabName = tabName + "#" + sym[0].type;
+            tabName = tabName + "#" + sym.type;
         }
-        return sym[0];
+        return sym;
     }
 
     @Override
@@ -7569,7 +7569,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         }
         
         if(((ASTNode)node).getSymbolTable() == null) {
-            //System.err.println("symbol table is null!");
+            System.err.println("symbol table is null!");
             return null;
         }
         
