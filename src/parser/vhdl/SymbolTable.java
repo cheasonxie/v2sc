@@ -3,6 +3,8 @@ package parser.vhdl;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
 
+import common.MyDebug;
+
 import parser.INameObject;
 import parser.ISymbol;
 import parser.ISymbolTable;
@@ -44,7 +46,10 @@ public class SymbolTable implements ISymbolTable, INameObject
                 p.chidren.add(this);
             }
         }else {
-            db.newTable(tabName, false);
+            if(!db.isTableExist(tabName)) {
+                MyDebug.printFileLine("symbol table not exist:" + tabName);
+            }
+            //db.newTable(tabName, true);
         }
     }
     
@@ -141,6 +146,19 @@ public class SymbolTable implements ISymbolTable, INameObject
             p = temp[0];
         }
         return (Symbol)p.getSymbol(name);
+    }
+    
+    /**
+     * static method, check whether symbol table exists
+     */
+    public static boolean isTableExist(SymbolTable curTab, String tabName) {
+        if(db.isTableExist(tabName))
+            return true;
+        
+        if(curTab == null || curTab.isLibraryTable)
+            return false;
+        
+        return (curTab.tabName.indexOf(tabName) >= 0);
     }
     
     @Override

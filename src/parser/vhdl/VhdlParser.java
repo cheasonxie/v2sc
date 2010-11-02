@@ -6,6 +6,8 @@ import java.io.FileReader;
 import java.io.Reader;
 import java.util.ArrayList;
 
+import common.MyDebug;
+
 import parser.CommentBlock;
 import parser.IASTNode;
 import parser.IParser;
@@ -7355,19 +7357,31 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
                 tmpToken = endToken;
             selected_name(node, tmpToken);
             if(!parseSymbol) {
+                
                 String[] selNames = getSelectedNames((ASTNode)node.getChild(
                                                 node.getChildrenNum() - 1));
+                
                 SymbolTable symTab = new SymbolTable(null, selNames[0], true);
                 symTab = new SymbolTable(symTab, selNames[1], true);
                 if(!selNames[2].isEmpty()) {
                     if(selNames[2].equalsIgnoreCase("all")) {
                         // get all symbols in first two segments
-                        Symbol[] allSyms = (Symbol[])symTab.getAllSymbols();
+                        Symbol[] allSyms = (Symbol[])symTab.getAllSymbols(); 
                         if(allSyms != null) {
+                            String tabName = symTab.getTableName();
                             for(int i = 0; i < allSyms.length; i++) {
-                                if(allSyms[i].kind == COMPONENT)
+                                String tabName1 = tabName + "#" + allSyms[i].getName();
+                                if(!SymbolTable.isTableExist(node.getSymbolTable(), tabName1))
+                                    continue;
+                                SymbolTable symTab1 = new SymbolTable(symTab, selNames[2], true);
+                                extSymbolTable.add(symTab1);
                             }
                         }
+                        
+                        if(allSyms == null || allSyms.length == 0) {
+                            extSymbolTable.add(symTab);
+                        }
+                        
                     }else {
                         // three segments, specified symbol
                         symTab = new SymbolTable(symTab, selNames[2], true);

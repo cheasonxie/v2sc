@@ -25,12 +25,16 @@ public class VhdlDataBase
     private Statement stmt = null;
     
     private String normalize(String str) {
+        if(str == null || str.isEmpty())
+            return str;
         String ret = str.replace('\"', '&');
         ret = ret.replace('\'', '@');
         return ret;
     }
     
     private String restore(String str) {
+        if(str == null || str.isEmpty())
+            return str;
         String ret = str.replace('&', '\"');
         ret = ret.replace('@', '\'');
         return ret;
@@ -412,13 +416,44 @@ public class VhdlDataBase
         tabName = normalize(tabName);
         
         try {
-            stmt.executeUpdate("drop table " + tabName + ";");
+            stmt.executeUpdate("drop table \"" + tabName + "\";");
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
         }
         
         return true;
+    }
+    
+    /**
+     * check whether table exist
+     */
+    public boolean isTableExist(String tabName) {
+        if(conn == null || stmt == null) {
+            System.err.println(JDBC_NOT_CONNECT);
+            return false;
+        }
+        
+        if(tabName == null || tabName.isEmpty()) {
+            System.err.println(INVALID_TABLE_NAME);
+            return false;
+        }
+        
+        tabName = normalize(tabName);
+        
+        try {
+            stmt.executeUpdate("create table \"" + tabName + "\"(name text);");
+        } catch (SQLException e) {
+            return true;
+        }
+
+        try {
+            stmt.executeUpdate("drop table \"" + tabName + "\";");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        return false;
     }
    
     /**

@@ -182,6 +182,8 @@ public class LibraryManager
             for(int j = 0; j < prePkg[i].syms.length; j++) {
                 dataBase.insert(tabName, prePkg[i].syms[j]);
             }
+            //Symbol[] tmpSyms = dataBase.retrive(tabName);
+            //MyDebug.printFileLine("tabName:" + tabName + ", count:" + tmpSyms.length);
         }
         return true;
     }
