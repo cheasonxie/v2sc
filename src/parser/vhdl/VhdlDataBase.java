@@ -27,6 +27,7 @@ public class VhdlDataBase
     private String normalize(String str) {
         if(str == null || str.isEmpty())
             return str;
+        str = str.toLowerCase();
         String ret = str.replace('\"', '&');
         ret = ret.replace('\'', '@');
         return ret;
@@ -35,6 +36,7 @@ public class VhdlDataBase
     private String restore(String str) {
         if(str == null || str.isEmpty())
             return str;
+        str = str.toLowerCase();
         String ret = str.replace('&', '\"');
         ret = ret.replace('@', '\'');
         return ret;
@@ -454,6 +456,33 @@ public class VhdlDataBase
         }
         
         return false;
+    }
+    
+    /**
+     * get all table
+     */
+    public String[] getAllTables() {
+        if(conn == null || stmt == null) {
+            System.err.println(JDBC_NOT_CONNECT);
+            return null;
+        }
+        
+        ArrayList<String> ret = new ArrayList<String>();
+
+        try {
+            DatabaseMetaData meta = conn.getMetaData();
+            ResultSet res = meta.getTables(null, null, null, new String[] {"table"});
+            while (res.next()) {
+                ret.add(res.getString("table_name"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+        
+        if(ret.size() == 0)
+            return null;
+        return ret.toArray(new String[ret.size()]);
     }
    
     /**

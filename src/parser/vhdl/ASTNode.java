@@ -14,7 +14,7 @@ public class ASTNode implements IASTNode
     protected int id;
     protected Token first_token = null;
     protected Token last_token = null;
-    protected SymbolTable symTabNode = null;
+    protected SymbolTable symTab = null;
     
     public ASTNode(IASTNode p, int id) {
         parent = p;
@@ -192,11 +192,11 @@ public class ASTNode implements IASTNode
     }
     
     public SymbolTable getSymbolTable() {
-        return symTabNode;
+        return symTab;
     }
     
     public void setSymbolTable(SymbolTable tab) {
-        symTabNode = tab;
+        symTab = tab;
     }
 }
 

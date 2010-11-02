@@ -72,12 +72,12 @@ public class LibraryManager
     }
     
     private boolean addChildren(String tabName, SymbolTable tab) {
-        if(tabName == null || tabName.isEmpty() || tab == null || tab.chidren == null) {
+        if(tabName == null || tabName.isEmpty() || tab == null || tab.children == null) {
             return false;
         }
         
-        for(int i = 0; i < tab.chidren.size(); i++) {
-            SymbolTable tab1 = tab.chidren.get(i);
+        for(int i = 0; i < tab.children.size(); i++) {
+            SymbolTable tab1 = tab.children.get(i);
             String tabName1 = tabName + "#" + tab1.getName(); 
             dataBase.newTable(tabName1, true);
             dataBase.insert(tabName1, (Symbol[])tab1.getAllSymbols());
@@ -119,7 +119,7 @@ public class LibraryManager
                                             VhdlTokenConstants.PACKAGE));
                         
                         dataBase.newTable(tabName, true);
-                        SymbolTable tab = pkgNodes[j].getSymbolTable();
+                        SymbolTable tab = ((ASTNode)pkgNodes[j].getChild(0)).getSymbolTable();
                         dataBase.insert(tabName, (Symbol[])tab.getAllSymbols());
                         addChildren(tabName, tab);
                     }
@@ -168,6 +168,27 @@ public class LibraryManager
         return true;
     }
     
+    /**
+     * find user defined library which includes specified symbol
+     * @param symName name of symbol, may be package, component.
+     * @return library name if found, elsewhere null; 
+     */
+    public String findWorkLibrary(String symName) {
+        String ret = null;
+        String[] tables = dataBase.getAllTables();
+        if(tables == null || tables.length == 0) {
+            return null;
+        }
+        for(int i = 0; i < tables.length; i++) {
+            String tabName = tables[i];
+            if(tabName.indexOf('#') >= 0)
+                continue;   // not library table
+            if(dataBase.retrive(tabName, symName) != null)
+                return tabName;
+        }
+        return ret;
+    }
+    
     protected boolean addPredefinedPackage() {
         PrePkg[] prePkg = PredefinedPackage.predefined_pkgs;
         for(int i = 0; i < prePkg.length; i++) {
@@ -187,5 +208,4 @@ public class LibraryManager
         }
         return true;
     }
-    
 }

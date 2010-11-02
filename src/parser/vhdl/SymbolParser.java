@@ -179,7 +179,7 @@ public class SymbolParser implements VhdlTokenConstants, VhdlASTConstants, IVhdl
                 sym.paramTypeList.add(type);
             }
         }
-        node.getSymbolTable().getParent().addSymbol(sym);   //note: use parent symbol table
+        node.getSymbolTable().addSymbol(sym);   //note: use parent symbol table
     }
     
     /**
@@ -197,11 +197,8 @@ public class SymbolParser implements VhdlTokenConstants, VhdlASTConstants, IVhdl
         if(tmpNode != null) {
             sym.type = tmpNode.getName();
         }
-        if(kind == COMPONENT) {
-            node.getSymbolTable().getParent().addSymbol(sym);
-        }else {
-            node.getSymbolTable().addSymbol(sym);
-        }
+        
+        node.getSymbolTable().addSymbol(sym);
     }
     
     /**

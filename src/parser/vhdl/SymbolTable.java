@@ -26,7 +26,7 @@ public class SymbolTable implements ISymbolTable, INameObject
      */
     boolean isLibraryTable = false;
     VhdlArrayList<Symbol> mysyms = null;
-    VhdlArrayList<SymbolTable> chidren = null;
+    VhdlArrayList<SymbolTable> children = null;
     
     private static VhdlDataBase db = LibraryManager.getInstance().getDb();
     
@@ -41,9 +41,9 @@ public class SymbolTable implements ISymbolTable, INameObject
         isLibraryTable = isLib;
         if(!isLib) {
             mysyms = new VhdlArrayList<Symbol>();
-            chidren = new VhdlArrayList<SymbolTable>();
+            children = new VhdlArrayList<SymbolTable>();
             if(p != null) {
-                p.chidren.add(this);
+                p.children.add(this);
             }
         }else {
             if(!db.isTableExist(tabName)) {
@@ -74,7 +74,10 @@ public class SymbolTable implements ISymbolTable, INameObject
     public void setParent(SymbolTable p) {
         parent = p;
         if(!isLibraryTable && p != null) {
-            p.chidren.add(this);
+            p.children.add(this);
+            tabName = p.tabName + "#" + name;
+            for(int i = 0; i < children.size(); i++)
+                children.get(i).setParent(this);    // update children's table name
         }
     }
     
@@ -100,6 +103,10 @@ public class SymbolTable implements ISymbolTable, INameObject
             return false;
         for(int i = 0; i < syms.length; i++) {
             addSymbol(syms[i]);
+        }
+        
+        if(!isLibraryTable) {
+            children.addAll(other.children);
         }
         return true;
     }
@@ -139,7 +146,7 @@ public class SymbolTable implements ISymbolTable, INameObject
         StringTokenizer tkn = new StringTokenizer(tableName, "#");
         while(tkn.hasMoreTokens()) {
             String n = tkn.nextToken();
-            SymbolTable[] temp = p.chidren.get(n);
+            SymbolTable[] temp = p.children.get(n);
             if(temp == null) {
                 return null;
             }
@@ -222,5 +229,10 @@ public class SymbolTable implements ISymbolTable, INameObject
         if(parent != null)
             return parent.getTableOfSymbol(name);
         return null;
+    }
+    
+    @Override
+    public String toString() {
+        return tabName;
     }
 }
