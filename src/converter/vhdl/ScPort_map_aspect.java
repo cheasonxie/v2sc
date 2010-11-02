@@ -46,6 +46,12 @@ class ScPort_map_aspect extends ScVhdl {
             return ret;
         }
         
+        symTab = symTab.getChildTable(name);
+        if(symTab == null) {
+            MyDebug.printFileLine("component table not found:" + name);
+            return ret;
+        }
+        
         Symbol[] syms = symTab.getKindSymbols(PORT);
         if(syms.length == 0) {
             System.out.println();

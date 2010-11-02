@@ -7388,7 +7388,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
                                 String tabName1 = tabName + "#" + allSyms[i].getName();
                                 if(!SymbolTable.isTableExist(node.getSymbolTable(), tabName1))
                                     continue;
-                                SymbolTable symTab1 = new SymbolTable(symTab, tabName1, true);
+                                SymbolTable symTab1 = new SymbolTable(symTab, allSyms[i].getName(), true);
                                 extSymbolTable.add(symTab1);
                             }
                         }

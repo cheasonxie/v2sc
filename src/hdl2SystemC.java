@@ -78,8 +78,8 @@ public class hdl2SystemC
             try
             {
                 hdlConverter conv = null;
-                String name = "amba";
-                //String name = "ahbctrl";
+                //String name = "amba";
+                String name = "ahbctrl";
                 String path = name + ".vhd";
                 //String path = "ac97_top.v";
                 if(args.length > 1)

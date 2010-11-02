@@ -39,12 +39,14 @@ public class SymbolTable implements ISymbolTable, INameObject
         this.name = name;
         tabName = getTableName();
         isLibraryTable = isLib;
+        
+        children = new VhdlArrayList<SymbolTable>();
+        if(p != null) {
+            p.children.add(this);
+        }
+        
         if(!isLib) {
             mysyms = new VhdlArrayList<Symbol>();
-            children = new VhdlArrayList<SymbolTable>();
-            if(p != null) {
-                p.children.add(this);
-            }
         }else {
             if(!db.isTableExist(tabName)) {
                 MyDebug.printFileLine("symbol table not exist:" + tabName);
@@ -73,7 +75,7 @@ public class SymbolTable implements ISymbolTable, INameObject
     
     public void setParent(SymbolTable p) {
         parent = p;
-        if(!isLibraryTable && p != null) {
+        if(p != null) {
             p.children.add(this);
             tabName = p.tabName + "#" + name;
             for(int i = 0; i < children.size(); i++)
@@ -104,10 +106,7 @@ public class SymbolTable implements ISymbolTable, INameObject
         for(int i = 0; i < syms.length; i++) {
             addSymbol(syms[i]);
         }
-        
-        if(!isLibraryTable) {
-            children.addAll(other.children);
-        }
+        children.addAll(other.children);
         return true;
     }
     
@@ -133,7 +132,7 @@ public class SymbolTable implements ISymbolTable, INameObject
         if(ret != null)
             return ret[0];
         
-        if(curTab == null || curTab.isLibraryTable)
+        if(curTab == null)
             return null;
         
         SymbolTable p = curTab;
@@ -166,6 +165,15 @@ public class SymbolTable implements ISymbolTable, INameObject
             return false;
         
         return (curTab.tabName.indexOf(tabName) >= 0);
+    }
+    
+    public SymbolTable getChildTable(String name) {
+        for(int i = 0; i < children.size(); i++) {
+            if(children.get(i).getName().equalsIgnoreCase(name)) {
+                return children.get(i);
+            }
+        }
+        return null;
     }
     
     @Override

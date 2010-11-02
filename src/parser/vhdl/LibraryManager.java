@@ -158,7 +158,7 @@ public class LibraryManager
                 tabNames.add(tabName);
                 
                 dataBase.newTable(tabName, false);
-                SymbolTable node = localEntities.get(i).getSymbolTable();
+                SymbolTable node = ((ASTNode)localEntities.get(i).getChild(0)).getSymbolTable();
                 dataBase.insert(tabName, (Symbol[])node.getAllSymbols());
                 addChildren(tabName, localEntities.get(i).getSymbolTable());
             }

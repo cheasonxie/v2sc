@@ -45,7 +45,17 @@ class ScGeneric_map_aspect extends ScVhdl {
             return ret;
         }
         
+        symTab = symTab.getChildTable(name);
+        if(symTab == null) {
+            MyDebug.printFileLine("component table not found:" + name);
+            return ret;
+        }
+        
         Symbol[] syms = symTab.getKindSymbols(GENERIC);
+        if(syms == null) {
+            MyDebug.printFileLine("component not found:" + name);
+            return ret;
+        }
         ArrayList<ScAssociation_element> elements = association_list.elements;
         
         for(i = 0; i < elements.size(); i++) {

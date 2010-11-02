@@ -113,6 +113,7 @@ public class VhdlDataBase
             //e.printStackTrace();
             return false;
         }
+        //MyDebug.printFileLine("create table:" + tabName);
         return true;
     }
     
