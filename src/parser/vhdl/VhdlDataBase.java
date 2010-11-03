@@ -445,15 +445,13 @@ public class VhdlDataBase
         tabName = normalize(tabName);
         
         try {
-            stmt.executeUpdate("create table \"" + tabName + "\"(name text);");
+            DatabaseMetaData meta = conn.getMetaData();
+            ResultSet res = meta.getTables(null, null, tabName, new String[] {"table"});
+            if (res.next()) {
+                return true;
+            }
         } catch (SQLException e) {
-            return true;
-        }
-
-        try {
-            stmt.executeUpdate("drop table \"" + tabName + "\";");
-        } catch (SQLException e) {
-            e.printStackTrace();
+            return false;
         }
         
         return false;
@@ -531,18 +529,26 @@ public class VhdlDataBase
         String tabName = "grlib#amba";
         //String tabName = "grlib";
         db.init();
-        db.clearAllTables();
+        //db.clearAllTables();
         //db.clearTable(tabName);
         db.newTable(tabName, false);
+        
+        boolean exist = db.isTableExist(tabName);
+        System.out.println(exist);
+        
+        exist = db.isTableExist("aaaaa");
         
         // insert symbols
         for(int i = 0; i < std_logic_1164_syms.length; i++) {
             db.insert(tabName, std_logic_1164_syms[i]);
         }
         
+        db.newTable(tabName, false);
+        
         // Retrieve
         for(int i = 0; i < std_logic_1164_syms.length; i++) {
             Symbol[] sym = db.retrive(tabName, std_logic_1164_syms[i].name);
+            System.out.println(sym.length);
         }
         //db.clearTable(tabName);
         db.exit();
