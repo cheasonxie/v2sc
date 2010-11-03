@@ -163,7 +163,7 @@ public class SymbolParser implements VhdlTokenConstants, VhdlASTConstants, IVhdl
         
         tmpNode = (ASTNode)node.getDescendant(ASTINTERFACE_LIST);
         if(tmpNode == null) {
-            node.getSymbolTable().getParent().addSymbol(sym);
+            node.getSymbolTable().addSymbol(sym);
             return;  // no parameters
         }
         

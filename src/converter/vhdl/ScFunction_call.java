@@ -48,6 +48,8 @@ class ScFunction_call extends ScVhdl {
                 ret += tmp + ".pos()";
             }else if(strName.equalsIgnoreCase("rising_edge")) {
                 ret += tmp + ".neg()";
+            }else if(strName.equalsIgnoreCase("conv_integer")) {
+                ret += tmp + ".to_int()";
             }else {
                 ret += strName + encloseBracket(tmp);
             }
