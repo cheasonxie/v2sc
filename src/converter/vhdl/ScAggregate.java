@@ -3,8 +3,8 @@ package converter.vhdl;
 import java.util.ArrayList;
 import parser.vhdl.ASTNode;
 import parser.IASTNode;
-import parser.vhdl.SymbolTable;
 import parser.vhdl.Symbol;
+import parser.vhdl.SymbolTable;
 
 
 /**
@@ -48,7 +48,7 @@ class ScAggregate extends ScVhdl {
             if(sym == null) { return null; }
             ret = curNode.getSymbolTable().getTableOfSymbol(sym.type); //TODO: only tow level here
             if(ret != null)
-                ret = ret.getSubtable(sym.type);
+                ret = ret.getTableOfSymbol(sym.type);
         }
         return ret;
     }
@@ -82,11 +82,11 @@ class ScAggregate extends ScVhdl {
             ret += elementList.get(0).toBitString(1, isArray);
         else {
             int num = 0;
+            Symbol[] recSyms = (Symbol[])recordTable.getAllSymbols();
             for(int i = 0; i < elementList.size(); i++) {
                 int width = max-num;
-                if(recordTable != null && recordTable.get(i).typeRange != null) {
-                    width = getWidth(recordTable.get(i).typeRange[0], 
-                                recordTable.get(i).typeRange[2]);
+                if(recordTable != null && recSyms[i].typeRange != null) {
+                    width = getWidth(recSyms[i].typeRange[0], recSyms[i].typeRange[2]);
                 }
                 ret += elementList.get(i).toBitString(width, isArray);
                 num += elementList.get(i).getBitWidth();

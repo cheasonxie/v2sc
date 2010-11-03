@@ -100,6 +100,19 @@ class ScCommonDeclaration extends ScVhdl {
                 ret += ",";
             }
         }
+        
+        ScSubtype_indication subtype = null;
+        if(sub instanceof ScElement_subtype_definition)
+            subtype = ((ScElement_subtype_definition)sub).item;
+        else
+            subtype = (ScSubtype_indication)sub;
+        
+        String[] vrange = subtype.getValueRange();
+        if(vrange != null) {
+            ret += "/* ";
+            ret += vrange[0] + " " + vrange[1] + " " + vrange[2];
+            ret += " */";
+        }
         isCommonDeclaration = false;
         return ret;
     }

@@ -15,6 +15,7 @@ public interface IVhdlType
     public static final int TYPE_NATURAL           = 9;
     public static final int TYPE_RECORD            = 10;
     public static final int TYPE_PHYSICAL          = 11;
+    public static final int TYPE_ENUMERATION       = 11;
     
     String[] strVhdlType = 
     {
@@ -22,6 +23,6 @@ public interface IVhdlType
         "std_logic", "std_logic_vector",
         "std_ulogic", "std_ulogic_vector",
         "boolean", "float", "natural", "record",
-        "units",
+        "units", "enumeration"
     };
 }

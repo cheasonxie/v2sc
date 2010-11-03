@@ -11,7 +11,7 @@ import parser.ParserException;
 
 public class hdl2SystemC
 {
-    public static boolean testDir = true;
+    public static boolean testDir = false;
     public static void main(String[] args)
     {
         if(testDir) {
@@ -78,8 +78,8 @@ public class hdl2SystemC
             try
             {
                 hdlConverter conv = null;
-                String name = "amba";
-                //String name = "ahbctrl";
+                //String name = "amba";
+                String name = "ahbctrl";
                 String path = name + ".vhd";
                 //String path = "ac97_top.v";
                 if(args.length > 1)

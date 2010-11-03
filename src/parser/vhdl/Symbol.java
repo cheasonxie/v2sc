@@ -20,6 +20,9 @@ public class Symbol implements ISymbol, Cloneable
 {
     /** invalid symbol kind */
     public static final int KIND_INVALID = -1;
+    
+    //public String libName;
+    //public String pkgName;
    
     /**
      * symbol name
@@ -174,6 +177,7 @@ public class Symbol implements ISymbol, Cloneable
         newSym.paramTypeList = paramTypeList;
         newSym.range = range;
         newSym.type = type;
+        newSym.value = value;
         newSym.typeRange = typeRange;
         newSym.arrayRange = arrayRange;
         return newSym;

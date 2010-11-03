@@ -60,6 +60,10 @@ public class PredefinedPackage implements VhdlTokenConstants
         new Symbol("rising_edge", FUNCTION, "boolean"),
         new Symbol("falling_edge", FUNCTION, "boolean"),
         new Symbol("is_x", FUNCTION, "boolean"),
+        
+        // following symbols are not in std_logic_1164, but always be used
+        new Symbol("conv_integer", FUNCTION, "integer"),
+        new Symbol("conv_std_logic_vector", FUNCTION, "std_logic_vector"),
     };
     
     static final Symbol[] std_logic_arith_syms = 
@@ -72,21 +76,10 @@ public class PredefinedPackage implements VhdlTokenConstants
         new Symbol("shr", FUNCTION, "unsigned"),
         new Symbol("shr", FUNCTION, "signed"),
         new Symbol("conv_integer", FUNCTION, "integer"),
-        new Symbol("conv_integer", FUNCTION, "integer"),
-        new Symbol("conv_integer", FUNCTION, "integer"),
         new Symbol("conv_integer", FUNCTION, "small_int"),
         new Symbol("conv_unsigned", FUNCTION, "unsigned"),
-        new Symbol("conv_unsigned", FUNCTION, "unsigned"),
-        new Symbol("conv_unsigned", FUNCTION, "unsigned"),
-        new Symbol("conv_unsigned", FUNCTION, "unsigned"),
-        new Symbol("conv_signed", FUNCTION, "signed"),
-        new Symbol("conv_signed", FUNCTION, "signed"),
-        new Symbol("conv_signed", FUNCTION, "signed"),
         new Symbol("conv_signed", FUNCTION, "signed"),
 
-        new Symbol("conv_std_logic_vector", FUNCTION, "std_logic_vector"),
-        new Symbol("conv_std_logic_vector", FUNCTION, "std_logic_vector"),
-        new Symbol("conv_std_logic_vector", FUNCTION, "std_logic_vector"),
         new Symbol("conv_std_logic_vector", FUNCTION, "std_logic_vector"),
         new Symbol("ext", FUNCTION, "std_logic_vector"),
         new Symbol("sxt", FUNCTION, "std_logic_vector"),

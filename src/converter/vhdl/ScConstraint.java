@@ -58,6 +58,22 @@ class ScConstraint extends ScVhdl {
         return ret;
     }
     
+    public String[] getTypeRange() {
+        if(index != null) {
+            return index.getRange();
+        }else {
+            return null;
+        }
+    }
+    
+    public String[] getValueRange() {
+        if(range != null) {
+            return range.getRange();
+        }else {
+            return null;
+        }
+    }
+    
     public String[] getRange() {
         String[] ret = null;
         if(range != null) {
