@@ -1,5 +1,6 @@
 package converter.vhdl;
 
+import converter.IScStatementBlock;
 import parser.vhdl.ASTNode;
 
 
@@ -11,7 +12,7 @@ import parser.vhdl.ASTNode;
  *   <ul> subprogram_statement_part
  *   </ul> <b>end</b> [ subprogram_kind ] [ designator ] ;
  */
-class ScSubprogram_body extends ScVhdl {
+class ScSubprogram_body extends ScVhdl implements IScStatementBlock {
     ScSubprogram_specification spec = null;
     ScSubprogram_declarative_part declarative_part = null;
     ScSubprogram_statement_part statement_part = null;
@@ -39,13 +40,10 @@ class ScSubprogram_body extends ScVhdl {
 
     public String scString() {
         String ret = "";
-        String tmp = "";
         ret += spec.specString(true) + "\r\n";
         ret += intent() + "{\r\n";
         startIntentBlock();
-        tmp = declarative_part.toString();
-        if(!tmp.isEmpty())
-            ret += tmp + "\r\n";
+        ret += addLF(declarative_part.toString());
         String[] lvars = getLoopVar();
         if(lvars != null && lvars.length > 0) {
             ret += intent() + "int ";
@@ -57,11 +55,25 @@ class ScSubprogram_body extends ScVhdl {
             }
             ret += ";\r\n";
         }
-        if(!tmp.isEmpty())
-            ret += "\r\n";
-        ret += statement_part.toString() + "\r\n";
+        ret += addLF(statement_part.toString());
         endIntentBlock();
         ret += intent() + "}\r\n";
         return ret;
+    }
+
+    @Override
+    public String getDeclaration() {
+        String ret = spec.specString(false) + ";\r\n";
+        return ret;
+    }
+
+    @Override
+    public String getImplements() {
+        return toString();
+    }
+
+    @Override
+    public String getInitCode() {
+        return "";
     }
 }

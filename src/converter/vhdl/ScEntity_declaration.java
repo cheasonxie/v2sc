@@ -63,9 +63,9 @@ class ScEntity_declaration extends ScCommonIdentifier implements IScStatementBlo
         }
         ret += "SC_MODULE(" + getName() + ")\r\n{\r\n";
         startIntentBlock();
-        ret += header.toString() + "\r\n";
-        ret += declarative_part.toString() + "\r\n";
-        ret += body.getDeclaration() + "\r\n";
+        ret += addLF(header.toString());
+        ret += addLF(declarative_part.toString());
+        ret += addLF(body.getDeclaration());
         
         ret += getInitCode();
         ret += getImplements();
@@ -120,9 +120,9 @@ class ScEntity_declaration extends ScCommonIdentifier implements IScStatementBlo
         }
         ret += "SC_MODULE(" + getName() + ")\r\n{\r\n";
         startIntentBlock();
-        ret += header.toString() + "\r\n";
-        ret += declarative_part.toString() + "\r\n";
-        ret += body.getDeclaration();
+        ret += addLF(header.toString());
+        ret += addLF(declarative_part.getDeclaration());
+        ret += addLF(body.getDeclaration());
         endIntentBlock();
         ret += "};\r\n";
         return ret;
@@ -136,10 +136,11 @@ class ScEntity_declaration extends ScCommonIdentifier implements IScStatementBlo
             return "";  //TODO no entity body, ignore
         }
         className = getName();
+        ret += addLF(declarative_part.getImplements());
         if(statement_part != null) {
-            ret += statement_part.toString() + "\r\n";
+            ret += addLF(statement_part.toString());
         }
-        ret += body.getImplements() + "\r\n";
+        ret += addLF(body.getImplements());
         return ret;
     }
 }

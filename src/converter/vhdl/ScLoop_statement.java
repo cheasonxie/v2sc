@@ -35,9 +35,9 @@ class ScLoop_statement extends ScVhdl {
     public String scString() {
         String ret = "";
         if(iteration == null)
-            ret += intent() + "while(1)" + "\r\n";
+            ret += addLFIntent("while(1)");
         else
-            ret += intent() + iteration.toString() + "\r\n";
+            ret += addLFIntent(iteration.toString());
         ret += intent() + "{\r\n";
         startIntentBlock();
         ret += seq_statements.scString();

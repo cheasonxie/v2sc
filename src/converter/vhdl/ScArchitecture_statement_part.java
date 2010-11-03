@@ -11,22 +11,21 @@ import parser.vhdl.ASTNode;
  *   <dd> { architecture_statement }
  */
 class ScArchitecture_statement_part extends ScVhdl implements IScStatementBlock {
-    ArrayList<ScArchitecture_statement> itemList = new ArrayList<ScArchitecture_statement>();
+    ArrayList<ScArchitecture_statement> items = new ArrayList<ScArchitecture_statement>();
     public ScArchitecture_statement_part(ASTNode node) {
         super(node);
         assert(node.getId() == ASTARCHITECTURE_STATEMENT_PART);
         for(int i = 0; i < node.getChildrenNum(); i++) {
             ASTNode c = (ASTNode)node.getChild(i);
-            ScArchitecture_statement newNode = new ScArchitecture_statement(c);
-            itemList.add(newNode);
+            items.add(new ScArchitecture_statement(c));
         }
     }
 
     public String scString() {
         String ret = "";
-        for(int i = 0; i < itemList.size(); i++) {
-            ret += intent() + itemList.get(i).scString();
-            if(i < itemList.size() - 1) {
+        for(int i = 0; i < items.size(); i++) {
+            ret += intent() + items.get(i).scString();
+            if(i < items.size() - 1) {
                 ret += "\r\n";
             }
         }
@@ -36,10 +35,8 @@ class ScArchitecture_statement_part extends ScVhdl implements IScStatementBlock 
     @Override
     public String getDeclaration() {
         String ret = "";
-        for(int i = 0; i < itemList.size(); i++) {
-            String tmp = itemList.get(i).getDeclaration();
-            if(!tmp.isEmpty())
-                ret += tmp + "\r\n";
+        for(int i = 0; i < items.size(); i++) {
+            ret += addLF(items.get(i).getDeclaration());
         }
         return ret;
     }
@@ -47,10 +44,8 @@ class ScArchitecture_statement_part extends ScVhdl implements IScStatementBlock 
     @Override
     public String getImplements() {
         String ret = "";
-        for(int i = 0; i < itemList.size(); i++) {
-            String tmp = itemList.get(i).getImplements();
-            if(!tmp.isEmpty())
-                ret += tmp + "\r\n";
+        for(int i = 0; i < items.size(); i++) {
+            ret += addLF(items.get(i).getImplements());
         }
         return ret;
     }
@@ -59,10 +54,8 @@ class ScArchitecture_statement_part extends ScVhdl implements IScStatementBlock 
     public String getInitCode()
     {
         String ret = "";
-        for(int i = 0; i < itemList.size(); i++) {
-            String tmp = itemList.get(i).getInitCode();
-            if(!tmp.isEmpty())
-                ret += tmp + "\r\n";
+        for(int i = 0; i < items.size(); i++) {
+            ret += addLF(items.get(i).getInitCode());
         }
         return ret;
     }

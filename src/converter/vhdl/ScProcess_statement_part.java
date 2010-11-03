@@ -23,9 +23,7 @@ class ScProcess_statement_part extends ScVhdl {
     public String scString() {
         String ret = "";
         for(int i = 0; i < statements.size(); i++) {
-            String tmp = statements.get(i).toString();
-            if(!tmp.isEmpty())
-                ret += tmp + "\r\n";
+            ret += addLF(statements.get(i).toString());
         }
         return ret;
     }

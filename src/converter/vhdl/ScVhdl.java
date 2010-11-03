@@ -460,35 +460,20 @@ public class ScVhdl implements ScVhdlConstants, VhdlTokenConstants,
         return 0;
     }
     
-    /*
-    protected Symbol[] getComponentChildSymbols(String componentName, int kind) {
-        SymbolTableNode tmpTable = null;
-        tmpTable = (SymbolTableNode)parser.getTableOfSymbol(curNode, componentName);
-        if(tmpTable == null) {
-            return null;
-        }
-        tmpTable = tmpTable.getSubtable(componentName);
-        if(tmpTable == null)
-            return null;
-        
-        int count = 0;
-        for(int i = 0; i < tmpTable.size(); i++) {
-            if(tmpTable.get(i).kind == kind) {
-                count ++;
-            }
-        }
-        
-        Symbol[] ret = new Symbol[count];
-        count = 0;
-        for(int i = 0; i < tmpTable.size(); i++) {
-            if(tmpTable.get(i).kind == kind) {
-                ret[count++] = tmpTable.get(i);
-            }
-        }
-        return ret;
+    protected String addLF(String str) {
+        if(!str.isEmpty())
+            return str + "\r\n";
+        else
+            return "";
     }
-    */
     
+    protected String addLFIntent(String str) {
+        if(!str.isEmpty())
+            return intent() + str + "\r\n";
+        else
+            return "";
+    }    
+
     static private boolean isBracketEnclosed(String str) {
         if(str.isEmpty())
             return false;

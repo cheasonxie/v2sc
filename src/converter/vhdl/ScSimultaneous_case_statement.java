@@ -94,7 +94,7 @@ class ScSimultaneous_case_statement extends ScCommonIdentifier implements IScSta
                 }
                 ret += intent() + "{\r\n";
                 startIntentBlock();
-                ret += intent() + alt.statement_part.toString() + "\r\n";
+                ret += addLFIntent(alt.statement_part.toString());
                 endIntentBlock();
                 ret += "}\r\n";
             }
@@ -102,7 +102,7 @@ class ScSimultaneous_case_statement extends ScCommonIdentifier implements IScSta
             ret += intent() + "switch(" + expression.scString() + ")\r\n";
             ret += intent() + "{\r\n";
             for(int i = 0; i < alts.size(); i++) {
-                ret += alts.get(i).toString() + "\r\n";
+                ret += addLF(alts.get(i).toString());
             }
             ret += intent() + "}\r\n";
         }

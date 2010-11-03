@@ -23,7 +23,7 @@ class ScSimultaneous_statement_part extends ScVhdl {
     public String scString() {
         String ret = "";
         for(int i = 0; i < statements.size(); i++) {
-            ret += statements.get(i).toString() + "\r\n";
+            ret += addLF(statements.get(i).toString());
         }
         return ret;
     }

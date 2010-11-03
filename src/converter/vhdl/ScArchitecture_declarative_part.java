@@ -1,6 +1,8 @@
 package converter.vhdl;
 
 import java.util.ArrayList;
+
+import converter.IScStatementBlock;
 import parser.vhdl.ASTNode;
 
 
@@ -8,26 +10,55 @@ import parser.vhdl.ASTNode;
  * <dl> architecture_declarative_part ::=
  *   <dd> { block_declarative_item }
  */
-class ScArchitecture_declarative_part extends ScVhdl {
-    ArrayList<ScVhdl> itemList = new ArrayList<ScVhdl>();
+class ScArchitecture_declarative_part extends ScVhdl implements IScStatementBlock {
+    ArrayList<ScBlock_declarative_item> items = new ArrayList<ScBlock_declarative_item>();
     public ScArchitecture_declarative_part(ASTNode node) {
         super(node);
         assert(node.getId() == ASTARCHITECTURE_DECLARATIVE_PART);
         for(int i = 0; i < node.getChildrenNum(); i++) {
             ASTNode c = (ASTNode)node.getChild(i);
-            ScVhdl newNode = new ScBlock_declarative_item(c);
-            itemList.add(newNode);
+            items.add(new ScBlock_declarative_item(c));
         }
     }
 
     public String scString() {
         String ret = "";
-        for(int i = 0; i < itemList.size(); i++) {
-            ret += itemList.get(i).toString();
-            if(i < itemList.size() - 1) {
+        for(int i = 0; i < items.size(); i++) {
+            ret += items.get(i).toString();
+            if(i < items.size() - 1) {
                 ret += "\r\n";
             }
         }
         return ret;
+    }
+
+    @Override
+    public String getDeclaration() {
+        String ret = "";
+        for(int i = 0; i < items.size(); i++) {
+            if(items.get(i).item instanceof ScSubprogram_body)
+                ret += ((ScSubprogram_body)items.get(i).item).getDeclaration();
+            else
+                ret += items.get(i).toString();
+            if(i < items.size() - 1) {
+                ret += "\r\n";
+            }
+        }
+        return ret;
+    }
+
+    @Override
+    public String getImplements() {
+        String ret = "";
+        for(int i = 0; i < items.size(); i++) {
+            if(items.get(i).item instanceof ScSubprogram_body)
+                ret += ((ScSubprogram_body)items.get(i).item).getImplements() + "\r\n";
+        }
+        return ret;
+    }
+
+    @Override
+    public String getInitCode() {
+        return "";
     }
 }

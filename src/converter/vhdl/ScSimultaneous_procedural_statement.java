@@ -52,8 +52,8 @@ class ScSimultaneous_procedural_statement extends ScCommonIdentifier implements 
         String ret = getSpec() + "\r\n";
         ret += intent() + "{";
         startIntentBlock();
-        ret += intent() + declarative_part.toString() + "\r\n";
-        ret += intent() + statement_part.toString() + "\r\n";
+        ret += addLFIntent(declarative_part.toString());
+        ret += addLFIntent(statement_part.toString());
         endIntentBlock();
         ret += intent() + "}";
         return ret;
@@ -62,13 +62,23 @@ class ScSimultaneous_procedural_statement extends ScCommonIdentifier implements 
     @Override
     public String getDeclaration()
     {
-        return getSpec() + ";";
+        String ret = "";
+        ret += addLF(declarative_part.getDeclaration());
+        ret += getSpec() + ";";
+        return ret;
     }
 
     @Override
     public String getImplements()
     {
-        return "";
+        String ret = getSpec() + "\r\n";
+        ret += intent() + "{";
+        startIntentBlock();
+        ret += addLFIntent(declarative_part.getImplements());
+        ret += addLFIntent(statement_part.toString());
+        endIntentBlock();
+        ret += intent() + "}";
+        return ret;
     }
 
     @Override

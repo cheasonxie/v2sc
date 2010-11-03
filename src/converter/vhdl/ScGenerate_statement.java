@@ -62,7 +62,9 @@ class ScGenerate_statement extends ScCommonIdentifier implements IScStatementBlo
     @Override
     public String getDeclaration() {
         String ret = "";
-        ret += statement_part.getDeclaration() + "\r\n";
+        if(declarative_part != null)
+            ret += addLF(declarative_part.getDeclaration());
+        ret += addLF(statement_part.getDeclaration());
         ret += getSpec(false) + ";";
         return ret;
     }
@@ -74,11 +76,11 @@ class ScGenerate_statement extends ScCommonIdentifier implements IScStatementBlo
         ret += getSpec(individual) + "\r\n";
         ret += intent() + "{\r\n";
         startIntentBlock();
-        ret += scheme.toString() + "\r\n";
+        ret += addLF(scheme.toString());
         ret += intent() + "{\r\n";
         startIntentBlock();
         if(declarative_part != null)
-            ret += declarative_part.toString() + "\r\n";
+            ret += addLF(declarative_part.getImplements());
         ret += statement_part.getInitCode();   // call statement part's init code
         endIntentBlock();
         ret += intent() + "}\r\n";

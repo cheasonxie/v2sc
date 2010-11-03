@@ -31,7 +31,7 @@ import parser.vhdl.ASTNode;
 class ScBlock_declarative_item extends ScVhdl {
     ScVhdl item = null;
     public ScBlock_declarative_item(ASTNode node) {
-        super(node);
+        super(node, false);
         //assert(node.getId() == ASTBLOCK_DECLARATIVE_ITEM);
         switch(node.getId())
         {

@@ -22,7 +22,7 @@ import parser.vhdl.ASTNode;
 class ScProcess_declarative_item extends ScVhdl {
     ScVhdl item = null;
     public ScProcess_declarative_item(ASTNode node) {
-        super(node);
+        super(node, false);
         //assert(node.getId() == ASTPROCESS_DECLARATIVE_ITEM);
         switch(node.getId())
         {

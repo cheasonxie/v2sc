@@ -58,8 +58,9 @@ class ScArchitecture_body extends ScCommonIdentifier implements IScStatementBloc
     }
     
     public String scString() {
-        String ret = declarative_part.toString() + "\r\n";
-        ret += statement_part.scString();
+        String ret = "";
+        ret += addLF(declarative_part.toString());
+        ret += addLF(statement_part.scString());
         return ret;
     }
 
@@ -67,20 +68,26 @@ class ScArchitecture_body extends ScCommonIdentifier implements IScStatementBloc
     public String getDeclaration()
     {
         String ret = "";
-        ret += declarative_part.toString() + "\r\n";
-        ret += statement_part.getDeclaration() + "\r\n";
+        ret += addLF(declarative_part.getDeclaration());
+        ret += addLF(statement_part.getDeclaration());
         return ret;
     }
 
     @Override
     public String getImplements()
     {
-        return statement_part.getImplements();
+        String ret = "";
+        ret += addLF(declarative_part.getImplements());
+        ret += addLF(statement_part.getImplements());
+        return ret;
     }
 
     @Override
     public String getInitCode()
     {
-        return statement_part.getInitCode();
+        String ret = "";
+        ret += addLF(declarative_part.getInitCode());
+        ret += addLF(statement_part.getInitCode());
+        return ret;
     }
 }

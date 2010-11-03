@@ -132,12 +132,10 @@ class ScDesign_file extends ScVhdl implements IScFile {
                     IncludePath[] paths = myunit.getInclude();
                     list.addAll(paths);
                     String tmp = myunit.getDeclaration();
-                    if(!tmp.isEmpty())
-                        strDeclaration.append(tmp + "\r\n");
+                    strDeclaration.append(addLF(tmp));
                     
                     tmp = myunit.getImplements();
-                    if(!tmp.isEmpty())
-                        strImplements.append(tmp);
+                    strImplements.append(addLF(tmp));
                     removeUnit(index);
                 }
                 System.gc();
@@ -168,7 +166,7 @@ class ScDesign_file extends ScVhdl implements IScFile {
     {
         String ret = "";
         for(int i = 0; i < design_units.size(); i++) {
-            ret += design_units.get(i).getDeclaration() + "\r\n";
+            ret += addLF(design_units.get(i).getDeclaration());
         }
         return ret;
     }
@@ -178,9 +176,7 @@ class ScDesign_file extends ScVhdl implements IScFile {
     {
         String ret = "";
         for(int i = 0; i < design_units.size(); i++) {
-            String tmp = design_units.get(i).getImplements();
-            if(!tmp.isEmpty())
-                ret += tmp + "\r\n";
+            ret += addLF(design_units.get(i).getImplements());
         }
         return ret;
     }

@@ -90,7 +90,7 @@ class ScSelected_signal_assignment extends ScVhdl {
                 }
                 ret += intent() + "{\r\n";
                 startIntentBlock();
-                ret += intent() + cw.waveform.assignment(strTarget) + "\r\n";
+                ret += addLFIntent(cw.waveform.assignment(strTarget));
                 endIntentBlock();
                 ret += "}\r\n";
             }

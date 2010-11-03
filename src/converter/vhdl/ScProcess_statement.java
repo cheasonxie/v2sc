@@ -60,9 +60,7 @@ class ScProcess_statement extends ScCommonIdentifier implements IScStatementBloc
         String ret = "\r\n" + getSpec(individual) + "\r\n";
         ret += intent() + "{\r\n";
         startIntentBlock();
-        String tmp = declarative_part.toString();
-        if(!tmp.isEmpty())
-            ret += tmp + "\r\n\r\n";
+        ret += addLF(declarative_part.toString());
         ret += statement_part.toString();
         endIntentBlock();
         ret += intent() + "}\r\n";
@@ -71,12 +69,22 @@ class ScProcess_statement extends ScCommonIdentifier implements IScStatementBloc
 
     @Override
     public String getDeclaration() {
-        return getSpec(false) + ";";
+        String ret = "";
+        ret += addLF(declarative_part.getDeclaration());
+        ret += getSpec(false) + ";";
+        return ret;
     }
 
     @Override
     public String getImplements() {
-        return toString();
+        String ret = "\r\n" + getSpec(individual) + "\r\n";
+        ret += intent() + "{\r\n";
+        startIntentBlock();
+        ret += addLF(declarative_part.getImplements());
+        ret += statement_part.toString();
+        endIntentBlock();
+        ret += intent() + "}\r\n";
+        return ret;
     }
 
     @Override

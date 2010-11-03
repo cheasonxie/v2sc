@@ -59,9 +59,9 @@ class ScBlock_statement extends ScCommonIdentifier implements IScStatementBlock 
         String ret = getSpec(individual) + "\r\n";
         ret += intent() + "{";
         startIntentBlock();
-        ret += intent() + header.toString() + "\r\n";
-        ret += intent() + declarative_part.toString() + "\r\n";
-        ret += intent() + statement_part.toString() + "\r\n";
+        ret += addLFIntent(header.toString());
+        ret += addLFIntent(declarative_part.toString());
+        ret += addLFIntent(statement_part.toString());
         endIntentBlock();
         ret += intent() + "}";
         return ret;

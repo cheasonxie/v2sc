@@ -49,19 +49,23 @@ class ScPackage_body extends ScCommonIdentifier implements IScStatementBlock {
     }
 
     public String scString() {
-        String ret = declarative_part.toString() + "\r\n";
+        String ret = "";
+        ret += addLF(declarative_part.toString());
         return ret;
     }
 
     @Override
     public String getDeclaration() {
         String ret = "";
+        ret += addLF(declarative_part.getDeclaration());
         return ret;
     }
 
     @Override
     public String getImplements() {
-        return toString();
+        String ret = "";
+        ret += addLF(declarative_part.getImplements());
+        return ret;
     }
 
     @Override
