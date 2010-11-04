@@ -159,10 +159,10 @@ public class Vhdl extends hdlConverter {
             }
             String dstPath = dstDir + "\\" + name;
             try {
-                //convertFile(filePath, dstPath);
-                System.out.println("parsing file:" + filePath);
-                VhdlParser parser = new VhdlParser(false);
-                parser.parse(filePath);
+                convertFile(filePath, dstPath);
+                //System.out.println("parsing file:" + filePath);
+                //VhdlParser parser = new VhdlParser(false);
+                //parser.parse(filePath);
             } catch (Exception e) {
                 StackTraceElement[] stackEle = e.getStackTrace();
                 System.err.println("stackEle.length:" + stackEle.length);

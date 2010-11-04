@@ -6,6 +6,8 @@ import java.io.FileReader;
 import java.io.Reader;
 import java.util.ArrayList;
 
+import common.MyDebug;
+
 import parser.CommentBlock;
 import parser.IASTNode;
 import parser.IParser;
@@ -408,11 +410,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         boolean ret = false;
         if(token == null)
             return ret;
-        //if(node.isDescendantOf(ASTEXPRESSION)
-        //    && (token.image.equalsIgnoreCase(strVhdlType[TYPE_STD_LOGIC_VECTOR])
-        //       || token.image.equalsIgnoreCase(strVhdlType[TYPE_STD_ULOGIC_VECTOR]))){
-        //    return true;
-        //}
+
         Symbol sym = (Symbol)getSymbol(node, token.image);  //TODO check selected name
         if((sym != null) && (sym.kind == FUNCTION || sym.kind == PROCEDURE)) {
             Token tmpToken = findLastLBracketToken(endToken);
@@ -7381,7 +7379,8 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
                 if(!selNames[2].isEmpty()) {
                     if(selNames[2].equalsIgnoreCase("all")) {
                         // get all symbols in first two segments
-                        Symbol[] allSyms = (Symbol[])symTab.getAllSymbols(); 
+                        Symbol[] allSyms = (Symbol[])symTab.getAllSymbols();
+                        boolean subTableExist = false;
                         if(allSyms != null) {
                             String tabName = symTab.getTableName();
                             for(int i = 0; i < allSyms.length; i++) {
@@ -7390,10 +7389,11 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
                                     continue;
                                 SymbolTable symTab1 = new SymbolTable(symTab, allSyms[i].getName(), true);
                                 extSymbolTable.add(symTab1);
+                                subTableExist = true;
                             }
                         }
                         
-                        if(allSyms == null || allSyms.length == 0) {
+                        if(!subTableExist) {
                             extSymbolTable.add(symTab);
                         }
                         

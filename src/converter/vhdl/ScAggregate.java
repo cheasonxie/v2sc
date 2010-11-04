@@ -82,7 +82,9 @@ class ScAggregate extends ScVhdl {
             ret += elementList.get(0).toBitString(1, isArray);
         else {
             int num = 0;
-            Symbol[] recSyms = (Symbol[])recordTable.getAllSymbols();
+            Symbol[] recSyms = null;
+            if(recordTable != null)
+                recSyms = (Symbol[])recordTable.getAllSymbols();
             for(int i = 0; i < elementList.size(); i++) {
                 int width = max-num;
                 if(recordTable != null && recSyms[i].typeRange != null) {

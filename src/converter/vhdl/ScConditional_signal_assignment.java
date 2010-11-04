@@ -46,7 +46,7 @@ class ScConditional_signal_assignment extends ScVhdl {
     public String scString() {
         String ret = "";
         String val = target.scString();
-        if(options != null) {
+        if(options != null && options.curNode.getChildrenNum() > 0) {
             warning("options ignored");
         }
         

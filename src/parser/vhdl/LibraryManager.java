@@ -175,16 +175,21 @@ public class LibraryManager
      */
     public String findWorkLibrary(String symName) {
         String ret = null;
-        String[] tables = dataBase.getAllTables();
+        String[] tables = dataBase.getAllTables(symName);
         if(tables == null || tables.length == 0) {
             return null;
         }
+        
         for(int i = 0; i < tables.length; i++) {
             String tabName = tables[i];
-            if(tabName.indexOf('#') >= 0)
-                continue;   // not library table
-            if(dataBase.retrive(tabName, symName) != null)
-                return tabName;
+            int index1 = tabName.indexOf('#');
+            int index2 = tabName.indexOf(symName);
+            if(index1 >= 0 && index2 >= 0 && index2 == index1+1) {
+                tabName = tabName.substring(0, index1);
+                if(dataBase.retrive(tabName, symName) != null) {
+                    return tabName;
+                }
+            }
         }
         return ret;
     }

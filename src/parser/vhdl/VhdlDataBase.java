@@ -458,13 +458,15 @@ public class VhdlDataBase
     }
     
     /**
-     * get all table
+     * get all table which's name include namePatten
      */
-    public String[] getAllTables() {
+    public String[] getAllTables(String nameSlice) {
         if(conn == null || stmt == null) {
             System.err.println(JDBC_NOT_CONNECT);
             return null;
         }
+        
+        nameSlice = normalize(nameSlice);
         
         ArrayList<String> ret = new ArrayList<String>();
 
@@ -472,7 +474,11 @@ public class VhdlDataBase
             DatabaseMetaData meta = conn.getMetaData();
             ResultSet res = meta.getTables(null, null, null, new String[] {"table"});
             while (res.next()) {
-                ret.add(res.getString("table_name"));
+                String n = res.getString("table_name");
+                n = n.toLowerCase();
+                if(nameSlice == null || nameSlice.isEmpty() || n.indexOf(nameSlice) >= 0) {
+                    ret.add(n);
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
