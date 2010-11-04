@@ -44,6 +44,8 @@ public class VhdlDataBase
     
     public boolean init() {
         try {
+            System.setProperty("java.library.path", "lib/sqlitejdbc.dll"); 
+            
             // Loading database driver
             String driverName = "org.sqlite.JDBC";
             Class.forName(driverName);
