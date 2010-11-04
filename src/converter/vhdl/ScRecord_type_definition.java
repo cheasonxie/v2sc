@@ -39,8 +39,8 @@ class ScRecord_type_definition extends ScCommonIdentifier {
         for(int i = 0; i < elements.size(); i++) {
             ret += addLFIntent(elements.get(i).toString());
         }
-        ret += endIntentBraceBlock();
-
+        endIntentBlock();
+        ret += "}";
         return ret;
     }
 }
