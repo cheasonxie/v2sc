@@ -2,6 +2,8 @@
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+import common.MyDebug;
+
 import converter.hdlConverter;
 import converter.verilog.Verilog;
 import converter.vhdl.Vhdl;
@@ -11,12 +13,32 @@ import parser.ParserException;
 
 public class hdl2SystemC
 {
-    public static boolean testDir = false;
+    public static boolean testDir = true;
     public static void main(String[] args)
     {
+        MyDebug.init("vhdllog.txt");
         if(testDir) {
             hdlConverter conv = new Vhdl();
-            String baseDir = "D:\\xzs\\grlib-gpl-1.0.21-b3848\\lib";
+            String baseDir = "E:\\grlib-gpl-1.0.22-b4095\\lib";
+            /*conv.addLibary(baseDir+"\\tech", "tech");
+            conv.addLibary(baseDir+"\\tech\\unisim", "unisim");
+            conv.addLibary(baseDir+"\\tech\\altera", "altera");
+            conv.addLibary(baseDir+"\\tech\\altera_mf", "altera_mf");
+            conv.addLibary(baseDir+"\\tech\\apa", "apa");
+            conv.addLibary(baseDir+"\\tech\\atc18", "atc18");
+            conv.addLibary(baseDir+"\\tech\\axcelerator", "axcelerator");
+            conv.addLibary(baseDir+"\\tech\\cycloneiii", "cycloneiii");
+            conv.addLibary(baseDir+"\\tech\\dw02", "dw02");
+            conv.addLibary(baseDir+"\\tech\\ec", "ec");
+            conv.addLibary(baseDir+"\\tech\\eclipsee", "eclipsee");
+            conv.addLibary(baseDir+"\\tech\\proasic3", "proasic3");
+            conv.addLibary(baseDir+"\\tech\\simprim", "simprim");
+            conv.addLibary(baseDir+"\\tech\\snps", "snps");
+            conv.addLibary(baseDir+"\\tech\\stratixii", "stratixii");
+            conv.addLibary(baseDir+"\\tech\\stratixiii", "stratixiii");
+            conv.addLibary(baseDir+"\\tech\\umc18", "umc18");
+            conv.addLibary(baseDir+"\\tech\\virage", "virage");            
+            
             conv.addLibary(baseDir+"\\contrib", "contrib");
             conv.addLibary(baseDir+"\\cypress", "cypress");
             conv.addLibary(baseDir+"\\esa", "esa");
@@ -33,26 +55,7 @@ public class hdl2SystemC
             conv.addLibary(baseDir+"\\spansion", "spansion");
             conv.addLibary(baseDir+"\\spw", "spw");
             conv.addLibary(baseDir+"\\synplify", "synplify");
-            //conv.addLibary(baseDir+"\\tech", "tech");
-            //conv.addLibary(baseDir+"\\techmap", "techmap");
-            
-            conv.addLibary(baseDir+"\\tech\\altera", "altera");
-            conv.addLibary(baseDir+"\\tech\\altera_mf", "altera_mf");
-            conv.addLibary(baseDir+"\\tech\\apa", "apa");
-            conv.addLibary(baseDir+"\\tech\\atc18", "atc18");
-            conv.addLibary(baseDir+"\\tech\\axcelerator", "axcelerator");
-            conv.addLibary(baseDir+"\\tech\\cycloneiii", "cycloneiii");
-            conv.addLibary(baseDir+"\\tech\\dw02", "dw02");
-            conv.addLibary(baseDir+"\\tech\\ec", "ec");
-            conv.addLibary(baseDir+"\\tech\\eclipsee", "eclipsee");
-            conv.addLibary(baseDir+"\\tech\\proasic3", "proasic3");
-            conv.addLibary(baseDir+"\\tech\\simprim", "simprim");
-            conv.addLibary(baseDir+"\\tech\\snps", "snps");
-            conv.addLibary(baseDir+"\\tech\\stratixii", "stratixii");
-            conv.addLibary(baseDir+"\\tech\\stratixiii", "stratixiii");
-            conv.addLibary(baseDir+"\\tech\\umc18", "umc18");
-            conv.addLibary(baseDir+"\\tech\\unisim", "unisim");
-            conv.addLibary(baseDir+"\\tech\\virage", "virage");
+            conv.addLibary(baseDir+"\\techmap", "techmap");
 
             conv.addLibary(baseDir+"\\techmap\\altera_mf", "altera_mf");
             conv.addLibary(baseDir+"\\techmap\\apa", "apa");
@@ -71,7 +74,7 @@ public class hdl2SystemC
             conv.addLibary(baseDir+"\\techmap\\stratixiii", "stratixiii");
             conv.addLibary(baseDir+"\\techmap\\umc18", "umc18");
             conv.addLibary(baseDir+"\\techmap\\unisim", "unisim");
-            conv.addLibary(baseDir+"\\techmap\\virage", "virage");
+            conv.addLibary(baseDir+"\\techmap\\virage", "virage");*/
             
             conv.convertDir(baseDir, baseDir + "\\SystemC");
         }else {

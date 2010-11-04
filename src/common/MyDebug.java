@@ -40,4 +40,29 @@ public class MyDebug
         String lineNum = String.format("%d", stacks[2].getLineNumber());
         stream.println(fileName + "--" + lineNum + ": " + msg);
     }
+    
+    public static void printStackTrace()
+    {
+        stream.println("**********start************");
+        StackTraceElement[] stacks = Thread.currentThread().getStackTrace();
+        for (int i=0; i < stacks.length; i++)
+            stream.println("\tat " + stacks[i]);
+        stream.println("**********end************");
+    }
+    
+    public static void printStackTrace(Exception e)
+    {
+        if(e == null)
+            return;
+        stream.println("**********start************");
+        stream.println(e);
+        StackTraceElement[] stacks = e.getStackTrace();
+        for (int i=0; i < stacks.length; i++)
+            stream.println("\tat " + stacks[i]);
+
+        Throwable ourCause = e.getCause();
+        if (ourCause != null)
+            stream.println("Caused by: " + ourCause);
+        stream.println("**********end************");
+    }
 }

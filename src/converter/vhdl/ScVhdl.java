@@ -134,17 +134,15 @@ public class ScVhdl implements ScVhdlConstants, VhdlTokenConstants,
     }
     
     protected void warning(String msg) {
-        System.out.println("line--" + beginLine + ": warning: " + msg);
+        MyDebug.printFileLine("line--" + beginLine + ": warning: " + msg);
     }
     
     protected void error() {
-        System.err.println("line--" + beginLine + ": ");
-        MyDebug.printFileLine("=========not support========");
+        MyDebug.printFileLine("line--" + beginLine + ": =========not support========");
     }
     
     protected void error(String msg) {
-        System.err.println("line--" + beginLine + ": ");
-        MyDebug.printFileLine(msg);
+        MyDebug.printFileLine("line--" + beginLine + ": " + msg);
     }
     
     protected static void startIntentBlock() { curLevel ++; }
@@ -461,7 +459,7 @@ public class ScVhdl implements ScVhdlConstants, VhdlTokenConstants,
             int v2 = getIntValue(str2);
             return (v1 > v2) ? (v1-v2+1) : (v2-v1+1);
         }catch(NumberFormatException e) {
-            System.out.println("line -- " + curNode.getFirstToken().beginLine
+            MyDebug.printFileLine("line -- " + curNode.getFirstToken().beginLine
                     + ": width calculation not correct");
             return 1;
         }

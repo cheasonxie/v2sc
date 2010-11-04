@@ -11,6 +11,7 @@ public interface ScVhdlConstants extends ScConstants
     // port direction
     static final String PORT_IN = "in";
     static final String PORT_OUT = "out";    
+    static final String PORT_INOUT = "inout";    
    
     static final String SEL_OTHERS = "others";
     

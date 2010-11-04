@@ -94,7 +94,7 @@ public class LibraryManager
      */
     public boolean add(String dir, String libName) {
         FileList list = new FileList(dir, IParser.EXT_VHDL);
-        System.out.println("======file num:" + list.getFileNum() + "========");
+        MyDebug.printFileLine("======file num:" + list.getFileNum() + "========");
         
         if(libName == null || libName.isEmpty())
             libName = getFileName(dir);    // use dir name as library name
@@ -107,7 +107,7 @@ public class LibraryManager
         for(int i = 0; i < list.getFileNum(); i++) {
             String path = list.getFile(i);
             try {
-                System.out.println("index:" + i + ", file:" + path);
+                MyDebug.printFileLine("index:" + i + ", file:" + path);
                 VhdlParser parser = new VhdlParser(true);
                 ASTNode designFile = (ASTNode)parser.parse(path);
                 ASTNode[] pkgNodes = getPackageNode(designFile, 0);
@@ -133,7 +133,7 @@ public class LibraryManager
                 StackTraceElement[] stackEle = e.getStackTrace();
                 MyDebug.printFileLine("stackEle.length:" + stackEle.length);
                 if(stackEle.length > 7) {
-                    e.printStackTrace();
+                    MyDebug.printStackTrace(e);
                 }
             }
         }

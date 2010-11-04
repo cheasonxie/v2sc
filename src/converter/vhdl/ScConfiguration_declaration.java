@@ -1,5 +1,7 @@
 package converter.vhdl;
 
+import common.MyDebug;
+
 import converter.IScStatementBlock;
 import parser.vhdl.ASTNode;
 
@@ -50,7 +52,7 @@ class ScConfiguration_declaration extends ScCommonIdentifier implements IScState
             }
         }
         if(i == units.size()) {
-            System.err.println("configuration declaration has no corresponding entity");
+            MyDebug.printFileLine("configuration declaration has no corresponding entity");
         }
     }
 

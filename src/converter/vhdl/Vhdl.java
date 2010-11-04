@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 
 import common.FileList;
+import common.MyDebug;
 
 import parser.IParser;
 import parser.ParserException;
@@ -20,7 +21,7 @@ public class Vhdl extends hdlConverter {
     public void convertFile(String srcPath, String dstPath)
             throws ParserException, IOException
     {
-        System.out.println("convertFile:" + srcPath);
+        MyDebug.printFileLine("convertFile:" + srcPath);
         VhdlParser parser = new VhdlParser(false);
         parser.parse(srcPath);
         ScDesign_file root = null;
@@ -160,14 +161,15 @@ public class Vhdl extends hdlConverter {
             String dstPath = dstDir + "\\" + name;
             try {
                 convertFile(filePath, dstPath);
-                //System.out.println("parsing file:" + filePath);
+                //MyDebug.printFileLine("parsing file:" + filePath);
                 //VhdlParser parser = new VhdlParser(false);
                 //parser.parse(filePath);
             } catch (Exception e) {
                 StackTraceElement[] stackEle = e.getStackTrace();
                 System.err.println("stackEle.length:" + stackEle.length);
                 if(stackEle.length > 7) {
-                    e.printStackTrace();
+                    MyDebug.printStackTrace(e);
+                    //e.printStackTrace();
                 }
             }
             System.gc();    // force garbage collection, release memory

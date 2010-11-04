@@ -1,5 +1,7 @@
 package converter.vhdl;
 
+import common.MyDebug;
+
 import converter.IScStatementBlock;
 import parser.vhdl.ASTNode;
 
@@ -44,7 +46,7 @@ class ScPackage_body extends ScCommonIdentifier implements IScStatementBlock {
             }
         }
         if(i == units.size()) {
-            System.err.println("package boty no corresponding package");
+            MyDebug.printFileLine("package boty no corresponding package");
         }
     }
 

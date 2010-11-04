@@ -2,6 +2,8 @@ package parser.vhdl;
 
 import java.util.ArrayList;
 
+import common.MyDebug;
+
 import parser.Token;
 
 public class SymbolParser implements VhdlTokenConstants, VhdlASTConstants, IVhdlType
@@ -14,11 +16,11 @@ public class SymbolParser implements VhdlTokenConstants, VhdlASTConstants, IVhdl
      */
     public static void parseInterface_listKind(ASTNode node, int kind, VhdlParser parser) {
         if(node == null) {
-            System.err.println("parseInterface_list:null parameter!");
+            MyDebug.printFileLine("parseInterface_list:null parameter!");
             return;
         }
         if(!(kind == PORT || kind == GENERIC || kind == VARIABLE)) {
-            System.err.println("parseInterface_list: not port or generic or subprogram parameter");
+            MyDebug.printFileLine("parseInterface_list: not port or generic or subprogram parameter");
             return;
         }
         
@@ -39,7 +41,7 @@ public class SymbolParser implements VhdlTokenConstants, VhdlASTConstants, IVhdl
      */
     public static void parseVariableKind(ASTNode node, int kind, VhdlParser parser) {
         if(node == null) {
-            System.err.println("parseVariableKind:null parameter!");
+            MyDebug.printFileLine("parseVariableKind:null parameter!");
             return;
         }
         
@@ -68,11 +70,11 @@ public class SymbolParser implements VhdlTokenConstants, VhdlASTConstants, IVhdl
      */
     public static void parseTypeKind(ASTNode node, int kind, VhdlParser parser) {
         if(node == null) {
-            System.err.println("parseTypeKind:null parameter!");
+            MyDebug.printFileLine("parseTypeKind:null parameter!");
             return;
         }
         if(kind != TYPE) {
-            System.err.println("parseTypeKind: not a type");
+            MyDebug.printFileLine("parseTypeKind: not a type");
             return;
         }
         
@@ -118,11 +120,11 @@ public class SymbolParser implements VhdlTokenConstants, VhdlASTConstants, IVhdl
      */
     public static void parseSubtypeKind(ASTNode node, int kind, VhdlParser parser) {
         if(node == null) {
-            System.err.println("parseSubtypeKind:null parameter!");
+            MyDebug.printFileLine("parseSubtypeKind:null parameter!");
             return;
         }
         if(kind != SUBTYPE) {
-            System.err.println("parseSubtypeKind: not a subtype");
+            MyDebug.printFileLine("parseSubtypeKind: not a subtype");
             return;
         }
         
@@ -143,11 +145,11 @@ public class SymbolParser implements VhdlTokenConstants, VhdlASTConstants, IVhdl
      */
     public static void parseSubprogramKind(ASTNode node, int kind, VhdlParser parser) {
         if(node == null) {
-            System.err.println("parseSubprogramKind:null parameter!");
+            MyDebug.printFileLine("parseSubprogramKind:null parameter!");
             return;
         }
         if(node.getId() != ASTSUBPROGRAM_SPECIFICATION) {
-            System.err.println("parseSubprogramKind: not a subprogram node");
+            MyDebug.printFileLine("parseSubprogramKind: not a subprogram node");
             return;
         }
         
@@ -187,7 +189,7 @@ public class SymbolParser implements VhdlTokenConstants, VhdlASTConstants, IVhdl
      */
     public static void parseOtherKind(ASTNode node, int kind, VhdlParser parser) {
         if(node == null) {
-            System.err.println("parseOtherKind:null parameter!");
+            MyDebug.printFileLine("parseOtherKind:null parameter!");
             return;
         }
         Symbol sym = new Symbol();
@@ -207,7 +209,7 @@ public class SymbolParser implements VhdlTokenConstants, VhdlASTConstants, IVhdl
      */
     public static void parseCommonKind(ASTNode node, int kind, String type, VhdlParser parser) {
         if(node == null) {
-            System.err.println("parseOtherKind:null parameter!");
+            MyDebug.printFileLine("parseOtherKind:null parameter!");
             return;
         }
         Symbol sym = new Symbol();
@@ -224,7 +226,7 @@ public class SymbolParser implements VhdlTokenConstants, VhdlASTConstants, IVhdl
     public static void parseCommonKind(ASTNode node, int kind, String type, String value,
                             VhdlParser parser) {
         if(node == null) {
-            System.err.println("parseOtherKind:null parameter!");
+            MyDebug.printFileLine("parseOtherKind:null parameter!");
             return;
         }
         Symbol sym = new Symbol();
@@ -246,13 +248,13 @@ public class SymbolParser implements VhdlTokenConstants, VhdlASTConstants, IVhdl
         }
         
         if(node.getId() != ASTSUBTYPE_INDICATION) {
-            System.err.println("getType:not subtype_indication");
+            MyDebug.printFileLine("getType:not subtype_indication");
             return "";
         }
         
         ASTNode tmNode = (ASTNode)node.getChildById(ASTTYPE_MARK);
         if(tmNode == null) {
-            System.err.println("no type_mark in subtype indication");
+            MyDebug.printFileLine("no type_mark in subtype indication");
             return "";
         }
         return tmNode.getName();
@@ -300,7 +302,7 @@ public class SymbolParser implements VhdlTokenConstants, VhdlASTConstants, IVhdl
                                         prefix.getName())).typeRange.clone();
                 }
             }else {
-                System.err.println("attribute name: symbol not found");
+                MyDebug.printFileLine("attribute name: symbol not found");
             }
         }
         return range;
@@ -315,7 +317,7 @@ public class SymbolParser implements VhdlTokenConstants, VhdlASTConstants, IVhdl
         }
         
         if(node.getId() != ASTSUBTYPE_INDICATION) {
-            System.err.println("getValueRange:not subtype_indication");
+            MyDebug.printFileLine("getValueRange:not subtype_indication");
             return null;
         }
         ASTNode tmNode = (ASTNode)node.getDescendant(ASTRANGE_CONSTRAINT);
@@ -335,7 +337,7 @@ public class SymbolParser implements VhdlTokenConstants, VhdlASTConstants, IVhdl
         }
         
         if(node.getId() != ASTSUBTYPE_INDICATION) {
-            System.err.println("getTypeRange:not subtype_indication");
+            MyDebug.printFileLine("getTypeRange:not subtype_indication");
             return null;
         }
         ASTNode tmNode = (ASTNode)node.getDescendant(ASTINDEX_CONSTRAINT);

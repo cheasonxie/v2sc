@@ -1,5 +1,7 @@
 package converter.vhdl;
 
+import common.MyDebug;
+
 import parser.vhdl.ASTNode;
 import parser.vhdl.Symbol;
 
@@ -33,7 +35,7 @@ class ScFunction_call extends ScVhdl {
     public int getBitWidth() {
         Symbol sym = (Symbol)parser.getSymbol(curNode, name.getNameSegments());
         if(sym == null || sym.typeRange == null) {
-            System.out.println("type range of " + name + " is null");
+            MyDebug.printFileLine("type range of " + name + " is null");
             return 1;
         }
         return getWidth(sym.typeRange[0], sym.typeRange[2]);

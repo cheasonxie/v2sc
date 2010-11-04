@@ -62,12 +62,12 @@ public class VhdlDataBase
     
     public boolean newTable(String tabName, boolean append) {
         if(conn == null || stmt == null) {
-            System.err.println(JDBC_NOT_CONNECT);
+            MyDebug.printFileLine(JDBC_NOT_CONNECT);
             return false;
         }
         
         if(tabName == null || tabName.isEmpty()) {
-            System.err.println(INVALID_TABLE_NAME);
+            MyDebug.printFileLine(INVALID_TABLE_NAME);
             return false;
         }
         
@@ -119,18 +119,18 @@ public class VhdlDataBase
     
     public boolean insert(String tabName, Symbol sym) {
         if(conn == null || stmt == null) {
-            System.err.println(JDBC_NOT_CONNECT);
+            MyDebug.printFileLine(JDBC_NOT_CONNECT);
             return false;
         }
         
         if(tabName == null || tabName.isEmpty()) {
-            System.err.println(INVALID_TABLE_NAME);
+            MyDebug.printFileLine(INVALID_TABLE_NAME);
             return false;
         }
         tabName = normalize(tabName);
         
         if(sym == null) {
-            System.err.println("null parameter");
+            MyDebug.printFileLine("null parameter");
             return false;
         }
         
@@ -201,7 +201,7 @@ public class VhdlDataBase
     
     public boolean insert(String tabName, Symbol[] syms) {
         if(syms == null) {
-            System.err.println("null parameter");
+            MyDebug.printFileLine("null parameter");
             return false;
         }
         
@@ -226,11 +226,11 @@ public class VhdlDataBase
     
     public int getCount(String tabName, String symName) {
         if(conn == null || stmt == null) {
-            System.err.println(JDBC_NOT_CONNECT);
+            MyDebug.printFileLine(JDBC_NOT_CONNECT);
             return 0;
         }
         if(tabName == null || tabName.isEmpty()) {
-            System.err.println(INVALID_TABLE_NAME);
+            MyDebug.printFileLine(INVALID_TABLE_NAME);
             return 0;
         }
         tabName = normalize(tabName);
@@ -259,11 +259,11 @@ public class VhdlDataBase
      */
     private Symbol[] retriveArray(String tabName, String symName) {
         if(conn == null || stmt == null) {
-            System.err.println(JDBC_NOT_CONNECT);
+            MyDebug.printFileLine(JDBC_NOT_CONNECT);
             return null;
         }
         if(tabName == null || tabName.isEmpty()) {
-            System.err.println(INVALID_TABLE_NAME);
+            MyDebug.printFileLine(INVALID_TABLE_NAME);
             return null;
         }
         tabName = normalize(tabName);
@@ -334,12 +334,12 @@ public class VhdlDataBase
      */
     public String getTableName(String[] tableNames, String symName) {
         if(conn == null || stmt == null) {
-            System.err.println(JDBC_NOT_CONNECT);
+            MyDebug.printFileLine(JDBC_NOT_CONNECT);
             return "";
         }
         
        if(symName == null || symName.isEmpty()) {
-           System.err.println("jdbc:invalid parameter");
+           MyDebug.printFileLine("jdbc:invalid parameter");
            return "";
        }
         
@@ -384,7 +384,7 @@ public class VhdlDataBase
      */
     public boolean clearAllTables() {
         if(conn == null || stmt == null) {
-            System.err.println(JDBC_NOT_CONNECT);
+            MyDebug.printFileLine(JDBC_NOT_CONNECT);
             return false;
         }
 
@@ -408,12 +408,12 @@ public class VhdlDataBase
      */
     public boolean clearTable(String tabName) {
         if(conn == null || stmt == null) {
-            System.err.println(JDBC_NOT_CONNECT);
+            MyDebug.printFileLine(JDBC_NOT_CONNECT);
             return false;
         }
         
         if(tabName == null || tabName.isEmpty()) {
-            System.err.println(INVALID_TABLE_NAME);
+            MyDebug.printFileLine(INVALID_TABLE_NAME);
             return false;
         }
         tabName = normalize(tabName);
@@ -433,12 +433,12 @@ public class VhdlDataBase
      */
     public boolean isTableExist(String tabName) {
         if(conn == null || stmt == null) {
-            System.err.println(JDBC_NOT_CONNECT);
+            MyDebug.printFileLine(JDBC_NOT_CONNECT);
             return false;
         }
         
         if(tabName == null || tabName.isEmpty()) {
-            System.err.println(INVALID_TABLE_NAME);
+            MyDebug.printFileLine(INVALID_TABLE_NAME);
             return false;
         }
         
@@ -462,7 +462,7 @@ public class VhdlDataBase
      */
     public String[] getAllTables(String nameSlice) {
         if(conn == null || stmt == null) {
-            System.err.println(JDBC_NOT_CONNECT);
+            MyDebug.printFileLine(JDBC_NOT_CONNECT);
             return null;
         }
         

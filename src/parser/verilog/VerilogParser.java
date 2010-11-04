@@ -6,6 +6,8 @@ import java.io.FileReader;
 import java.io.Reader;
 import java.util.HashMap;
 
+import common.MyDebug;
+
 import parser.CommentBlock;
 import parser.IASTNode;
 import parser.IParser;
@@ -4289,7 +4291,7 @@ public class VerilogParser implements IParser, VerilogTokenConstants,
     @Override
     public CommentBlock[] getComment() {
         if(tokenMgr == null) {
-            System.err.println("you must parse the file by call parse() firstly");
+            MyDebug.printFileLine("you must parse the file by call parse() firstly");
             return null;
         }
         return tokenMgr.getComment();
@@ -4303,11 +4305,11 @@ public class VerilogParser implements IParser, VerilogTokenConstants,
     @Override
     public ISymbol getSymbol(IASTNode node, String name) {
         if(node == null) {
-            System.err.println("null parameter");
+            MyDebug.printFileLine("null parameter");
             return null;
         }
         if(tokenMgr == null) {
-            System.err.println("you must parse the file by calling parse() firstly");
+            MyDebug.printFileLine("you must parse the file by calling parse() firstly");
             return null;
         }
         return null;
@@ -4335,11 +4337,11 @@ public class VerilogParser implements IParser, VerilogTokenConstants,
     @Override
     public ISymbol getSymbol(IASTNode node, String[] names) {
         if(node == null) {
-            System.err.println("null parameter");
+            MyDebug.printFileLine("null parameter");
             return null;
         }
         if(tokenMgr == null) {
-            System.err.println("you must parse the file by calling parse() firstly");
+            MyDebug.printFileLine("you must parse the file by calling parse() firstly");
             return null;
         }
         return null;
@@ -4349,11 +4351,11 @@ public class VerilogParser implements IParser, VerilogTokenConstants,
     public ISymbolTable getTableOfSymbol(IASTNode node, String name)
     {
         if(node == null) {
-            System.err.println("null parameter");
+            MyDebug.printFileLine("null parameter");
             return null;
         }
         if(tokenMgr == null) {
-            System.err.println("you must parse the file by calling parse() firstly");
+            MyDebug.printFileLine("you must parse the file by calling parse() firstly");
             return null;
         }
         return null;

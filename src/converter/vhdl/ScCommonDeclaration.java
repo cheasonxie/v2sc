@@ -74,6 +74,8 @@ class ScCommonDeclaration extends ScVhdl {
                     ret += "sc_in<";
                 }else if(mode.scString().equalsIgnoreCase(PORT_OUT)) {
                     ret += "sc_out<";
+                }else if(mode.scString().equalsIgnoreCase(PORT_INOUT)) {
+                    ret += "sc_inout<";
                 }else {
                     warning("token" + mode.scString() + " ignored");
                 }

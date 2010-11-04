@@ -5,6 +5,8 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 
+import common.MyDebug;
+
 import parser.CommentBlock;
 import parser.ParserException;
 import parser.Token;
@@ -465,7 +467,7 @@ public class VerilogTokenManager extends TokenManager implements VerilogTokenCon
             int kind = tm.getNextTokenKind();
             kind = tm.getNextTokenKind(2);
             kind = tm.getNextTokenKind(5);
-            //System.out.print(kind);
+            //MyDebug.printFileLine(kind);
             
             int lastLine = 0x0fffffff;
             while(true) {
@@ -474,9 +476,9 @@ public class VerilogTokenManager extends TokenManager implements VerilogTokenCon
                     break;
                 }
                 if(lastLine < token.beginLine) {
-                    System.out.println();
+                    MyDebug.printFileLine();
                 }
-                System.out.print(" " + token.image);
+                MyDebug.printFileLine(" " + token.image);
                 lastLine = token.endLine;
             }
         } catch (FileNotFoundException e) {

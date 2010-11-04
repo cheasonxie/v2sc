@@ -54,7 +54,7 @@ class ScPort_map_aspect extends ScVhdl {
         
         Symbol[] syms = symTab.getKindSymbols(PORT);
         if(syms.length == 0) {
-            System.out.println();
+            MyDebug.printFileLine();
         }
         ArrayList<ScAssociation_element> elements = association_list.elements;
         

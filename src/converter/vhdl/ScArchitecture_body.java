@@ -1,5 +1,7 @@
 package converter.vhdl;
 
+import common.MyDebug;
+
 import converter.IScStatementBlock;
 import parser.vhdl.ASTNode;
 
@@ -53,7 +55,7 @@ class ScArchitecture_body extends ScCommonIdentifier implements IScStatementBloc
             }
         }
         if(i == units.size()) {
-            System.err.println("architecture boty has no corresponding entity");
+            MyDebug.printFileLine("architecture boty has no corresponding entity");
         }
     }
     

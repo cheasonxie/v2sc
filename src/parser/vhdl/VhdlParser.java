@@ -7332,7 +7332,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
             }
             token = token.next;
             if(token == null) {
-                System.out.println("error");
+                MyDebug.printFileLine("error");
             }
         }
         
@@ -7571,7 +7571,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
     @Override
     public CommentBlock[] getComment() {
         if(tokenMgr == null) {
-            System.err.println("you must parse the file by call parse() firstly");
+            MyDebug.printFileLine("you must parse the file by call parse() firstly");
             return null;
         }
         return tokenMgr.getComment();
@@ -7586,7 +7586,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         String tabName = "";
         Symbol sym = null;
         if(curTab == null || names == null) {
-            System.err.println("VhdlParser.getNamesSymbol: null pointer");
+            MyDebug.printFileLine("VhdlParser.getNamesSymbol: null pointer");
             return null;
         }
 
@@ -7603,16 +7603,16 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
     @Override
     public ISymbol getSymbol(IASTNode node, String name) {
         if(node == null) {
-            System.err.println("null parameter");
+            MyDebug.printFileLine("null parameter");
             return null;
         }
         if(tokenMgr == null) {
-            System.err.println("you must parse the file by calling parse() firstly");
+            MyDebug.printFileLine("you must parse the file by calling parse() firstly");
             return null;
         }
         
         if(((ASTNode)node).getSymbolTable() == null) {
-            //System.err.println("symbol table is null!");
+            //MyDebug.printFileLine("symbol table is null!");
             return null;
         }
         
@@ -7633,11 +7633,11 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
     public ISymbol getSymbol(IASTNode node, String[] names)
     {
         if(node == null || names == null) {
-            System.err.println("null parameter");
+            MyDebug.printFileLine("null parameter");
             return null;
         }
         if(tokenMgr == null) {
-            System.err.println("you must parse the file by calling parse() firstly");
+            MyDebug.printFileLine("you must parse the file by calling parse() firstly");
             return null;
         }
         
