@@ -74,18 +74,15 @@ class ScGenerate_statement extends ScCommonIdentifier implements IScStatementBlo
         String ret = "";
         ret += addPrevComment();
         ret += getSpec(individual) + "\r\n";
-        ret += intent() + "{\r\n";
-        startIntentBlock();
+        ret += startIntentBraceBlock();
         ret += addLF(scheme.toString());
-        ret += intent() + "{\r\n";
-        startIntentBlock();
+        ret += startIntentBraceBlock();
         if(declarative_part != null)
             ret += addLF(declarative_part.getImplements());
         ret += statement_part.getInitCode();   // call statement part's init code
-        endIntentBlock();
-        ret += intent() + "}\r\n";
-        endIntentBlock();
-        ret += intent() + "}\r\n\r\n";
+        ret += endIntentBraceBlock();
+        ret += endIntentBraceBlock();
+        ret += "\r\n";
         
         ret += statement_part.getImplements();
         return ret;

@@ -150,6 +150,17 @@ public class ScVhdl implements ScVhdlConstants, VhdlTokenConstants,
     protected static void startIntentBlock() { curLevel ++; }
     protected static void endIntentBlock() { curLevel --; }
     
+    protected String startIntentBraceBlock() {
+        String ret = intent() + "{\r\n";
+        curLevel ++;
+        return ret;
+    }
+    
+    protected String endIntentBraceBlock() {
+        curLevel --;
+        return intent() + "}\r\n";
+    }
+    
     // intent
     protected static String intent(int lv)
     {

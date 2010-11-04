@@ -95,11 +95,9 @@ class ScEntity_declaration extends ScCommonIdentifier implements IScStatementBlo
         String ret = "";
         className = getName();
         ret += intent() + "SC_CTOR(" + getName() + ")\r\n";
-        ret += intent() + "{\r\n";
-        startIntentBlock();
+        ret += startIntentBraceBlock();
         ret += body.getInitCode();
-        endIntentBlock();
-        ret += intent() + "}\r\n";
+        ret += endIntentBraceBlock();
         return ret;
     }
 

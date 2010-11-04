@@ -38,11 +38,11 @@ class ScLoop_statement extends ScVhdl {
             ret += addLFIntent("while(1)");
         else
             ret += addLFIntent(iteration.toString());
-        ret += intent() + "{\r\n";
-        startIntentBlock();
+
+        ret += startIntentBraceBlock();
         ret += seq_statements.scString();
-        endIntentBlock();
-        ret += intent() + "}";
+        ret += endIntentBraceBlock();
+
         return ret;
     }
 }

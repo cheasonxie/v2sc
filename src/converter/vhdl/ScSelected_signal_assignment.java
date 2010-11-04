@@ -88,16 +88,15 @@ class ScSelected_signal_assignment extends ScVhdl {
                 }else {
                     ret += intent() + "else if(" + tmp + ")\r\n";
                 }
-                ret += intent() + "{\r\n";
-                startIntentBlock();
+
+                ret += startIntentBraceBlock();
                 ret += addLFIntent(cw.waveform.assignment(strTarget));
-                endIntentBlock();
-                ret += "}\r\n";
+                ret += endIntentBraceBlock();
             }
         }else {
             ret += intent() + "switch(" + val + ")\r\n";
-            ret += intent() + "{\r\n";
-            startIntentBlock();
+
+            ret += startIntentBraceBlock();
             for(int i = 0; i < selected_waveforms.choicesWaveform.size(); i++) {
                 ChoicesWaveform cw = selected_waveforms.choicesWaveform.get(i);
                 ScChoices choices = cw.choices;
@@ -115,8 +114,7 @@ class ScSelected_signal_assignment extends ScVhdl {
                 ret += intent() + "break;\r\n";
                 endIntentBlock();
             }
-            endIntentBlock();
-            ret += intent() + "}\r\n";
+            ret += endIntentBraceBlock();
         }
         return ret;
     }

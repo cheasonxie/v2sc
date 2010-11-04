@@ -35,8 +35,8 @@ class ScAssertion extends ScVhdl {
         String ret = "";
         if(report_exp != null) {
             ret += "if(!(" + condition.scString() + "))\r\n";
-            ret += intent(curLevel+1) + "printf(\"";
-            ret += report_exp.scString() + "\");\r\n";
+            ret += intent(curLevel+1) + "printf(";
+            ret += report_exp.scString() + ");\r\n";
         }
         ret += intent() + "assert(" + condition.scString() + ")";
         if(severity_exp != null) {

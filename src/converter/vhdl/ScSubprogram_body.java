@@ -41,8 +41,8 @@ class ScSubprogram_body extends ScVhdl implements IScStatementBlock {
     public String scString() {
         String ret = "";
         ret += spec.specString(true) + "\r\n";
-        ret += intent() + "{\r\n";
-        startIntentBlock();
+
+        ret += startIntentBraceBlock();
         ret += addLF(declarative_part.toString());
         String[] lvars = getLoopVar();
         if(lvars != null && lvars.length > 0) {
@@ -56,8 +56,7 @@ class ScSubprogram_body extends ScVhdl implements IScStatementBlock {
             ret += ";\r\n";
         }
         ret += addLF(statement_part.toString());
-        endIntentBlock();
-        ret += intent() + "}\r\n";
+        ret += endIntentBraceBlock();
         return ret;
     }
 

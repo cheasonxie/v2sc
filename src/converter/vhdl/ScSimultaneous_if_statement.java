@@ -74,31 +74,29 @@ class ScSimultaneous_if_statement extends ScCommonIdentifier implements IScState
     public String scString() {
         String ret = "";
         ret += intent() + "if(" + if_pair.condition.scString() + ")\r\n";
-        ret += intent() + "{\r\n";
-        startIntentBlock();
+
+        ret += startIntentBraceBlock();
         ret += if_pair.statements.scString();
+        ret += endIntentBraceBlock();
+
         if(elsif_pair.size() > 0) {
-            endIntentBlock();
-            ret += intent() + "}\r\n";
             for(int i = 0; i < elsif_pair.size(); i++) {
                 ConPair pair = elsif_pair.get(i);
                 ret += intent() + "else if(" + pair.condition.scString() + ")\r\n";
-                ret += intent() + "{\r\n";
-                startIntentBlock();
+
+                ret += startIntentBraceBlock();
                 ret += pair.statements.scString();
+                ret += endIntentBraceBlock();
             }
         }
         
         if(else_pair != null) {
-            endIntentBlock();
-            ret += intent() + "}\r\n";
             ret += intent() + "else\r\n";
-            ret += intent() + "{\r\n";
-            startIntentBlock();
+
+            ret += startIntentBraceBlock();
             ret += else_pair.statements.scString();
+            ret += endIntentBraceBlock();
         }
-        endIntentBlock();
-        ret += intent() + "}";
         return ret;
     }
 

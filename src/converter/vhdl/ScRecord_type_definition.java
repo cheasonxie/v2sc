@@ -34,13 +34,13 @@ class ScRecord_type_definition extends ScCommonIdentifier {
     public String scString() {
         String ret = "";
         ret += addLFIntent("typedef struct " + identifier);
-        ret += intent() +"{\r\n";
-        startIntentBlock();
+
+        ret += startIntentBraceBlock();
         for(int i = 0; i < elements.size(); i++) {
             ret += addLFIntent(elements.get(i).toString());
         }
-        endIntentBlock();
-        ret += intent() +"}";
+        ret += endIntentBraceBlock();
+
         return ret;
     }
 }

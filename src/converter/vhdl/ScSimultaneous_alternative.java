@@ -54,7 +54,7 @@ class ScSimultaneous_alternative extends ScVhdl {
         }
         startIntentBlock();
         ret += statementsString();
-        ret += intent() + "break;";
+        ret += intent() + "break;\r\n";
         endIntentBlock();
         return ret;
     }

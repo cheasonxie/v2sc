@@ -92,11 +92,10 @@ class ScSimultaneous_case_statement extends ScCommonIdentifier implements IScSta
                 }else {
                     ret += intent() + "else if(" + tmp + ")\r\n";
                 }
-                ret += intent() + "{\r\n";
-                startIntentBlock();
+
+                ret += startIntentBraceBlock();
                 ret += addLFIntent(alt.statement_part.toString());
-                endIntentBlock();
-                ret += "}\r\n";
+                ret += endIntentBraceBlock();
             }
         }else {
             ret += intent() + "switch(" + expression.scString() + ")\r\n";

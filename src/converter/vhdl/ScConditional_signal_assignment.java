@@ -64,11 +64,9 @@ class ScConditional_signal_assignment extends ScVhdl {
                 }else {
                     ret += intent() + "else\r\n";
                 }
-                ret += intent() + "{\r\n";
-                startIntentBlock();
+                ret += startIntentBraceBlock();
                 ret += cw.waveform.assignment(val) + ";\r\n";
-                endIntentBlock();
-                ret += intent() + "}\r\n";
+                ret += endIntentBraceBlock();
             }
         }
 

@@ -64,30 +64,27 @@ class ScIf_statement extends ScVhdl {
     public String scString() {
         String ret = "";
         ret += intent() + "if(" + if_pair.condition.scString() + ")\r\n";
-        ret += intent() + "{\r\n";
-        startIntentBlock();
+
+        ret += startIntentBraceBlock();
         ret += if_pair.seq_statements.scString();
-        endIntentBlock();
-        ret += intent() + "}\r\n";
+        ret += endIntentBraceBlock();
+
         if(elsif_pair.size() > 0) {
             for(int i = 0; i < elsif_pair.size(); i++) {
                 ConPair pair = elsif_pair.get(i);
                 ret += intent() + "else if(" + pair.condition.scString() + ")\r\n";
-                ret += intent() + "{\r\n";
-                startIntentBlock();
+
+                ret += startIntentBraceBlock();
                 ret += pair.seq_statements.scString();
-                endIntentBlock();
-                ret += intent() + "}\r\n";
+                ret += endIntentBraceBlock();
             }
         }
         
         if(else_pair != null) {
             ret += intent() + "else\r\n";
-            ret += intent() + "{\r\n";
-            startIntentBlock();
+            ret += startIntentBraceBlock();
             ret += else_pair.seq_statements.scString();
-            endIntentBlock();
-            ret += intent() + "}\r\n";
+            ret += endIntentBraceBlock();
         }
         return ret;
     }
