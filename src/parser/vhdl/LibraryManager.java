@@ -23,6 +23,7 @@ public class LibraryManager
     public static LibraryManager getInstance() {
         if(libMgr == null) {
             libMgr = new LibraryManager();
+            libMgr.deleteAll();
             libMgr.loadAll();
             libMgr.addPredefinedPackage();
         }
@@ -124,6 +125,7 @@ public class LibraryManager
             if(syms == null || syms.length == 0) {
                 continue;
             }
+
             ArrayList<Symbol> symsArray = new ArrayList<Symbol>();
             for(int j = 0; j < syms.length; j++) {
                 symsArray.add(syms[j]);
@@ -140,7 +142,7 @@ public class LibraryManager
     public boolean writeAll() {
         VhdlDataBase db = new VhdlDataBase();
         db.init();
-        db.beginBatch();
+        db.beginTransaction();
         
         Set<String> keys = symbolMap.keySet();
         Iterator<String> keyIter = keys.iterator();
@@ -155,8 +157,22 @@ public class LibraryManager
                db.insert(tabName, syms.get(i));
            }
         }
-        db.endBatch();
+        db.endTransaction();
         db.exit();
+        return true;
+    }
+    
+    /**
+     * delete all symbol in database
+     */
+    public boolean deleteAll() {
+        VhdlDataBase db = new VhdlDataBase();
+        db.init();
+        db.beginTransaction();
+        db.clearAllTables();
+        db.endTransaction();
+        db.exit();
+        symbolMap.clear();
         return true;
     }
     
@@ -182,11 +198,11 @@ public class LibraryManager
     private boolean writeLibrary(String libName) {
         VhdlDataBase db = new VhdlDataBase();
         db.init();
-        db.beginBatch();
+        db.beginTransaction();
         
         writeTable(db, libName);
 
-        db.endBatch();
+        db.endTransaction();
         db.exit();
         return true;
     }
@@ -226,7 +242,7 @@ public class LibraryManager
                         tabNames.add(tabName);
                         libSyms.add(new Symbol(pkgNodes[j].getName(), VhdlTokenConstants.PACKAGE));
                         
-                        addPackageOrEntity(tabName, pkgNodes[i]);
+                        addPackageOrEntity(tabName, pkgNodes[j]);
                     }
                 }
                 

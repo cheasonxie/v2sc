@@ -23,8 +23,6 @@ public class VhdlDataBase
     private Connection conn = null;
     private Statement stmt = null;
     
-    private boolean isBatch = false;
-    
     private String normalize(String str) {
         if(str == null || str.isEmpty())
             return str;
@@ -194,10 +192,7 @@ public class VhdlDataBase
         insertStr += ");";
         
         try {
-            if(isBatch)
-                stmt.addBatch(insertStr);
-            else
-                stmt.executeUpdate(insertStr);
+            stmt.executeUpdate(insertStr);
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
@@ -395,13 +390,19 @@ public class VhdlDataBase
             return false;
         }
 
+        ArrayList<String> tables = new ArrayList<String>();
         try {
             DatabaseMetaData meta = conn.getMetaData();
             ResultSet res = meta.getTables(null, null, null, new String[] {"table"});
             while (res.next()) {
-                clearTable(res.getString("table_name"));
+                tables.add(res.getString("table_name"));
             }
             res.close();
+            
+            for(int i = 0; i < tables.size(); i++) {
+                clearTable(tables.get(i));
+            }
+            tables.clear();
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
@@ -501,25 +502,29 @@ public class VhdlDataBase
         return ret.toArray(new String[ret.size()]);
     }
     
-    public boolean beginBatch() {
+    public boolean beginTransaction() {
         if(conn == null || stmt == null) {
             MyDebug.printFileLine(JDBC_NOT_CONNECT);
             return false;
         }
-        isBatch = true;
+        
+        try {
+            conn.setAutoCommit(false);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         return true;
     }
     
-    public boolean endBatch() {
+    public boolean endTransaction() {
         if(conn == null || stmt == null) {
             MyDebug.printFileLine(JDBC_NOT_CONNECT);
             return false;
         }
         
-        isBatch = false;
-        
         try {
-            stmt.executeBatch();
+            conn.commit();
+            conn.setAutoCommit(true);
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
@@ -576,7 +581,9 @@ public class VhdlDataBase
         //String tabName = "grlib";
         db.init();
         //db.clearAllTables();
-        //db.clearTable(tabName);
+        db.clearTable(tabName);
+        db.newTable(tabName, false);
+        db.clearTable(tabName);
         db.newTable(tabName, false);
         
         boolean exist = db.isTableExist(tabName);
@@ -589,12 +596,15 @@ public class VhdlDataBase
             db.insert(tabName, std_logic_1164_syms[i]);
         }
         
-        db.newTable(tabName, false);
+        db.exit();
+        db.init();
+        
+        db.clearTable(tabName);
         
         // Retrieve
         for(int i = 0; i < std_logic_1164_syms.length; i++) {
             Symbol[] sym = db.retrive(tabName, std_logic_1164_syms[i].name);
-            System.out.println(sym.length);
+            //System.out.println(sym.length);
         }
         //db.clearTable(tabName);
         db.exit();
