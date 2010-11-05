@@ -125,6 +125,7 @@ public class hdl2SystemC
                 e.printStackTrace();
             }
         }
+        MyDebug.exit();
     }
     
     public static int getFileType(String path)

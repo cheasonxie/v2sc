@@ -22,6 +22,7 @@ public class MyDebug
     public static void exit()
     {
         if(stream != System.out)
+            stream.flush();
             stream.close();
     }
     

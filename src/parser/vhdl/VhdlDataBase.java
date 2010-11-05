@@ -506,12 +506,6 @@ public class VhdlDataBase
             MyDebug.printFileLine(JDBC_NOT_CONNECT);
             return false;
         }
-        try {
-            conn.setAutoCommit(false);
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
         isBatch = true;
         return true;
     }
@@ -525,9 +519,7 @@ public class VhdlDataBase
         isBatch = false;
         
         try {
-            stmt.addBatch("commit");
             stmt.executeBatch();
-            conn.commit();
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
@@ -545,7 +537,6 @@ public class VhdlDataBase
             }
             
             if(conn != null) {
-                conn.commit();
                 conn.close();
             }
         } catch (SQLException e) {

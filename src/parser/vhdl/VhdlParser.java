@@ -25,7 +25,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
     protected ASTNode lastNode = null;      // last parsed node
     protected ASTNode designFile = null;  // design file node
     
-    protected static ArrayList<ASTNode> localUnits = null;   // entities/packages in this file
+    protected ArrayList<ASTNode> localUnits = null;   // entities/packages in this file
     
     /**
      *  true -- just only parse symbols in package(if exist)<br>

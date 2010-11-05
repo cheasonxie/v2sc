@@ -79,7 +79,7 @@ public class LibraryManager
         for(int i = 0; i < tab.children.size(); i++) {
             SymbolTable tab1 = tab.children.get(i);
             String tabName1 = tabName + "#" + tab1.getName();
-            addTable(tabName1, tab);
+            addTable(tabName1, tab1);
         }
         return true;
     }
@@ -126,7 +126,7 @@ public class LibraryManager
             }
             ArrayList<Symbol> symsArray = new ArrayList<Symbol>();
             for(int j = 0; j < syms.length; j++) {
-                symsArray.add(syms[i]);
+                symsArray.add(syms[j]);
             }
             symbolMap.put(tabs[i], symsArray);
         }
@@ -155,6 +155,37 @@ public class LibraryManager
                db.insert(tabName, syms.get(i));
            }
         }
+        db.endBatch();
+        db.exit();
+        return true;
+    }
+    
+    /**
+     * write specified table and it's child table to database from memory
+     */
+    private boolean writeTable(VhdlDataBase db, String tabName) {
+        ArrayList<Symbol> symsArray = symbolMap.get(tabName);
+        if(symsArray == null)
+            return false;
+        db.newTable(tabName, true);
+        for(int i = 0; i < symsArray.size(); i++) {
+            db.insert(tabName, symsArray.get(i));
+            String tabName1 = tabName + "#" + symsArray.get(i).name;
+            writeTable(db, tabName1);
+        }
+        return true;
+    }
+    
+    /**
+     * write specified library to database from memory
+     */
+    private boolean writeLibrary(String libName) {
+        VhdlDataBase db = new VhdlDataBase();
+        db.init();
+        db.beginBatch();
+        
+        writeTable(db, libName);
+
         db.endBatch();
         db.exit();
         return true;
@@ -199,7 +230,14 @@ public class LibraryManager
                     }
                 }
                 
-                localEntities.addAll(parser.getLocalUnits());
+                ArrayList<ASTNode> units = parser.getLocalUnits();
+                if(units != null) {
+                    for(int j = 0; j < units.size(); j++) {
+                        if(units.get(j).getId() != VhdlASTConstants.ASTPACKAGE_DECLARATION) {
+                            localEntities.add(units.get(j));
+                        }
+                    }
+                }
                 parser.getLocalUnits().clear();
                 designFile = null;
                 parser = null;
@@ -237,6 +275,7 @@ public class LibraryManager
         }
         localEntities.clear();
         tabNames.clear();
+        writeLibrary(libName);
         System.gc();
         return true;
     }
