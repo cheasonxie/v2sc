@@ -40,7 +40,7 @@ class ScRecord_type_definition extends ScCommonIdentifier {
             ret += addLFIntent(elements.get(i).toString());
         }
         endIntentBlock();
-        ret += "}";
+        ret += intent() + "}";
         return ret;
     }
 }

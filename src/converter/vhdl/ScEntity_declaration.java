@@ -50,7 +50,7 @@ class ScEntity_declaration extends ScCommonIdentifier implements IScStatementBlo
     }
 
     public String scString() {
-        String ret = "";
+        String ret = "\r\n";
         if(body == null) {
             return "";  //TODO no entity body, ignore
         }
@@ -121,6 +121,7 @@ class ScEntity_declaration extends ScCommonIdentifier implements IScStatementBlo
         ret += addLF(header.toString());
         ret += addLF(declarative_part.getDeclaration());
         ret += addLF(body.getDeclaration());
+        ret += "\r\n" + addLF(getInitCode());   // add sc_ctor
         endIntentBlock();
         ret += "};\r\n";
         return ret;

@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import converter.IScFile;
 import converter.IncludePath;
-import parser.INameObject;
 import parser.IParser;
 import parser.vhdl.ASTNode;
 import parser.vhdl.VhdlArrayList;
