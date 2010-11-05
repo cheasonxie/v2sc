@@ -3,55 +3,28 @@ package parser.vhdl;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
 
-import common.MyDebug;
-
 import parser.INameObject;
 import parser.ISymbol;
 import parser.ISymbolTable;
 
-public class SymbolTable implements ISymbolTable, INameObject
+public abstract class SymbolTable implements ISymbolTable, INameObject
 {
-    private static final long serialVersionUID = -5606826108996410370L;
+    protected String name = "";
+    protected SymbolTable parent = null;
+    protected String tabName = "tabName";
     
-    String name = "";
-    SymbolTable parent = null;
-    String tabName = "tabName";
-    int symNum = 0;
+    protected VhdlArrayList<SymbolTable> children = null;
     
-    /**
-     * whether this table is library, stand for where to get symbol
-     * @value true: gets symbol from database
-     * <br>false: get symbol from local ArrayList
-     * @note set true if create instance from use_clause
-     */
-    boolean isLibraryTable = false;
-    VhdlArrayList<Symbol> mysyms = null;
-    VhdlArrayList<SymbolTable> children = null;
+    protected static LibraryManager libMgr = LibraryManager.getInstance();
     
-    private static VhdlDataBase db = LibraryManager.getInstance().getDb();
-    
-    public SymbolTable(SymbolTable p, String name) {
-        this(p, name, false);
-    }
-    
-    public SymbolTable(SymbolTable p, String name, boolean isLib) {
+    protected SymbolTable(SymbolTable p, String name) {
         parent = p;
         this.name = name;
         tabName = getTableName();
-        isLibraryTable = isLib;
         
         children = new VhdlArrayList<SymbolTable>();
         if(p != null) {
             p.children.add(this);
-        }
-        
-        if(!isLib) {
-            mysyms = new VhdlArrayList<Symbol>();
-        }else {
-            if(!db.isTableExist(tabName)) {
-                MyDebug.printFileLine("symbol table not exist:" + tabName);
-            }
-            //db.newTable(tabName, true);
         }
     }
     
@@ -110,17 +83,6 @@ public class SymbolTable implements ISymbolTable, INameObject
         return true;
     }
     
-    @Override
-    public boolean addSymbol(ISymbol sym) {
-        boolean ret = true;
-        if(!isLibraryTable)
-            ret = mysyms.add((Symbol)sym);
-        else
-            ret = db.insert(tabName, (Symbol)sym);
-        symNum ++;
-        return ret;
-    }
-    
     /**
      * static method, get symbol by specified table name,
      * @param curTab current table
@@ -128,7 +90,7 @@ public class SymbolTable implements ISymbolTable, INameObject
      * @param name symbol name
      */
     public static Symbol getSymbol(SymbolTable curTab, String tableName, String name) {
-        Symbol[] ret = db.retrive(tableName, name);
+        Symbol[] ret = libMgr.getLibSymbol(tableName, name);
         if(ret != null)
             return ret[0];
         
@@ -158,13 +120,33 @@ public class SymbolTable implements ISymbolTable, INameObject
      * static method, check whether symbol table exists
      */
     public static boolean isTableExist(SymbolTable curTab, String tabName) {
-        if(db.isTableExist(tabName))
+        if(libMgr.isTableExist(tabName))
             return true;
-        
-        if(curTab == null || curTab.isLibraryTable)
+
+        if(curTab == null)
             return false;
         
         return (curTab.tabName.indexOf(tabName) >= 0);
+    }
+    
+    public Symbol[] getKindSymbols(int kind) {
+        ArrayList<Symbol> symArray = new ArrayList<Symbol>();
+
+        Symbol[] syms = (Symbol[])getAllSymbols();
+        if(syms == null) {
+            return null;
+        }
+        for(int i = 0; i < syms.length; i++) {
+            if(syms[i].kind == kind) {
+                symArray.add(syms[i]);
+            }
+        }
+
+        if(symArray.size() == 0) {
+            return null;
+        }else {
+            return symArray.toArray(new Symbol[symArray.size()]);
+        }
     }
     
     public SymbolTable getChildTable(String name) {
@@ -176,68 +158,7 @@ public class SymbolTable implements ISymbolTable, INameObject
         return null;
     }
     
-    @Override
-    public ISymbol getSymbol(String name) {
-        Symbol[] ret = null;
-        if(!isLibraryTable)
-            ret = mysyms.get(name);
-        else
-            ret = db.retrive(tabName, name);
-        if(ret != null)
-            return ret[0];
-        if(parent != null)
-            return parent.getSymbol(name);
-        return null;
-    }
-
-    @Override
-    public ISymbol[] getAllSymbols() {
-        if(!isLibraryTable)
-            return mysyms.toArray(new Symbol[mysyms.size()]); 
-        else
-            return db.retrive(tabName);
-    }
-    
-    public Symbol[] getKindSymbols(int kind) {
-        ArrayList<Symbol> symArray = new ArrayList<Symbol>();
-        if(!isLibraryTable) {
-            for(int i = 0; i < mysyms.size(); i++) {
-                if(mysyms.get(i).kind == kind) {
-                    symArray.add(mysyms.get(i));
-                }
-            }
-        }else {
-            Symbol[] syms = db.retrive(tabName);
-            if(syms == null) {
-                return null;
-            }
-            for(int i = 0; i < syms.length; i++) {
-                if(syms[i].kind == kind) {
-                    symArray.add(syms[i]);
-                }
-            }
-        }
-
-        if(symArray.size() == 0) {
-            return null;
-        }else {
-            return symArray.toArray(new Symbol[symArray.size()]);
-        }
-    }
-    
-    public SymbolTable getTableOfSymbol(String name) {
-        Symbol[] ret = null;
-        if(!isLibraryTable) {
-            ret = mysyms.get(name);
-        }else {
-            ret = db.retrive(tabName, name);
-        }
-        if(ret != null)
-            return this;
-        if(parent != null)
-            return parent.getTableOfSymbol(name);
-        return null;
-    }
+    public abstract SymbolTable getTableOfSymbol(String name);
     
     @Override
     public String toString() {

@@ -45,7 +45,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
      * use pair with endBlock
      */
     void startBlock() {
-        SymbolTable newTab = new SymbolTable(curSymbolTable, curNode.getName());
+        SymbolTable newTab = new LocalSymbolTable(curSymbolTable, curNode.getName());
         curSymbolTable = newTab;
     }
     
@@ -7374,8 +7374,8 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
                     selNames[0] = LibraryManager.getInstance().findWorkLibrary(selNames[1]);
                 }
                 
-                SymbolTable symTab = new SymbolTable(null, selNames[0], true);
-                symTab = new SymbolTable(symTab, selNames[1], true);
+                SymbolTable symTab = new LibSymbolTable(null, selNames[0]);
+                symTab = new LibSymbolTable(symTab, selNames[1]);
                 if(!selNames[2].isEmpty()) {
                     if(selNames[2].equalsIgnoreCase("all")) {
                         // get all symbols in first two segments
@@ -7387,7 +7387,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
                                 String tabName1 = tabName + "#" + allSyms[i].getName();
                                 if(!SymbolTable.isTableExist(node.getSymbolTable(), tabName1))
                                     continue;
-                                SymbolTable symTab1 = new SymbolTable(symTab, allSyms[i].getName(), true);
+                                SymbolTable symTab1 = new LibSymbolTable(symTab, allSyms[i].getName());
                                 extSymbolTable.add(symTab1);
                                 subTableExist = true;
                             }
@@ -7399,7 +7399,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
                         
                     }else {
                         // three segments, specified symbol
-                        symTab = new SymbolTable(symTab, selNames[2], true);
+                        symTab = new LibSymbolTable(symTab, selNames[2]);
                         extSymbolTable.add(symTab);
                     }
                 }else {

@@ -18,11 +18,12 @@ public class VhdlDataBase
     // error string
     private static String JDBC_NOT_CONNECT = "jdbc has not been connect, call init() firstly";
     private static String INVALID_TABLE_NAME = "invalid table name";
-    private static String INVALID_SYMBOL_NAME = "invalid symbol name";
     
     // database connection & statement
     private Connection conn = null;
     private Statement stmt = null;
+    
+    private boolean isBatch = false;
     
     private String normalize(String str) {
         if(str == null || str.isEmpty())
@@ -193,7 +194,10 @@ public class VhdlDataBase
         insertStr += ");";
         
         try {
-            stmt.executeUpdate(insertStr);
+            if(isBatch)
+                stmt.addBatch(insertStr);
+            else
+                stmt.executeUpdate(insertStr);
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
@@ -320,6 +324,7 @@ public class VhdlDataBase
                 }
                 ret.add(sym);
             }
+            rs.close();
         }catch (SQLException e) {
             return null;
         }
@@ -396,6 +401,7 @@ public class VhdlDataBase
             while (res.next()) {
                 clearTable(res.getString("table_name"));
             }
+            res.close();
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
@@ -452,6 +458,7 @@ public class VhdlDataBase
             if (res.next()) {
                 return true;
             }
+            res.close();
         } catch (SQLException e) {
             return false;
         }
@@ -460,7 +467,8 @@ public class VhdlDataBase
     }
     
     /**
-     * get all table which's name include namePatten
+     * get all table which's name contain nameSlice
+     * <br> if namsSlice is null or empty, get all table in database
      */
     public String[] getAllTables(String nameSlice) {
         if(conn == null || stmt == null) {
@@ -477,11 +485,12 @@ public class VhdlDataBase
             ResultSet res = meta.getTables(null, null, null, new String[] {"table"});
             while (res.next()) {
                 String n = res.getString("table_name");
-                n = n.toLowerCase();
+                n = restore(n);
                 if(nameSlice == null || nameSlice.isEmpty() || n.indexOf(nameSlice) >= 0) {
                     ret.add(n);
                 }
             }
+            res.close();
         } catch (SQLException e) {
             e.printStackTrace();
             return null;
@@ -491,16 +500,54 @@ public class VhdlDataBase
             return null;
         return ret.toArray(new String[ret.size()]);
     }
+    
+    public boolean beginBatch() {
+        if(conn == null || stmt == null) {
+            MyDebug.printFileLine(JDBC_NOT_CONNECT);
+            return false;
+        }
+        try {
+            conn.setAutoCommit(false);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+        isBatch = true;
+        return true;
+    }
+    
+    public boolean endBatch() {
+        if(conn == null || stmt == null) {
+            MyDebug.printFileLine(JDBC_NOT_CONNECT);
+            return false;
+        }
+        
+        isBatch = false;
+        
+        try {
+            stmt.addBatch("commit");
+            stmt.executeBatch();
+            conn.commit();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
    
     /**
      * disconnect jdbc
      */
     public void exit() {
         try {
-            if(stmt != null)
+            if(stmt != null) {
                 stmt.close();
-            if(conn != null)
+            }
+            
+            if(conn != null) {
+                conn.commit();
                 conn.close();
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
