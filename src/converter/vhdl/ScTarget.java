@@ -30,10 +30,14 @@ class ScTarget extends ScVhdl {
     public String[] getTargetRange() {
         String[] ret = null;
         if(item instanceof ScName) {
-            String[] segs = null;
             ScName name = (ScName)item;
-            segs = name.getNameSegments();
-            ret = getTypeRange(item.curNode, segs);
+            if(name.item instanceof ScSlice_name) {
+                ret = ((ScSlice_name)name.item).range.getRange();
+            }else {
+                String[] segs = null;
+                segs = name.getNameSegments();
+                ret = getTypeRange(item.curNode, segs);
+            }
         }else {
             warning("aggregate target range not supported");
             //TODO aggregate target range

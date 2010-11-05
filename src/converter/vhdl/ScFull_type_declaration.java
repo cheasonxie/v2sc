@@ -33,7 +33,7 @@ class ScFull_type_declaration extends ScVhdl {
         String ret = "";
         type_def.setIdentifier(identifier.scString());
         ret += type_def.scString();
-        ret += ";";
+        ret += ";\r\n";
         return ret;
     }
 }

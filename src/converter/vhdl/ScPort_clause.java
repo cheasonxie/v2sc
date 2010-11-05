@@ -26,6 +26,6 @@ class ScPort_clause extends ScVhdl {
     }
 
     public String scString() {
-        return port_list.scString() + ";";
+        return port_list.scString() + ";\r\n";
     }
 }

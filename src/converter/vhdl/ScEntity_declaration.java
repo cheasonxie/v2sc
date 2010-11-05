@@ -104,7 +104,7 @@ class ScEntity_declaration extends ScCommonIdentifier implements IScStatementBlo
     @Override
     public String getDeclaration()
     {
-        String ret = "";
+        String ret = "\r\n";
         if(body == null) {
             return "";  //TODO no entity body, ignore
         }

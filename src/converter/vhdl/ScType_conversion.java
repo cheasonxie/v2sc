@@ -18,8 +18,10 @@ class ScType_conversion extends ScVhdl {
             switch(c.getId())
             {
             case ASTTYPE_MARK:
+                type_mark = new ScType_mark(c);
                 break;
             case ASTEXPRESSION:
+                expression = new ScExpression(c);
                 break;
             default:
                 break;
@@ -29,7 +31,6 @@ class ScType_conversion extends ScVhdl {
 
     public String scString() {
         String ret = "";
-        String pre = type_mark.scString();
         String tmp = "";
         
         tmp = expression.scString();
@@ -57,9 +58,28 @@ class ScType_conversion extends ScVhdl {
                 range[1] = RANGE_TO;
                 range[2] = tmp + "-1";
             }
-            ret = getReplaceType(pre, range);
+            ret = type_mark.getTypeString(range);
         }else {
-            ret = getReplaceType(pre, null);
+            String[] range = getTargetRange();
+            if(range != null) {
+                if(range[1].equalsIgnoreCase(RANGE_TO)) {
+                    String tmpr = range[0];
+                    range[0] = range[2];
+                    range[2] = tmpr;
+                    range[1] = RANGE_DOWNTO;
+                }
+                
+                try {
+                    int v1 = Integer.parseInt(range[0]);
+                    int v2 = Integer.parseInt(range[2]);
+                    range[0] = String.format("%d", v1-v2);
+                    range[2] = "0";
+                }catch(NumberFormatException e) {
+                    range[0] = range[0] + "-" + range[2];
+                    range[2] = "0";
+                }
+            }
+            ret = type_mark.getTypeString(range);
             ret = encloseBracket(ret);
             ret += tmp;
         }

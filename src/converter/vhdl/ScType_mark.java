@@ -25,6 +25,10 @@ class ScType_mark extends ScVhdl {
             }
         }
     }
+    
+    public String getTypeString(String[] range) {
+        return getReplaceType(name.scString(), range);
+    }
 
     public String scString() {
         return getReplaceType(name.scString(), null);

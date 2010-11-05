@@ -410,6 +410,10 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         boolean ret = false;
         if(token == null)
             return ret;
+        
+        if(token.image.equalsIgnoreCase("std_logic_vector")) {
+            MyDebug.printFileLine();
+        }
 
         Symbol sym = (Symbol)getSymbol(node, token.image);  //TODO check selected name
         if((sym != null) && (sym.kind == FUNCTION || sym.kind == PROCEDURE)) {
@@ -425,21 +429,6 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         boolean ret = false;
         if(token == null)
             return ret;
-        Symbol sym = (Symbol)getSymbol(node, token.image);  //TODO check selected name
-        if((sym != null) && (sym.kind == TYPE || sym.kind == SUBTYPE)) {
-            ret = true;
-        }
-        return ret;
-    }
-    
-    boolean isType_conversion(ASTNode node, Token endToken) throws ParserException {
-        Token token = tokenMgr.getNextToken();
-        if(token == null)
-            return false;
-        token = tokenMgr.getNextToken(2);
-        if(token == null || token.kind != LBRACKET) {
-            return false;
-        }
         
         // check buildin type
         for(int i = 0; i < strVhdlType.length; i++) {
@@ -453,7 +442,23 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         if((sym != null) && (sym.kind == TYPE || sym.kind == SUBTYPE)) {
             return true;
         }
-        return false;
+        
+        return ret;
+    }
+    
+    boolean isType_conversion(ASTNode node, Token endToken) throws ParserException {
+        Token token = tokenMgr.getNextToken();
+        if(token == null)
+            return false;
+        if(!isType_mark(node, endToken)) {
+            return false;
+        }
+        
+        token = tokenMgr.getNextToken(2);
+        if(token == null || token.kind != LBRACKET) {
+            return false;
+        }
+        return true;
     }
     
     /**
@@ -5033,40 +5038,41 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         ASTNode node = new ASTNode(p, ASTPRIMARY);
         openNodeScope(node);
         int kind = tokenMgr.getNextTokenKind();
-        if(isType_conversion(node, endToken)) {
+        Token tmpToken = null;
+        
+        if(kind == character_literal || kind == decimal_literal
+                || kind == based_literal || kind == string_literal
+                || kind == bit_string_literal || kind == NULL) {
+            literal(node, endToken);
+        }else if(kind == NEW) {
+            allocator(node, endToken);
+        }else if((tmpToken = findTokenInBlock(SQUOTE, endToken)) != null) {
+            tmpToken = tokenMgr.getNextToken(tmpToken);
+            if(tmpToken == null) {
+                throw new ParserException(tokenMgr.toNextToken());
+            }
+            
+            if(tmpToken.kind == LBRACKET) {
+                qualified_expression(node, endToken);
+            }else {
+                name(node, endToken);   // attribute name
+            }
+        }else if(isType_conversion(node, endToken)) {
             type_conversion(node, endToken);
         }else if(isFunction_call(node, endToken)) {
             function_call(node, endToken);
-        }else {
-            if(kind == character_literal || kind == decimal_literal
-                || kind == based_literal || kind == string_literal
-                || kind == bit_string_literal || kind == NULL) {
-                literal(node, endToken);
-            }else if(kind == NEW) {
-                allocator(node, endToken);
-            }else if(kind == identifier && tokenMgr.getNextTokenKind(2) == SQUOTE) {
-                Token tmpToken = tokenMgr.getNextToken(3);
-                if(tmpToken == null) {
-                    throw new ParserException(tokenMgr.toNextToken());
-                }
-                if(tmpToken.kind != LBRACKET) {
-                    name(node, endToken);   // attribute name
-                }else {
-                    qualified_expression(node, endToken);
-                }
-            }else if(kind == LBRACKET) {
-                Token tmp = findTokenInBlock(tokenMgr.getNextToken(2), COMMA, endToken);
-                Token tmp1 = findTokenInBlock(tokenMgr.getNextToken(2), RARROW, endToken);
-                if(tmp != null || tmp1 != null) {
-                    aggregate(node, endToken);
-                }else {
-                    tokenMgr.toNextToken();     // "("
-                    expression(node, endToken.prev);
-                    tokenMgr.toNextToken();     // ")"
-                }
+        }else if(kind == LBRACKET) {
+            Token tmp = findTokenInBlock(tokenMgr.getNextToken(2), COMMA, endToken);
+            Token tmp1 = findTokenInBlock(tokenMgr.getNextToken(2), RARROW, endToken);
+            if(tmp != null || tmp1 != null) {
+                aggregate(node, endToken);
             }else {
-                name(node, endToken);
+                tokenMgr.toNextToken();     // "("
+                expression(node, endToken.prev);
+                tokenMgr.toNextToken();     // ")"
             }
+        }else {
+            name(node, endToken);
         }
         closeNodeScope(node);
     }

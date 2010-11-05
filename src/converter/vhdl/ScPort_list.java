@@ -26,6 +26,6 @@ class ScPort_list extends ScVhdl {
     }
 
     public String scString() {
-        return list.scString() + "\r\n";
+        return list.scString();
     }
 }

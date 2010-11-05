@@ -58,6 +58,7 @@ class ScSubtype_indication extends ScVhdl {
         }
         return ret;
     }
+    
     public String getMax() {
         String ret = "0";
         if(constraint != null){
@@ -123,7 +124,7 @@ class ScSubtype_indication extends ScVhdl {
                 ret += " */";
             }
             //warning("constraint ignored");
-            ret += getReplaceType(type_mark.name.scString(), trange);
+            ret += type_mark.getTypeString(trange);
         }else {
             ret += type_mark.scString();
         }

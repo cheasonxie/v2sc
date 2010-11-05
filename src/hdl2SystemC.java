@@ -10,14 +10,15 @@ import converter.vhdl.Vhdl;
 
 import parser.IParser;
 import parser.ParserException;
+import parser.vhdl.LibraryManager;
 
 public class hdl2SystemC
 {
-    public static final boolean testDir = true;
-    public static final boolean addLib = false;
+    public static final boolean testDir = false;
+    public static final boolean addLib = true;
     public static void main(String[] args)
     {
-        MyDebug.init("vhdllog.txt");
+        //MyDebug.init("vhdllog.txt");
         if(testDir) {
             hdlConverter conv = new Vhdl();
             String baseDir = "E:\\grlib-gpl-1.0.22-b4095\\lib";
@@ -84,8 +85,9 @@ public class hdl2SystemC
             try
             {
                 hdlConverter conv = null;
-                //String name = "amba";
-                String name = "ahbctrl";
+                String name = "amba";
+                //String name = "ahbctrl";
+                //String name = "ahbtbp";
                 String path = name + ".vhd";
                 //String path = "ac97_top.v";
                 if(args.length > 1)
