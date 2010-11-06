@@ -18,14 +18,15 @@ import common.MyDebug;
 public class LibraryManager
 {
     static LibraryManager libMgr = null;
-    static HashMap<String, ArrayList<Symbol>> symbolMap = new HashMap<String, ArrayList<Symbol>>();
+    static HashMap<String, VhdlArrayList<Symbol>> symbolMap = 
+                                new HashMap<String, VhdlArrayList<Symbol>>();
     
     public static LibraryManager getInstance() {
         if(libMgr == null) {
             libMgr = new LibraryManager();
-            libMgr.deleteAll();
+            //libMgr.deleteAll();
             libMgr.loadAll();
-            libMgr.addPredefinedPackage();
+            //libMgr.addPredefinedPackage();
         }
         return libMgr;
     }
@@ -85,12 +86,18 @@ public class LibraryManager
         return true;
     }
     
+    /**
+     * add symbol in table and it's children table
+     */
     private boolean addTable(String tabName, SymbolTable tab) {
-        ArrayList<Symbol> symsArray = symbolMap.get(tabName);
+        VhdlArrayList<Symbol> symsArray = symbolMap.get(tabName);
         if(symsArray == null) {
-            symsArray = new ArrayList<Symbol>();
+            symsArray = new VhdlArrayList<Symbol>();
             symbolMap.put(tabName, symsArray);
+        }else{
+            //MyDebug.printFileLine();
         }
+        MyDebug.printFileLine("table name: " + tabName);
         
         Symbol[] syms = (Symbol[])tab.getAllSymbols();
         if(syms != null) {
@@ -126,7 +133,7 @@ public class LibraryManager
                 continue;
             }
 
-            ArrayList<Symbol> symsArray = new ArrayList<Symbol>();
+            VhdlArrayList<Symbol> symsArray = new VhdlArrayList<Symbol>();
             for(int j = 0; j < syms.length; j++) {
                 symsArray.add(syms[j]);
             }
@@ -215,15 +222,18 @@ public class LibraryManager
      */
     public boolean add(String dir, String libName) {
         FileList list = new FileList(dir, IParser.EXT_VHDL);
+        MyDebug.printFileLine("libName:" + libName);
         MyDebug.printFileLine("======file num:" + list.getFileNum() + "========");
         
         if(libName == null || libName.isEmpty())
             libName = getFileName(dir);    // use dir name as library name
         libName = libName.toLowerCase();
-        ArrayList<Symbol> libSyms = symbolMap.get(libName);
+        VhdlArrayList<Symbol> libSyms = symbolMap.get(libName);
         if(libSyms == null) {
-            libSyms = new ArrayList<Symbol>();
+            libSyms = new VhdlArrayList<Symbol>();
             symbolMap.put(libName, libSyms);
+        }else {
+            //MyDebug.printFileLine();
         }
         
         ArrayList<String> tabNames = new ArrayList<String>();
@@ -232,7 +242,7 @@ public class LibraryManager
         for(int i = 0; i < list.getFileNum(); i++) {
             String path = list.getFile(i);
             try {
-                MyDebug.printFileLine("index:" + i + ", file:" + path);
+                //MyDebug.printFileLine("index:" + i + ", file:" + path);
                 VhdlParser parser = new VhdlParser(true);
                 ASTNode designFile = (ASTNode)parser.parse(path);
                 ASTNode[] pkgNodes = getPackageNode(designFile, 0);
@@ -271,7 +281,7 @@ public class LibraryManager
             String name = localEntities.get(i).getName().toLowerCase();
             int j = 0;
             for(j = 0; j < tabNames.size(); j++) {
-                if(getLibSymbol(tabNames.get(j), name) != null) {
+                if(getSymbol(tabNames.get(j), name) != null) {
                     break;
                 }
             }
@@ -305,7 +315,7 @@ public class LibraryManager
         Iterator<String> nameIter = symbolMap.keySet().iterator();
         while (nameIter.hasNext()) {
            String tabName = nameIter.next();
-           if(getLibSymbol(tabName, symName) != null) {
+           if(getSymbol(tabName, symName) != null) {
                return tabName;
            }
         }
@@ -319,31 +329,64 @@ public class LibraryManager
             String libName = prePkg[i].libName.toLowerCase();
             String pkgName = prePkg[i].pkgName.toLowerCase();
             
-            ArrayList<Symbol> libSyms = symbolMap.get(libName);
+            VhdlArrayList<Symbol> libSyms = symbolMap.get(libName);
             if(libSyms == null) {
-                libSyms = new ArrayList<Symbol>();
+                libSyms = new VhdlArrayList<Symbol>();
                 symbolMap.put(libName, libSyms);
             }
             
             libSyms.add(new Symbol(pkgName, VhdlTokenConstants.PACKAGE));
             String tabName = libName + "#" + pkgName;
             
-            ArrayList<Symbol> pkgSyms = symbolMap.get(tabName);
+            VhdlArrayList<Symbol> pkgSyms = symbolMap.get(tabName);
             if(pkgSyms == null) {
-                pkgSyms = new ArrayList<Symbol>();
+                pkgSyms = new VhdlArrayList<Symbol>();
                 symbolMap.put(tabName, pkgSyms);
             }
             
             for(int j = 0; j < prePkg[i].syms.length; j++) {
                 pkgSyms.add(prePkg[i].syms[j]);
             }
+            writeLibrary(libName);
             //Symbol[] tmpSyms = dataBase.retrive(tabName);
             //MyDebug.printFileLine("tabName:" + tabName + ", count:" + tmpSyms.length);
         }
         return true;
     }
     
-    public Symbol[] getLibSymbol(String tabName, String symName) {
+    /**
+     * get name of table which contain specified symbol in specified library
+     * @return name of table, null if not found
+     */
+    public String getTableName(String libName, String symName) {
+        Set<String> keys = symbolMap.keySet();
+        Iterator<String> keyIter = keys.iterator();
+        while (keyIter.hasNext()) {
+           String tabName = keyIter.next();
+           if(tabName.indexOf(libName) < 0) {
+               continue;
+           }
+           VhdlArrayList<Symbol> syms = symbolMap.get(tabName);
+           if(syms == null) {
+               continue;
+           }
+           
+           if(syms.get(symName) != null) {
+               return tabName;
+           }
+        }
+        
+        return null;
+    }
+    
+    protected HashMap<String, VhdlArrayList<Symbol>> getSymbolMap() {
+        return symbolMap;
+    }
+    
+    /**
+     * get symbol in specified table name
+     */
+    public Symbol[] getSymbol(String tabName, String symName) {
         ArrayList<Symbol> syms = symbolMap.get(tabName);
         if(syms == null) {
             return null;

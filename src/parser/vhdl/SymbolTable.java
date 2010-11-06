@@ -43,7 +43,7 @@ public abstract class SymbolTable implements ISymbolTable, INameObject
     public boolean equals(INameObject other) {
         if(other == null || !(other instanceof SymbolTable))
             return false;
-        return name.equals(other.getName());
+        return name.equalsIgnoreCase(other.getName());
     }
     
     public void setParent(SymbolTable p) {
@@ -90,7 +90,7 @@ public abstract class SymbolTable implements ISymbolTable, INameObject
      * @param name symbol name
      */
     public static Symbol getSymbol(SymbolTable curTab, String tableName, String name) {
-        Symbol[] ret = libMgr.getLibSymbol(tableName, name);
+        Symbol[] ret = libMgr.getSymbol(tableName, name);
         if(ret != null)
             return ret[0];
         

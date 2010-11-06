@@ -10,7 +10,7 @@ public class LibSymbolTable extends SymbolTable
     public LibSymbolTable(SymbolTable p, String name) {
         super(p, name);
         if(!libMgr.isTableExist(tabName)) {
-            MyDebug.printFileLine("symbol table not exist:" + tabName);
+            MyDebug.printFileLine("symbol table not exist:" + tabName + ", it may be a symbol");
         }
     }
     
@@ -21,7 +21,7 @@ public class LibSymbolTable extends SymbolTable
     
     @Override
     public ISymbol getSymbol(String name) {
-        Symbol[] ret = libMgr.getLibSymbol(tabName, name);
+        Symbol[] ret = libMgr.getSymbol(tabName, name);
         if(ret != null)
             return ret[0];
         if(parent != null)
@@ -31,11 +31,11 @@ public class LibSymbolTable extends SymbolTable
 
     @Override
     public ISymbol[] getAllSymbols() {
-        return libMgr.getLibSymbol(tabName, null); 
+        return libMgr.getSymbol(tabName, null); 
     }
     
     public SymbolTable getTableOfSymbol(String name) {
-        if(libMgr.getLibSymbol(tabName, name) != null)
+        if(libMgr.getSymbol(tabName, name) != null)
             return this;
         if(parent != null)
             return parent.getTableOfSymbol(name);

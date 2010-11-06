@@ -5,6 +5,10 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.Reader;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.StringTokenizer;
 
 import common.MyDebug;
 
@@ -19,11 +23,12 @@ import parser.Token;
 public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants, IVhdlType
 {
     protected VhdlTokenManager tokenMgr = null;
-    protected ArrayList<SymbolTable> extSymbolTable = new ArrayList<SymbolTable>();
+    protected VhdlArrayList<SymbolTable> extSymbolTable = new VhdlArrayList<SymbolTable>();
     protected SymbolTable curSymbolTable = null;
     protected ASTNode curNode = null;       // current parsing node
     protected ASTNode lastNode = null;      // last parsed node
     protected ASTNode designFile = null;  // design file node
+    protected LibraryManager libMgr = LibraryManager.getInstance();
     
     protected ArrayList<ASTNode> localUnits = null;   // entities/packages in this file
     
@@ -7356,6 +7361,43 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         ret[2] = symbolName;
         return ret;
     }
+    
+    /**
+     * add all children table to use table 
+     */
+    private void addAllTable(ASTNode node, SymbolTable symTab) {
+        Symbol[] allSyms = (Symbol[])symTab.getAllSymbols();
+        boolean subTableExist = false;
+        if(allSyms != null) {
+            String tabName = symTab.getTableName();
+            for(int i = 0; i < allSyms.length; i++) {
+                String tabName1 = tabName + "#" + allSyms[i].getName();
+                if(!SymbolTable.isTableExist(node.getSymbolTable(), tabName1))
+                    continue;
+                SymbolTable symTab1 = new LibSymbolTable(symTab, allSyms[i].getName());
+                addAllTable(node, symTab1);
+                subTableExist = true;
+            }
+        }
+        
+        if(!subTableExist) {
+            extSymbolTable.add(symTab);
+        }
+    }
+    
+    /**
+     * add work.all table to use table
+     */
+    private void addWorkAll(ASTNode node) {
+        HashMap<String, VhdlArrayList<Symbol>> symbolMap = libMgr.getSymbolMap();
+        Set<String> keys = symbolMap.keySet();
+        Iterator<String> keyIter = keys.iterator();
+        while (keyIter.hasNext()) {
+           String tabName = keyIter.next();
+           SymbolTable symTab = new LibSymbolTable(null, tabName);
+           addAllTable(node, symTab);
+        }
+    }
 
     /**
      * <dl> use_clause ::=
@@ -7373,35 +7415,28 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
                 tmpToken = endToken;
             selected_name(node, tmpToken);
             if(!parseSymbol) {
-                
                 String[] selNames = getSelectedNames((ASTNode)node.getChild(
                                                 node.getChildrenNum() - 1));
                 if(selNames[0].equalsIgnoreCase("work")) {
-                    selNames[0] = LibraryManager.getInstance().findWorkLibrary(selNames[1]);
+                    if(selNames[1].equalsIgnoreCase("all")) {
+                        // work.all
+                        addWorkAll(node);
+                        if(tokenMgr.getNextTokenKind() != COMMA) {
+                            break;
+                        }
+                        consumeToken(COMMA);
+                        continue;
+                    }else {
+                        selNames[0] = libMgr.findWorkLibrary(selNames[1]);
+                    }
                 }
                 
                 SymbolTable symTab = new LibSymbolTable(null, selNames[0]);
-                symTab = new LibSymbolTable(symTab, selNames[1]);
                 if(!selNames[2].isEmpty()) {
+                    symTab = new LibSymbolTable(symTab, selNames[1]);
                     if(selNames[2].equalsIgnoreCase("all")) {
                         // get all symbols in first two segments
-                        Symbol[] allSyms = (Symbol[])symTab.getAllSymbols();
-                        boolean subTableExist = false;
-                        if(allSyms != null) {
-                            String tabName = symTab.getTableName();
-                            for(int i = 0; i < allSyms.length; i++) {
-                                String tabName1 = tabName + "#" + allSyms[i].getName();
-                                if(!SymbolTable.isTableExist(node.getSymbolTable(), tabName1))
-                                    continue;
-                                SymbolTable symTab1 = new LibSymbolTable(symTab, allSyms[i].getName());
-                                extSymbolTable.add(symTab1);
-                                subTableExist = true;
-                            }
-                        }
-                        
-                        if(!subTableExist) {
-                            extSymbolTable.add(symTab);
-                        }
+                        addAllTable(node, symTab);
                         
                     }else {
                         // three segments, specified symbol
@@ -7410,9 +7445,23 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
                     }
                 }else {
                     // only two segments
-                    extSymbolTable.add(symTab);
+                    if(selNames[1].equalsIgnoreCase("all")) {
+                        // get all symbols in first segments
+                        addAllTable(node, symTab);
+                    }else {
+                        // specified symbol
+                        String tabName = libMgr.getTableName(selNames[0], selNames[1]);
+                        StringTokenizer tkn = new StringTokenizer(tabName, "#");
+                        symTab = null;
+                        while(tkn.hasMoreTokens()) {
+                            String seg = tkn.nextToken();
+                            symTab = new LibSymbolTable(symTab, seg);
+                        }
+                        extSymbolTable.add(symTab);
+                    }
                 }
             }
+            
             if(tokenMgr.getNextTokenKind() != COMMA) {
                 break;
             }
