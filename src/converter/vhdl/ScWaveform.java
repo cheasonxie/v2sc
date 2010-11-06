@@ -48,7 +48,7 @@ class ScWaveform extends ScVhdl {
             ScExpression delayTime = (ScExpression)ele.getTime();
             if(delayTime != null) {
                 String unit = ele.getTimeUnit();
-                ret += intent() + "next_triger(" + delayTime.scString() + 
+                ret += intent() + "next_trigger(" + delayTime.scString() + 
                                 ", " + getSCTime(unit) + ");\r\n";                
             }
             ret += intent() + target + ".write(" + ele.getValue().scString() + ")";
