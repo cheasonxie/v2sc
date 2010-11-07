@@ -40,15 +40,12 @@ class ScWaveform extends ScVhdl {
             return "";
         }
             
-        if(elements.size() > 1) {
-            warning("multi-source of signal assignment not support");
-        }
         for(int j = 0; j < elements.size(); j++) {
             ScWaveform_element ele = elements.get(j);
             ScExpression delayTime = (ScExpression)ele.getTime();
             if(delayTime != null) {
                 String unit = ele.getTimeUnit();
-                ret += intent() + "next_trigger(" + delayTime.scString() + 
+                ret += intent() + "wait(" + delayTime.scString() + 
                                 ", " + getSCTime(unit) + ");\r\n";                
             }
             ret += intent() + target + ".write(" + ele.getValue().scString() + ")";

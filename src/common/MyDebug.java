@@ -42,6 +42,22 @@ public class MyDebug
         stream.println(fileName + "--" + lineNum + ": " + msg);
     }
     
+    public static void printFileLine0()
+    {
+        StackTraceElement[] stacks = Thread.currentThread().getStackTrace();
+        String fileName = stacks[3].getFileName();
+        String lineNum = String.format("%d", stacks[3].getLineNumber());
+        stream.println(fileName + "--" + lineNum);
+    }
+     
+    public static void printFileLine0(String msg)
+    {
+        StackTraceElement[] stacks = Thread.currentThread().getStackTrace();
+        String fileName = stacks[3].getFileName();
+        String lineNum = String.format("%d", stacks[3].getLineNumber());
+        stream.println(fileName + "--" + lineNum + ": " + msg);
+    }
+    
     public static void printStackTrace()
     {
         stream.println("**********start************");

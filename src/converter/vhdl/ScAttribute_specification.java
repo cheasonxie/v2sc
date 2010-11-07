@@ -8,9 +8,9 @@ import parser.vhdl.ASTNode;
  *   <dd> <b>attribute</b> attribute_designator <b>of</b> entity_specification <b>is</b> expression ;
  */
 class ScAttribute_specification extends ScVhdl {
-    ScVhdl designator = null;
-    ScVhdl entity = null;
-    ScVhdl expression = null;
+    ScAttribute_designator designator = null;
+    ScEntity_specification entity = null;
+    ScExpression expression = null;
     public ScAttribute_specification(ASTNode node) {
         super(node);
         assert(node.getId() == ASTATTRIBUTE_SPECIFICATION);
@@ -34,7 +34,7 @@ class ScAttribute_specification extends ScVhdl {
     }
 
     public String scString() {
-        error("user define attribute not support");
+        error("user defined attribute not support!");
         return "";
     }
 }

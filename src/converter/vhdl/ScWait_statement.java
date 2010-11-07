@@ -37,11 +37,13 @@ class ScWait_statement extends ScVhdl {
     
     private String getWaitString() {
         String ret = intent();
-        ret += "next_trigger(";
         if(timeout != null) {
+            ret += "wait(";
             ret += timeout.scString();
             ret += ", ";
             ret += getSCTime(timeout.getTimeUnitName());
+        }else {
+            ret += "next_trigger(";
         }
         
         if(sensitivity != null) {

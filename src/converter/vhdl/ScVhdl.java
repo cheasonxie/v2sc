@@ -134,15 +134,15 @@ public class ScVhdl implements ScVhdlConstants, VhdlTokenConstants,
     }
     
     protected void warning(String msg) {
-        MyDebug.printFileLine("line--" + beginLine + ": warning: " + msg);
+        MyDebug.printFileLine0("line--" + beginLine + ": warning: " + msg);
     }
     
     protected void error() {
-        MyDebug.printFileLine("line--" + beginLine + ": =========not support========");
+        MyDebug.printFileLine0("line--" + beginLine + ": =========not support========");
     }
     
     protected void error(String msg) {
-        MyDebug.printFileLine("line--" + beginLine + ": " + msg);
+        MyDebug.printFileLine0("line--" + beginLine + ": " + msg);
     }
     
     protected static void startIntentBlock() { curLevel ++; }
