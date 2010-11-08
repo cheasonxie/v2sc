@@ -415,10 +415,6 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         boolean ret = false;
         if(token == null)
             return ret;
-        
-        if(token.image.equalsIgnoreCase("std_logic_vector")) {
-            MyDebug.printFileLine();
-        }
 
         Symbol sym = (Symbol)getSymbol(node, token.image);  //TODO check selected name
         if((sym != null) && (sym.kind == FUNCTION || sym.kind == PROCEDURE)) {
@@ -1970,6 +1966,11 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         if(tokenMgr.getNextTokenKind(2) == COLON) {
             tmpToken = tokenMgr.getNextToken(tmpToken);   // ignore label
             tmpToken = tokenMgr.getNextToken(tmpToken);
+            if(tmpToken == null) { return false; }
+        }
+        
+        if(tmpToken.kind == POSTPONED) {
+            tmpToken = tokenMgr.getNextToken(tmpToken);   // ignore postponed
             if(tmpToken == null) { return false; }
         }
         
@@ -5045,13 +5046,10 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         int kind = tokenMgr.getNextTokenKind();
         Token tmpToken = null;
         
-        if(kind == character_literal || kind == decimal_literal
-                || kind == based_literal || kind == string_literal
-                || kind == bit_string_literal || kind == NULL) {
-            literal(node, endToken);
-        }else if(kind == NEW) {
+        if(kind == NEW) {
             allocator(node, endToken);
-        }else if((tmpToken = findTokenInBlock(SQUOTE, endToken)) != null) {
+        }else if((tmpToken = findTokenInBlock(SQUOTE, endToken)) != null
+                && kind != character_literal) {
             tmpToken = tokenMgr.getNextToken(tmpToken);
             if(tmpToken == null) {
                 throw new ParserException(tokenMgr.toNextToken());
@@ -5066,6 +5064,10 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
             type_conversion(node, endToken);
         }else if(isFunction_call(node, endToken)) {
             function_call(node, endToken);
+        }else if(kind == character_literal || kind == decimal_literal
+                || kind == based_literal || kind == string_literal
+                || kind == bit_string_literal || kind == NULL) {
+            literal(node, endToken);
         }else if(kind == LBRACKET) {
             Token tmp = findTokenInBlock(tokenMgr.getNextToken(2), COMMA, endToken);
             Token tmp1 = findTokenInBlock(tokenMgr.getNextToken(2), RARROW, endToken);
@@ -6759,7 +6761,9 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         endToken = findTokenInBlock(END, endToken);
         
         // add parameter list symbols to subprogram body
-        curSymbolTable.addAll(((ASTNode)node.getChild(0).getChild(0)).getSymbolTable());
+        ASTNode param_list = (ASTNode)node.getDescendant(ASTFORMAL_PARAMETER_LIST);
+        if(param_list != null)
+            curSymbolTable.addAll(param_list.getSymbolTable());
         
         consumeToken(IS);
         

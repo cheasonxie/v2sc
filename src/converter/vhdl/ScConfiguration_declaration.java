@@ -63,18 +63,21 @@ class ScConfiguration_declaration extends ScCommonIdentifier implements IScState
     @Override
     public String getDeclaration()
     {
+        warning("configuration not support");
         return "";
     }
 
     @Override
     public String getImplements()
     {
+        warning("configuration not support");
         return "";
     }
 
     @Override
     public String getInitCode()
     {
+        warning("configuration not support");
         return "";
     }
 }

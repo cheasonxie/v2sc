@@ -87,7 +87,7 @@ public class Vhdl extends hdlConverter {
                 String sPath = dstPath+".cpp";
                 createFile(sPath, true);
                 PrintStream sFileBuff = new PrintStream(sPath);
-                sFileBuff.println("#include \"" + name + "\"");
+                sFileBuff.println("\r\n#include \"" + name + "\"\r\n");
                 sFileBuff.print(strImplements);
             }
         } catch (IOException e) {
@@ -134,7 +134,7 @@ public class Vhdl extends hdlConverter {
                 name = path.substring(index+1);
             else
                 name = path;
-            fileBuff.println("#include \"" + name + "\"");
+            fileBuff.println("\r\n#include \"" + name + "\"\r\n");
             fileBuff.print(buff);
             fileBuff.close();
         } catch (IOException e) {

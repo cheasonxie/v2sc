@@ -105,6 +105,7 @@ public abstract class SymbolTable implements ISymbolTable, INameObject
         }
         
         StringTokenizer tkn = new StringTokenizer(tableName, "#");
+        tkn.nextToken();
         while(tkn.hasMoreTokens()) {
             String n = tkn.nextToken();
             SymbolTable[] temp = p.children.get(n);

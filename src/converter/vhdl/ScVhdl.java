@@ -443,13 +443,14 @@ public class ScVhdl implements ScVhdlConstants, VhdlTokenConstants,
     static int getIntValue(String str) throws NumberFormatException {
         if(str.isEmpty())
             return 0;
+        int ret = 0;
         if(Character.isDigit(str.charAt(0))) {
-            Integer.parseInt(str);
+            ret = Integer.parseInt(str);
         }else {
             //Symbol sym = (Symbol)parser.getSymbol(curNode, str);
             //TODO get value
         }
-        return 0;
+        return ret;
     }
     
     int getWidth(String str1, String str2) {

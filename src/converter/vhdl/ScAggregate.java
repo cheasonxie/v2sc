@@ -1,8 +1,12 @@
 package converter.vhdl;
 
 import java.util.ArrayList;
+
+import common.MyDebug;
+
 import parser.vhdl.ASTNode;
 import parser.IASTNode;
+import parser.ISymbol;
 import parser.vhdl.Symbol;
 import parser.vhdl.SymbolTable;
 
@@ -47,9 +51,18 @@ class ScAggregate extends ScVhdl {
             Symbol sym = (Symbol)parser.getSymbol(node, cd.idList.items.get(0).identifier);
             if(sym == null) { return null; }
             ret = curNode.getSymbolTable().getTableOfSymbol(sym.type); //TODO: only tow level here
-            if(ret != null)
-                ret = ret.getTableOfSymbol(sym.type);
+            if(ret != null) {
+                ret = ret.getChildTable(sym.type);
+            }
         }
+        
+        if(ret != null) {
+            ISymbol[] syms = ret.getAllSymbols();
+            if(syms == null || syms.length == 0) {
+                ret = null; // no symbols in this table
+            }
+        }
+        
         return ret;
     }
     
@@ -62,8 +75,12 @@ class ScAggregate extends ScVhdl {
     public String scString() {
         String[] typeRange = getTargetRange();
         String[] arrayRange = getTargetArrayRange();
+        if(getTargetTypeSymbolTable() != null) {
+            MyDebug.printFileLine();
+        }
         SymbolTable recordTable = getTargetTypeSymbolTable();
         boolean isArray = (arrayRange != null);
+        
         
         String ret = "";
         if(isArray)

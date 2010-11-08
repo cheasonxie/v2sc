@@ -302,7 +302,7 @@ public class SymbolParser implements VhdlTokenConstants, VhdlASTConstants, IVhdl
                                         prefix.getName())).typeRange.clone();
                 }
             }else {
-                MyDebug.printFileLine("attribute name: symbol not found");
+                MyDebug.printFileLine("symbol not found");
             }
         }
         return range;
