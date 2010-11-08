@@ -1,10 +1,12 @@
 package converter.vhdl;
 
 import java.util.ArrayList;
+import java.util.StringTokenizer;
 
 import common.MyDebug;
 
 import parser.vhdl.ASTNode;
+import parser.vhdl.LibSymbolTable;
 import parser.vhdl.Symbol;
 import parser.vhdl.SymbolTable;
 
@@ -38,18 +40,22 @@ class ScGeneric_map_aspect extends ScVhdl {
     public String mapString(String name) {
         String ret = "";
         int i = 0;
-
-        SymbolTable symTab = (SymbolTable)parser.getTableOfSymbol(curNode, name);
-        if(symTab == null) {
-            MyDebug.printFileLine("component not found:" + name);
-            return ret;
-        }
         
-        symTab = symTab.getChildTable(name);
-        if(symTab == null) {
-            MyDebug.printFileLine("component table not found:" + name);
-            return ret;
+
+        SymbolTable symTab = null;
+        if(name.indexOf('.') > 0) {
+            StringTokenizer tkn = new StringTokenizer(name, ".");
+            while(tkn.hasMoreTokens()) {
+                symTab = new LibSymbolTable(symTab, tkn.nextToken());
+            }
+        }else {
+            symTab = (SymbolTable)parser.getTableOfSymbol(curNode, name);
+            if(symTab == null) {
+                MyDebug.printFileLine("library not found:" + name);
+                return ret;
+            }
         }
+
         
         Symbol[] syms = symTab.getKindSymbols(GENERIC);
         if(syms == null) {
