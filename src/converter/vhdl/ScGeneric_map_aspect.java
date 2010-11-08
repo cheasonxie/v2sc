@@ -7,6 +7,7 @@ import common.MyDebug;
 
 import parser.vhdl.ASTNode;
 import parser.vhdl.LibSymbolTable;
+import parser.vhdl.LibraryManager;
 import parser.vhdl.Symbol;
 import parser.vhdl.SymbolTable;
 
@@ -40,18 +41,26 @@ class ScGeneric_map_aspect extends ScVhdl {
     public String mapString(String name) {
         String ret = "";
         int i = 0;
-        
 
         SymbolTable symTab = null;
         if(name.indexOf('.') > 0) {
             StringTokenizer tkn = new StringTokenizer(name, ".");
-            while(tkn.hasMoreTokens()) {
-                symTab = new LibSymbolTable(symTab, tkn.nextToken());
+            String n0 = tkn.nextToken();
+            String n1 = tkn.nextToken();
+            if(n0.equalsIgnoreCase("work")) {
+                n0 = LibraryManager.getInstance().findWorkLibrary(n1);
+            }
+            symTab = new LibSymbolTable(symTab, n0);
+            symTab = new LibSymbolTable(symTab, n1);
+            String n2 = "";
+            if(tkn.hasMoreTokens()) {
+                n2 = tkn.nextToken();
+                symTab = new LibSymbolTable(symTab, n2);
             }
         }else {
             symTab = (SymbolTable)parser.getTableOfSymbol(curNode, name);
             if(symTab == null) {
-                MyDebug.printFileLine("library not found:" + name);
+                MyDebug.printFileLine("package not found:" + name);
                 return ret;
             }
             symTab = symTab.getChildTable(name);
