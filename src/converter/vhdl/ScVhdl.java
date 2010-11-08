@@ -102,11 +102,10 @@ public class ScVhdl implements ScVhdlConstants, VhdlTokenConstants,
     protected String addPrevComment() {
         if(myPrevComment == null) return "";
         String ret = "";
-        String strIntent = intent();
         for(int i = 0; i < myPrevComment.size(); i ++) {
             CommentBlock cb = myPrevComment.get(i);
             for(int j = 0; j < cb.commentLines.size(); j++) {
-                ret += strIntent + cb.commentLines.get(j) + "\r\n";
+                ret += addLFIntent(cb.commentLines.get(j));
             }
         }
         return ret;

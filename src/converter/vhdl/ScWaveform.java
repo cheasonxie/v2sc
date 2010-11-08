@@ -48,9 +48,11 @@ class ScWaveform extends ScVhdl {
                 ret += intent() + "wait(" + delayTime.scString() + 
                                 ", " + getSCTime(unit) + ");\r\n";                
             }
-            ret += intent() + target + ".write(" + ele.getValue().scString() + ")";
+            if(!ele.isNull) {
+                ret += intent() + target + ".write(" + ele.getValue().scString() + ");";
+            }
             if(j < elements.size() - 1) {
-                ret += ";\r\n";
+                ret += "\r\n";
             }
         }
         return ret;

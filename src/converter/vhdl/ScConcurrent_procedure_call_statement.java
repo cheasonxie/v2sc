@@ -32,7 +32,7 @@ class ScConcurrent_procedure_call_statement extends ScCommonIdentifier implement
     }
 
     public String scString() {
-        return procedure_call.scString();
+        return intent() + procedure_call.scString() + ";";
     }
 
     @Override

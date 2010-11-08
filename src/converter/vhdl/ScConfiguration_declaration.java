@@ -52,7 +52,7 @@ class ScConfiguration_declaration extends ScCommonIdentifier implements IScState
             }
         }
         if(i == units.size()) {
-            MyDebug.printFileLine("configuration declaration has no corresponding entity");
+            warning("configuration declaration has no corresponding entity");
         }
     }
 

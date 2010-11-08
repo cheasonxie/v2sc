@@ -25,7 +25,7 @@ class ScDesign_file extends ScVhdl implements IScFile {
      * it will be converted immediately and then it's memory will be free.<br>
      * <br>
      * "can be converted" means that:
-     * <li> <b>entity</b> meets it's architecture body
+     * <li> <b>entity</b> meets all of it's architecture body & configuration
      * <li> <b>package</b> meets it's package body
      */
     boolean convDividual = false;
@@ -48,7 +48,8 @@ class ScDesign_file extends ScVhdl implements IScFile {
      * can design unit be converted ? return it's index
      */
     protected int getIndexOfConverting() {
-        int ret = -1;
+        /*int ret = -1;
+        
         for(int i = 0; i < units.size(); i++) {
             ScCommonIdentifier ident = units.get(i);
             if(ident instanceof ScPackage_declaration
@@ -60,8 +61,10 @@ class ScDesign_file extends ScVhdl implements IScFile {
                 ret = i;
                 break;
             }
-        }
-        return ret;
+        }*/
+        if(units.size() > 1)    //TODO if there more than 1 units, convert the first
+            return 0;
+        return -1;
     }
     
     /**
@@ -126,6 +129,8 @@ class ScDesign_file extends ScVhdl implements IScFile {
                 design_units.add(dunit);
                 
                 int index = getIndexOfConverting();
+                if(i == curNode.getChildrenNum() - 1)
+                    index = 0;  // always convert the last one
                 if(index >= 0) {
                     ScDesign_unit myunit = getConvertDesignUnit(units.get(index));
                     IncludePath[] paths = myunit.getInclude();

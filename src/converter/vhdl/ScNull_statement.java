@@ -15,6 +15,6 @@ class ScNull_statement extends ScVhdl {
 
     public String scString() {
         warning("null statement ignore");
-        return ";";
+        return "";
     }
 }

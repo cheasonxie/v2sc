@@ -23,10 +23,7 @@ class ScSubprogram_statement_part extends ScVhdl {
     public String scString() {
         String ret = "";
         for(int i = 0; i < items.size(); i++) {
-            ret += items.get(i).toString();
-            if(i < items.size() - 1) {
-                ret += "\r\n";
-            }
+            ret += addLF(items.get(i).toString());
         }
         return ret;
     }
