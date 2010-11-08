@@ -54,11 +54,13 @@ class ScPort_map_aspect extends ScVhdl {
                 MyDebug.printFileLine("library not found:" + name);
                 return ret;
             }
+            symTab = symTab.getChildTable(name);
         }
         
         Symbol[] syms = symTab.getKindSymbols(PORT);
-        if(syms.length == 0) {
-            MyDebug.printFileLine();
+        if(syms == null || syms.length == 0) {
+            MyDebug.printFileLine("no port in component:" + name);
+            return ret;
         }
         ArrayList<ScAssociation_element> elements = association_list.elements;
         

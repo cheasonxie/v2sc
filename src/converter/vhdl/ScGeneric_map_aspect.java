@@ -54,12 +54,13 @@ class ScGeneric_map_aspect extends ScVhdl {
                 MyDebug.printFileLine("library not found:" + name);
                 return ret;
             }
+            symTab = symTab.getChildTable(name);
         }
 
         
         Symbol[] syms = symTab.getKindSymbols(GENERIC);
-        if(syms == null) {
-            MyDebug.printFileLine("component not found:" + name);
+        if(syms == null || syms.length == 0) {
+            MyDebug.printFileLine("no generic in component:" + name);
             return ret;
         }
         ArrayList<ScAssociation_element> elements = association_list.elements;
