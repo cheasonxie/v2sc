@@ -21,11 +21,15 @@ public class MyDebug
     
     public static void exit()
     {
-        if(stream != System.out)
+        if(stream != System.out) {
             stream.flush();
             stream.close();
+        }
     }
     
+    /**
+     * print this file and line
+     */
     public static void printFileLine()
     {
         StackTraceElement[] stacks = Thread.currentThread().getStackTrace();
@@ -33,7 +37,10 @@ public class MyDebug
         String lineNum = String.format("%d", stacks[2].getLineNumber());
         stream.println(fileName + "--" + lineNum);
     }
-     
+    
+    /**
+     * print this file and line, append other string
+     */
     public static void printFileLine(String msg)
     {
         StackTraceElement[] stacks = Thread.currentThread().getStackTrace();
@@ -42,6 +49,9 @@ public class MyDebug
         stream.println(fileName + "--" + lineNum + ": " + msg);
     }
     
+    /**
+     * print calling file and line
+     */
     public static void printFileLine0()
     {
         StackTraceElement[] stacks = Thread.currentThread().getStackTrace();
@@ -49,7 +59,10 @@ public class MyDebug
         String lineNum = String.format("%d", stacks[3].getLineNumber());
         stream.println(fileName + "--" + lineNum);
     }
-     
+    
+    /**
+     * print calling file and line, append other string
+     */
     public static void printFileLine0(String msg)
     {
         StackTraceElement[] stacks = Thread.currentThread().getStackTrace();

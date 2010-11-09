@@ -33,6 +33,9 @@ class ScSelected_name extends ScVhdl {
     public int getBitWidth() {
         String[] segs = getNameSegments();
         Symbol sym = (Symbol)parser.getSymbol(curNode, segs);
+        if(sym == null || sym.typeRange == null) {
+            return 1;
+        }
         return getWidth(sym.typeRange[0], sym.typeRange[2]);
     }
     

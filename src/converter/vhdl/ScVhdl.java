@@ -105,7 +105,7 @@ public class ScVhdl implements ScVhdlConstants, VhdlTokenConstants,
         for(int i = 0; i < myPrevComment.size(); i ++) {
             CommentBlock cb = myPrevComment.get(i);
             for(int j = 0; j < cb.commentLines.size(); j++) {
-                ret += addLFIntent(cb.commentLines.get(j));
+                ret += intent() + cb.commentLines.get(j) + "\r\n";
             }
         }
         return ret;
@@ -477,10 +477,23 @@ public class ScVhdl implements ScVhdlConstants, VhdlTokenConstants,
     }
     
     protected String addLFIntent(String str) {
-        if(!str.isEmpty())
-            return intent() + str + "\r\n";
-        else
+        if(str.isEmpty())
             return "";
+
+        String ret = "";
+        str = str.trim();
+        int index = str.indexOf("//");
+        // until not comment line
+        while(index == 0) {
+            int index2 = str.indexOf("\r\n");
+            if(index2 < 0)
+                break;
+            ret += intent() + str.substring(0, index2+2);
+            str = str.substring(index2+2).trim();
+            index = str.indexOf("//");
+        }
+        ret += intent() + str + "\r\n";
+        return ret;
     }    
 
     static private boolean isBracketEnclosed(String str) {

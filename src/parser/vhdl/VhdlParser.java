@@ -6755,10 +6755,12 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         startBlock();
         Token tmpToken = findToken(identifier, endToken);
         curSymbolTable.setName(tmpToken.image);
+        node.setName(tmpToken.image);
         
         tmpToken = findToken(IS, endToken);
         subprogram_specification(node, tmpToken);
         endToken = findTokenInBlock(END, endToken);
+        
         
         // add parameter list symbols to subprogram body
         ASTNode param_list = (ASTNode)node.getDescendant(ASTFORMAL_PARAMETER_LIST);
@@ -6964,9 +6966,9 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         closeNodeScope(node);
         
         if(kind == PROCEDURE) {
-            SymbolParser.parseSubprogramKind(node, PROCEDURE, this);
+            SymbolParser.parseSubprogramKind((ASTNode)p, PROCEDURE, this);
         }else {
-            SymbolParser.parseSubprogramKind(node, FUNCTION, this);
+            SymbolParser.parseSubprogramKind((ASTNode)p, FUNCTION, this);
         }
     }
 
@@ -7642,20 +7644,32 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
     }
     
     protected Symbol getNamesSymbol(SymbolTable curTab, String[] names) {
-        String tabName = "";
         Symbol sym = null;
-        if(curTab == null || names == null) {
+        if(curTab == null || names == null || names.length == 0) {
             MyDebug.printFileLine("VhdlParser.getNamesSymbol: null pointer");
             return null;
         }
 
-        tabName = curTab.getTableName();
+        
         for(int i = 0; i < names.length; i++)
         {
-            if((sym = SymbolTable.getSymbol(curTab, tabName, names[i])) == null)
+            if(curTab == null) {
                 return null;
-            tabName = tabName + "#" + sym.type;
+            }
+            
+            sym = (Symbol)curTab.getSymbol(names[i]);
+            if(sym == null) {
+                return null;
+            }
+            
+            if(i < names.length - 1) {
+                if((curTab = curTab.getTableOfSymbol(sym.type)) == null) {
+                    return null;
+                }
+                curTab = curTab.getChildTable(sym.type);
+            }
         }
+            
         return sym;
     }
 

@@ -37,6 +37,7 @@ public abstract class SymbolTable implements ISymbolTable, INameObject
     @Override
     public void setName(String n) {
         name = n;
+        tabName = getTableName();
     }
     
     @Override

@@ -1,7 +1,5 @@
 package converter.vhdl;
 
-import common.MyDebug;
-
 import converter.IScStatementBlock;
 import parser.vhdl.ASTNode;
 

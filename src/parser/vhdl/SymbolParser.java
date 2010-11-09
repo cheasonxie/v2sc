@@ -148,7 +148,8 @@ public class SymbolParser implements VhdlTokenConstants, VhdlASTConstants, IVhdl
             MyDebug.printFileLine("parseSubprogramKind:null parameter!");
             return;
         }
-        if(node.getId() != ASTSUBPROGRAM_SPECIFICATION) {
+        if(node.getId() != ASTSUBPROGRAM_DECLARATION 
+                && node.getId() != ASTSUBPROGRAM_BODY) {
             MyDebug.printFileLine("parseSubprogramKind: not a subprogram node");
             return;
         }
