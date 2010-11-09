@@ -75,9 +75,9 @@ class ScAggregate extends ScVhdl {
     public String scString() {
         String[] typeRange = getTargetRange();
         String[] arrayRange = getTargetArrayRange();
-        if(getTargetTypeSymbolTable() != null) {
-            MyDebug.printFileLine();
-        }
+        //if(getTargetTypeSymbolTable() != null) {
+        //      MyDebug.printFileLine();
+        //}
         SymbolTable recordTable = getTargetTypeSymbolTable();
         boolean isArray = (arrayRange != null);
         

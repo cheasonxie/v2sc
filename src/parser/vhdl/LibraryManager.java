@@ -20,13 +20,12 @@ public class LibraryManager
     static LibraryManager libMgr = null;
     static HashMap<String, VhdlArrayList<Symbol>> symbolMap = 
                                 new HashMap<String, VhdlArrayList<Symbol>>();
-    
+    static boolean is_preDefinedPackageAdded = false;
     public static LibraryManager getInstance() {
         if(libMgr == null) {
             libMgr = new LibraryManager();
             //libMgr.deleteAll();
             libMgr.loadAll();
-            //libMgr.addPredefinedPackage();
         }
         return libMgr;
     }
@@ -222,8 +221,13 @@ public class LibraryManager
      */
     public boolean add(String dir, String libName) {
         FileList list = new FileList(dir, IParser.EXT_VHDL);
-        MyDebug.printFileLine("libName:" + libName);
-        MyDebug.printFileLine("======file num:" + list.getFileNum() + "========");
+
+        if(!is_preDefinedPackageAdded) {
+            libMgr.addPredefinedPackage();
+            is_preDefinedPackageAdded = true;
+        }
+        
+        MyDebug.printFileLine("libName:" + libName + "======file num:" + list.getFileNum() + "========");
         
         if(libName == null || libName.isEmpty())
             libName = getFileName(dir);    // use dir name as library name

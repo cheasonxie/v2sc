@@ -22,6 +22,7 @@ public class PredefinedPackage implements VhdlTokenConstants
     static final String STD = "std";
     
     // package name
+    static final String STANDARD = "standard";
     static final String STD_LOGIC_1164 = "std_logic_1164";
     static final String STD_LOGIC_ARITH = "std_logic_arith";
     static final String STD_LOGIC_SIGNED = "std_logic_signed";
@@ -341,6 +342,7 @@ public class PredefinedPackage implements VhdlTokenConstants
         new Symbol("VitalStateTable", FUNCTION, "std_ulogic"),
     };
     
+    static final PrePkg pkg_standard = new PrePkg(STD, STANDARD, std_logic_1164_syms);
     static final PrePkg pkg_std_logic_1164 = new PrePkg(IEEE, STD_LOGIC_1164, std_logic_1164_syms);
     static final PrePkg pkg_std_logic_arith = new PrePkg(IEEE, STD_LOGIC_ARITH, std_logic_arith_syms);
     static final PrePkg pkg_std_logic_signed = new PrePkg(IEEE, STD_LOGIC_SIGNED, std_logic_signed_unsigned_syms);
@@ -356,6 +358,7 @@ public class PredefinedPackage implements VhdlTokenConstants
     
     static final PrePkg[] predefined_pkgs = 
     {
+        pkg_standard,
         pkg_std_logic_1164,
         pkg_std_logic_arith,
         pkg_std_logic_signed,

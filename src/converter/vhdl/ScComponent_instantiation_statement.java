@@ -60,7 +60,7 @@ class ScComponent_instantiation_statement extends ScCommonIdentifier implements 
     @Override
     public String getDeclaration() {
         String ret = "";
-        if(port_map != null) {
+        //if(port_map != null) {
             String name = instantiated_unit.name.scString();
             ret += intent() + name;
             if(generic_map != null) {
@@ -68,7 +68,7 @@ class ScComponent_instantiation_statement extends ScCommonIdentifier implements 
             }
             name = "comp_" + name;
             ret += " " + name + "(\"" + name + "\");\r\n";
-        }
+        //}
         ret += getSpec(false) + ";";
         return ret;
     }
