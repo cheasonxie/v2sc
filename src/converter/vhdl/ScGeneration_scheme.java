@@ -36,8 +36,8 @@ class ScGeneration_scheme extends ScVhdl {
             ret += "if(" + condition.scString() + ")";
         }else {
             String var = param.identifier.scString();
-            ret += "for(int " + var + " = " + param.getMin() + ";";
-            ret += var + " < " + addOne(param.getMax()) + ";";
+            ret += "for(int " + var + " = " + param.getMin() + "; ";
+            ret += var + " < " + addOne(param.getMax()) + "; ";
             ret += var + "++)";
         }
         return ret;

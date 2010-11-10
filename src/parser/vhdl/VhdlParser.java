@@ -785,6 +785,9 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         identifier(node, tmpToken);        
         consumeToken(OF);
         
+        // save old symbol table
+        SymbolTable oldTab = curSymbolTable;
+        
         startBlock();
         ((ASTNode)node.getChild(0)).setSymbolTable(curSymbolTable);
 
@@ -825,6 +828,9 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         endBlock();
         closeNodeScope(node);
         SymbolParser.parseOtherKind(node, ARCHITECTURE, this);
+        
+        // restore symbol table
+        curSymbolTable = oldTab;
     }
 
     /**
@@ -4612,6 +4618,9 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         Token tmpToken = findToken(IS, endToken);
         simple_name(node, tmpToken);
         
+        // save old symbol table
+        SymbolTable oldTab = curSymbolTable;
+        
         startBlock();
         ((ASTNode)node.getChild(0)).setSymbolTable(curSymbolTable);
         
@@ -4643,6 +4652,9 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         consumeToken(SEMICOLON);
         endBlock();
         closeNodeScope(node);
+        
+        // restore symbol table
+        curSymbolTable = oldTab;
     }
 
     /**
