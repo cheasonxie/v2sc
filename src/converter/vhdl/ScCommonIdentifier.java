@@ -6,7 +6,7 @@ import parser.vhdl.Symbol;
 
 class ScCommonIdentifier extends ScVhdl {
     String identifier = "";
-    String param = null;
+    String param = null;    // just used for statements in generate statement
     
     public ScCommonIdentifier(ASTNode node) {
         super(node);
