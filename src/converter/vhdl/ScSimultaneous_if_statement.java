@@ -115,6 +115,6 @@ class ScSimultaneous_if_statement extends ScCommonIdentifier implements IScState
     @Override
     public String getInitCode()
     {
-        return scString();
+        return toString();
     }
 }

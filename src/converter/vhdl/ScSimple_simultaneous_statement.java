@@ -60,6 +60,6 @@ class ScSimple_simultaneous_statement extends ScCommonIdentifier implements IScS
     @Override
     public String getInitCode()
     {
-        return "";
+        return toString();
     }
 }

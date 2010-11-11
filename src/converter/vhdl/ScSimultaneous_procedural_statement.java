@@ -45,7 +45,14 @@ class ScSimultaneous_procedural_statement extends ScCommonIdentifier implements 
     }
     
     private String getSpec() {
-        return intent() + "void " + getName() + "(void)";
+        String ret = intent() + "void ";
+        ret += getName() + "(";
+        if(param != null)
+            ret += "int " + param;
+        else
+            ret += "void";
+        ret += ")";
+        return ret;
     }
 
     public String scString() {
@@ -81,7 +88,11 @@ class ScSimultaneous_procedural_statement extends ScCommonIdentifier implements 
     @Override
     public String getInitCode()
     {
-        // just call it
-        return getName() + "();";
+     // just call it
+        String ret = intent() + getName() + "(";
+        if(param != null)
+            ret += param;
+        ret += ");";
+        return ret;
     }
 }

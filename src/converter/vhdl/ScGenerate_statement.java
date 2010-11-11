@@ -42,17 +42,47 @@ class ScGenerate_statement extends ScCommonIdentifier implements IScStatementBlo
         }
         if(identifier.isEmpty())
             identifier = String.format("line%d", node.getFirstToken().beginLine);
+        
+        setStatementParam();
     }
 
     private String getName() {
         return "process_generate_" + identifier;
     }
     
+    private void setStatementParam() {
+        if(scheme.param == null) {
+            return;
+        }
+        
+        String ident = scheme.param.identifier.scString();
+        for(int i = 0; i < statement_part.items.size(); i++) {
+            ScArchitecture_statement st = statement_part.items.get(i);
+            if(st.statement instanceof ScSimultaneous_statement) {
+                ScSimultaneous_statement sst = (ScSimultaneous_statement)st.statement;
+                if(sst.item instanceof ScCommonIdentifier) {
+                    ((ScCommonIdentifier)sst.item).setParam(ident);
+                }
+            }else {
+                ScConcurrent_statement cst = (ScConcurrent_statement)st.statement;
+                if(cst.item instanceof ScCommonIdentifier) {
+                    ((ScCommonIdentifier)cst.item).setParam(ident);
+                }
+            }
+        }
+    }
+    
     private String getSpec(boolean individual) {
         String ret = intent() + "void ";
         if(individual)
             ret += className + "::";
-        return ret + getName() + "(void)";
+        ret += getName() + "(";
+        if(param != null)
+            ret += "int " + param;
+        else
+            ret += "void";
+        ret += ")";
+        return ret;
     }
 
     public String scString() {
@@ -92,6 +122,10 @@ class ScGenerate_statement extends ScCommonIdentifier implements IScStatementBlo
     public String getInitCode()
     {
         // just call it
-        return intent() + getName() + "();";
+        String ret = intent() + getName() + "(";
+        if(param != null)
+            ret += param;
+        ret += ");";
+        return ret;
     }
 }

@@ -53,7 +53,13 @@ class ScProcess_statement extends ScCommonIdentifier implements IScStatementBloc
         String ret = intent() + "void ";
         if(individual)
             ret += className + "::";
-        return ret + getName() + "(void)";
+        ret += getName() + "(";
+        if(param != null)
+            ret += "int " + param;
+        else
+            ret += "void";
+        ret += ")";
+        return ret;
     }
 
     public String scString() {

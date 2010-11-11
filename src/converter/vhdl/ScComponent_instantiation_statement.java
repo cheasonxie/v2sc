@@ -50,7 +50,13 @@ class ScComponent_instantiation_statement extends ScCommonIdentifier implements 
         String ret = intent() + "void ";
         if(individual)
             ret += className + "::";
-        return ret + getName() + "(void)";
+        ret += getName() + "(";
+        if(param != null)
+            ret += "int " + param;
+        else
+            ret += "void";
+        ret += ")";
+        return ret;
     }
     
     public String scString() {
@@ -88,6 +94,11 @@ class ScComponent_instantiation_statement extends ScCommonIdentifier implements 
     @Override
     public String getInitCode()
     {
-        return intent() + getName() + "();";
+     // just call it
+        String ret = intent() + getName() + "(";
+        if(param != null)
+            ret += param;
+        ret += ");";
+        return ret;
     }
 }
