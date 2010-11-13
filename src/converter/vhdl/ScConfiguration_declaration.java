@@ -16,7 +16,7 @@ class ScConfiguration_declaration extends ScCommonIdentifier implements IScState
     ScConfiguration_declarative_part declarative_part = null;
     ScBlock_configuration block_config = null;
     public ScConfiguration_declaration(ASTNode node) {
-        super(node);
+        super(node, true);
         int i = 0;
         assert(node.getId() == ASTCONFIGURATION_DECLARATION);
         for(i = 0; i < node.getChildrenNum(); i++) {
@@ -61,8 +61,10 @@ class ScConfiguration_declaration extends ScCommonIdentifier implements IScState
     @Override
     public String getDeclaration()
     {
+        String ret = "";
+        ret += addPrevComment();
         warning("configuration not support");
-        return "";
+        return ret;
     }
 
     @Override

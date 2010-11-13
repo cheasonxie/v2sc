@@ -9,7 +9,7 @@ import parser.vhdl.ASTNode;
  */
 class ScGroup_declaration extends ScVhdl {
     public ScGroup_declaration(ASTNode node) {
-        super(node);
+        super(node, true);
         assert(node.getId() == ASTGROUP_DECLARATION);
     }
 

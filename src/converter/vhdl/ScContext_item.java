@@ -30,7 +30,7 @@ class ScContext_item extends ScVhdl {
 
     public String scString() {
         String ret = "";
-        ret += item.scString();
+        ret += item.toString();
         return ret;
     }
 }

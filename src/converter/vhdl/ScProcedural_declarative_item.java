@@ -21,7 +21,7 @@ import parser.vhdl.ASTNode;
 class ScProcedural_declarative_item extends ScVhdl {
     ScVhdl item = null;
     public ScProcedural_declarative_item(ASTNode node) {
-        super(node, false);
+        super(node);
         //assert(node.getId() == ASTPROCEDURAL_DECLARATIVE_ITEM);
         for(int i = 0; i < node.getChildrenNum(); i++) {
             ASTNode c = (ASTNode)node.getChild(i);
@@ -70,6 +70,6 @@ class ScProcedural_declarative_item extends ScVhdl {
     }
 
     public String scString() {
-        return item.scString();
+        return item.toString();
     }
 }

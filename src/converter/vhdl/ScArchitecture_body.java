@@ -19,7 +19,7 @@ class ScArchitecture_body extends ScCommonIdentifier implements IScStatementBloc
     ScArchitecture_declarative_part declarative_part = null;
     ScArchitecture_statement_part statement_part = null;
     public ScArchitecture_body(ASTNode node) {
-        super(node);
+        super(node, true);
         assert(node.getId() == ASTARCHITECTURE_BODY);
         int i;
         for(i = 0; i < node.getChildrenNum(); i++) {

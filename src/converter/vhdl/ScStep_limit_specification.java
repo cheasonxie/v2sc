@@ -9,7 +9,7 @@ import parser.vhdl.ASTNode;
  */
 class ScStep_limit_specification extends ScVhdl {
     public ScStep_limit_specification(ASTNode node) {
-        super(node);
+        super(node, true);
         assert(node.getId() == ASTSTEP_LIMIT_SPECIFICATION);
     }
 

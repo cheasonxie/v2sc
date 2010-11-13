@@ -75,6 +75,6 @@ class ScSequential_statement extends ScVhdl {
     }
 
     public String scString() {
-        return item.scString();
+        return item.toString();
     }
 }

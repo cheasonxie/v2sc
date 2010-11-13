@@ -11,7 +11,7 @@ import parser.vhdl.ASTNode;
 class ScConcurrent_assertion_statement extends ScCommonIdentifier implements IScStatementBlock {
     ScAssertion assertion = null;
     public ScConcurrent_assertion_statement(ASTNode node) {
-        super(node);
+        super(node, true);
         assert(node.getId() == ASTCONCURRENT_ASSERTION_STATEMENT);
         for(int i = 0; i < node.getChildrenNum(); i++) {
             ASTNode c = (ASTNode)node.getChild(i);

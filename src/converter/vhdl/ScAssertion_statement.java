@@ -11,7 +11,7 @@ class ScAssertion_statement extends ScVhdl {
     ScVhdl label = null;
     ScVhdl assertion = null;
     public ScAssertion_statement(ASTNode node) {
-        super(node);
+        super(node, true);
         assert(node.getId() == ASTASSERTION_STATEMENT);
         for(int i = 0; i < node.getChildrenNum(); i++) {
             ASTNode c = (ASTNode)node.getChild(i);

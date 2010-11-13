@@ -88,32 +88,92 @@ class ScAggregate extends ScVhdl {
         else if(elementList.size() > 1)
             ret += "(";
         
-        int max = 1;
-        if(isArray) {
-            max = getWidth(arrayRange[0], arrayRange[2]);
-        }else if(typeRange != null) {
-            max = getWidth(typeRange[0], typeRange[2]);
-        }
-        
-        if(elementList.size() == 1 && elementList.get(0).choices.isOthers())
-            ret += elementList.get(0).toBitString(1, isArray);
-        else {
-            int num = 0;
-            Symbol[] recSyms = null;
-            if(recordTable != null)
-                recSyms = (Symbol[])recordTable.getAllSymbols();
+        if(isArray && elementList.get(0).choices != null) {
+            String othersValue = "";
+            int maxId = -1;
             for(int i = 0; i < elementList.size(); i++) {
-                int width = max-num;
-                if(recordTable != null && recSyms[i].typeRange != null) {
-                    width = getWidth(recSyms[i].typeRange[0], recSyms[i].typeRange[2]);
-                }
-                ret += elementList.get(i).toBitString(width, isArray);
-                num += elementList.get(i).getBitWidth();
-                if(i < elementList.size() - 1) {
-                    ret += ", ";
+                ScElement_association ele = elementList.get(i);
+                if(ele.choices.isOthers()) {
+                    othersValue = getReplaceValue(ele.expression.scString());
+                }else {
+                    try {
+                        int v = getIntValue(ele.choices.items.get(0).toString());
+                        if(v > maxId)
+                            maxId = v;
+                    }catch(NumberFormatException e) {
+                        maxId = -1;
+                        break;
+                    }
                 }
             }
+            
+            if(maxId >= 0) {
+                for(int i = 0; i <= maxId; i++) {
+                    int j = 0;
+                    // find index in choices
+                    for(j = 0; j < elementList.size(); j++) {
+                        ScElement_association ele = elementList.get(j);
+                        if(!ele.choices.isOthers()) {
+                            try {
+                                int v = getIntValue(ele.choices.items.get(0).toString());
+                                if(v == i) {
+                                    ret += getReplaceValue(ele.expression.scString());
+                                    break;
+                                }
+                            }catch(NumberFormatException e) {
+                                MyDebug.printFileLine("internal error!");
+                            }
+                        }
+                    }
+                    
+                    // not found
+                    if(j >= elementList.size()) {
+                        ret += othersValue;
+                    }
+                    ret += ", ";
+                }
+                
+                if(!othersValue.isEmpty()) {
+                    ret += "others => " + othersValue;
+                }
+            }else {
+                for(int i = 0; i < elementList.size(); i++) {
+                    ret += elementList.get(i).orgString();
+                    if(i < elementList.size() - 1)
+                        ret += ", ";
+                }
+            }
+                
+        }else {
+            int max = 1;
+            if(isArray) {
+                max = getWidth(arrayRange[0], arrayRange[2]);
+            }else if(typeRange != null) {
+                max = getWidth(typeRange[0], typeRange[2]);
+            }
+            
+            if(elementList.size() == 1 && elementList.get(0).choices.isOthers())
+                ret += elementList.get(0).toBitString(1, isArray);
+            else {
+                int num = 0;
+                Symbol[] recSyms = null;
+                if(recordTable != null)
+                    recSyms = (Symbol[])recordTable.getAllSymbols();
+                for(int i = 0; i < elementList.size(); i++) {
+                    int width = max-num;
+                    if(recordTable != null && recSyms[i].typeRange != null) {
+                        width = getWidth(recSyms[i].typeRange[0], recSyms[i].typeRange[2]);
+                    }
+                    ret += elementList.get(i).toBitString(width, isArray);
+                    num += elementList.get(i).getBitWidth();
+                    if(i < elementList.size() - 1) {
+                        ret += ", ";
+                    }
+                }
+            }            
         }
+        
+
         
         if(isArray)
             ret += "}";

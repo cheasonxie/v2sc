@@ -10,7 +10,7 @@ import parser.vhdl.ASTNode;
 class ScSubprogram_declaration extends ScVhdl {
     ScVhdl spec = null;
     public ScSubprogram_declaration(ASTNode node) {
-        super(node);
+        super(node, true);
         assert(node.getId() == ASTSUBPROGRAM_DECLARATION);
         spec = new ScSubprogram_specification((ASTNode)node.getChild(0));
     }

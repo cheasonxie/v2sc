@@ -13,7 +13,7 @@ class ScAlias_declaration extends ScVhdl {
     ScVhdl name = null;
     ScVhdl signature = null;
     public ScAlias_declaration(ASTNode node) {
-        super(node);
+        super(node, true);
         assert(node.getId() == ASTALIAS_DECLARATION);
         for(int i = 0; i < node.getChildrenNum(); i++) {
             ASTNode c = (ASTNode)node.getChild(i);

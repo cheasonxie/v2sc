@@ -11,7 +11,7 @@ class ScVariable_assignment_statement extends ScVhdl {
     ScTarget target = null;
     ScExpression expression = null;
     public ScVariable_assignment_statement(ASTNode node) {
-        super(node);
+        super(node, true);
         assert(node.getId() == ASTVARIABLE_ASSIGNMENT_STATEMENT);
         for(int i = 0; i < node.getChildrenNum(); i++) {
             ASTNode c = (ASTNode)node.getChild(i);

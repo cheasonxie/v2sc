@@ -9,11 +9,12 @@ import parser.vhdl.ASTNode;
  */
 class ScDisconnection_specification extends ScVhdl {
     public ScDisconnection_specification(ASTNode node) {
-        super(node);
+        super(node, true);
         assert(node.getId() == ASTDISCONNECTION_SPECIFICATION);
     }
 
     public String scString() {
+        warning("disconnection_specification not support");
         return "";
     }
 }

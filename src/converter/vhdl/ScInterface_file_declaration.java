@@ -10,7 +10,7 @@ import parser.vhdl.ASTNode;
 class ScInterface_file_declaration extends ScCommonDeclaration {
 
     public ScInterface_file_declaration(ASTNode node) {
-        super(node);
+        super(node, false);
         assert(node.getId() == ASTINTERFACE_FILE_DECLARATION);
     }
 

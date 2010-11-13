@@ -13,7 +13,7 @@ class ScConcurrent_break_statement extends ScCommonIdentifier implements IScStat
     ScSensitivity_clause sensitivity_clause = null;
     ScCondition condition = null;
     public ScConcurrent_break_statement(ASTNode node) {
-        super(node);
+        super(node, true);
         assert(node.getId() == ASTCONCURRENT_BREAK_STATEMENT);
         for(int i = 0; i < node.getChildrenNum(); i++) {
             ASTNode c = (ASTNode)node.getChild(i);

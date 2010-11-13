@@ -15,7 +15,7 @@ class ScSelected_signal_assignment extends ScVhdl {
     ScOptions options = null;
     ScSelected_waveforms selected_waveforms = null;
     public ScSelected_signal_assignment(ASTNode node) {
-        super(node);
+        super(node, true);
         assert(node.getId() == ASTSELECTED_SIGNAL_ASSIGNMENT);
         for(int i = 0; i < node.getChildrenNum(); i++) {
             ASTNode c = (ASTNode)node.getChild(i);

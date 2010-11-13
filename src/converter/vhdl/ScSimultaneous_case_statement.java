@@ -19,7 +19,7 @@ class ScSimultaneous_case_statement extends ScCommonIdentifier implements IScSta
     ScVhdl expression = null;
     ArrayList<ScVhdl> alts = new ArrayList<ScVhdl>();
     public ScSimultaneous_case_statement(ASTNode node) {
-        super(node);
+        super(node, true);
         assert(node.getId() == ASTSIMULTANEOUS_CASE_STATEMENT);
         for(int i = 0; i < node.getChildrenNum(); i++) {
             ASTNode c = (ASTNode)node.getChild(i);

@@ -18,7 +18,7 @@ class ScProcess_statement extends ScCommonIdentifier implements IScStatementBloc
     ScProcess_declarative_part declarative_part = null;
     ScProcess_statement_part statement_part = null;
     public ScProcess_statement(ASTNode node) {
-        super(node);
+        super(node, true);
         assert(node.getId() == ASTPROCESS_STATEMENT);
         for(int i = 0; i < node.getChildrenNum(); i++) {
             ASTNode c = (ASTNode)node.getChild(i);

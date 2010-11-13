@@ -9,7 +9,7 @@ import parser.vhdl.ASTNode;
  */
 class ScInterface_terminal_declaration extends ScCommonDeclaration {
     public ScInterface_terminal_declaration(ASTNode node) {
-        super(node);
+        super(node, false);
         assert(node.getId() == ASTINTERFACE_TERMINAL_DECLARATION);
     }
 }

@@ -12,6 +12,10 @@ class ScCommonIdentifier extends ScVhdl {
         super(node);
     }
     
+    public ScCommonIdentifier(ASTNode node, boolean needComment) {
+        super(node, needComment);
+    }
+    
     public void setIdentifier(String ident) {
         identifier = ident;
     }

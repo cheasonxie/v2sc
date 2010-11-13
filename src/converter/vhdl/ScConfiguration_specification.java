@@ -9,7 +9,7 @@ import parser.vhdl.ASTNode;
  */
 class ScConfiguration_specification extends ScVhdl {
     public ScConfiguration_specification(ASTNode node) {
-        super(node);
+        super(node, true);
         assert(node.getId() == ASTCONFIGURATION_SPECIFICATION);
     }
 

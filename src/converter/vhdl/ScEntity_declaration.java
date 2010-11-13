@@ -21,7 +21,7 @@ class ScEntity_declaration extends ScCommonIdentifier implements IScStatementBlo
     ScConfiguration_declaration config = null;
     
     public ScEntity_declaration(ASTNode node) {
-        super(node);
+        super(node, true);
         assert(node.getId() == ASTENTITY_DECLARATION);
         curLevel = 0;
         for(int i = 0; i < node.getChildrenNum(); i++) {
@@ -108,6 +108,9 @@ class ScEntity_declaration extends ScCommonIdentifier implements IScStatementBlo
         if(body == null) {
             return "";  //TODO no entity body, ignore
         }
+        
+        ret += addPrevComment();
+        
         className = getName();
         if(header.generic != null) {
             ret += "template<\r\n";

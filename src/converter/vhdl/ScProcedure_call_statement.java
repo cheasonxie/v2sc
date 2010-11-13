@@ -10,7 +10,7 @@ import parser.vhdl.ASTNode;
 class ScProcedure_call_statement extends ScVhdl {
     ScVhdl procedure_call = null;
     public ScProcedure_call_statement(ASTNode node) {
-        super(node);
+        super(node, true);
         assert(node.getId() == ASTPROCEDURE_CALL_STATEMENT);
         for(int i = 0; i < node.getChildrenNum(); i++) {
             ASTNode c = (ASTNode)node.getChild(i);

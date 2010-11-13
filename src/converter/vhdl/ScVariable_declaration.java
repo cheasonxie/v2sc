@@ -12,7 +12,7 @@ import parser.vhdl.VhdlTokenManager;
  */
 class ScVariable_declaration extends ScCommonDeclaration {
     public ScVariable_declaration(ASTNode node) {
-        super(node);
+        super(node, true);
         assert(node.getId() == ASTVARIABLE_DECLARATION);
     }
     

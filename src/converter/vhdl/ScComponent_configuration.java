@@ -15,7 +15,7 @@ class ScComponent_configuration extends ScVhdl {
     ScVhdl binding = null;
     ScVhdl block = null;
     public ScComponent_configuration(ASTNode node) {
-        super(node);
+        super(node, true);
         assert(node.getId() == ASTCOMPONENT_CONFIGURATION);
         for(int i = 0; i < node.getChildrenNum(); i++) {
             ASTNode c = (ASTNode)node.getChild(i);
@@ -37,6 +37,7 @@ class ScComponent_configuration extends ScVhdl {
     }
 
     public String scString() {
+        warning("component_configuration not support");
         return "";
     }
 }

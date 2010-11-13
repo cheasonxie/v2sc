@@ -10,7 +10,7 @@ import parser.vhdl.ASTNode;
  */
 class ScSimultaneous_null_statement extends ScCommonIdentifier implements IScStatementBlock {
     public ScSimultaneous_null_statement(ASTNode node) {
-        super(node);
+        super(node, true);
         assert(node.getId() == ASTSIMULTANEOUS_NULL_STATEMENT);
     }
 

@@ -11,7 +11,7 @@ class ScAttribute_declaration extends ScVhdl {
     ScIdentifier identifier = null;
     ScType_mark type_mark = null;
     public ScAttribute_declaration(ASTNode node) {
-        super(node);
+        super(node, true);
         assert(node.getId() == ASTATTRIBUTE_DECLARATION);
         for(int i = 0; i < node.getChildrenNum(); i++) {
             ASTNode c = (ASTNode)node.getChild(i);

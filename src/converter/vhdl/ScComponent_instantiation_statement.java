@@ -16,7 +16,7 @@ class ScComponent_instantiation_statement extends ScCommonIdentifier implements 
     ScGeneric_map_aspect generic_map = null;
     ScPort_map_aspect port_map = null;
     public ScComponent_instantiation_statement(ASTNode node) {
-        super(node);
+        super(node, true);
         assert(node.getId() == ASTCOMPONENT_INSTANTIATION_STATEMENT);
         for(int i = 0; i < node.getChildrenNum(); i++) {
             ASTNode c = (ASTNode)node.getChild(i);

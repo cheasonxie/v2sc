@@ -12,7 +12,7 @@ import parser.vhdl.ASTNode;
  */
 class ScComponent_declaration extends ScVhdl {
     public ScComponent_declaration(ASTNode node) {
-        super(node);
+        super(node, true);
         assert(node.getId() == ASTCOMPONENT_DECLARATION);
     }
 

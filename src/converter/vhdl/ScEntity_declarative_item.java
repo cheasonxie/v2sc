@@ -1,6 +1,5 @@
 package converter.vhdl;
 
-import converter.IScStatementBlock;
 import parser.vhdl.ASTNode;
 
 
@@ -30,7 +29,7 @@ import parser.vhdl.ASTNode;
 class ScEntity_declarative_item extends ScVhdl {
     ScVhdl item = null;
     public ScEntity_declarative_item(ASTNode node) {
-        super(node, false);
+        super(node);
         //assert(node.getId() == ASTENTITY_DECLARATIVE_ITEM);
         switch(node.getId())
         {
@@ -101,6 +100,6 @@ class ScEntity_declarative_item extends ScVhdl {
     }
 
     public String scString() {
-        return item.scString();
+        return item.toString();
     }
 }

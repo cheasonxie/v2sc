@@ -12,7 +12,7 @@ class ScConditional_signal_assignment extends ScVhdl {
     ScOptions options = null;
     ScConditional_waveforms waveforms = null;
     public ScConditional_signal_assignment(ASTNode node) {
-        super(node);
+        super(node, true);
         assert(node.getId() == ASTCONDITIONAL_SIGNAL_ASSIGNMENT);
         for(int i = 0; i < node.getChildrenNum(); i++) {
             ASTNode c = (ASTNode)node.getChild(i);

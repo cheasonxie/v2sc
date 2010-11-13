@@ -12,7 +12,7 @@ import parser.vhdl.ASTNode;
 class ScArchitecture_statement extends ScVhdl implements IScStatementBlock {
     IScStatementBlock statement = null;
     public ScArchitecture_statement(ASTNode node) {
-        super(node, false);
+        super(node);
         //assert(node.getId() == ASTARCHITECTURE_STATEMENT);
         switch(node.getId())
         {

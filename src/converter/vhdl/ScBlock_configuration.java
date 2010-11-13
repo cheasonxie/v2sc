@@ -19,7 +19,7 @@ class ScBlock_configuration extends ScVhdl {
     ScVhdl use_clause = null;
     ScVhdl cfg_item = null;
     public ScBlock_configuration(ASTNode node) {
-        super(node);
+        super(node, true);
         assert(node.getId() == ASTBLOCK_CONFIGURATION);
         for(int i = 0; i < node.getChildrenNum(); i++) {
             ASTNode c = (ASTNode)node.getChild(i);

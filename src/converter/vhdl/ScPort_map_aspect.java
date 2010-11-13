@@ -19,7 +19,7 @@ import parser.vhdl.SymbolTable;
 class ScPort_map_aspect extends ScVhdl {
     ScAssociation_list association_list = null;
     public ScPort_map_aspect(ASTNode node) {
-        super(node);
+        super(node, true);
         assert(node.getId() == ASTPORT_MAP_ASPECT);
         for(int i = 0; i < node.getChildrenNum(); i++) {
             ASTNode c = (ASTNode)node.getChild(i);

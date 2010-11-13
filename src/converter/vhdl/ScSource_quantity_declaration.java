@@ -9,7 +9,7 @@ import parser.vhdl.ASTNode;
  */
 class ScSource_quantity_declaration extends ScVhdl {
     public ScSource_quantity_declaration(ASTNode node) {
-        super(node);
+        super(node, true);
         assert(node.getId() == ASTSOURCE_QUANTITY_DECLARATION);
     }
 

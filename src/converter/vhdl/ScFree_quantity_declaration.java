@@ -9,7 +9,7 @@ import parser.vhdl.ASTNode;
  */
 class ScFree_quantity_declaration extends ScCommonDeclaration {
     public ScFree_quantity_declaration(ASTNode node) {
-        super(node);
+        super(node, true);
         assert(node.getId() == ASTFREE_QUANTITY_DECLARATION);
     }
 

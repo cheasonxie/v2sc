@@ -42,6 +42,14 @@ class ScElement_association extends ScVhdl {
             expression.setLogic(logic);
     }
     
+    public String orgString() {
+        String ret = "";
+        if(choices != null)
+            ret += choices.scString() + " => ";
+        ret += getReplaceValue(expression.scString());
+        return ret;
+    }
+    
     public String toBitString(int max, boolean isArray) {
         String ret = "";
         String val = expression.scString();

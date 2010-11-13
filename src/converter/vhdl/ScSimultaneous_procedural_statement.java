@@ -17,7 +17,7 @@ class ScSimultaneous_procedural_statement extends ScCommonIdentifier implements 
     ScProcedural_declarative_part declarative_part = null;
     ScProcedural_statement_part statement_part = null;
     public ScSimultaneous_procedural_statement(ASTNode node) {
-        super(node);
+        super(node, true);
         assert(node.getId() == ASTSIMULTANEOUS_PROCEDURAL_STATEMENT);
         for(int i = 0; i < node.getChildrenNum(); i++) {
             ASTNode c = (ASTNode)node.getChild(i);

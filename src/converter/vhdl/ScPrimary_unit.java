@@ -33,7 +33,7 @@ class ScPrimary_unit extends ScVhdl implements IScStatementBlock {
     }
 
     public String scString() {
-        return declaration.scString();
+        return declaration.toString();
     }
 
     @Override

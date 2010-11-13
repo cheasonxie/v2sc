@@ -16,7 +16,7 @@ class ScPackage_body extends ScCommonIdentifier implements IScStatementBlock {
     ScName package_name = null;
     ScPackage_body_declarative_part declarative_part = null;
     public ScPackage_body(ASTNode node) {
-        super(node);
+        super(node, true);
         assert(node.getId() == ASTPACKAGE_BODY);
         int i;
         for(i = 0; i < node.getChildrenNum(); i++) {

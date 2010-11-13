@@ -10,7 +10,7 @@ import parser.vhdl.ASTNode;
 class ScPrimary_unit_declaration extends ScVhdl {
     ScVhdl identifier = null;
     public ScPrimary_unit_declaration(ASTNode node) {
-        super(node);
+        super(node, true);
         assert(node.getId() == ASTPRIMARY_UNIT_DECLARATION);
         ASTNode c = (ASTNode)node.getChild(0);
         assert(c.getId() == ASTIDENTIFIER);

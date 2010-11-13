@@ -17,7 +17,7 @@ class ScSubprogram_body extends ScVhdl implements IScStatementBlock {
     ScSubprogram_declarative_part declarative_part = null;
     ScSubprogram_statement_part statement_part = null;
     public ScSubprogram_body(ASTNode node) {
-        super(node);
+        super(node, true);
         assert(node.getId() == ASTSUBPROGRAM_BODY);
         for(int i = 0; i < node.getChildrenNum(); i++) {
             ASTNode c = (ASTNode)node.getChild(i);

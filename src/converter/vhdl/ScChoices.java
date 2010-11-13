@@ -46,6 +46,16 @@ class ScChoices extends ScVhdl {
 
     public String scString() {
         String ret = "";
+        if(items.size() > 1)
+            ret += "(";
+        for(int i = 0; i < items.size(); i++) {
+            ret += items.get(i);
+            if(i < items.size() - 1) {
+                ret += ", ";
+            }
+        }
+        if(items.size() > 1)
+            ret += ")";
         return ret;
     }
 }

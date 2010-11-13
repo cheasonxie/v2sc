@@ -13,8 +13,8 @@ class ScCommonDeclaration extends ScVhdl {
     ScVhdl sub = null;
     ScSignal_kind signal_kind = null;
     ScExpression expression = null;
-    public ScCommonDeclaration(ASTNode node) {
-        super(node);
+    public ScCommonDeclaration(ASTNode node, boolean needComment) {
+        super(node, needComment);
         for(int i = 0; i < node.getChildrenNum(); i++) {
             ASTNode c = (ASTNode)node.getChild(i);
             switch(c.getId())

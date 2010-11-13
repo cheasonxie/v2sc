@@ -9,7 +9,7 @@ import parser.vhdl.ASTNode;
  */
 class ScIncomplete_type_declaration extends ScVhdl {
     public ScIncomplete_type_declaration(ASTNode node) {
-        super(node);
+        super(node, true);
         assert(node.getId() == ASTINCOMPLETE_TYPE_DECLARATION);
     }
 

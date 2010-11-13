@@ -11,7 +11,7 @@ class ScFull_type_declaration extends ScVhdl {
     ScIdentifier identifier = null;
     ScType_definition type_def = null;
     public ScFull_type_declaration(ASTNode node) {
-        super(node);
+        super(node, true);
         assert(node.getId() == ASTFULL_TYPE_DECLARATION);
         for(int i = 0; i < node.getChildrenNum(); i++) {
             ASTNode c = (ASTNode)node.getChild(i);

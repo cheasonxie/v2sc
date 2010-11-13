@@ -9,11 +9,12 @@ import parser.vhdl.ASTNode;
  */
 class ScSubnature_declaration extends ScVhdl {
     public ScSubnature_declaration(ASTNode node) {
-        super(node);
+        super(node, true);
         assert(node.getId() == ASTSUBNATURE_DECLARATION);
     }
 
     public String scString() {
+        warning("subnature_declaration not support");
         return "";
     }
 }

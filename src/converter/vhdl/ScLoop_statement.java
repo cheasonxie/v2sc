@@ -14,7 +14,7 @@ class ScLoop_statement extends ScVhdl {
     ScIteration_scheme iteration = null;
     ScVhdl seq_statements = null;
     public ScLoop_statement(ASTNode node) {
-        super(node);
+        super(node, true);
         assert(node.getId() == ASTLOOP_STATEMENT);
         for(int i = 0; i < node.getChildrenNum(); i++) {
             ASTNode c = (ASTNode)node.getChild(i);

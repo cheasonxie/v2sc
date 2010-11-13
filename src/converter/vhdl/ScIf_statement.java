@@ -24,7 +24,7 @@ class ScIf_statement extends ScVhdl {
     ArrayList<ConPair> elsif_pair = new ArrayList<ConPair>();
     ConPair else_pair = null;
     public ScIf_statement(ASTNode node) {
-        super(node);
+        super(node, true);
         assert(node.getId() == ASTIF_STATEMENT);
         int i = 0;
         while(i < node.getChildrenNum()) {

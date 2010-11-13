@@ -33,7 +33,7 @@ public class ScVhdl implements ScVhdlConstants, VhdlTokenConstants,
     protected boolean isLogic = false;
     protected ArrayList<CommentBlock> myPrevComment = null;
     protected CommentBlock myPostComment = null;
-    protected boolean needComment = true;
+    protected boolean needComment = false;
     
     /**
      * constructor
@@ -455,12 +455,12 @@ public class ScVhdl implements ScVhdlConstants, VhdlTokenConstants,
         if(str.isEmpty())
             return 0;
         int ret = 0;
-        if(Character.isDigit(str.charAt(0))) {
+        //if(Character.isDigit(str.charAt(0))) {
             ret = Integer.parseInt(str);
-        }else {
+        //}else {
             //Symbol sym = (Symbol)parser.getSymbol(curNode, str);
             //TODO get value
-        }
+        //}
         return ret;
     }
     

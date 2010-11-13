@@ -9,11 +9,12 @@ import parser.vhdl.ASTNode;
  */
 class ScNature_declaration extends ScVhdl {
     public ScNature_declaration(ASTNode node) {
-        super(node);
+        super(node, true);
         assert(node.getId() == ASTNATURE_DECLARATION);
     }
 
     public String scString() {
+        warning("nature_declaration not support");
         return "";
     }
 }

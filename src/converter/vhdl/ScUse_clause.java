@@ -16,7 +16,7 @@ class ScUse_clause extends ScVhdl {
     ArrayList<ScSelected_name> names = new ArrayList<ScSelected_name>();
     
     public ScUse_clause(ASTNode node) {
-        super(node);
+        super(node, true);
         assert(node.getId() == ASTUSE_CLAUSE);
         for(int i = 0; i < node.getChildrenNum(); i++) {
             ASTNode c = (ASTNode)node.getChild(i);

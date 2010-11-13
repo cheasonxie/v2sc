@@ -16,6 +16,7 @@ class ScQuantity_declaration extends ScVhdl {
     }
 
     public String scString() {
+        warning("quantity_declaration not support");
         return "";
     }
 }

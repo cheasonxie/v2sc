@@ -12,7 +12,7 @@ class ScBranch_quantity_declaration extends ScVhdl {
     ScVhdl through = null;
     ScVhdl terminal = null;
     public ScBranch_quantity_declaration(ASTNode node) {
-        super(node);
+        super(node, true);
         assert(node.getId() == ASTBRANCH_QUANTITY_DECLARATION);
         for(int i = 0; i < node.getChildrenNum(); i++) {
             ASTNode c = (ASTNode)node.getChild(i);

@@ -27,7 +27,7 @@ import parser.vhdl.ASTNode;
 class ScPackage_declarative_item extends ScVhdl {
     ScVhdl item = null;
     public ScPackage_declarative_item(ASTNode node) {
-        super(node, false);
+        super(node);
         //assert(node.getId() == ASTPACKAGE_DECLARATIVE_ITEM);
         switch(node.getId())
         {
@@ -92,7 +92,7 @@ class ScPackage_declarative_item extends ScVhdl {
 
     public String scString() {
         if(!(item instanceof ScComponent_declaration))
-            return item.scString();
+            return item.toString();
         return "";
     }
 }

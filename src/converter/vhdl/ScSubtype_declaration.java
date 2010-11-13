@@ -11,7 +11,7 @@ class ScSubtype_declaration extends ScVhdl {
     ScIdentifier identifier = null;
     ScSubtype_indication subtype = null;
     public ScSubtype_declaration(ASTNode node) {
-        super(node);
+        super(node, true);
         assert(node.getId() == ASTSUBTYPE_DECLARATION);
         for(int i = 0; i < node.getChildrenNum(); i++) {
             ASTNode c = (ASTNode)node.getChild(i);

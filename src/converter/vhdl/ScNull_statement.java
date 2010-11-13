@@ -9,7 +9,7 @@ import parser.vhdl.ASTNode;
  */
 class ScNull_statement extends ScVhdl {
     public ScNull_statement(ASTNode node) {
-        super(node);
+        super(node, true);
         assert(node.getId() == ASTNULL_STATEMENT);
     }
 

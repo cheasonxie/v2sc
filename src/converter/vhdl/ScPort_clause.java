@@ -10,7 +10,7 @@ import parser.vhdl.ASTNode;
 class ScPort_clause extends ScVhdl {
     ScPort_list port_list = null;
     public ScPort_clause(ASTNode node) {
-        super(node);
+        super(node, true);
         assert(node.getId() == ASTPORT_CLAUSE);
         for(int i = 0; i < node.getChildrenNum(); i++) {
             ASTNode c = (ASTNode)node.getChild(i);

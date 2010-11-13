@@ -10,7 +10,7 @@ import parser.vhdl.ASTNode;
 class ScGeneric_clause extends ScVhdl {
     ScGeneric_list generic_list = null;
     public ScGeneric_clause(ASTNode node) {
-        super(node);
+        super(node, true);
         assert(node.getId() == ASTGENERIC_CLAUSE);
         for(int i = 0; i < node.getChildrenNum(); i++) {
             ASTNode c = (ASTNode)node.getChild(i);

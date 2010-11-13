@@ -10,7 +10,7 @@ import parser.vhdl.ASTNode;
 class ScElement_declaration extends ScCommonDeclaration {
     ScElement_subtype_definition type = null;
     public ScElement_declaration(ASTNode node) {
-        super(node);
+        super(node, true);
         assert(node.getId() == ASTELEMENT_DECLARATION);
     }
 

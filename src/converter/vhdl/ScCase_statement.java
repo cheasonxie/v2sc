@@ -16,7 +16,7 @@ class ScCase_statement extends ScVhdl {
     ScVhdl expression = null;
     ArrayList<ScVhdl> statement_alt = new ArrayList<ScVhdl>();
     public ScCase_statement(ASTNode node) {
-        super(node);
+        super(node, true);
         assert(node.getId() == ASTCASE_STATEMENT);
         for(int i = 0; i < node.getChildrenNum(); i++) {
             ASTNode c = (ASTNode)node.getChild(i);

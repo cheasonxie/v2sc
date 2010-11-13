@@ -29,7 +29,7 @@ class ScSimultaneous_if_statement extends ScCommonIdentifier implements IScState
     ConPair else_pair = null;
     
     public ScSimultaneous_if_statement(ASTNode node) {
-        super(node);
+        super(node, true);
         assert(node.getId() == ASTSIMULTANEOUS_IF_STATEMENT);
         int i = 0;
         while(i < node.getChildrenNum()) {

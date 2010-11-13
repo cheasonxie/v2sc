@@ -11,7 +11,7 @@ import java.util.ArrayList;
 class ScLibrary_clause extends ScVhdl {
     ScLogical_name_list logical_name_list = null;
     public ScLibrary_clause(ASTNode node) {
-        super(node);
+        super(node, true);
         assert(node.getId() == ASTLIBRARY_CLAUSE);
         logical_name_list = new ScLogical_name_list((ASTNode)node.getChild(0));
     }

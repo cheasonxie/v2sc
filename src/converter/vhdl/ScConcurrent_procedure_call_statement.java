@@ -11,7 +11,7 @@ import parser.vhdl.ASTNode;
 class ScConcurrent_procedure_call_statement extends ScCommonIdentifier implements IScStatementBlock {
     ScProcedure_call procedure_call = null;
     public ScConcurrent_procedure_call_statement(ASTNode node) {
-        super(node);
+        super(node, true);
         assert(node.getId() == ASTCONCURRENT_PROCEDURE_CALL_STATEMENT);
         for(int i = 0; i < node.getChildrenNum(); i++) {
             ASTNode c = (ASTNode)node.getChild(i);

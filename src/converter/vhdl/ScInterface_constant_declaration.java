@@ -10,7 +10,7 @@ import parser.vhdl.ASTNode;
  */
 class ScInterface_constant_declaration extends ScCommonDeclaration {
     public ScInterface_constant_declaration(ASTNode node) {
-        super(node);
+        super(node, false);
         assert(node.getId() == ASTINTERFACE_CONSTANT_DECLARATION);
     }
 

@@ -41,7 +41,7 @@ class ScBinding_indication extends ScVhdl {
 
     public String scString() {
         String ret = "";
-        error();
+        error("binding_indication not support");
         return ret;
     }
 }

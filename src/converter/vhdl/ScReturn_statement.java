@@ -10,7 +10,7 @@ import parser.vhdl.ASTNode;
 class ScReturn_statement extends ScVhdl {
     ScVhdl expression = null;
     public ScReturn_statement(ASTNode node) {
-        super(node);
+        super(node, true);
         assert(node.getId() == ASTRETURN_STATEMENT);
         for(int i = 0; i < node.getChildrenNum(); i++) {
             ASTNode c = (ASTNode)node.getChild(i);

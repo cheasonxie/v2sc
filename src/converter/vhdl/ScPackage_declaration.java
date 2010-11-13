@@ -14,7 +14,7 @@ class ScPackage_declaration extends ScCommonIdentifier implements IScStatementBl
     ScPackage_declarative_part declarative_part = null;
     ScPackage_body body = null;
     public ScPackage_declaration(ASTNode node) {
-        super(node);
+        super(node, true);
         assert(node.getId() == ASTPACKAGE_DECLARATION);
         for(int i = 0; i < node.getChildrenNum(); i++) {
             ASTNode c = (ASTNode)node.getChild(i);
@@ -66,6 +66,8 @@ class ScPackage_declaration extends ScCommonIdentifier implements IScStatementBl
         if(body == null) {
             warning("no package body");
         }
+        ret += addPrevComment();
+        
         className = getName();
         ret += "namespace " + identifier;
         ret += "\r\n{\r\n";

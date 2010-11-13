@@ -11,7 +11,7 @@ class ScSecondary_unit_declaration extends ScVhdl {
     ScVhdl identifier = null;
     ScVhdl phy_literal = null;
     public ScSecondary_unit_declaration(ASTNode node) {
-        super(node);
+        super(node, true);
         assert(node.getId() == ASTSECONDARY_UNIT_DECLARATION);
         for(int i = 0; i < node.getChildrenNum(); i++) {
             ASTNode c = (ASTNode)node.getChild(i);

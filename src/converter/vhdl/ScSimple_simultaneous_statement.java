@@ -13,7 +13,7 @@ class ScSimple_simultaneous_statement extends ScCommonIdentifier implements IScS
     ScSimple_expression exp2 = null;
     ScTolerance_aspect tolerance = null;
     public ScSimple_simultaneous_statement(ASTNode node) {
-        super(node);
+        super(node, true);
         assert(node.getId() == ASTSIMPLE_SIMULTANEOUS_STATEMENT);
         for(int i = 0; i < node.getChildrenNum(); i++) {
             ASTNode c = (ASTNode)node.getChild(i);

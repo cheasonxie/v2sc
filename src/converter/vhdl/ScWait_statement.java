@@ -14,7 +14,7 @@ class ScWait_statement extends ScVhdl {
     ScCondition_clause condition = null;
     ScTimeout_clause timeout = null;
     public ScWait_statement(ASTNode node) {
-        super(node);
+        super(node, true);
         assert(node.getId() == ASTWAIT_STATEMENT);
         for(int i = 0; i < node.getChildrenNum(); i++) {
             ASTNode c = (ASTNode)node.getChild(i);

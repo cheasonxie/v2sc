@@ -18,7 +18,7 @@ class ScGenerate_statement extends ScCommonIdentifier implements IScStatementBlo
     ScBlock_declarative_part declarative_part = null;
     ScArchitecture_statement_part statement_part = null;
     public ScGenerate_statement(ASTNode node) {
-        super(node);
+        super(node, true);
         assert(node.getId() == ASTGENERATE_STATEMENT);
         for(int i = 0; i < node.getChildrenNum(); i++) {
             ASTNode c = (ASTNode)node.getChild(i);
