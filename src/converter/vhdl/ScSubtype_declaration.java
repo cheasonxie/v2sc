@@ -1,6 +1,9 @@
 package converter.vhdl;
 
+import common.MyDebug;
+
 import parser.vhdl.ASTNode;
+import parser.vhdl.Symbol;
 
 
 /**
@@ -32,8 +35,23 @@ class ScSubtype_declaration extends ScVhdl {
     public String scString() {
         String ret = intent();
         ret += "typedef";
-        ret += " " + subtype.scString();
-        ret += " " + identifier.scString();
+        
+        String strType = subtype.type_mark.name.scString();
+        Symbol sym = (Symbol)parser.getSymbol(curNode, strType);
+        if(sym == null) {
+            MyDebug.printFileLine("subtype no correspond type!");
+            ret += " " + subtype.scString();
+            ret += " " + identifier.scString() + ";";
+            return ret;
+        }
+        
+        String fullType = sym.type;
+        ret += " " + subtype.subTypeString(fullType);
+        ret += " " + identifier;
+        
+        if(subtype.constraint != null && subtype.constraint.index != null) {
+            ret += encloseBracket(addOne(subtype.constraint.index.getMax()), "[]");
+        }
         ret += ";";
         return ret;
     }

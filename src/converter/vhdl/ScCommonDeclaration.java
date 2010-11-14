@@ -112,6 +112,21 @@ class ScCommonDeclaration extends ScVhdl {
             }
             if(i < items.size() - 1) {
                 ret += ", ";
+                if(curNode.isDescendantOf(ASTSUBPROGRAM_SPECIFICATION)) {
+                    if(mode != null) {
+                        if(mode.scString().equalsIgnoreCase(PORT_IN)) {
+                            ret += "const ";
+                        }
+                        ret += strType + " ";
+                        
+                        if(mode.scString().equalsIgnoreCase(PORT_OUT)
+                                || mode.scString().equalsIgnoreCase(PORT_INOUT)) {
+                            ret += "&";
+                        }
+                    }else {
+                        ret += strType + " ";
+                    }
+                }
             }
         }
         

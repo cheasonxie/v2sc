@@ -112,6 +112,19 @@ class ScSubtype_indication extends ScVhdl {
         }
     }
     
+    public String subTypeString(String type) {
+        String ret = "";
+        if(curNode.isDescendantOf(ASTSUBTYPE_DECLARATION)) {
+            ret += getReplaceType(type);
+            if(tolerance != null) {
+                warning("tolerance ignored");
+            }
+        }else {
+            ret = scString();
+        }
+        return ret;
+    }
+    
     public String scString() {
         String ret = "";
         if(constraint != null) {

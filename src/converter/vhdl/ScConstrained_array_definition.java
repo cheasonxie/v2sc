@@ -32,8 +32,8 @@ class ScConstrained_array_definition extends ScCommonIdentifier {
     public String scString() {
         String ret = intent() + "typedef ";
         ret += subtype.scString();
-        ret += encloseBracket(addOne(index_constraint.getMax()), "[]");
         ret += " " + identifier;
+        ret += encloseBracket(addOne(index_constraint.getMax()), "[]");
         return ret;
     }
 }

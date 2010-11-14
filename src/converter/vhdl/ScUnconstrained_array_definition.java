@@ -34,13 +34,14 @@ class ScUnconstrained_array_definition extends ScCommonIdentifier {
     }
 
     public String scString() {
-        String ret = intent();
+        String ret = intent() + "// Unconstrained_array_definition === ";
         if(indexItems.size() > 0) {
             warning("index_subtype_definition not supported");
         }
         ret += "typedef ";
         ret += subtype.scString();
         ret += " " + identifier;
+        
         return ret;
     }
 }
