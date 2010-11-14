@@ -83,7 +83,7 @@ class ScAggregate extends ScVhdl {
         
         
         String ret = "";
-        if(isArray)
+        if(isArray || recordTable != null)
             ret += "{";
         else if(elementList.size() > 1)
             ret += "(";
@@ -175,7 +175,7 @@ class ScAggregate extends ScVhdl {
         
 
         
-        if(isArray)
+        if(isArray || recordTable != null)
             ret += "}";
         else if(elementList.size() > 1)
             ret += ")";

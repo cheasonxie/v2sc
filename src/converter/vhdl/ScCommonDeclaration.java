@@ -84,22 +84,34 @@ class ScCommonDeclaration extends ScVhdl {
             if(strType.endsWith(">")) {
                 ret += " ";  // avoid double '>'
             }
-            ret += ">";
+            ret += "> ";
+        }else if(curNode.isDescendantOf(ASTSUBPROGRAM_SPECIFICATION)
+                && mode != null) {
+            // procedure
+            if(mode.scString().equalsIgnoreCase(PORT_IN)) {
+                ret += "const ";
+            }
+            ret += strType + " ";
+            
+            if(mode.scString().equalsIgnoreCase(PORT_OUT)
+                    || mode.scString().equalsIgnoreCase(PORT_INOUT)) {
+                ret += "&";
+            }
         }else {
-            ret += strType;
-        }        
+            ret += strType + " ";
+        }
         
         ArrayList<ScIdentifier> items = idList.getItems();
         for(int i = 0; i < items.size(); i++) {
-            ret += " " + items.get(i).scString();
+            ret += items.get(i).scString();
             if(!maxIndex.isEmpty()) {
                 ret += "(" + maxIndex + ")";
             }
-            if(expression != null) {
+            if(expression != null && !curNode.isDescendantOf(ASTSUBPROGRAM_BODY)) {
                 ret += " = " + expression.scString();
             }
             if(i < items.size() - 1) {
-                ret += ",";
+                ret += ", ";
             }
         }
         
