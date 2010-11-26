@@ -28,7 +28,7 @@ class ScCommonIdentifier extends ScVhdl {
                 return getWidth(sym.typeRange[0], sym.typeRange[2]);
             }
         }
-        return 0;
+        return 1;
     }
     
     public void setParam(String pa) {

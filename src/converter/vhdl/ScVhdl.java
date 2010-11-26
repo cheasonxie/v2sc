@@ -477,7 +477,7 @@ public class ScVhdl implements ScVhdlConstants, VhdlTokenConstants,
     }
     
     public int getBitWidth() {
-        return 0;
+        return 1;
     }
     
     protected String addLF(String str) {

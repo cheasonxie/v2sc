@@ -34,12 +34,7 @@ class ScProcess_declarative_part extends ScVhdl implements IScStatementBlock {
         String ret = "";
         for(int i = 0; i < items.size(); i++) {
             if(items.get(i).item instanceof ScSubprogram_body)
-                ret += ((ScSubprogram_body)items.get(i).item).getDeclaration();
-            else
-                ret += items.get(i).toString();
-            if(i < items.size() - 1) {
-                ret += "\r\n";
-            }
+                ret += ((ScSubprogram_body)items.get(i).item).getDeclaration() + "\r\n";
         }
         return ret;
     }
@@ -49,7 +44,12 @@ class ScProcess_declarative_part extends ScVhdl implements IScStatementBlock {
         String ret = "";
         for(int i = 0; i < items.size(); i++) {
             if(items.get(i).item instanceof ScSubprogram_body)
-                ret += ((ScSubprogram_body)items.get(i).item).getImplements() + "\r\n";
+                ret += ((ScSubprogram_body)items.get(i).item).getImplements();
+            else
+                ret += items.get(i).toString();
+            if(i < items.size() - 1) {
+                ret += "\r\n";
+            }
         }
         return ret;
     }

@@ -35,15 +35,10 @@ class ScPackage_body_declarative_part extends ScVhdl implements IScStatementBloc
     @Override
     public String getDeclaration() {
         String ret = "";
-        for(int i = 0; i < items.size(); i++) {
-            if(items.get(i).item instanceof ScSubprogram_body)
-                ret += ((ScSubprogram_body)items.get(i).item).getDeclaration();
-            else
-                ret += items.get(i).toString();
-            if(i < items.size() - 1) {
-                ret += "\r\n";
-            }
-        }
+        //for(int i = 0; i < items.size(); i++) {
+        //    if(items.get(i).item instanceof ScSubprogram_body)
+        //        ret += ((ScSubprogram_body)items.get(i).item).getDeclaration();
+        //}
         return ret;
     }
 
@@ -53,6 +48,11 @@ class ScPackage_body_declarative_part extends ScVhdl implements IScStatementBloc
         for(int i = 0; i < items.size(); i++) {
             if(items.get(i).item instanceof ScSubprogram_body)
                 ret += ((ScSubprogram_body)items.get(i).item).getImplements() + "\r\n";
+            else
+                ret += items.get(i).toString();
+            if(i < items.size() - 1) {
+                ret += "\r\n";
+            }
         }
         return ret;
     }
