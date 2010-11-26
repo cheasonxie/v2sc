@@ -1,3 +1,3 @@
 
-1. aggregate assignment converting
-2. fix subtype_indication parse
+1. 修改：数组赋值个数比定义的大
+
