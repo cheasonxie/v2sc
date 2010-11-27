@@ -85,6 +85,13 @@ class ScCommonDeclaration extends ScVhdl {
                 ret += " ";  // avoid double '>'
             }
             ret += "> ";
+        }else if(curNode.getId() == ASTSIGNAL_DECLARATION) {
+            ret += "sc_signal<";
+            ret += strType;
+            if(strType.endsWith(">")) {
+                ret += " ";  // avoid double '>'
+            }
+            ret += "> ";
         }else if(curNode.isDescendantOf(ASTSUBPROGRAM_SPECIFICATION)
                 && mode != null) {
             // procedure
