@@ -29,6 +29,7 @@ public interface ScVhdlConstants extends ScConstants
     static final int VHDL_REAL              = 10;
     static final int VHDL_SIGNED            = 11;
     static final int VHDL_UNSIGNED          = 12;
+    static final int VHDL_STRING            = 13;
     
     static final String[] vhdlTypes = 
     {
@@ -122,43 +123,6 @@ public interface ScVhdlConstants extends ScConstants
     static final String[] vhdlTimeScale = 
     {
         "ns", "us", "ms", "s",
-    };
-    
-    // rising/falling edge of signal
-    static final int EDGE_RISING = 0;
-    static final int EDGE_FALLING = 1;
-    static final String[] edgeFuncs = 
-    {
-        "rising_edge",
-        "falling_edge",
-    };
-    
-    static final String[] replaceEdge = 
-    {
-        "pos",
-        "neg",
-    };
-    
-    // some std_logic_1164 functions
-    static final String[] stdLogic1164Funcs = 
-    {
-        "to_bit",
-        "to_bitvector",
-        "to_stdULlogic",
-        "to_stdLogicVector",
-        "to_stdULogicVector",
-        "to_x01",
-        "to_x01z",
-        "to_ux01",
-
-        "is_x",
-   };
-    
-    // textio functions
-    static final String[] textioFuncs = 
-    {
-        "write", "writeline", "read", "readline",
-        "character",
     };
 }
 

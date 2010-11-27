@@ -57,7 +57,7 @@ class ScWait_statement extends ScVhdl {
                 }
             }
         }
-        ret += ");";
+        ret += ")";
         return ret;
     }
 
