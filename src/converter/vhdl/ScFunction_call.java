@@ -47,9 +47,9 @@ class ScFunction_call extends ScVhdl {
         if(param_part != null) {
             String tmp = param_part.scString();
             if(strName.equalsIgnoreCase("rising_edge")) {
-                ret += tmp + ".pos()";
+                ret += tmp + ".posedge()";
             }else if(strName.equalsIgnoreCase("falling_edge")) {
-                ret += tmp + ".neg()";
+                ret += tmp + ".negedge()";
             }else if(strName.equalsIgnoreCase("conv_integer")) {
                 ret += tmp + ".to_int()";
             }else {
