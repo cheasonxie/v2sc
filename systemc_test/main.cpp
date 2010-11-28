@@ -61,7 +61,7 @@ struct ahb_dma_in_type
         sc_trace(tf, v.size, name + ".size");
     }
 
-    inline friend ostream& operator << (ostream& os, const ahb_dma_in_type & v)
+   inline friend ostream& operator << (ostream& os, const ahb_dma_in_type & v)
     {
         os << "(" << std::dec << v.address << ", ";
         os << v.wdata << ", ";
@@ -154,21 +154,24 @@ SC_MODULE(ahbdma)
 
         if(rst == 1)
         {
-            vdmao.active = 0;
-            vdmao.haddr = 0;
+            vdmao.active.write(0);
+            vdmao.haddr.write(0);
         }
         else
         {
             if(dmai.read().irq == 1)
-                vdmao.active = 1;
+                vdmao.active.write(1);
             if(dmai.read().start == 1)
-                vdmao.rdata = dmai.read().address;
-            if(dmai.read().address == 0xff)
-                vdmao.mexc = 0;
+                vdmao.rdata.write(dmai.read().address);
+            if(dmai.read().address.read().to_int() == 0xff)
+                vdmao.mexc.write(0);
         }
 
         ldmao.write(vdmao);
+
+        ((ahb_dma_out_type &)dmao.read()).start.write((bool)0);
     }
+
 
     SC_CTOR(ahbdma)
     {
@@ -218,6 +221,8 @@ SC_MODULE(counter32)
     }
 };
 
+void testSigStrut();
+
 int sc_main(int argc, char *argv[])
 {
     sc_signal<bool> clk, rst, load;
@@ -231,6 +236,8 @@ int sc_main(int argc, char *argv[])
     sc_uint<32> ddd = 22;
     sc_uint<32> eee;
 
+    testSigStrut();
+#if 0
     int a0 = 0;
     long a1 = 0;
     double a2 = 0;
@@ -285,7 +292,99 @@ int sc_main(int argc, char *argv[])
     dma.rst(dmai.read().irq);
     dma.dmai(dmai);
     dma.dmao(dmao);
-
+#endif
     return 0;
 }
+
+
+
+
+
+
+
+
+struct SigStruct_t
+{
+    reg_uint<32> aaa;
+    reg_bool bbb;
+
+    inline bool operator == (const SigStruct_t& v) const
+    {
+        return ((aaa == v.aaa)
+                && (bbb == v.bbb));
+    }
+
+    inline bool operator != (const SigStruct_t& v) const
+    {
+        return (! operator == (v));
+    }
+
+    inline SigStruct_t& operator = (const SigStruct_t& v)
+    {
+        aaa = v.aaa;
+        bbb = v.bbb;
+        return *this;
+    }
+
+    inline friend void sc_trace(sc_trace_file *tf, const SigStruct_t& v,
+            const std::string& name)
+    {
+        sc_trace(tf, v.aaa, name + ".aaa");
+        sc_trace(tf, v.bbb, name + ".bbb");
+    }
+
+    inline friend ostream& operator << (ostream& os, const SigStruct_t& v)
+    {
+        os << "(" << std::boolalpha << v.aaa << ", ";
+        os << v.bbb << ", ";
+        return os;
+    }
+};
+
+
+SC_MODULE(m_testSigStrut)
+{
+    sc_in<bool> clk;
+    sc_out<SigStruct_t> sigstr_o;
+
+    sc_signal<SigStruct_t> sigstr;
+
+    void comp()
+    {
+        SigStruct_t &sigstr_s = (SigStruct_t &)sigstr.read();
+        sigstr_s.aaa.write(sigstr_s.aaa.read().to_int() + 1);
+        sigstr_s.bbb.write(!sigstr_s.bbb.read());
+
+        sigstr_o.write(sigstr);
+
+        cout << "old: aaa: " << sigstr.read().aaa;
+        cout << ", bbb: " << sigstr.read().bbb << endl;
+
+        cout << "new: aaa: " << sigstr_s.aaa;
+        cout << ", bbb: " << sigstr_s.bbb << endl;
+
+        cout << "out: aaa: " << sigstr_o.read().aaa;
+        cout << ", bbb: " << sigstr_o.read().bbb << endl;
+    }
+
+    SC_CTOR(m_testSigStrut)
+    {
+        SC_METHOD(comp);
+        sensitive << clk.pos();
+    }
+};
+
+void testSigStrut()
+{
+    sc_clock clk("clock", 20, SC_NS);
+    sc_signal<SigStruct_t> sigstr;
+
+    m_testSigStrut testsig("m_testSigStrut");
+    testsig.clk(clk);
+    testsig.sigstr_o(sigstr);
+
+    cout << "start:" << endl;
+    sc_start(200);
+}
+
 
