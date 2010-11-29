@@ -160,10 +160,9 @@ public:
     sc_uint<W>& operator ++ () // prefix
     {
         sc_uint<W> value = sc_signal<sc_uint<W> >::read();
-        sc_uint<W> value1(value);
         ++value;
         sc_signal<sc_uint<W> >::write(value);
-        return value1;
+        return value;
     }
 
     const sc_uint<W> operator ++ ( int ) // postfix
@@ -172,15 +171,15 @@ public:
         sc_uint<W> value1(value);
         value++;
         sc_signal<sc_uint<W> >::write(value);
-        return value;
+        return value1;
     }
 
     sc_uint<W>& operator -- () // prefix
     {
         sc_uint<W> value = sc_signal<sc_uint<W> >::read();
-        sc_uint<W> value1(value);
         --value;
-        sc_signal<sc_uint<W> >::write(value); return value1;
+        sc_signal<sc_uint<W> >::write(value);
+        return value;
     }
 
     const sc_uint<W> operator -- ( int ) // postfix
