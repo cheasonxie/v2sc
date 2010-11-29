@@ -28,6 +28,15 @@ public:
         : sc_signal<int>()
     { sc_signal<int>::m_cur_val = a.read(); }
 
+    reg_int( unsigned int a )
+        : sc_signal<int>()
+    { sc_signal<int>::m_cur_val = (int)a; }
+
+    reg_int( int a )
+        : sc_signal<int>()
+    { sc_signal<int>::m_cur_val = a; }
+
+
 
     // assignment operators
 
@@ -134,21 +143,45 @@ public:
 
     friend bool operator == ( const reg_int& a, const reg_int& b )
     { return a.read() == b.read(); }
+    friend bool operator == ( const reg_int& a, const int& b )
+    { return a.read() == b; }
+    friend bool operator == ( const int& a, const reg_int& b )
+    { return a == b.read(); }
 
     friend bool operator != ( const reg_int& a, const reg_int& b )
     { return a.read() != b.read(); }
+    friend bool operator != ( const reg_int& a, const int& b )
+    { return a.read() != b; }
+    friend bool operator != ( const int& a, const reg_int& b )
+    { return a != b.read(); }
 
     friend bool operator <  ( const reg_int& a, const reg_int& b )
     { return a.read() < b.read(); }
+    friend bool operator <  ( const reg_int& a, const int& b )
+    { return a.read() < b; }
+    friend bool operator <  ( const int& a, const reg_int& b )
+    { return a < b.read(); }
 
     friend bool operator <= ( const reg_int& a, const reg_int& b )
     { return a.read() <= b.read(); }
+    friend bool operator <= ( const reg_int& a, const int& b )
+    { return a.read() <= b; }
+    friend bool operator <= ( const int& a, const reg_int& b )
+    { return a <= b.read(); }
 
     friend bool operator >  ( const reg_int& a, const reg_int& b )
     { return a.read() > b.read(); }
+    friend bool operator >  ( const reg_int& a, const int& b )
+    { return a.read() > b; }
+    friend bool operator >  ( const int& a, const reg_int& b )
+    { return a > b.read(); }
 
     friend bool operator >= ( const reg_int& a, const reg_int& b )
     { return a.read() >= b.read(); }
+    friend bool operator >= ( const reg_int& a, const int& b )
+    { return a.read() >= b; }
+    friend bool operator >= ( const int& a, const reg_int& b )
+    { return a >= b.read(); }
 
     int to_int() const
     { return sc_signal<int>::read(); }

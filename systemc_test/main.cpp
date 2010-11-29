@@ -272,6 +272,16 @@ int sc_main(int argc, char *argv[])
     if(1 == aaa)
         printf("equal\n");
 
+    if(aaa1 == 1)
+        printf("equal\n");
+    if(1 == aaa1)
+        printf("equal\n");
+
+    if(aaa2 == 1)
+        printf("equal\n");
+    if(1 == aaa2)
+        printf("equal\n");
+
 
     int a0 = 0;
     long a1 = 0;

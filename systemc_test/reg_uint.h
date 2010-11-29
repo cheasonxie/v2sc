@@ -252,21 +252,45 @@ public:
 
     friend bool operator == ( const reg_uint& a, const reg_uint& b )
     { return a.read() == b.read(); }
+    friend bool operator == ( const reg_uint& a, const int& b )
+    { return a.read().to_int() == b; }
+    friend bool operator == ( const int& a, const reg_uint& b )
+    { return a == b.read().to_int(); }
 
     friend bool operator != ( const reg_uint& a, const reg_uint& b )
     { return a.read() != b.read(); }
+    friend bool operator != ( const reg_uint& a, const int& b )
+    { return a.read().to_int() != b; }
+    friend bool operator != ( const int& a, const reg_uint& b )
+    { return a != b.read().to_int(); }
 
     friend bool operator <  ( const reg_uint& a, const reg_uint& b )
     { return a.read() < b.read(); }
+    friend bool operator <  ( const reg_uint& a, const int& b )
+    { return a.read().to_int() < b; }
+    friend bool operator <  ( const int& a, const reg_uint& b )
+    { return a < b.read().to_int(); }
 
     friend bool operator <= ( const reg_uint& a, const reg_uint& b )
     { return a.read() <= b.read(); }
+    friend bool operator <= ( const reg_uint& a, const int& b )
+    { return a.read().to_int() <= b; }
+    friend bool operator <= ( const int& a, const reg_uint& b )
+    { return a <= b.read().to_int(); }
 
     friend bool operator >  ( const reg_uint& a, const reg_uint& b )
     { return a.read() > b.read(); }
+    friend bool operator >  ( const reg_uint& a, const int& b )
+    { return a.read().to_int() > b; }
+    friend bool operator >  ( const int& a, const reg_uint& b )
+    { return a > b.read().to_int(); }
 
     friend bool operator >= ( const reg_uint& a, const reg_uint& b )
     { return a.read() >= b.read(); }
+    friend bool operator >= ( const reg_uint& a, const int& b )
+    { return a.read().to_int() >= b; }
+    friend bool operator >= ( const int& a, const reg_uint& b )
+    { return a >= b.read().to_int(); }
 
 
     // bit selection

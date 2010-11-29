@@ -28,6 +28,14 @@ public:
         : sc_signal<bool>()
     { sc_signal<bool>::m_cur_val = a.read(); }
 
+    reg_bool( unsigned int a )
+        : sc_signal<bool>()
+    { sc_signal<bool>::m_cur_val = (bool)a; }
+
+    reg_bool( int a )
+        : sc_signal<bool>()
+    { sc_signal<bool>::m_cur_val = (bool)a; }
+
 
     // assignment operators
 
@@ -75,27 +83,17 @@ public:
     // relational operators
     friend bool operator == ( const reg_bool& a, const reg_bool& b )
     { return a.read() == b.read(); }
-
     friend bool operator == ( const reg_bool& a, const int& b )
     { return a.read() == b; }
-
     friend bool operator == ( const int& a, const reg_bool& b )
     { return a == b.read(); }
 
     friend bool operator != ( const reg_bool& a, const reg_bool& b )
     { return a.read() != b.read(); }
-
-    friend bool operator <  ( const reg_bool& a, const reg_bool& b )
-    { return a.read() < b.read(); }
-
-    friend bool operator <= ( const reg_bool& a, const reg_bool& b )
-    { return a.read() <= b.read(); }
-
-    friend bool operator >  ( const reg_bool& a, const reg_bool& b )
-    { return a.read() > b.read(); }
-
-    friend bool operator >= ( const reg_bool& a, const reg_bool& b )
-    { return a.read() >= b.read(); }
+    friend bool operator != ( const reg_bool& a, const int& b )
+    { return a.read() != b; }
+    friend bool operator != ( const int& a, const reg_bool& b )
+    { return a != b.read(); }
 
     int to_int() const
     { return (int)sc_signal<bool>::read(); }
