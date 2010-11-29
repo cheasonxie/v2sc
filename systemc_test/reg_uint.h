@@ -19,15 +19,15 @@ public:
 
     reg_uint()
         : sc_signal<sc_uint<W> >()
-    {}
+    { }
 
     reg_uint( uint_type v )
         : sc_signal<sc_uint<W> >()
-    {sc_signal<sc_uint<W> >::write(v);}
+    { sc_signal<sc_uint<W> >::write(v); }
 
     reg_uint( const reg_uint<W>& a )
         : sc_signal<sc_uint<W> >()
-    {sc_signal<sc_uint<W> >::write(a);}
+    { sc_signal<sc_uint<W> >::write(a); }
 
 
     // assignment operators
@@ -157,25 +157,40 @@ public:
 
     // prefix and postfix increment and decrement operators
 
-    reg_uint<W>& operator ++ () // prefix
-    { sc_uint<W> value = sc_signal<sc_uint<W> >::read();
-        value++;
-        sc_signal<sc_uint<W> >::write(value); return *this; }
-
-    const reg_uint<W> operator ++ ( int ) // postfix
-    { sc_uint<W> value = sc_signal<sc_uint<W> >::read();
+    sc_uint<W>& operator ++ () // prefix
+    {
+        sc_uint<W> value = sc_signal<sc_uint<W> >::read();
+        sc_uint<W> value1(value);
         ++value;
-        sc_signal<sc_uint<W> >::write(value); return *this; }
+        sc_signal<sc_uint<W> >::write(value);
+        return value1;
+    }
 
-    reg_uint<W>& operator -- () // prefix
-    { sc_uint<W> value = sc_signal<sc_uint<W> >::read();
-        value--;
-        sc_signal<sc_uint<W> >::write(value); return *this; }
+    const sc_uint<W> operator ++ ( int ) // postfix
+    {
+        sc_uint<W> value = sc_signal<sc_uint<W> >::read();
+        sc_uint<W> value1(value);
+        value++;
+        sc_signal<sc_uint<W> >::write(value);
+        return value1;
+    }
 
-    const reg_uint<W> operator -- ( int ) // postfix
-    { sc_uint<W> value = sc_signal<sc_uint<W> >::read();
+    sc_uint<W>& operator -- () // prefix
+    {
+        sc_uint<W> value = sc_signal<sc_uint<W> >::read();
+        sc_uint<W> value1(value);
         --value;
-        sc_signal<sc_uint<W> >::write(value); return *this; }
+        sc_signal<sc_uint<W> >::write(value); return value1;
+    }
+
+    const sc_uint<W> operator -- ( int ) // postfix
+    {
+        sc_uint<W> value = sc_signal<sc_uint<W> >::read();
+        sc_uint<W> value1(value);
+        value--;
+        sc_signal<sc_uint<W> >::write(value);
+        return value1;
+    }
 
     // relational operators
 
@@ -201,7 +216,7 @@ public:
     // bit selection
 
     sc_uint_bitref&         operator [] ( int i )
-    { return sc_signal<sc_uint<W> >::read()[i]; }
+    { return (sc_uint_bitref&)sc_signal<sc_uint<W> >::read()[i]; }
 
     const sc_uint_bitref_r& operator [] ( int i ) const
     { return sc_signal<sc_uint<W> >::read()[i];}
@@ -222,7 +237,7 @@ public:
     { return sc_signal<sc_uint<W> >::read()(left, right); }
 
     sc_uint_subref&         range( int left, int right )
-    { return sc_signal<sc_uint<W> >::read().range(left, right); }
+    { return (sc_uint_subref&)sc_signal<sc_uint<W> >::read().range(left, right); }
 
     const sc_uint_subref_r& range( int left, int right ) const
     { return sc_signal<sc_uint<W> >::read().range(left, right); }

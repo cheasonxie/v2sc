@@ -221,7 +221,8 @@ SC_MODULE(counter32)
     }
 };
 
-void testSigStrut();
+extern void testSigStrut();
+extern void test_reg_uint();
 
 int sc_main(int argc, char *argv[])
 {
@@ -235,6 +236,8 @@ int sc_main(int argc, char *argv[])
     sc_uint<32> ccc = 11;
     sc_uint<32> ddd = 22;
     sc_uint<32> eee;
+
+    test_reg_uint();
 
     testSigStrut();
 #if 0
@@ -385,6 +388,8 @@ void testSigStrut()
 
     cout << "start:" << endl;
     sc_start(200);
+
+    sc_stop();
 }
 
 
