@@ -54,8 +54,16 @@ SC_MODULE(testRegUint)
             cout << "8-v1: " << v1.to_int() << endl;
             break;
         case 9:
-            v1 = ((sc_uint<3>)5, v2.range(13, 0));
-            cout << "9-v1: " << v1 << endl;
+            v1 = ((sc_uint<4>)7, v2.range(3, 0), v1.range(7, 0));
+            cout << "9-v1: " << std::hex << v1 << endl;
+            break;
+        case 10:
+            cout << "100-v1: " << std::hex << v1 << endl;
+            v1.range(3, 0) = (sc_uint<3>)5;
+            cout << "101-v1: " << std::hex << v1 << endl;
+            break;
+        case 11:
+            cout << "11-v1: " << std::hex << v1 << endl;
             break;
         }
      }

@@ -172,7 +172,7 @@ public:
         sc_uint<W> value1(value);
         value++;
         sc_signal<sc_uint<W> >::write(value);
-        return value1;
+        return value;
     }
 
     sc_uint<W>& operator -- () // prefix
@@ -216,13 +216,15 @@ public:
     // bit selection
 
     sc_uint_bitref&         operator [] ( int i )
-    { return (sc_uint_bitref&)sc_signal<sc_uint<W> >::read()[i]; }
+    { sc_signal<sc_uint<W> >::request_update();
+        return sc_signal<sc_uint<W> >::m_new_val[i]; }
 
     const sc_uint_bitref_r& operator [] ( int i ) const
     { return sc_signal<sc_uint<W> >::read()[i];}
 
     sc_uint_bitref&         bit( int i )
-    { return sc_signal<sc_uint<W> >::read().bit(i); }
+    { sc_signal<sc_uint<W> >::request_update();
+        return sc_signal<sc_uint<W> >::m_new_val.bit(i); }
 
     const sc_uint_bitref_r& bit( int i ) const
     { return sc_signal<sc_uint<W> >::read().bit(i); }
@@ -231,13 +233,15 @@ public:
     // part selection
 
     sc_uint_subref&         operator () ( int left, int right )
-    { return sc_signal<sc_uint<W> >::read()(left, right); }
+    { sc_signal<sc_uint<W> >::request_update();
+        return sc_signal<sc_uint<W> >::m_new_val(left, right); }
 
     const sc_uint_subref_r& operator () ( int left, int right ) const
     { return sc_signal<sc_uint<W> >::read()(left, right); }
 
     sc_uint_subref&         range( int left, int right )
-    { return (sc_uint_subref&)sc_signal<sc_uint<W> >::read().range(left, right); }
+    { sc_signal<sc_uint<W> >::request_update();
+        return sc_signal<sc_uint<W> >::m_new_val.range(left, right); }
 
     const sc_uint_subref_r& range( int left, int right ) const
     { return sc_signal<sc_uint<W> >::read().range(left, right); }
