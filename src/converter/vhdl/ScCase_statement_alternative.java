@@ -52,8 +52,13 @@ class ScCase_statement_alternative extends ScVhdl {
             }
         }
         startIntentBlock();
-        ret += statementsString();
-        ret += intent() + "break;\r\n";
+        String tmp = statementsString(); 
+        if(!tmp.isEmpty()) {
+            ret += tmp;
+            ret += intent() + "break;\r\n";
+        }else {
+            ret += "\r\n";
+        }
         endIntentBlock();
         return ret;
     }
