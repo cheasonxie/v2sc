@@ -29,6 +29,63 @@ public:
         : sc_signal<sc_uint<W> >()
     { sc_signal<sc_uint<W> >::m_cur_val = a.read(); }
 
+    reg_uint( const sc_uint_base& a )
+        : sc_signal<sc_uint<W> >()
+    { sc_signal<sc_uint<W> >::m_cur_val = a; }
+
+    reg_uint( const sc_uint_subref_r& a )
+        : sc_signal<sc_uint<W> >()
+    { sc_signal<sc_uint<W> >::m_cur_val = a; }
+
+    template< class T >
+    reg_uint( const sc_generic_base<T>& a )
+        : sc_signal<sc_uint<W> >()
+    { sc_signal<sc_uint<W> >::m_cur_val = a; }
+
+    reg_uint( const sc_signed& a )
+        : sc_signal<sc_uint<W> >()
+    { sc_signal<sc_uint<W> >::m_cur_val = a; }
+
+    reg_uint( const sc_unsigned& a )
+        : sc_signal<sc_uint<W> >()
+    { sc_signal<sc_uint<W> >::m_cur_val = a; }
+
+    reg_uint( const sc_bv_base& a )
+        : sc_signal<sc_uint<W> >()
+    { sc_signal<sc_uint<W> >::m_cur_val = a; }
+
+    reg_uint( const sc_lv_base& a )
+        : sc_signal<sc_uint<W> >()
+    { sc_signal<sc_uint<W> >::m_cur_val = a; }
+
+    reg_uint( const char* a )
+        : sc_signal<sc_uint<W> >()
+    { sc_signal<sc_uint<W> >::m_cur_val = a; }
+
+    reg_uint( unsigned long a )
+        : sc_signal<sc_uint<W> >()
+    { sc_signal<sc_uint<W> >::m_cur_val = a; }
+
+    reg_uint( long a )
+        : sc_signal<sc_uint<W> >()
+    { sc_signal<sc_uint<W> >::m_cur_val = a; }
+
+    reg_uint( unsigned int a )
+        : sc_signal<sc_uint<W> >()
+    { sc_signal<sc_uint<W> >::m_cur_val = a; }
+
+    reg_uint( int a )
+        : sc_signal<sc_uint<W> >()
+    { sc_signal<sc_uint<W> >::m_cur_val = a; }
+
+    reg_uint( int64 a )
+        : sc_signal<sc_uint<W> >()
+    { sc_signal<sc_uint<W> >::m_cur_val = a; }
+
+    reg_uint( double a )
+        : sc_signal<sc_uint<W> >()
+    { sc_signal<sc_uint<W> >::m_cur_val = a; }
+
 
     // assignment operators
 

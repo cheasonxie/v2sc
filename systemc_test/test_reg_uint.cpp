@@ -89,8 +89,16 @@ void test_reg_uint()
 {
     sc_clock clk("clock", 10, SC_NS);
     sc_signal<reg_uint<16> > regUint;
+
+    int a = 10;
+    char *b = "0001100";
+    sc_uint<16> c = 100;
+
     reg_uint<16> aaa(20);
-    reg_uint<16> bbb(aaa);
+    reg_uint<16> aaa0(aaa);
+    reg_uint<16> aaa1(a);
+    reg_uint<16> aaa2(b);
+    reg_uint<16> aaa3(c);
 
     testRegUint testreg("testRegUint");
     testreg.clk(clk);
