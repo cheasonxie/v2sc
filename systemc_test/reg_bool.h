@@ -8,94 +8,106 @@
 
 #include <systemc.h>
 
-using sc_dt::sc_concat_bool;
+using namespace sc_dt;
 
-class reg_bool : public sc_signal<bool>, public sc_concat_bool
+class reg_bool : public sc_signal<bool>
 {
 public:
 
     // constructors
-    reg_bool() {m_value = 0;}
 
-    reg_bool( bool v ) {m_value = v; update_signal();}
+    reg_bool()
+        : sc_signal<bool>()
+    { }
+
+    reg_bool( bool v )
+        : sc_signal<bool>()
+    { sc_signal<bool>::m_cur_val = v; }
 
     reg_bool( const reg_bool& a )
-    {m_value = a.m_value; update_signal();}
+        : sc_signal<bool>()
+    { sc_signal<bool>::m_cur_val = a.read(); }
 
 
     // assignment operators
-    reg_bool& operator = ( const reg_bool& a )
-    { m_value = a.m_value; update_signal(); return *this; }
 
-    reg_bool& operator = ( bool a )
-    { m_value = a; update_signal(); return *this; }
+    reg_bool& operator = ( bool v )
+    { sc_signal<bool>::write(v); return *this; }
 
+    reg_bool& operator = ( uint_type v )
+    { sc_signal<bool>::write((bool)v); return *this; }
+
+    reg_bool& operator = ( unsigned long a )
+    { sc_signal<bool>::write((bool)a); return *this; }
+
+    reg_bool& operator = ( long a )
+    { sc_signal<bool>::write((bool)a); return *this; }
+
+    reg_bool& operator = ( unsigned int a )
+    { sc_signal<bool>::write((bool)a); return *this; }
+
+    reg_bool& operator = ( int a )
+    { sc_signal<bool>::write((bool)a); return *this; }
+
+    reg_bool& operator = ( int64 a )
+    { sc_signal<bool>::write((bool)a); return *this; }
+
+    reg_bool& operator = ( double a )
+    { sc_signal<bool>::write((bool)a); return *this; }
 
     // bitwise assignment operators
-    reg_bool& operator &= ( bool v )
-    { m_value &= v; update_signal(); return *this; }
 
-    reg_bool& operator &= ( reg_bool v )
-    { m_value &= v.m_value; update_signal(); return *this; }
+    reg_bool& operator &= ( uint_type v )
+    { int value = sc_signal<bool>::read();
+        sc_signal<bool>::write(value&v); return *this; }
 
-    reg_bool& operator |= ( bool v )
-    { m_value |= v; update_signal(); return *this; }
+    reg_bool& operator |= ( uint_type v )
+    { int value = sc_signal<bool>::read();
+        sc_signal<bool>::write(value|v); return *this; }
 
-    reg_bool& operator |= ( reg_bool v )
-    { m_value |= v.m_value; update_signal(); return *this; }
+    reg_bool& operator ^= ( uint_type v )
+    { int value = sc_signal<bool>::read();
+        sc_signal<bool>::write(value^v); return *this; }
 
-    reg_bool& operator ^= ( bool v )
-    { m_value ^= v; update_signal(); return *this; }
+    bool operator ! ()
+    { return !sc_signal<bool>::read(); }
 
-    reg_bool& operator ^= ( reg_bool v )
-    { m_value ^= v.m_value; update_signal(); return *this; }
+    // relational operators
+    friend bool operator == ( const reg_bool& a, const reg_bool& b )
+    { return a.read() == b.read(); }
 
-    // implement signal trace
-    inline friend void sc_trace(sc_trace_file *tf, const reg_bool & v,
-            const std::string& name )
-    {
-        sc_trace(tf, v.m_value, name + ".m_value");
-    }
+    friend bool operator != ( const reg_bool& a, const reg_bool& b )
+    { return a.read() != b.read(); }
 
-    // implement interface of signal
-    // write the new value
-    virtual void write( reg_bool& a )
-    { reg_bool::operator = (a); update_signal();}
+    friend bool operator <  ( const reg_bool& a, const reg_bool& b )
+    { return a.read() < b.read(); }
 
-    virtual void write( const bool& a )
-    { reg_bool::operator = (a); update_signal();}
+    friend bool operator <= ( const reg_bool& a, const reg_bool& b )
+    { return a.read() <= b.read(); }
 
-    // iostream
-    void print( ::std::ostream& os = ::std::cout ) const
-    {
-        os << m_value;
-    }
-    void scan( ::std::istream& is = ::std::cin )
-    {
-        std::string s;
-        is >> s;
-        *this = s.c_str();
-    }
+    friend bool operator >  ( const reg_bool& a, const reg_bool& b )
+    { return a.read() > b.read(); }
 
-protected:
+    friend bool operator >= ( const reg_bool& a, const reg_bool& b )
+    { return a.read() >= b.read(); }
 
-    void update_signal() {sc_signal<bool>::write(m_value);}
+    int to_int() const
+    { return (int)sc_signal<bool>::read(); }
 };
 
 inline
-::std::ostream&
-operator << ( ::std::ostream& os, const reg_bool& a )
+const
+sc_dt::sc_concatref& operator , (const reg_bool& a, reg_bool& b)
 {
-    a.print( os );
-    return os;
-}
+    const sc_dt::sc_concat_bool* a_p;      // Proxy for boolean value.
+    const sc_dt::sc_concat_bool* b_p;      // Proxy for boolean value.
+    sc_dt::sc_concatref*         result_p; // Proxy for the concatenation.
 
-inline
-::std::istream&
-operator >> ( ::std::istream& is, reg_bool& a )
-{
-    a.scan( is );
-    return is;
+    a_p = sc_dt::sc_concat_bool::allocate(a.read());
+    b_p = sc_dt::sc_concat_bool::allocate(b.read());
+    result_p = sc_dt::sc_concatref::m_pool.allocate();
+    result_p->initialize( *a_p, *b_p );
+    return *result_p;
 }
 
 #endif /* __REG_BOOL_H__ */

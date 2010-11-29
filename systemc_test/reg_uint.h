@@ -23,11 +23,11 @@ public:
 
     reg_uint( uint_type v )
         : sc_signal<sc_uint<W> >()
-    { sc_signal<sc_uint<W> >::write(v); }
+    { sc_signal<sc_uint<W> >::m_cur_val = v; }
 
     reg_uint( const reg_uint<W>& a )
         : sc_signal<sc_uint<W> >()
-    { sc_signal<sc_uint<W> >::write(a); }
+    { sc_signal<sc_uint<W> >::m_cur_val = a.read(); }
 
 
     // assignment operators

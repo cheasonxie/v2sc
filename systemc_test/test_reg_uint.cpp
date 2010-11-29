@@ -8,6 +8,7 @@ SC_MODULE(testRegUint)
     sc_out<reg_uint<16> > out;
 
     reg_uint<16> v1, v2;
+    reg_uint<8> v3;
     int iv1, iv2;
     int count;
 
@@ -22,6 +23,7 @@ SC_MODULE(testRegUint)
         case 0:
             v1 = iv1;
             v2 = iv2;
+            v3 = iv2;
             cout << "0-v1: " << v1 << endl;
             break;
         case 1:
@@ -58,12 +60,16 @@ SC_MODULE(testRegUint)
             cout << "9-v1: " << std::hex << v1 << endl;
             break;
         case 10:
-            cout << "100-v1: " << std::hex << v1 << endl;
-            v1.range(3, 0) = (sc_uint<3>)5;
-            cout << "101-v1: " << std::hex << v1 << endl;
+            v1 = ((sc_uint<4>)7, v3, v1.range(3, 0));
+            cout << "10-v1: " << std::hex << v1 << endl;
             break;
         case 11:
-            cout << "11-v1: " << std::hex << v1 << endl;
+            cout << "110-v1: " << std::hex << v1 << endl;
+            v1.range(3, 0) = (sc_uint<3>)5;
+            cout << "111-v1: " << std::hex << v1 << endl;
+            break;
+        case 12:
+            cout << "12-v1: " << std::hex << v1 << endl;
             break;
         }
      }
@@ -92,6 +98,7 @@ void test_reg_uint()
 
     cout << "start: test_reg_uint" << endl;
     sc_start(500);
+    cout << "end: test_reg_uint" << endl;
 
     sc_stop();
 }

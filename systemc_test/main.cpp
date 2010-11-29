@@ -1,6 +1,7 @@
 
 #include <systemc.h>
 #include "reg_uint.h"
+#include "reg_int.h"
 #include "reg_bool.h"
 
 using sc_dt::sc_uint_bitref;
@@ -159,9 +160,9 @@ SC_MODULE(ahbdma)
         }
         else
         {
-            if(dmai.read().irq == 1)
+            if(dmai.read().irq == (reg_bool)1)
                 vdmao.active.write(1);
-            if(dmai.read().start == 1)
+            if(dmai.read().start == (reg_bool)1)
                 vdmao.rdata.write(dmai.read().address);
             if(dmai.read().address.read().to_int() == 0xff)
                 vdmao.mexc.write(0);
@@ -223,6 +224,17 @@ SC_MODULE(counter32)
 
 extern void testSigStrut();
 extern void test_reg_uint();
+extern void test_reg_int();
+extern void test_reg_bool();
+
+enum
+{
+    SIGSTRUCT = 1,
+    REG_UINT,
+    REG_INT,
+    REG_BOOL,
+};
+int testId = REG_UINT;
 
 int sc_main(int argc, char *argv[])
 {
@@ -237,10 +249,25 @@ int sc_main(int argc, char *argv[])
     sc_uint<32> ddd = 22;
     sc_uint<32> eee;
 
-    test_reg_uint();
+    reg_uint<5> aaa1;
+    reg_int aaa2;
 
-    testSigStrut();
-#if 0
+    switch(testId)
+    {
+    case SIGSTRUCT:
+        testSigStrut();
+        return 0;
+    case REG_UINT:
+        test_reg_uint();
+        return 0;
+    case REG_INT:
+        test_reg_int();
+        return 0;
+    case REG_BOOL:
+        return 0;
+    }
+
+
     int a0 = 0;
     long a1 = 0;
     double a2 = 0;
@@ -254,10 +281,14 @@ int sc_main(int argc, char *argv[])
     eee = bbb.read();
     aaa = 1;
     aaa0 = 1;
-    bbb.range(4, 0) = (aaa, aaa, 1, aaa, aaa);
+    bbb.range(4, 0) = (aaa1, aaa1, aaa1, aaa1, aaa2);
+    bbb.range(4, 0) = (aaa2, aaa2, aaa2, aaa2, aaa2);
+    bbb.range(4, 0) = (aaa2, aaa1, aaa2, aaa1, aaa2);
+    bbb.range(4, 0) = (aaa1, aaa2, aaa, aaa2, aaa1);
+    bbb.range(4, 0) = (aaa2, aaa1, aaa, aaa1, aaa2);
     cout << "b[0]:" << bbb[0] << ", b[1]:" << bbb[1] << ", b[2]:" << bbb[2];
     cout << ", b[3]:" << bbb[3] << ", b[4]:" << bbb[4] << endl;
-    bbb.range(4, 0) = (clk.read(), aaa0, aaa, aaa, 1);
+    bbb.range(4, 0) = (clk.read(), aaa0, aaa, aaa, (sc_uint<1>)1);
     cout << "b[0]:" << bbb[0] << ", b[1]:" << bbb[1] << ", b[2]:" << bbb[2];
     cout << ", b[3]:" << bbb[3] << ", b[4]:" << bbb[4] << endl;
     ccc.range(4, 0) = ((reg_bool)aaa0, aaa, (reg_bool)aaa0, (reg_bool)aaa0,
@@ -295,7 +326,7 @@ int sc_main(int argc, char *argv[])
     dma.rst(dmai.read().irq);
     dma.dmai(dmai);
     dma.dmao(dmao);
-#endif
+
     return 0;
 }
 
@@ -379,6 +410,7 @@ SC_MODULE(m_testSigStrut)
 
 void testSigStrut()
 {
+    cout << "testSigStrut" << endl;
     sc_clock clk("clock", 20, SC_NS);
     sc_signal<SigStruct_t> sigstr;
 
