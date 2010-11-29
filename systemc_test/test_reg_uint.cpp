@@ -100,6 +100,9 @@ void test_reg_uint()
     reg_uint<16> aaa2(b);
     reg_uint<16> aaa3(c);
 
+    aaa = aaa + 1;
+    aaa = aaa * 2;
+
     testRegUint testreg("testRegUint");
     testreg.clk(clk);
     testreg.out(regUint);

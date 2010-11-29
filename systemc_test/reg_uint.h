@@ -182,6 +182,22 @@ public:
         value %= v;
         sc_signal<sc_uint<W> >::write(value); return *this; }
 
+    // arithmetic operators
+    reg_uint<W>& operator + ( uint_type v )
+    { return (sc_signal<sc_uint<W> >::read() + v); }
+
+    reg_uint<W>& operator - ( uint_type v )
+    { return (sc_signal<sc_uint<W> >::read() - v); }
+
+    reg_uint<W>& operator * ( uint_type v )
+    { return (sc_signal<sc_uint<W> >::read() * v); }
+
+    reg_uint<W>& operator / ( uint_type v )
+    { return (sc_signal<sc_uint<W> >::read() / v); }
+
+    reg_uint<W>& operator % ( uint_type v )
+    { return (sc_signal<sc_uint<W> >::read() % v); }
+
 
     // bitwise assignment operators
 
@@ -210,6 +226,23 @@ public:
     { sc_uint<W> value = sc_signal<sc_uint<W> >::read();
         value >>= v;
         sc_signal<sc_uint<W> >::write(value); return *this; }
+
+    // bitwise operators
+
+    reg_uint<W>& operator & ( uint_type v )
+    { return (sc_signal<sc_uint<W> >::read() & v); }
+
+    reg_uint<W>& operator | ( uint_type v )
+    { return (sc_signal<sc_uint<W> >::read() | v); }
+
+    reg_uint<W>& operator ^ ( uint_type v )
+    { return (sc_signal<sc_uint<W> >::read() ^ v); }
+
+    reg_uint<W>& operator << ( uint_type v )
+    { return (sc_signal<sc_uint<W> >::read() << v); }
+
+    reg_uint<W>& operator >> ( uint_type v )
+    { return (sc_signal<sc_uint<W> >::read() >> v); }
 
 
     // prefix and postfix increment and decrement operators
@@ -256,6 +289,20 @@ public:
     { return a.read().to_int() == b; }
     friend bool operator == ( const int& a, const reg_uint& b )
     { return a == b.read().to_int(); }
+    friend bool operator == ( const sc_uint_subref_r& a, const int& b )
+    { return a.to_int() == b; }
+    friend bool operator == ( const int& a, const sc_uint_subref_r& b )
+    { return a == b.to_int(); }
+    friend bool operator == ( const sc_uint_subref_r& a, const sc_uint_subref_r& b )
+    { return a.to_int() == b.to_int(); }
+    friend bool operator == ( const int& a, const sc_uint_base& b )
+    { return a == b.to_int(); }
+    friend bool operator == ( const sc_uint_base& a, const int& b )
+    { return a.to_int() == b; }
+    friend bool operator == ( const sc_uint_base& a, const sc_uint_subref_r& b )
+    { return a.to_int() == b.to_int(); }
+    friend bool operator == ( const sc_uint_subref_r& a, const sc_uint_base& b )
+    { return a.to_int() == b.to_int(); }
 
     friend bool operator != ( const reg_uint& a, const reg_uint& b )
     { return a.read() != b.read(); }
@@ -263,6 +310,16 @@ public:
     { return a.read().to_int() != b; }
     friend bool operator != ( const int& a, const reg_uint& b )
     { return a != b.read().to_int(); }
+    friend bool operator != ( const sc_uint_subref_r& a, const int& b )
+    { return a.to_int() != b; }
+    friend bool operator != ( const int& a, const sc_uint_subref_r& b )
+    { return a != b.to_int(); }
+    friend bool operator != ( const sc_uint_subref_r& a, const sc_uint_subref_r& b )
+    { return a.to_int() != b.to_int(); }
+    friend bool operator != ( const int& a, const sc_uint_base& b )
+    { return a != b.to_int(); }
+    friend bool operator != ( const sc_uint_base& a, const int& b )
+    { return a.to_int() != b; }
 
     friend bool operator <  ( const reg_uint& a, const reg_uint& b )
     { return a.read() < b.read(); }
