@@ -1,5 +1,5 @@
 /*
- * reg_uint: inheritance of sc_signal and sc_uint_base
+ * reg_uint: inheritance of sc_signal
  * operate the same as sc_uint, but can be used as signal
  */
 
@@ -8,10 +8,7 @@
 
 #include <systemc.h>
 
-using sc_dt::sc_uint_base;
-using sc_dt::sc_generic_base;
-using sc_dt::sc_uint_subref_r;
-using sc_dt::uint_type;
+using namespace sc_dt;
 
 template<int W>
 class reg_uint : public sc_signal<sc_uint<W> >
@@ -105,75 +102,175 @@ public:
 
     reg_uint<W>& operator += ( uint_type v )
     { sc_uint<W> value = sc_signal<sc_uint<W> >::read();
-        sc_signal<sc_uint<W> >::write(value+v); return *this; }
+        value += v;
+        sc_signal<sc_uint<W> >::write(value); return *this; }
 
     reg_uint<W>& operator -= ( uint_type v )
     { sc_uint<W> value = sc_signal<sc_uint<W> >::read();
-        sc_signal<sc_uint<W> >::write(value-v); return *this; }
+        value -= v;
+        sc_signal<sc_uint<W> >::write(value); return *this; }
 
     reg_uint<W>& operator *= ( uint_type v )
     { sc_uint<W> value = sc_signal<sc_uint<W> >::read();
-        sc_signal<sc_uint<W> >::write(value*v); return *this; }
+        value *= v;
+        sc_signal<sc_uint<W> >::write(value); return *this; }
 
     reg_uint<W>& operator /= ( uint_type v )
     { sc_uint<W> value = sc_signal<sc_uint<W> >::read();
-        sc_signal<sc_uint<W> >::write(value/v); return *this; }
+        value /= v;
+        sc_signal<sc_uint<W> >::write(value); return *this; }
 
     reg_uint<W>& operator %= ( uint_type v )
     { sc_uint<W> value = sc_signal<sc_uint<W> >::read();
-        sc_signal<sc_uint<W> >::write(value%v); return *this; }
+        value %= v;
+        sc_signal<sc_uint<W> >::write(value); return *this; }
 
 
     // bitwise assignment operators
 
     reg_uint<W>& operator &= ( uint_type v )
     { sc_uint<W> value = sc_signal<sc_uint<W> >::read();
-        sc_signal<sc_uint<W> >::write(value&v); return *this; }
+        value &= v;
+        sc_signal<sc_uint<W> >::write(value); return *this; }
 
     reg_uint<W>& operator |= ( uint_type v )
     { sc_uint<W> value = sc_signal<sc_uint<W> >::read();
-        sc_signal<sc_uint<W> >::write(value|v); return *this; }
+        value |= v;
+        sc_signal<sc_uint<W> >::write(value); return *this; }
 
     reg_uint<W>& operator ^= ( uint_type v )
     { sc_uint<W> value = sc_signal<sc_uint<W> >::read();
-        sc_signal<sc_uint<W> >::write(value^v); return *this; }
+        value ^= v;
+        sc_signal<sc_uint<W> >::write(value); return *this; }
 
 
     reg_uint<W>& operator <<= ( uint_type v )
     { sc_uint<W> value = sc_signal<sc_uint<W> >::read();
-        sc_signal<sc_uint<W> >::write(value<<v); return *this; }
+        value <<= v;
+        sc_signal<sc_uint<W> >::write(value); return *this; }
 
     reg_uint<W>& operator >>= ( uint_type v )
     { sc_uint<W> value = sc_signal<sc_uint<W> >::read();
-        sc_signal<sc_uint<W> >::write(value>>v); return *this; }
+        value >>= v;
+        sc_signal<sc_uint<W> >::write(value); return *this; }
 
 
     // prefix and postfix increment and decrement operators
 
     reg_uint<W>& operator ++ () // prefix
     { sc_uint<W> value = sc_signal<sc_uint<W> >::read();
-        sc_signal<sc_uint<W> >::write(value++); return *this; }
+        value++;
+        sc_signal<sc_uint<W> >::write(value); return *this; }
 
     const reg_uint<W> operator ++ ( int ) // postfix
     { sc_uint<W> value = sc_signal<sc_uint<W> >::read();
-        sc_signal<sc_uint<W> >::write(++value); return *this; }
+        ++value;
+        sc_signal<sc_uint<W> >::write(value); return *this; }
 
     reg_uint<W>& operator -- () // prefix
     { sc_uint<W> value = sc_signal<sc_uint<W> >::read();
-        sc_signal<sc_uint<W> >::write(value--); return *this; }
+        value--;
+        sc_signal<sc_uint<W> >::write(value); return *this; }
 
     const reg_uint<W> operator -- ( int ) // postfix
     { sc_uint<W> value = sc_signal<sc_uint<W> >::read();
-        sc_signal<sc_uint<W> >::write(--value); return *this; }
+        --value;
+        sc_signal<sc_uint<W> >::write(value); return *this; }
 
-    // compare operators
-    const bool operator == (reg_uint<W> &v)
-    { return (sc_signal<sc_uint<W> >::read() == v.read()); }
+    // relational operators
 
-    const bool operator == (uint_type v)
-    { return (sc_signal<sc_uint<W> >::read().to_int() == v); }
+    friend bool operator == ( const reg_uint& a, const reg_uint& b )
+    { return a.read() == b.read(); }
 
-    // convert to primitive type
+    friend bool operator != ( const reg_uint& a, const reg_uint& b )
+    { return a.read() != b.read(); }
+
+    friend bool operator <  ( const reg_uint& a, const reg_uint& b )
+    { return a.read() < b.read(); }
+
+    friend bool operator <= ( const reg_uint& a, const reg_uint& b )
+    { return a.read() <= b.read(); }
+
+    friend bool operator >  ( const reg_uint& a, const reg_uint& b )
+    { return a.read() > b.read(); }
+
+    friend bool operator >= ( const reg_uint& a, const reg_uint& b )
+    { return a.read() >= b.read(); }
+
+
+    // bit selection
+
+    sc_uint_bitref&         operator [] ( int i )
+    { return sc_signal<sc_uint<W> >::read()[i]; }
+
+    const sc_uint_bitref_r& operator [] ( int i ) const
+    { return sc_signal<sc_uint<W> >::read()[i];}
+
+    sc_uint_bitref&         bit( int i )
+    { return sc_signal<sc_uint<W> >::read().bit(i); }
+
+    const sc_uint_bitref_r& bit( int i ) const
+    { return sc_signal<sc_uint<W> >::read().bit(i); }
+
+
+    // part selection
+
+    sc_uint_subref&         operator () ( int left, int right )
+    { return sc_signal<sc_uint<W> >::read()(left, right); }
+
+    const sc_uint_subref_r& operator () ( int left, int right ) const
+    { return sc_signal<sc_uint<W> >::read()(left, right); }
+
+    sc_uint_subref&         range( int left, int right )
+    { return sc_signal<sc_uint<W> >::read().range(left, right); }
+
+    const sc_uint_subref_r& range( int left, int right ) const
+    { return sc_signal<sc_uint<W> >::read().range(left, right); }
+
+
+    // bit access, without bounds checking or sign extension
+
+    bool test( int i ) const
+    { return sc_signal<sc_uint<W> >::read().test(i); }
+
+    void set( int i )
+    { sc_uint<W> value = sc_signal<sc_uint<W> >::read();
+        value.set(i);
+        sc_signal<sc_uint<W> >::write(value); }
+
+    void set( int i, bool v )
+    { sc_uint<W> value = sc_signal<sc_uint<W> >::read();
+        value.set(i, v);
+        sc_signal<sc_uint<W> >::write(value); }
+
+
+    // capacity
+
+    int length() const
+    { return sc_signal<sc_uint<W> >::read().length(); }
+
+    // reduce methods
+
+    bool and_reduce() const
+    { return sc_signal<sc_uint<W> >::read().and_reduce(); }
+
+    bool nand_reduce() const
+    { return ( ! and_reduce() ); }
+
+    bool or_reduce() const
+    { return sc_signal<sc_uint<W> >::read().or_reduce(); }
+
+    bool nor_reduce() const
+    { return ( ! or_reduce() ); }
+
+    bool xor_reduce() const
+    { return sc_signal<sc_uint<W> >::read().xor_reduce(); }
+
+    bool xnor_reduce() const
+    { return ( ! xor_reduce() ); }
+
+
+    // implicit conversion to uint_type
     int to_int() const
     { return sc_signal<sc_uint<W> >::read().to_int(); }
 
