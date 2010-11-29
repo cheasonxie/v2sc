@@ -76,6 +76,12 @@ public:
     friend bool operator == ( const reg_bool& a, const reg_bool& b )
     { return a.read() == b.read(); }
 
+    friend bool operator == ( const reg_bool& a, const int& b )
+    { return a.read() == b; }
+
+    friend bool operator == ( const int& a, const reg_bool& b )
+    { return a == b.read(); }
+
     friend bool operator != ( const reg_bool& a, const reg_bool& b )
     { return a.read() != b.read(); }
 
@@ -97,7 +103,7 @@ public:
 
 inline
 const
-sc_dt::sc_concatref& operator , (const reg_bool& a, reg_bool& b)
+sc_dt::sc_concatref& operator , (const reg_bool& a, const reg_bool& b)
 {
     const sc_dt::sc_concat_bool* a_p;      // Proxy for boolean value.
     const sc_dt::sc_concat_bool* b_p;      // Proxy for boolean value.

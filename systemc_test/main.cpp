@@ -242,7 +242,7 @@ int sc_main(int argc, char *argv[])
     sc_signal<sc_uint<32> >  d, q;
     sc_signal<ahb_dma_in_type> dmai;
     sc_signal<ahb_dma_out_type> dmao;
-    reg_bool aaa;
+    reg_bool aaa = 0;
     bool aaa0;
     reg_uint<32> bbb;
     sc_uint<32> ccc = 11;
@@ -261,11 +261,16 @@ int sc_main(int argc, char *argv[])
         test_reg_uint();
         return 0;
     case REG_INT:
-        test_reg_int();
+        //test_reg_int();
         return 0;
     case REG_BOOL:
         return 0;
     }
+
+    if(aaa == 1)
+        printf("equal\n");
+    if(1 == aaa)
+        printf("equal\n");
 
 
     int a0 = 0;

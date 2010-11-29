@@ -156,7 +156,7 @@ public:
 
 inline
 const
-sc_dt::sc_concatref& operator , (const reg_int& a, reg_int& b)
+sc_dt::sc_concatref& operator , (const reg_int& a, const reg_int& b)
 {
     sc_int<32> a_i(a.read());   // integer always 32 bits
     sc_int<32> b_i(b.read());   // integer always 32 bits
