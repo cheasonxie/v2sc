@@ -109,9 +109,10 @@ class ScRecord_type_definition extends ScCommonIdentifier {
         boolean boolSet = false;
         for(int i = 0; i < elements.size(); i++) {
             ScElement_declaration decl = elements.get(i);
+            String type = decl.sub.scString();
             for(int j = 0; j < decl.idList.items.size(); j++) {
                 String iden = decl.idList.items.get(j).scString();
-                if(iden.equals(scType[SC_BOOL]) && !boolSet) {
+                if(type.equals(scType[SC_BOOL]) && !boolSet) {
                     ret += " << std::boolalpha";
                     boolSet = true;
                 }
