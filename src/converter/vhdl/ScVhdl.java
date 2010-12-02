@@ -260,10 +260,6 @@ public class ScVhdl implements ScVhdlConstants, VhdlTokenConstants,
         if (!isRangeValid(range)) {
             if (ret.equals(scType[SC_UINT]))
                 ret = "sc_uint_base";
-            if(curNode.isDescendantOf(ASTRECORD_TYPE_DEFINITION)) {
-                ret = ret.replace("sc_uint_base", "reg_uint");
-                ret = ret.replace(scType[SC_BOOL], "reg_bool");
-            }
             return ret;
         }
 
@@ -280,11 +276,6 @@ public class ScVhdl implements ScVhdlConstants, VhdlTokenConstants,
             ret += encloseBracket(addOne(max), "<>");
         else
             ret += encloseBracket(addOne(max), "[]");
-        
-        if(curNode.isDescendantOf(ASTRECORD_TYPE_DEFINITION)) {
-            ret = ret.replace(scType[SC_UINT], "reg_uint");
-            ret = ret.replace(scType[SC_BOOL], "reg_bool");
-        }
         
         return ret;
     }

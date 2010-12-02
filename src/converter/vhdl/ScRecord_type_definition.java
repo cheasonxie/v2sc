@@ -30,17 +30,115 @@ class ScRecord_type_definition extends ScCommonIdentifier {
             }
         }
     }
+    
+    // operator ==
+    String equalOp()
+    {
+        String ret = intent() + "inline bool operator == ";
+        ret += "(const " + identifier + "& rhs) const\r\n";
+        ret += startIntentBraceBlock();
+        ret += intent() + "return (";
+        for(int i = 0; i < elements.size(); i++) {
+            ScElement_declaration decl = elements.get(i);
+            for(int j = 0; j < decl.idList.items.size(); j++) {
+                String iden = decl.idList.items.get(j).scString();
+                ret += "(rhs." + iden + " == " + iden + ")";
+                if(i < elements.size()-1 && j < decl.idList.items.size()-1) {
+                    ret += " && ";
+                }
+            }
+            if(i < elements.size()-1) {
+                ret += " && ";
+            }
+        }
+        ret += ");\r\n";
+        ret += endIntentBraceBlock();
+        return ret;
+    }
+    
+    // operator =
+    String assignmentOp()
+    {
+        String ret = intent() + "inline " + identifier + "& operator = ";
+        ret += "(const " + identifier + "& rhs)\r\n";
+        ret += startIntentBraceBlock();
+        for(int i = 0; i < elements.size(); i++) {
+            ScElement_declaration decl = elements.get(i);
+            for(int j = 0; j < decl.idList.items.size(); j++) {
+                String iden = decl.idList.items.get(j).scString();
+                ret += addLFIntent(iden + " = " + "rhs." + iden + ";");
+            }
+        }
+        ret += intent() + "return *this;\r\n";
+        ret += endIntentBraceBlock();
+        return ret;
+    }
+    
+    // override sc_trace
+    String traceMethod()
+    {
+        String ret = intent() + "inline friend void sc_trace(";
+        ret += "sc_trace_file *tf";
+        ret += ", const " + identifier + "& v";
+        ret += ", const std::string& name";
+        ret += ")\r\n";
+        ret += startIntentBraceBlock();
+        for(int i = 0; i < elements.size(); i++) {
+            ScElement_declaration decl = elements.get(i);
+            for(int j = 0; j < decl.idList.items.size(); j++) {
+                String iden = decl.idList.items.get(j).scString();
+                String strTmp = "sc_trace(tf, " + "v." + iden + ", "
+                            + "name + \"." + iden + "\");";
+                ret += addLFIntent(strTmp);
+            }
+        }
+        ret += endIntentBraceBlock();
+        return ret;
+    }
+    
+    // operator <<
+    String ostreamOp()
+    {
+        String ret = intent() + "inline friend ostream& operator << (";
+        ret += "ostream& os";
+        ret += ", const " + identifier + "& v";
+        ret += ")\r\n";
+        ret += startIntentBraceBlock();
+        ret += intent() + "os << \"(\"";
+        
+        boolean boolSet = false;
+        for(int i = 0; i < elements.size(); i++) {
+            ScElement_declaration decl = elements.get(i);
+            for(int j = 0; j < decl.idList.items.size(); j++) {
+                String iden = decl.idList.items.get(j).scString();
+                if(iden.equals(scType[SC_BOOL]) && !boolSet) {
+                    ret += " << std::boolalpha";
+                    boolSet = true;
+                }
+                ret += " << " + "v." + iden;
+            }
+        }
+        ret += " << \")\";\r\n";
+        ret += intent() + "return os;\r\n";
+        ret += endIntentBraceBlock();
+        return ret;
+    }
 
     public String scString() {
         String ret = "";
-        ret += addLFIntent("typedef struct");
+        ret += addLFIntent("struct " + identifier);
 
         ret += startIntentBraceBlock();
         for(int i = 0; i < elements.size(); i++) {
             ret += addLFIntent(elements.get(i).toString());
         }
+        ret += "\r\n";
+        ret += addLF(equalOp());
+        ret += addLF(assignmentOp());
+        ret += addLF(traceMethod());
+        ret += addLF(ostreamOp());
         endIntentBlock();
-        ret += intent() + "}" + identifier;
+        ret += intent() + "}";
         return ret;
     }
 }
