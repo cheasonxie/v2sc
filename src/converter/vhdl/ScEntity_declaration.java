@@ -113,6 +113,9 @@ class ScEntity_declaration extends ScCommonIdentifier implements IScStatementBlo
         
         className = getName();
         if(header.generic != null) {
+            
+            curIndividual = false;
+            
             ret += "template<\r\n";
             startIntentBlock();
             ret += header.generic.toString();
@@ -125,8 +128,20 @@ class ScEntity_declaration extends ScCommonIdentifier implements IScStatementBlo
         ret += addLF(declarative_part.getDeclaration());
         ret += addLF(body.getDeclaration());
         ret += "\r\n" + addLF(getInitCode());   // add sc_ctor
+        
+        if(!curIndividual) {
+            // getImplements
+            ret += "\r\n\r\n";
+            ret += addLF(declarative_part.getImplements());
+            if(statement_part != null) {
+                ret += addLF(statement_part.toString());
+            }
+            ret += addLF(body.getImplements());
+        }
+        
         endIntentBlock();
         ret += "};\r\n";
+        
         return ret;
     }
 
@@ -134,7 +149,7 @@ class ScEntity_declaration extends ScCommonIdentifier implements IScStatementBlo
     public String getImplements()
     {
         String ret = "";
-        if(body == null) {
+        if(body == null || !curIndividual) {    // template class can only in one file
             return "";  //TODO no entity body, ignore
         }
         className = getName();

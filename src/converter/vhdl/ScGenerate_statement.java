@@ -103,7 +103,7 @@ class ScGenerate_statement extends ScCommonIdentifier implements IScStatementBlo
     public String getImplements() {
         String ret = "";
         ret += addPrevComment();
-        ret += getSpec(individual) + "\r\n";
+        ret += getSpec(curIndividual) + "\r\n";
         ret += startIntentBraceBlock();
         ret += addLF(scheme.toString());
         ret += startIntentBraceBlock();

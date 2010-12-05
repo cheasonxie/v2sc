@@ -122,8 +122,8 @@ public class Vhdl extends hdlConverter {
     {
         try {
             String buff = root.getImplements();
-            if(buff.isEmpty())
-                return;
+            //if(buff.isEmpty())
+            //    return;
             createFile(dstPath+".cpp", true);
             PrintStream fileBuff = new PrintStream(dstPath+".cpp");
             String path = dstPath+".h";

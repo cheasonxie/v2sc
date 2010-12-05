@@ -24,7 +24,16 @@ public class ScVhdl implements ScVhdlConstants, VhdlTokenConstants,
     protected static int curLevel = 0;    // intent level
     
     protected static String className = "entity"; // current entity or package name
-    protected static final boolean individual = true;  // whether create .cpp&.h or .h only
+    
+    /** whether create .cpp&.h or .h only */
+    protected static final boolean individual = true;
+    
+    /** whether this module is individual:
+     * <br>to package: = individual,
+     * <br>to generic entity: = false,
+     * <br>to non generic entity: = individual 
+     */ 
+    protected static boolean curIndividual = individual; 
     protected static boolean isCommonDeclaration = false;
     
     protected ASTNode curNode = null;

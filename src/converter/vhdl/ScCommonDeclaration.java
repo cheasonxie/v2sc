@@ -127,8 +127,8 @@ class ScCommonDeclaration extends ScVhdl {
                 ret += "(" + maxIndex + ")";
             }
             if(expression != null) {
-                IASTNode tmpNode = curNode.getAncestor(ASTSUBPROGRAM_SPECIFICATION);
-                if(tmpNode == null || tmpNode.getParent().getId() != ASTSUBPROGRAM_BODY) {
+                ASTNode tmpNode = (ASTNode)curNode.getAncestor(ASTSUBPROGRAM_SPECIFICATION);
+                if(tmpNode == null || !tmpNode.isDescendantOf(ASTPACKAGE_BODY)) {
                     ret += " = " + expression.scString();
                 }
             }

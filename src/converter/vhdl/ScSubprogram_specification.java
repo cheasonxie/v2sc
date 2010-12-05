@@ -51,7 +51,7 @@ class ScSubprogram_specification extends ScVhdl {
         }else {
             ret += "void ";
         }
-        if(isBody && individual) {
+        if(isBody && curIndividual) {
             ret += className + "::";
         }
         ret += designator.scString();
