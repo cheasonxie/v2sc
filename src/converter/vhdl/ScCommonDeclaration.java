@@ -1,5 +1,6 @@
 package converter.vhdl;
 
+import parser.IASTNode;
 import parser.vhdl.ASTNode;
 import java.util.ArrayList;
 
@@ -95,10 +96,21 @@ class ScCommonDeclaration extends ScVhdl {
         }else if(curNode.isDescendantOf(ASTSUBPROGRAM_SPECIFICATION)
                 && mode != null) {
             // procedure
-            if(mode.scString().equalsIgnoreCase(PORT_IN)) {
+            if(mode.scString().equalsIgnoreCase(PORT_IN) 
+                    && curNode.getId() != ASTINTERFACE_CONSTANT_DECLARATION) {
                 ret += "const ";
             }
-            ret += strType + " ";
+            
+            if(curNode.firstTokenImage().equalsIgnoreCase(tokenImage[SIGNAL])) {
+                ret += "sc_signal<";
+                ret += strType;
+                if(strType.endsWith(">")) {
+                    ret += " ";  // avoid double '>'
+                }
+                ret += "> ";
+            }else {
+                ret += strType + " ";
+            }
             
             if(mode.scString().equalsIgnoreCase(PORT_OUT)
                     || mode.scString().equalsIgnoreCase(PORT_INOUT)) {
@@ -114,8 +126,11 @@ class ScCommonDeclaration extends ScVhdl {
             if(!maxIndex.isEmpty()) {
                 ret += "(" + maxIndex + ")";
             }
-            if(expression != null && !curNode.isDescendantOf(ASTSUBPROGRAM_BODY)) {
-                ret += " = " + expression.scString();
+            if(expression != null) {
+                IASTNode tmpNode = curNode.getAncestor(ASTSUBPROGRAM_SPECIFICATION);
+                if(tmpNode == null || tmpNode.getParent().getId() != ASTSUBPROGRAM_BODY) {
+                    ret += " = " + expression.scString();
+                }
             }
             if(i < items.size() - 1) {
                 ret += ", ";

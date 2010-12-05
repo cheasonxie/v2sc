@@ -57,24 +57,23 @@ class ScWait_statement extends ScVhdl {
                 }
             }
         }
-        ret += ")";
+        ret += ");";
         return ret;
     }
 
     public String scString() {
         String ret = "";
         if(condition != null) {
-            ret += intent() + "do {\r\n";
+            ret += intent() + "while(!(";
+            ret += condition.scString();
+            ret += ")){\r\n";
             startIntentBlock();
             ret += getWaitString();
             endIntentBlock();
-            ret += "\r\n" + intent() + "}while(";
-            ret += condition.scString();
-            ret += ")";
+            ret += "\r\n" + intent() + "}";
         }else {
             ret += getWaitString();
         }
-        ret += ";";
         return ret;
     }
 }

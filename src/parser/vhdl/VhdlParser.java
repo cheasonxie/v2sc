@@ -3983,8 +3983,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         identifier_list(node, tmpToken);
         consumeToken(COLON);
         if(tokenMgr.getNextTokenKind() == IN) {
-            consumeToken(IN);
-            new ASTtoken(node, tokenImage[IN]);
+            mode(node, endToken);
         }
         
         tmpToken = findToken(ASSIGN, endToken);
@@ -4088,8 +4087,7 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         
         int kind = tokenMgr.getNextTokenKind();
         if(kind == IN || kind == OUT) {
-            consumeToken(kind);
-            new ASTtoken(node, tokenImage[kind]);
+            mode(node, endToken);
         }
         
         tmpToken = findToken(ASSIGN, endToken);

@@ -44,7 +44,7 @@ class ScSubprogram_body extends ScVhdl implements IScStatementBlock {
 
         ret += startIntentBraceBlock();
         ret += addLF(declarative_part.toString());
-        String[] lvars = getLoopVar();
+        String[] lvars = declarative_part.getLoopVar();
         if(lvars != null && lvars.length > 0) {
             ret += intent() + "int ";
             for(int i = 0; i < lvars.length; i++) {
@@ -55,6 +55,7 @@ class ScSubprogram_body extends ScVhdl implements IScStatementBlock {
             }
             ret += ";\r\n";
         }
+        ret += "\r\n";
         ret += addLF(statement_part.toString());
         ret += endIntentBraceBlock();
         return ret;
