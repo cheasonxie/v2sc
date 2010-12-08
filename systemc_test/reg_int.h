@@ -41,103 +41,77 @@ public:
     // assignment operators
 
     reg_int& operator = ( uint_type v )
-    { sc_signal<int>::write((int)v); return *this; }
+    { sc_signal<int>::m_cur_val = v; return *this; }
 
     reg_int& operator = ( unsigned long a )
-    { sc_signal<int>::write((int)a); return *this; }
+    { sc_signal<int>::m_cur_val = a; return *this; }
 
     reg_int& operator = ( long a )
-    { sc_signal<int>::write((int)a); return *this; }
+    { sc_signal<int>::m_cur_val = a; return *this; }
 
     reg_int& operator = ( unsigned int a )
-    { sc_signal<int>::write((int)a); return *this; }
+    { sc_signal<int>::m_cur_val = a; return *this; }
 
     reg_int& operator = ( int a )
-    { sc_signal<int>::write(a); return *this; }
+    { sc_signal<int>::m_cur_val = a; return *this; }
 
     reg_int& operator = ( int64 a )
-    { sc_signal<int>::write((int)a); return *this; }
+    { sc_signal<int>::m_cur_val = a; return *this; }
 
     reg_int& operator = ( double a )
-    { sc_signal<int>::write((int)a); return *this; }
+    { sc_signal<int>::m_cur_val = (int)a; return *this; }
 
 
     // arithmetic assignment operators
 
     reg_int& operator += ( uint_type v )
-    { int value = sc_signal<int>::read();
-        sc_signal<int>::write(value+v); return *this; }
+    { sc_signal<int>::m_cur_val += v; return *this; }
 
     reg_int& operator -= ( uint_type v )
-    { int value = sc_signal<int>::read();
-        sc_signal<int>::write(value-v); return *this; }
+    { sc_signal<int>::m_cur_val -= v; return *this; }
 
     reg_int& operator *= ( uint_type v )
-    { int value = sc_signal<int>::read();
-        sc_signal<int>::write(value*v); return *this; }
+    { sc_signal<int>::m_cur_val *= v; return *this; }
 
     reg_int& operator /= ( uint_type v )
-    { int value = sc_signal<int>::read();
-        sc_signal<int>::write(value/v); return *this; }
+    { sc_signal<int>::m_cur_val /= v; return *this; }
 
     reg_int& operator %= ( uint_type v )
-    { int value = sc_signal<int>::read();
-        sc_signal<int>::write(value%v); return *this; }
+    { sc_signal<int>::m_cur_val %= v; return *this; }
 
 
     // bitwise assignment operators
 
     reg_int& operator &= ( uint_type v )
-    { int value = sc_signal<int>::read();
-        sc_signal<int>::write(value&v); return *this; }
+    { sc_signal<int>::m_cur_val &= v; return *this; }
 
     reg_int& operator |= ( uint_type v )
-    { int value = sc_signal<int>::read();
-        sc_signal<int>::write(value|v); return *this; }
+    { sc_signal<int>::m_cur_val |= v; return *this; }
 
     reg_int& operator ^= ( uint_type v )
-    { int value = sc_signal<int>::read();
-        sc_signal<int>::write(value^v); return *this; }
+    { sc_signal<int>::m_cur_val ^= v; return *this; }
 
 
     reg_int& operator <<= ( uint_type v )
-    { int value = sc_signal<int>::read();
-        sc_signal<int>::write(value<<v); return *this; }
+    { sc_signal<int>::m_cur_val <<= v; return *this; }
 
     reg_int& operator >>= ( uint_type v )
-    { int value = sc_signal<int>::read();
-        sc_signal<int>::write(value>>v); return *this; }
+    { sc_signal<int>::m_cur_val >>= v; return *this; }
 
 
     // prefix and postfix increment and decrement operators
 
     int operator ++ () // prefix
-    {
-        int value = sc_signal<int>::read();
-        sc_signal<int>::write(value+1);
-        return (value+1);
-    }
+    { return sc_signal<int>::m_cur_val ++; }
 
     const int operator ++ ( int ) // postfix
-    {
-        int value = sc_signal<int>::read();
-        sc_signal<int>::write(value+1);
-        return value;
-    }
+    { return ++ sc_signal<int>::m_cur_val; }
 
     int operator -- () // prefix
-    {
-        int value = sc_signal<int>::read();
-        sc_signal<int>::write(value-1);
-        return (value-1);
-    }
+    { return sc_signal<int>::m_cur_val --; }
 
     const int operator -- ( int ) // postfix
-    {
-        int value = sc_signal<int>::read();
-        sc_signal<int>::write(value-1);
-        return value;
-    }
+    { return -- sc_signal<int>::m_cur_val; }
 
     // relational operators
 
@@ -184,7 +158,7 @@ public:
     { return a >= b.read(); }
 
     int to_int() const
-    { return sc_signal<int>::read(); }
+    { return sc_signal<int>::m_cur_val; }
 };
 
 inline

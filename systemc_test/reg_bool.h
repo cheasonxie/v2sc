@@ -40,42 +40,39 @@ public:
     // assignment operators
 
     reg_bool& operator = ( bool v )
-    { sc_signal<bool>::write(v); return *this; }
+    { sc_signal<bool>::m_cur_val = v; return *this; }
 
     reg_bool& operator = ( uint_type v )
-    { sc_signal<bool>::write((bool)v); return *this; }
+    { sc_signal<bool>::m_cur_val = (bool)v; return *this; }
 
     reg_bool& operator = ( unsigned long a )
-    { sc_signal<bool>::write((bool)a); return *this; }
+    { sc_signal<bool>::m_cur_val = (bool)a; return *this; }
 
     reg_bool& operator = ( long a )
-    { sc_signal<bool>::write((bool)a); return *this; }
+    { sc_signal<bool>::m_cur_val = (bool)a; return *this; }
 
     reg_bool& operator = ( unsigned int a )
-    { sc_signal<bool>::write((bool)a); return *this; }
+    { sc_signal<bool>::m_cur_val = (bool)a; return *this; }
 
     reg_bool& operator = ( int a )
-    { sc_signal<bool>::write((bool)a); return *this; }
+    { sc_signal<bool>::m_cur_val = (bool)a; return *this; }
 
     reg_bool& operator = ( int64 a )
-    { sc_signal<bool>::write((bool)a); return *this; }
+    { sc_signal<bool>::m_cur_val = (bool)a; return *this; }
 
     reg_bool& operator = ( double a )
-    { sc_signal<bool>::write((bool)a); return *this; }
+    { sc_signal<bool>::m_cur_val = (bool)a; return *this; }
 
     // bitwise assignment operators
 
     reg_bool& operator &= ( uint_type v )
-    { int value = sc_signal<bool>::read();
-        sc_signal<bool>::write(value&v); return *this; }
+    { sc_signal<bool>::m_cur_val &= (bool)v; return *this; }
 
     reg_bool& operator |= ( uint_type v )
-    { int value = sc_signal<bool>::read();
-        sc_signal<bool>::write(value|v); return *this; }
+    { sc_signal<bool>::m_cur_val |= (bool)v; return *this; }
 
     reg_bool& operator ^= ( uint_type v )
-    { int value = sc_signal<bool>::read();
-        sc_signal<bool>::write(value^v); return *this; }
+    { sc_signal<bool>::m_cur_val ^= (bool)v; return *this; }
 
     bool operator ! ()
     { return !sc_signal<bool>::read(); }
