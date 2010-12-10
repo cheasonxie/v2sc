@@ -2,6 +2,8 @@
 #include "reg_uint.h"
 #include <iostream>
 
+using namespace sc_dt;
+
 SC_MODULE(testRegUint)
 {
     sc_in<bool> clk;
@@ -85,6 +87,7 @@ SC_MODULE(testRegUint)
     }
 };
 
+
 void test_reg_uint()
 {
     sc_clock clk("clock", 10, SC_NS);
@@ -99,9 +102,78 @@ void test_reg_uint()
     reg_uint<16> aaa1(a);
     reg_uint<16> aaa2(b);
     reg_uint<16> aaa3(c);
+    reg_uint<4> aaa4(a);
+    sc_uint_base aaa5(20);
 
     aaa = aaa + 1;
     aaa = aaa * 2;
+    aaa += 1;
+    aaa ++;
+    ++aaa;
+
+    if(aaa5 == 5)
+        printf("ok\n");
+    if(aaa < 5)
+        printf("ok\n");
+    if(aaa > 5)
+        printf("ok\n");
+    if(aaa <= 5)
+        printf("ok\n");
+    if(aaa >= 5)
+        printf("ok\n");
+
+    if(aaa < aaa5)
+        printf("ok\n");
+    if(aaa > aaa5)
+        printf("ok\n");
+    if(aaa <= aaa5)
+        printf("ok\n");
+    if(aaa >= aaa5)
+        printf("ok\n");
+
+    if(aaa5 < aaa)
+        printf("ok\n");
+    if(aaa5 > aaa)
+        printf("ok\n");
+    if(aaa5 <= aaa)
+        printf("ok\n");
+    if(aaa5 >= aaa)
+        printf("ok\n");
+
+    aaa5.range(3, 0) = c.range(3, 0);
+    aaa.range(3, 0) = aaa0.range(3, 0);
+
+    if(aaa.range(3, 0) == aaa0.range(3, 0))
+        printf("ok\n");
+    if(aaa.range(3, 0) == aaa4)
+        printf("ok\n");
+    if(aaa4 == aaa.range(3, 0))
+        printf("ok\n");
+    if(aaa == aaa5)
+        printf("ok\n");
+    if(aaa5 == aaa)
+        printf("ok\n");
+    if(aaa == 5)
+        printf("ok\n");
+    if(5 == aaa)
+        printf("ok\n");
+
+    //if(aaa.range(3, 0) != aaa0.range(3, 0))
+    //    printf("ok\n");
+    if(aaa5.range(3, 0) != c.range(3, 0))
+        printf("ok\n");
+    if(aaa.range(3, 0) != aaa4)
+        printf("ok\n");
+    if(aaa4 != aaa.range(3, 0))
+        printf("ok\n");
+    if(aaa != aaa5)
+        printf("ok\n");
+    if(aaa5 != aaa)
+        printf("ok\n");
+    if(aaa != 5)
+        printf("ok\n");
+    if(5 != aaa)
+        printf("ok\n");
 
     testRegUint testreg("testRegUint");
     testreg.clk(clk);
