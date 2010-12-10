@@ -11,8 +11,13 @@
 using namespace sc_dt;
 
 template<int W>
-class reg_uint : public sc_signal<sc_uint<W> >
+class reg_uint : public sc_signal<sc_uint<W> >, public sc_value_base
 {
+    friend class sc_uint_bitref_r;
+    friend class sc_uint_bitref;
+    friend class sc_uint_subref_r;
+    friend class sc_uint_subref;
+    friend class sc_uint_base;
 public:
 
     // constructors
@@ -29,32 +34,32 @@ public:
         : sc_signal<sc_uint<W> >()
     { sc_signal<sc_uint<W> >::m_cur_val = a.read(); }
 
-    reg_uint( const sc_uint_base& a )
+    explicit reg_uint( const sc_uint_base& a )
         : sc_signal<sc_uint<W> >()
     { sc_signal<sc_uint<W> >::m_cur_val = a; }
 
-    reg_uint( const sc_uint_subref_r& a )
+    explicit reg_uint( const sc_uint_subref_r& a )
         : sc_signal<sc_uint<W> >()
     { sc_signal<sc_uint<W> >::m_cur_val = a; }
 
     template< class T >
-    reg_uint( const sc_generic_base<T>& a )
+    explicit reg_uint( const sc_generic_base<T>& a )
         : sc_signal<sc_uint<W> >()
     { sc_signal<sc_uint<W> >::m_cur_val = a; }
 
-    reg_uint( const sc_signed& a )
+    explicit reg_uint( const sc_signed& a )
         : sc_signal<sc_uint<W> >()
     { sc_signal<sc_uint<W> >::m_cur_val = a; }
 
-    reg_uint( const sc_unsigned& a )
+    explicit reg_uint( const sc_unsigned& a )
         : sc_signal<sc_uint<W> >()
     { sc_signal<sc_uint<W> >::m_cur_val = a; }
 
-    reg_uint( const sc_bv_base& a )
+    explicit reg_uint( const sc_bv_base& a )
         : sc_signal<sc_uint<W> >()
     { sc_signal<sc_uint<W> >::m_cur_val = a; }
 
-    reg_uint( const sc_lv_base& a )
+    explicit reg_uint( const sc_lv_base& a )
         : sc_signal<sc_uint<W> >()
     { sc_signal<sc_uint<W> >::m_cur_val = a; }
 
@@ -99,7 +104,7 @@ public:
     { sc_signal<sc_uint<W> >::m_cur_val = a; return *this; }
 
     reg_uint<W>& operator = ( const reg_uint<W>& a )
-    { sc_signal<sc_uint<W> >::m_cur_val = a; return *this; }
+    { sc_signal<sc_uint<W> >::m_cur_val = a.read(); return *this; }
 
     template<class T>
     reg_uint<W>& operator = ( const sc_generic_base<T>& a )
@@ -156,23 +161,6 @@ public:
     reg_uint<W>& operator %= ( uint_type v )
     { sc_signal<sc_uint<W> >::m_cur_val %= v; return *this; }
 
-    // arithmetic operators
-    sc_uint<W> operator + ( uint_type v )
-    { return (sc_signal<sc_uint<W> >::read() + v); }
-
-    sc_uint<W> operator - ( uint_type v )
-    { return (sc_signal<sc_uint<W> >::read() - v); }
-
-    sc_uint<W> operator * ( uint_type v )
-    { return (sc_signal<sc_uint<W> >::read() * v); }
-
-    sc_uint<W> operator / ( uint_type v )
-    { return (sc_signal<sc_uint<W> >::read() / v); }
-
-    sc_uint<W> operator % ( uint_type v )
-    { return (sc_signal<sc_uint<W> >::read() % v); }
-
-
     // bitwise assignment operators
 
     reg_uint<W>& operator &= ( uint_type v )
@@ -190,24 +178,6 @@ public:
 
     reg_uint<W>& operator >>= ( uint_type v )
     { sc_signal<sc_uint<W> >::m_cur_val >>= v; return *this; }
-
-    // bitwise operators
-
-    sc_uint<W> operator & ( uint_type v )
-    { return (sc_signal<sc_uint<W> >::read() & v); }
-
-    sc_uint<W> operator | ( uint_type v )
-    { return (sc_signal<sc_uint<W> >::read() | v); }
-
-    sc_uint<W> operator ^ ( uint_type v )
-    { return (sc_signal<sc_uint<W> >::read() ^ v); }
-
-    sc_uint<W> operator << ( uint_type v )
-    { return (sc_signal<sc_uint<W> >::read() << v); }
-
-    sc_uint<W> operator >> ( uint_type v )
-    { return (sc_signal<sc_uint<W> >::read() >> v); }
-
 
     // prefix and postfix increment and decrement operators
 
@@ -227,70 +197,16 @@ public:
 
     friend bool operator == ( const reg_uint& a, const reg_uint& b )
     { return a.read() == b.read(); }
-    friend bool operator == ( const reg_uint& a, const int& b )
-    { return a.read().to_int() == b; }
-    friend bool operator == ( const int& a, const reg_uint& b )
-    { return a == b.read().to_int(); }
-    friend bool operator == ( const sc_uint_subref_r& a, const int& b )
-    { return a.to_int() == b; }
-    friend bool operator == ( const int& a, const sc_uint_subref_r& b )
-    { return a == b.to_int(); }
-    friend bool operator == ( const sc_uint_subref_r& a, const sc_uint_subref_r& b )
-    { return a.to_int() == b.to_int(); }
-    friend bool operator == ( const int& a, const sc_uint_base& b )
-    { return a == b.to_int(); }
-    friend bool operator == ( const sc_uint_base& a, const int& b )
-    { return a.to_int() == b; }
-    friend bool operator == ( const sc_uint_base& a, const sc_uint_subref_r& b )
-    { return a.to_int() == b.to_int(); }
-    friend bool operator == ( const sc_uint_subref_r& a, const sc_uint_base& b )
-    { return a.to_int() == b.to_int(); }
-
     friend bool operator != ( const reg_uint& a, const reg_uint& b )
     { return a.read() != b.read(); }
-    friend bool operator != ( const reg_uint& a, const int& b )
-    { return a.read().to_int() != b; }
-    friend bool operator != ( const int& a, const reg_uint& b )
-    { return a != b.read().to_int(); }
-    friend bool operator != ( const sc_uint_subref_r& a, const int& b )
-    { return a.to_int() != b; }
-    friend bool operator != ( const int& a, const sc_uint_subref_r& b )
-    { return a != b.to_int(); }
-    friend bool operator != ( const sc_uint_subref_r& a, const sc_uint_subref_r& b )
-    { return a.to_int() != b.to_int(); }
-    friend bool operator != ( const int& a, const sc_uint_base& b )
-    { return a != b.to_int(); }
-    friend bool operator != ( const sc_uint_base& a, const int& b )
-    { return a.to_int() != b; }
-
     friend bool operator <  ( const reg_uint& a, const reg_uint& b )
     { return a.read() < b.read(); }
-    friend bool operator <  ( const reg_uint& a, const int& b )
-    { return a.read().to_int() < b; }
-    friend bool operator <  ( const int& a, const reg_uint& b )
-    { return a < b.read().to_int(); }
-
     friend bool operator <= ( const reg_uint& a, const reg_uint& b )
     { return a.read() <= b.read(); }
-    friend bool operator <= ( const reg_uint& a, const int& b )
-    { return a.read().to_int() <= b; }
-    friend bool operator <= ( const int& a, const reg_uint& b )
-    { return a <= b.read().to_int(); }
-
     friend bool operator >  ( const reg_uint& a, const reg_uint& b )
     { return a.read() > b.read(); }
-    friend bool operator >  ( const reg_uint& a, const int& b )
-    { return a.read().to_int() > b; }
-    friend bool operator >  ( const int& a, const reg_uint& b )
-    { return a > b.read().to_int(); }
-
     friend bool operator >= ( const reg_uint& a, const reg_uint& b )
     { return a.read() >= b.read(); }
-    friend bool operator >= ( const reg_uint& a, const int& b )
-    { return a.read().to_int() >= b; }
-    friend bool operator >= ( const int& a, const reg_uint& b )
-    { return a >= b.read().to_int(); }
-
 
     // bit selection
 
@@ -359,8 +275,15 @@ public:
     bool xnor_reduce() const
     { return ( ! xor_reduce() ); }
 
-
     // implicit conversion to uint_type
+    operator uint_type() const
+    { return sc_signal<sc_uint<W> >::m_cur_val; }
+
+    // explicit conversions
+    uint_type value() const
+    { return operator uint_type(); }
+
+
     int to_int() const
     { return sc_signal<sc_uint<W> >::m_cur_val.to_int(); }
 
@@ -382,6 +305,33 @@ public:
     double to_double() const
     { return sc_signal<sc_uint<W> >::m_cur_val.to_double(); }
 
+    // concatenation support
+
+    virtual int concat_length(bool* xz_present_p) const
+    { return sc_signal<sc_uint<W> >::m_cur_val.concat_length(xz_present_p); }
+
+    virtual bool concat_get_ctrl( sc_digit* dst_p, int low_i ) const
+    { return sc_signal<sc_uint<W> >::m_cur_val.concat_get_ctrl(dst_p, low_i); }
+
+    virtual bool concat_get_data( sc_digit* dst_p, int low_i ) const
+    { return sc_signal<sc_uint<W> >::m_cur_val.concat_get_data(dst_p, low_i); }
+
+    virtual uint64 concat_get_uint64() const
+    { return sc_signal<sc_uint<W> >::m_cur_val.concat_get_uint64(); }
+
+    virtual void concat_set(int64 src, int low_i)
+    { sc_signal<sc_uint<W> >::m_cur_val.concat_set(src, low_i); }
+
+    virtual void concat_set(const sc_signed& src, int low_i)
+    { sc_signal<sc_uint<W> >::m_cur_val.concat_set(src, low_i); }
+
+    virtual void concat_set(const sc_unsigned& src, int low_i)
+    { sc_signal<sc_uint<W> >::m_cur_val.concat_set(src, low_i); }
+
+    virtual void concat_set(uint64 src, int low_i)
+    { sc_signal<sc_uint<W> >::m_cur_val.concat_set(src, low_i); }
+
 };
+
 
 #endif /* __REG_UINT_H__ */
