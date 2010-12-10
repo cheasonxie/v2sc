@@ -26,7 +26,7 @@ public:
         : sc_signal<sc_uint<W> >()
     { }
 
-    reg_uint( uint_type v )
+    explicit reg_uint( uint_type v )
         : sc_signal<sc_uint<W> >()
     { sc_signal<sc_uint<W> >::m_cur_val = v; }
 
@@ -67,27 +67,27 @@ public:
         : sc_signal<sc_uint<W> >()
     { sc_signal<sc_uint<W> >::m_cur_val = a; }
 
-    reg_uint( unsigned long a )
+    explicit reg_uint( unsigned long a )
         : sc_signal<sc_uint<W> >()
     { sc_signal<sc_uint<W> >::m_cur_val = a; }
 
-    reg_uint( long a )
+    explicit reg_uint( long a )
         : sc_signal<sc_uint<W> >()
     { sc_signal<sc_uint<W> >::m_cur_val = a; }
 
-    reg_uint( unsigned int a )
+    explicit reg_uint( unsigned int a )
         : sc_signal<sc_uint<W> >()
     { sc_signal<sc_uint<W> >::m_cur_val = a; }
 
-    reg_uint( int a )
+    explicit reg_uint( int a )
         : sc_signal<sc_uint<W> >()
     { sc_signal<sc_uint<W> >::m_cur_val = a; }
 
-    reg_uint( int64 a )
+    explicit reg_uint( int64 a )
         : sc_signal<sc_uint<W> >()
     { sc_signal<sc_uint<W> >::m_cur_val = a; }
 
-    reg_uint( double a )
+    explicit reg_uint( double a )
         : sc_signal<sc_uint<W> >()
     { sc_signal<sc_uint<W> >::m_cur_val = a; }
 
