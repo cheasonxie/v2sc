@@ -149,9 +149,9 @@ SC_MODULE(ahbdma)
     sc_signal<ahb_dma_out_type>    ldmao;
     void control()
     {
-        ahb_dma_out_type vdmao;
+        ahb_dma_out_type &vdmao = (ahb_dma_out_type &)ldmao.read();
+
         sc_uint<32> aaa = 10;
-        vdmao = ldmao.read();
 
         if(rst == 1)
         {
@@ -160,17 +160,26 @@ SC_MODULE(ahbdma)
         }
         else
         {
-            if(dmai.read().irq == (reg_bool)1)
-                vdmao.active.write(1);
-            if(dmai.read().start == (reg_bool)1)
-                vdmao.rdata.write(dmai.read().address);
+            vdmao.haddr.write(vdmao.haddr.read() + 1);
+            cout << "active:" << vdmao.active.read() << endl;
+            vdmao.active.write(~vdmao.active);
+            vdmao.rdata.write(dmai.read().address);
             if(dmai.read().address.read().to_int() == 0xff)
                 vdmao.mexc.write(0);
         }
 
-        ldmao.write(vdmao);
+        //ldmao.write(vdmao);
 
-        ((ahb_dma_out_type &)dmao.read()).start.write((bool)0);
+        //((ahb_dma_out_type &)dmao.read()).start.write((bool)0);
+        //cout << ldmao << endl;
+    }
+
+    void comp_reg()
+    {
+        ahb_dma_out_type &vdmao = (ahb_dma_out_type &)dmao.read();
+        vdmao.haddr.write(ldmao.read().haddr);  // write only one member in structure
+        //dmao.write(ldmao);
+        cout << dmao << endl;
     }
 
 
@@ -178,48 +187,10 @@ SC_MODULE(ahbdma)
     {
         SC_METHOD(control);
         sensitive << rst << clk.pos();
+        SC_METHOD(comp_reg);
+        sensitive << clk.pos();
     }
 
-};
-
-SC_MODULE(counter32)
-{
-    sc_in<bool> clk;
-    sc_in<bool> rst;
-    sc_in<bool> load;
-    sc_in<sc_uint<32> > d;
-    sc_out<sc_uint<32> > q;
-
-    sc_signal<sc_uint<32> > iq;
-
-    void control()
-    {
-        sc_uint<32> iiq = iq.read();
-        if(rst == 1)
-        {
-            iiq = 0;
-        }
-        else if(load)
-        {
-            iiq = d;
-        }
-        else
-        {
-            iiq ++;
-        }
-        iq.write(iiq);
-    }
-
-    void comb_assignement()
-    {
-        q.write(iq);
-    }
-
-    SC_CTOR(counter32)
-    {
-        SC_METHOD(control);
-        sensitive << clk.pos() << rst << load;
-    }
 };
 
 extern void testSigStrut();
@@ -229,16 +200,19 @@ extern void test_reg_bool();
 
 enum
 {
-    SIGSTRUCT = 1,
+    DEFAULT = 0,
+    SIGSTRUCT,
     REG_UINT,
     REG_INT,
     REG_BOOL,
 };
-int testId = REG_BOOL;
+int testId = DEFAULT;
 
 int sc_main(int argc, char *argv[])
 {
-    sc_signal<bool> clk, rst, load;
+    sc_clock clk("clock", 10, SC_NS);
+
+    sc_signal<bool> rst, load;
     sc_signal<sc_uint<32> >  d, q;
     sc_signal<ahb_dma_in_type> dmai;
     sc_signal<ahb_dma_out_type> dmao;
@@ -284,7 +258,7 @@ int sc_main(int argc, char *argv[])
     if(1 == aaa2)
         printf("equal\n");
 
-
+#if 0
     int a0 = 0;
     long a1 = 0;
     double a2 = 0;
@@ -330,19 +304,19 @@ int sc_main(int argc, char *argv[])
     cout << "bbb:" << bbb << ", bbb.read():" << bbb.read() << ", d:" << d << endl;
     cout << "ddd:" << ddd << endl;
     cout << "eee:" << eee << endl;
-
-    counter32 cnt32("counter32");
-    cnt32.clk(clk);
-    cnt32.rst(rst);
-    cnt32.load(load);
-    cnt32.d(dmai.read().address);
-    cnt32.q(bbb);
+#endif
 
     ahbdma dma("ahbdma");
-    dma.clk(aaa);
-    dma.rst(dmai.read().irq);
+    dma.clk(clk);
+    dma.rst(rst);
     dma.dmai(dmai);
     dma.dmao(dmao);
+
+    rst.write(1);
+    ((reg_uint<32> &)dmai.read().address) = 0xaaaaa;
+    sc_start(sc_time(100, SC_NS));
+    rst.write(0);
+    sc_start(sc_time(1000, SC_NS));
 
     return 0;
 }
@@ -436,9 +410,7 @@ void testSigStrut()
     testsig.sigstr_o(sigstr);
 
     cout << "start:" << endl;
-    sc_start(200);
-
-    sc_stop();
+    sc_start(1000);
 }
 
 
