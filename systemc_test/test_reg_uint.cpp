@@ -2,8 +2,6 @@
 #include "reg_uint.h"
 #include <iostream>
 
-using namespace sc_dt;
-
 SC_MODULE(testRegUint)
 {
     sc_in<bool> clk;

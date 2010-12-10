@@ -234,7 +234,7 @@ enum
     REG_INT,
     REG_BOOL,
 };
-int testId = REG_UINT;
+int testId = REG_BOOL;
 
 int sc_main(int argc, char *argv[])
 {
@@ -261,10 +261,12 @@ int sc_main(int argc, char *argv[])
         test_reg_uint();
         return 0;
     case REG_INT:
-        //test_reg_int();
+        test_reg_int();
         return 0;
     case REG_BOOL:
+        test_reg_bool();
         return 0;
+        break;
     }
 
     if(aaa == 1)

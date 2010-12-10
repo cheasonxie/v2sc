@@ -15,7 +15,6 @@ class reg_bool : public sc_signal<bool>
 public:
 
     // constructors
-
     reg_bool()
         : sc_signal<bool>()
     { }
@@ -35,6 +34,14 @@ public:
     reg_bool( int a )
         : sc_signal<bool>()
     { sc_signal<bool>::m_cur_val = (bool)a; }
+
+    reg_bool( char a )
+        { sc_signal<bool>::m_cur_val = (bool)a;}
+
+    reg_bool( const char *a )
+        : sc_signal<bool>()
+    { if(a != NULL)
+        sc_signal<bool>::m_cur_val = (a[0] == '0' ? 0 : 1); }
 
 
     // assignment operators
@@ -63,37 +70,30 @@ public:
     reg_bool& operator = ( double a )
     { sc_signal<bool>::m_cur_val = (bool)a; return *this; }
 
+    reg_bool& operator = ( char a )
+    { sc_signal<bool>::m_cur_val = (a == '0' ? 0 : 1); return *this; }
+
+    reg_bool& operator = ( const char *a )
+    { if(a != NULL)
+        sc_signal<bool>::m_cur_val = (a[0] == '0' ? 0 : 1);
+      return *this; }
+
     // bitwise assignment operators
 
-    reg_bool& operator &= ( uint_type v )
+    reg_bool& operator &= ( bool v )
     { sc_signal<bool>::m_cur_val &= (bool)v; return *this; }
 
-    reg_bool& operator |= ( uint_type v )
+    reg_bool& operator |= ( bool v )
     { sc_signal<bool>::m_cur_val |= (bool)v; return *this; }
 
-    reg_bool& operator ^= ( uint_type v )
+    reg_bool& operator ^= ( bool v )
     { sc_signal<bool>::m_cur_val ^= (bool)v; return *this; }
 
     bool operator ! ()
     { return !sc_signal<bool>::read(); }
 
-    // relational operators
-    friend bool operator == ( const reg_bool& a, const reg_bool& b )
-    { return a.read() == b.read(); }
-    friend bool operator == ( const reg_bool& a, const int& b )
-    { return a.read() == b; }
-    friend bool operator == ( const int& a, const reg_bool& b )
-    { return a == b.read(); }
-
-    friend bool operator != ( const reg_bool& a, const reg_bool& b )
-    { return a.read() != b.read(); }
-    friend bool operator != ( const reg_bool& a, const int& b )
-    { return a.read() != b; }
-    friend bool operator != ( const int& a, const reg_bool& b )
-    { return a != b.read(); }
-
-    int to_int() const
-    { return (int)sc_signal<bool>::read(); }
+    bool operator ~ ()
+    { return !sc_signal<bool>::read(); }
 };
 
 inline

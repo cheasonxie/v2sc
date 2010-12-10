@@ -1,6 +1,6 @@
 /*
  * reg_int: inheritance of sc_signal and sc_uint_base
- * operate the same as sc_int, but can be used as signal
+ * operate the same as int, but can be used as signal
  */
 
 #ifndef __REG_INT_H__
@@ -15,12 +15,11 @@ class reg_int : public sc_signal<int>
 public:
 
     // constructors
-
     reg_int()
         : sc_signal<int>()
-    { }
+    {  }
 
-    reg_int( uint_type v )
+    reg_int( int v )
         : sc_signal<int>()
     { sc_signal<int>::m_cur_val = v; }
 
@@ -32,70 +31,44 @@ public:
         : sc_signal<int>()
     { sc_signal<int>::m_cur_val = (int)a; }
 
-    reg_int( int a )
-        : sc_signal<int>()
-    { sc_signal<int>::m_cur_val = a; }
-
-
 
     // assignment operators
-
-    reg_int& operator = ( uint_type v )
+    reg_int& operator = ( int v )
     { sc_signal<int>::m_cur_val = v; return *this; }
 
-    reg_int& operator = ( unsigned long a )
-    { sc_signal<int>::m_cur_val = a; return *this; }
-
-    reg_int& operator = ( long a )
-    { sc_signal<int>::m_cur_val = a; return *this; }
-
-    reg_int& operator = ( unsigned int a )
-    { sc_signal<int>::m_cur_val = a; return *this; }
-
-    reg_int& operator = ( int a )
-    { sc_signal<int>::m_cur_val = a; return *this; }
-
-    reg_int& operator = ( int64 a )
-    { sc_signal<int>::m_cur_val = a; return *this; }
-
-    reg_int& operator = ( double a )
-    { sc_signal<int>::m_cur_val = (int)a; return *this; }
-
-
     // arithmetic assignment operators
-
-    reg_int& operator += ( uint_type v )
+    reg_int& operator += ( int v )
     { sc_signal<int>::m_cur_val += v; return *this; }
 
-    reg_int& operator -= ( uint_type v )
+    reg_int& operator -= ( int v )
     { sc_signal<int>::m_cur_val -= v; return *this; }
 
-    reg_int& operator *= ( uint_type v )
+    reg_int& operator *= ( int v )
     { sc_signal<int>::m_cur_val *= v; return *this; }
 
-    reg_int& operator /= ( uint_type v )
+    reg_int& operator /= ( int v )
     { sc_signal<int>::m_cur_val /= v; return *this; }
 
-    reg_int& operator %= ( uint_type v )
+    reg_int& operator %= ( int v )
     { sc_signal<int>::m_cur_val %= v; return *this; }
 
 
     // bitwise assignment operators
 
-    reg_int& operator &= ( uint_type v )
+    reg_int& operator &= ( int v )
     { sc_signal<int>::m_cur_val &= v; return *this; }
 
-    reg_int& operator |= ( uint_type v )
+    reg_int& operator |= ( int v )
     { sc_signal<int>::m_cur_val |= v; return *this; }
 
-    reg_int& operator ^= ( uint_type v )
+    reg_int& operator ^= ( int v )
     { sc_signal<int>::m_cur_val ^= v; return *this; }
 
 
-    reg_int& operator <<= ( uint_type v )
+    reg_int& operator <<= ( int v )
     { sc_signal<int>::m_cur_val <<= v; return *this; }
 
-    reg_int& operator >>= ( uint_type v )
+    reg_int& operator >>= ( int v )
     { sc_signal<int>::m_cur_val >>= v; return *this; }
 
 
@@ -113,52 +86,8 @@ public:
     const int operator -- ( int ) // postfix
     { return -- sc_signal<int>::m_cur_val; }
 
-    // relational operators
-
-    friend bool operator == ( const reg_int& a, const reg_int& b )
-    { return a.read() == b.read(); }
-    friend bool operator == ( const reg_int& a, const int& b )
-    { return a.read() == b; }
-    friend bool operator == ( const int& a, const reg_int& b )
-    { return a == b.read(); }
-
-    friend bool operator != ( const reg_int& a, const reg_int& b )
-    { return a.read() != b.read(); }
-    friend bool operator != ( const reg_int& a, const int& b )
-    { return a.read() != b; }
-    friend bool operator != ( const int& a, const reg_int& b )
-    { return a != b.read(); }
-
-    friend bool operator <  ( const reg_int& a, const reg_int& b )
-    { return a.read() < b.read(); }
-    friend bool operator <  ( const reg_int& a, const int& b )
-    { return a.read() < b; }
-    friend bool operator <  ( const int& a, const reg_int& b )
-    { return a < b.read(); }
-
-    friend bool operator <= ( const reg_int& a, const reg_int& b )
-    { return a.read() <= b.read(); }
-    friend bool operator <= ( const reg_int& a, const int& b )
-    { return a.read() <= b; }
-    friend bool operator <= ( const int& a, const reg_int& b )
-    { return a <= b.read(); }
-
-    friend bool operator >  ( const reg_int& a, const reg_int& b )
-    { return a.read() > b.read(); }
-    friend bool operator >  ( const reg_int& a, const int& b )
-    { return a.read() > b; }
-    friend bool operator >  ( const int& a, const reg_int& b )
-    { return a > b.read(); }
-
-    friend bool operator >= ( const reg_int& a, const reg_int& b )
-    { return a.read() >= b.read(); }
-    friend bool operator >= ( const reg_int& a, const int& b )
-    { return a.read() >= b; }
-    friend bool operator >= ( const int& a, const reg_int& b )
-    { return a >= b.read(); }
-
-    int to_int() const
-    { return sc_signal<int>::m_cur_val; }
+    //operator int() const
+    //{ return sc_signal<int>::m_cur_val; }
 };
 
 inline

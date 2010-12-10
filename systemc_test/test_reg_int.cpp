@@ -41,7 +41,7 @@ SC_MODULE(testRegInt)
             cout << "4-v1: " << v1 << endl;
             break;
         case 5:
-            cout << "5-v1: " << v1.to_int() << endl;
+            cout << "5-v1: " << v1 << endl;
             break;
         case 6:
             cout << "6-v1: " << std::hex << v1 << endl;
@@ -66,6 +66,37 @@ void test_reg_int()
     sc_signal<reg_int> regInt;
     reg_int aaa(20);
     reg_int bbb(aaa);
+    reg_int ccc = 5;
+
+    ccc = 1;
+    ccc += 1;
+    ccc ++;
+    ++ ccc;
+    ccc = ccc + 1;
+    ccc = ccc-1;
+    ccc = ccc*1;
+    ccc = ccc/1;
+
+    if(ccc == 1)
+        printf("ok\n");
+    if(ccc > 1)
+        printf("ok\n");
+    if(ccc < 1)
+        printf("ok\n");
+    if(ccc >= 1)
+        printf("ok\n");
+    if(ccc <= 1)
+        printf("ok\n");
+    if(1 == ccc)
+        printf("ok\n");
+    if(1 > ccc)
+        printf("ok\n");
+    if(1 < ccc)
+        printf("ok\n");
+    if(1 >= ccc)
+        printf("ok\n");
+    if(1 <= ccc)
+        printf("ok\n");
 
     testRegInt testreg("testRegUint");
     testreg.clk(clk);
