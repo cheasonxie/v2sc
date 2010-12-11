@@ -161,7 +161,7 @@ SC_MODULE(ahbdma)
         else
         {
             vdmao.haddr.write(vdmao.haddr.read() + 1);
-            cout << "active:" << vdmao.active.read() << endl;
+            //cout << "active:" << vdmao.active.read() << endl;
             vdmao.active.write(~vdmao.active);
             vdmao.rdata.write(dmai.read().address);
             if(dmai.read().address.read().to_int() == 0xff)
@@ -172,13 +172,15 @@ SC_MODULE(ahbdma)
 
         //((ahb_dma_out_type &)dmao.read()).start.write((bool)0);
         //cout << ldmao << endl;
+        cout << "rst:" << rst.read() << endl;
     }
 
     void comp_reg()
     {
         ahb_dma_out_type &vdmao = (ahb_dma_out_type &)dmao.read();
-        vdmao.haddr.write(ldmao.read().haddr);  // write only one member in structure
-        //dmao.write(ldmao);
+        sc_uint<10> haddr = ldmao.read().haddr;
+        //vdmao.haddr.write(haddr);  // write only one member in structure
+        dmao.write(ldmao);
         cout << dmao << endl;
     }
 
@@ -308,14 +310,18 @@ int sc_main(int argc, char *argv[])
 
     ahbdma dma("ahbdma");
     dma.clk(clk);
-    dma.rst(rst);
+    //dma.rst(rst);
+    dma.rst(dmai.read().busy);
     dma.dmai(dmai);
     dma.dmao(dmao);
 
+    ahb_dma_in_type &vdmai = (ahb_dma_in_type &)dmai.read();
     rst.write(1);
-    ((reg_uint<32> &)dmai.read().address) = 0xaaaaa;
+    vdmai.address = 0xaaaaa;
+    vdmai.busy = 1;
     sc_start(sc_time(100, SC_NS));
     rst.write(0);
+    vdmai.busy = 0;
     sc_start(sc_time(1000, SC_NS));
 
     return 0;
