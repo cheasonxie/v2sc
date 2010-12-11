@@ -42,7 +42,7 @@ public:
     { sc_signal<bool>::m_cur_val = (bool)a; }
 
     reg_bool( char a )
-        { sc_signal<bool>::m_cur_val = (bool)a;}
+        { sc_signal<bool>::m_cur_val = (a == '0' ? 0 : 1);}
 
     reg_bool( const sc_uint_base& a )
         : sc_signal<bool>()
