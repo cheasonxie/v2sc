@@ -260,7 +260,6 @@ int sc_main(int argc, char *argv[])
     if(1 == aaa2)
         printf("equal\n");
 
-#if 0
     int a0 = 0;
     long a1 = 0;
     double a2 = 0;
@@ -276,6 +275,8 @@ int sc_main(int argc, char *argv[])
     aaa0 = 1;
     bbb.range(4, 0) = (aaa1, aaa1, aaa1, aaa1, aaa2);
     bbb.range(4, 0) = (aaa2, aaa2, aaa2, aaa2, aaa2);
+    bbb.range(4, 0) = (aaa, aaa, aaa, aaa, aaa);
+#if 1
     bbb.range(4, 0) = (aaa2, aaa1, aaa2, aaa1, aaa2);
     bbb.range(4, 0) = (aaa1, aaa2, aaa, aaa2, aaa1);
     bbb.range(4, 0) = (aaa2, aaa1, aaa, aaa1, aaa2);
