@@ -12,6 +12,12 @@ using namespace sc_dt;
 
 class reg_bool : public sc_signal<bool>
 {
+    friend class sc_uint_bitref_r;
+    friend class sc_uint_bitref;
+    friend class sc_uint_subref_r;
+    friend class sc_uint_subref;
+    friend class sc_uint_base;
+
 public:
 
     // constructors
@@ -38,6 +44,15 @@ public:
     reg_bool( char a )
         { sc_signal<bool>::m_cur_val = (bool)a;}
 
+    reg_bool( const sc_uint_base& a )
+        : sc_signal<bool>()
+    { sc_signal<bool>::m_cur_val = a.to_int(); }
+
+    reg_bool( const sc_uint_subref_r& a )
+        : sc_signal<bool>()
+    { sc_signal<bool>::m_cur_val = a.to_int(); }
+
+
     reg_bool( const char *a )
         : sc_signal<bool>()
     { if(a != NULL)
@@ -51,6 +66,12 @@ public:
 
     reg_bool& operator = ( uint_type v )
     { sc_signal<bool>::m_cur_val = (bool)v; return *this; }
+
+    reg_bool& operator = ( const sc_uint_base& a )
+    { sc_signal<bool>::m_cur_val = a.to_int(); return *this; }
+
+    reg_bool& operator = ( const sc_uint_subref_r& a )
+    { sc_signal<bool>::m_cur_val = a.to_int(); return *this; }
 
     reg_bool& operator = ( unsigned long a )
     { sc_signal<bool>::m_cur_val = (bool)a; return *this; }
