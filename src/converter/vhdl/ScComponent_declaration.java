@@ -11,12 +11,50 @@ import parser.vhdl.ASTNode;
  *   </ul> <b>end</b> <b>component</b> [ <i>component_</i>simple_name ] ;
  */
 class ScComponent_declaration extends ScVhdl {
+    ScIdentifier identifier = null;
+    ScGeneric_clause generic = null;
+    ScPort_clause port = null;
     public ScComponent_declaration(ASTNode node) {
         super(node, true);
         assert(node.getId() == ASTCOMPONENT_DECLARATION);
+        for(int i = 0; i < node.getChildrenNum(); i++) {
+            ASTNode c = (ASTNode)node.getChild(i);
+            switch(c.getId())
+            {
+            case ASTIDENTIFIER:
+                identifier = new ScIdentifier(c);
+                break;
+            case ASTGENERIC_CLAUSE:
+                generic = new ScGeneric_clause(c);
+                break;
+            case ASTPORT_CLAUSE:
+                port = new ScPort_clause(c);
+                break;
+            default:
+                break;
+            }
+        }
     }
 
     public String scString() {
-        return "";
+        String ret = "";        
+        if(generic != null) {
+            
+            ret += intent() + "template<\r\n";
+            startIntentBlock();
+            ret += generic.toString();
+            endIntentBlock();
+            ret += "\r\n" + intent() + ">\r\n";
+        }
+        
+        ret += addLFIntent("SC_MODULE(" + identifier + ")");
+        ret += addLFIntent("{");
+        startIntentBlock();
+        if(port != null) {
+            ret += addLF(port.toString());
+        }
+        endIntentBlock();
+        ret += addLFIntent("};");
+        return ret;
     }
 }

@@ -91,8 +91,8 @@ class ScPackage_declarative_item extends ScVhdl {
     }
 
     public String scString() {
-        if(!(item instanceof ScComponent_declaration))
+        //if(!(item instanceof ScComponent_declaration))
             return item.toString();
-        return "";
+        //return "";
     }
 }

@@ -25,9 +25,9 @@ class ScPackage_declarative_part extends ScVhdl implements IScStatementBlock {
     public String scString() {
         String ret = "";
         for(int i = 0; i < items.size(); i++) {
-            if(items.get(i).item instanceof ScComponent_declaration)
-                continue;   // component declaration in other file
-            ret += items.get(i);
+            //if(items.get(i).item instanceof ScComponent_declaration)
+            //    continue;   // component declaration in other file
+            ret += items.get(i).toString();
             if(i < items.size() - 1) {
                 ret += "\r\n";
             }
@@ -39,8 +39,8 @@ class ScPackage_declarative_part extends ScVhdl implements IScStatementBlock {
     public String getDeclaration() {
         String ret = "";
         for(int i = 0; i < items.size(); i++) {
-            if(items.get(i).item instanceof ScComponent_declaration)
-                continue;   // component declaration in other file
+            //if(items.get(i).item instanceof ScComponent_declaration)
+            //    continue;   // component declaration in other file
             if(items.get(i).item instanceof ScSubprogram_body)
                 ret += ((ScSubprogram_body)items.get(i).item).getDeclaration();
             else
