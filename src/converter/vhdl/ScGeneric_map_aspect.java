@@ -1,6 +1,7 @@
 package converter.vhdl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.StringTokenizer;
 
 import common.MyDebug;
@@ -74,6 +75,37 @@ class ScGeneric_map_aspect extends ScVhdl {
         }
         ArrayList<ScAssociation_element> elements = association_list.elements;
         
+        HashMap<String, String> genMap = new HashMap<String, String>();
+        int maxIndex = -1;
+        for(i = 0; i < syms.length; i++) {
+            String value = null;
+            for(int j = 0; j < elements.size(); j++) {
+                if(elements.get(i).formal_part != null) {
+                    String genName = elements.get(j).formal_part.scString();
+                    if(genName.equalsIgnoreCase(syms[i].name)) {
+                        value = elements.get(j).actual_part.scString();
+                        break;
+                    }
+                }else {
+                    value = elements.get(i).actual_part.scString();
+                    break;
+                }
+            }
+            genMap.put(syms[i].name, value);
+            if(value != null)
+                maxIndex = i;
+        }
+        
+        for(i = 0; i <= maxIndex; i++) {
+            String value = genMap.get(syms[i].name);
+            if(value == null)
+                value = syms[i].value;
+            ret += value;
+            if(i < genMap.size() - 1)
+                ret += ", ";
+        }
+        
+/*        
         for(i = 0; i < elements.size(); i++) {
             if(elements.get(i).formal_part!= null) {
                 String genName = elements.get(i).formal_part.scString();
@@ -93,7 +125,7 @@ class ScGeneric_map_aspect extends ScVhdl {
                 ret += ", ";
             }
         }
-
+*/
         return ret;
     }
 
