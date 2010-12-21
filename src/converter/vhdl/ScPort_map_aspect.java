@@ -61,7 +61,7 @@ class ScPort_map_aspect extends ScVhdl {
         }else {
             symTab = (SymbolTable)parser.getTableOfSymbol(curNode, name);
             if(symTab == null) {
-                MyDebug.printFileLine("package not found:" + name);
+                MyDebug.printFileLine("component not found:" + name);
                 return ret;
             }
             symTab = symTab.getChildTable(name);
