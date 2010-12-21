@@ -79,16 +79,19 @@ class ScPort_map_aspect extends ScVhdl {
         int maxIndex = -1;
         for(i = 0; i < syms.length; i++) {
             String value = null;
-            for(int j = 0; j < elements.size(); j++) {
-                if(elements.get(i).formal_part != null) {
-                    String genName = elements.get(j).formal_part.scString();
-                    if(genName.equalsIgnoreCase(syms[i].name)) {
-                        value = elements.get(j).actual_part.scString();
+            if(i < elements.size()) {
+                for(int j = 0; j < elements.size(); j++) {
+                    if(elements.get(j).formal_part != null) {
+                        String genName = elements.get(j).formal_part.scString();
+                        if(genName.equalsIgnoreCase(syms[i].name)
+                            && !elements.get(j).actual_part.designator.isOpen) {
+                            value = elements.get(j).actual_part.scString();
+                            break;
+                        }
+                    }else {
+                        value = elements.get(i).actual_part.scString();
                         break;
                     }
-                }else {
-                    value = elements.get(i).actual_part.scString();
-                    break;
                 }
             }
             pMap.put(syms[i].name, value);
@@ -100,9 +103,9 @@ class ScPort_map_aspect extends ScVhdl {
             String value = pMap.get(syms[i].name);
             if(value == null)
                 value = syms[i].value;
+            ret += intent() + entityName + "." + syms[i].name + "(";
             ret += value;
-            if(i < pMap.size() - 1)
-                ret += ", ";
+            ret += ");\r\n";
         }
 /*        
         for(i = 0; i < elements.size(); i++) {
