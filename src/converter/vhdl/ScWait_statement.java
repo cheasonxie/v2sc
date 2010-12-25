@@ -42,18 +42,18 @@ class ScWait_statement extends ScVhdl {
             ret += timeout.scString();
             ret += ", ";
             ret += getSCTime(timeout.getTimeUnitName());
+        }else if(sensitivity != null) {
+            ret += "wait(";
         }else {
             ret += "next_trigger(";
         }
         
         if(sensitivity != null) {
-            ret += ", ";
             ArrayList<String> sensList = sensitivity.getSensitiveList();
-            String strSens = "";
             for(int i = 0; i < sensList.size(); i++) {
-                strSens += sensList.get(i);
-                if(i < sensList.size()) {
-                    strSens += " | ";
+                ret += sensList.get(i) + ".event()";
+                if(i < sensList.size() - 1) {
+                    ret += " | ";
                 }
             }
         }

@@ -95,13 +95,15 @@ class ScProcess_statement extends ScCommonIdentifier implements IScStatementBloc
     public String getInitCode()
     {
         String ret = "";
-        ret += intent() + "SC_METHOD(" + getName() + ");\r\n";
         if(sensitivity_list != null) {
+            ret += intent() + "SC_METHOD(" + getName() + ");\r\n";
             ret += intent() + "sensitive";
             for(int i = 0; i < sensitivity_list.items.size(); i++) {
                 ret += " << " + sensitivity_list.items.get(i);
             }
             ret += ";";
+        }else {
+            ret += intent() + "SC_THREAD(" + getName() + ");\r\n";
         }
         return ret;
     }
