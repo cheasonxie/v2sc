@@ -96,7 +96,7 @@ class ScSelected_signal_assignment extends ScVhdl {
         }else {
             ret += intent() + "switch(" + val + ")\r\n";
 
-            ret += startIntentBraceBlock();
+            ret += intent() + "{\r\n";
             for(int i = 0; i < selected_waveforms.choicesWaveform.size(); i++) {
                 ChoicesWaveform cw = selected_waveforms.choicesWaveform.get(i);
                 ScChoices choices = cw.choices;
@@ -114,7 +114,7 @@ class ScSelected_signal_assignment extends ScVhdl {
                 ret += intent() + "break;\r\n";
                 endIntentBlock();
             }
-            ret += endIntentBraceBlock();
+            ret += intent() + "}\r\n";
         }
         return ret;
     }

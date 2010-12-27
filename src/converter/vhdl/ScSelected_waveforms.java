@@ -21,6 +21,7 @@ class ScSelected_waveforms extends ScVhdl {
             {
             case ASTWAVEFORM:
                 cw = new ChoicesWaveform();
+                choicesWaveform.add(cw);
                 cw.waveform = new ScWaveform(c);
                 break;
             case ASTCHOICES:
