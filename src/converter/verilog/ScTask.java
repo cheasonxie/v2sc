@@ -15,7 +15,7 @@ class ScTask extends ScVerilog {
         assert(node.getId() == ASTTASK);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

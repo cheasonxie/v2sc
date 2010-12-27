@@ -16,7 +16,7 @@ class ScExpression extends ScVerilog {
         assert(node.getId() == ASTEXPRESSION);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

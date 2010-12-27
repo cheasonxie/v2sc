@@ -12,7 +12,7 @@ class ScUnary_operator extends ScVerilog {
         assert(node.getId() == ASTUNARY_OPERATOR);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

@@ -12,7 +12,7 @@ class ScNotify_register extends ScVerilog {
         assert(node.getId() == ASTNOTIFY_REGISTER);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

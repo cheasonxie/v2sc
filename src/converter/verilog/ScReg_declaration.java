@@ -12,7 +12,7 @@ class ScReg_declaration extends ScVerilog {
         assert(node.getId() == ASTREG_DECLARATION);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

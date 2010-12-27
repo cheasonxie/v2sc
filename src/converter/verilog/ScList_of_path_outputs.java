@@ -12,7 +12,7 @@ class ScList_of_path_outputs extends ScVerilog {
         assert(node.getId() == ASTLIST_OF_PATH_OUTPUTS);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

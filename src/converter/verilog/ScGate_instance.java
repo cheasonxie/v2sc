@@ -12,7 +12,7 @@ class ScGate_instance extends ScVerilog {
         assert(node.getId() == ASTGATE_INSTANCE);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

@@ -12,7 +12,7 @@ class ScCombinational_entry extends ScVerilog {
         assert(node.getId() == ASTCOMBINATIONAL_ENTRY);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

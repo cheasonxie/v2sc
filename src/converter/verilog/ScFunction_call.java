@@ -14,7 +14,7 @@ class ScFunction_call extends ScVerilog {
         assert(node.getId() == ASTFUNCTION_CALL);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

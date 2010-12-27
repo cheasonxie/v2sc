@@ -13,7 +13,7 @@ class ScTable_entries extends ScVerilog {
         assert(node.getId() == ASTTABLE_ENTRIES);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

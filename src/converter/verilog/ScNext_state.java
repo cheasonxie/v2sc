@@ -13,7 +13,7 @@ class ScNext_state extends ScVerilog {
         assert(node.getId() == ASTNEXT_STATE);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

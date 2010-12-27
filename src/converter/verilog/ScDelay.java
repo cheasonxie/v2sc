@@ -14,7 +14,7 @@ class ScDelay extends ScVerilog {
         assert(node.getId() == ASTDELAY);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

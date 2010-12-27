@@ -12,7 +12,7 @@ class ScInout_declaration extends ScVerilog {
         assert(node.getId() == ASTINOUT_DECLARATION);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

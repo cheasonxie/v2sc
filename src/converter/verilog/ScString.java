@@ -11,7 +11,7 @@ class ScString extends ScVerilog {
         assert(node.getId() == ASTSTRING);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

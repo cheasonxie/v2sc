@@ -12,7 +12,7 @@ class ScList_of_variables extends ScVerilog {
         assert(node.getId() == ASTLIST_OF_VARIABLES);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

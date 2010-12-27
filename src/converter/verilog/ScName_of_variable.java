@@ -12,7 +12,7 @@ class ScName_of_variable extends ScVerilog {
         assert(node.getId() == ASTNAME_OF_VARIABLE);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

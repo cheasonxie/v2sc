@@ -12,7 +12,7 @@ class ScList_of_register_variables extends ScVerilog {
         assert(node.getId() == ASTLIST_OF_REGISTER_VARIABLES);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

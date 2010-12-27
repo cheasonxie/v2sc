@@ -12,7 +12,7 @@ class ScEdge_symbol extends ScVerilog {
         assert(node.getId() == ASTEDGE_SYMBOL);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

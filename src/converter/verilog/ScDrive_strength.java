@@ -13,7 +13,7 @@ class ScDrive_strength extends ScVerilog {
         assert(node.getId() == ASTDRIVE_STRENGTH);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

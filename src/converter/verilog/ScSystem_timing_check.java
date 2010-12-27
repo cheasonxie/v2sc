@@ -29,7 +29,7 @@ class ScSystem_timing_check extends ScVerilog {
         assert(node.getId() == ASTSYSTEM_TIMING_CHECK);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

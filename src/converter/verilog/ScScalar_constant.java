@@ -21,7 +21,7 @@ class ScScalar_constant extends ScVerilog {
         assert(node.getId() == ASTSCALAR_CONSTANT);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

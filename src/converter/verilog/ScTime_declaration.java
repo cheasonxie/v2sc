@@ -12,7 +12,7 @@ class ScTime_declaration extends ScVerilog {
         assert(node.getId() == ASTTIME_DECLARATION);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

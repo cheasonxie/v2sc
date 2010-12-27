@@ -12,7 +12,7 @@ class ScName_of_udp extends ScVerilog {
         assert(node.getId() == ASTNAME_OF_UDP);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

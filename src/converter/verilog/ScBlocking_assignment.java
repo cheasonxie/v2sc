@@ -13,7 +13,7 @@ class ScBlocking_assignment extends ScVerilog {
         assert(node.getId() == ASTBLOCKING_ASSIGNMENT);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

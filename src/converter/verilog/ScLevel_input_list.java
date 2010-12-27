@@ -12,7 +12,7 @@ class ScLevel_input_list extends ScVerilog {
         assert(node.getId() == ASTLEVEL_INPUT_LIST);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

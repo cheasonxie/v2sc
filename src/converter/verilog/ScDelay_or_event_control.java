@@ -14,7 +14,7 @@ class ScDelay_or_event_control extends ScVerilog {
         assert(node.getId() == ASTDELAY_OR_EVENT_CONTROL);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

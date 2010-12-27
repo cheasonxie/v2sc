@@ -12,7 +12,7 @@ class ScParameter_override extends ScVerilog {
         assert(node.getId() == ASTPARAMETER_OVERRIDE);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

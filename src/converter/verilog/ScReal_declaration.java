@@ -12,7 +12,7 @@ class ScReal_declaration extends ScVerilog {
         assert(node.getId() == ASTREAL_DECLARATION);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

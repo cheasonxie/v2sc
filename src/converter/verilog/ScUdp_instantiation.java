@@ -13,7 +13,7 @@ class ScUdp_instantiation extends ScVerilog {
         assert(node.getId() == ASTUDP_INSTANTIATION);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

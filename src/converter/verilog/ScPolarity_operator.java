@@ -13,7 +13,7 @@ class ScPolarity_operator extends ScVerilog {
         assert(node.getId() == ASTPOLARITY_OPERATOR);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

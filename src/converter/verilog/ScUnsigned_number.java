@@ -13,7 +13,7 @@ class ScUnsigned_number extends ScVerilog {
         assert(node.getId() == ASTUNSIGNED_NUMBER);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

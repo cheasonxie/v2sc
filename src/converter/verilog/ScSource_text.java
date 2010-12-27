@@ -31,7 +31,7 @@ class ScSource_text extends ScVerilog implements IScFile {
         convDividual = dividual;
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

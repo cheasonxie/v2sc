@@ -14,7 +14,7 @@ class ScSpecify_output_terminal_descriptor extends ScVerilog {
         assert(node.getId() == ASTSPECIFY_OUTPUT_TERMINAL_DESCRIPTOR);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

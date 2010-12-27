@@ -12,7 +12,7 @@ class ScParameter_value_assignment extends ScVerilog {
         assert(node.getId() == ASTPARAMETER_VALUE_ASSIGNMENT);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

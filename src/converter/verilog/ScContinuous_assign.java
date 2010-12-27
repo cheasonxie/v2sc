@@ -13,7 +13,7 @@ class ScContinuous_assign extends ScVerilog {
         assert(node.getId() == ASTCONTINUOUS_ASSIGN);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

@@ -13,7 +13,7 @@ class ScTiming_check_condition extends ScVerilog {
         assert(node.getId() == ASTTIMING_CHECK_CONDITION);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

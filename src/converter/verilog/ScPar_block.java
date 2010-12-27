@@ -13,7 +13,7 @@ class ScPar_block extends ScVerilog {
         assert(node.getId() == ASTPAR_BLOCK);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

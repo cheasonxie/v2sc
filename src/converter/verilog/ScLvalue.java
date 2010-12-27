@@ -15,7 +15,7 @@ class ScLvalue extends ScVerilog {
         assert(node.getId() == ASTLVALUE);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

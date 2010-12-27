@@ -12,7 +12,7 @@ class ScScalar_expression extends ScVerilog {
         assert(node.getId() == ASTSCALAR_EXPRESSION);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

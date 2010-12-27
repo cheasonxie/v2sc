@@ -13,7 +13,7 @@ class ScTiming_check_event extends ScVerilog {
         assert(node.getId() == ASTTIMING_CHECK_EVENT);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

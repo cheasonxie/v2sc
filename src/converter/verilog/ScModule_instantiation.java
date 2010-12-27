@@ -13,7 +13,7 @@ class ScModule_instantiation extends ScVerilog {
         assert(node.getId() == ASTMODULE_INSTANTIATION);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

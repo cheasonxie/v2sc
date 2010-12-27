@@ -12,7 +12,7 @@ class ScUdp_initial_statement extends ScVerilog {
         assert(node.getId() == ASTUDP_INITIAL_STATEMENT);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

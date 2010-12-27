@@ -7,13 +7,15 @@ import parser.verilog.ASTNode;
  *     ::= <b>always</b>  statement  
  */
 class ScAlways_statement extends ScVerilog {
+    ScStatement statement = null;
     public ScAlways_statement(ASTNode node) {
         super(node);
         assert(node.getId() == ASTALWAYS_STATEMENT);
+        ASTNode c = (ASTNode)curNode.getChild(0);
+        statement = new ScStatement(c);
     }
 
-    public String ScString() {
-        String ret = "";
-        return ret;
+    public String scString() {
+        return statement.scString();
     }
 }

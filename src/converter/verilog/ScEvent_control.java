@@ -13,7 +13,7 @@ class ScEvent_control extends ScVerilog {
         assert(node.getId() == ASTEVENT_CONTROL);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

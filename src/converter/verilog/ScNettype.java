@@ -12,7 +12,7 @@ class ScNettype extends ScVerilog {
         assert(node.getId() == ASTNETTYPE);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

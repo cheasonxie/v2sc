@@ -14,7 +14,7 @@ class ScPort_reference extends ScVerilog {
         assert(node.getId() == ASTPORT_REFERENCE);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

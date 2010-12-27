@@ -12,7 +12,7 @@ class ScRange extends ScVerilog {
         assert(node.getId() == ASTRANGE);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

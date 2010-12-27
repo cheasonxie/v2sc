@@ -20,7 +20,7 @@ class ScNumber extends ScVerilog {
         assert(node.getId() == ASTNUMBER);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

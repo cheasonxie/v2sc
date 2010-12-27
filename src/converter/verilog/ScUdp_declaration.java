@@ -14,7 +14,7 @@ class ScUdp_declaration extends ScVerilog {
         assert(node.getId() == ASTUDP_DECLARATION);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

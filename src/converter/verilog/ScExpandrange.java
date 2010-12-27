@@ -14,7 +14,7 @@ class ScExpandrange extends ScVerilog {
         assert(node.getId() == ASTEXPANDRANGE);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

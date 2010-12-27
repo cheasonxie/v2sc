@@ -13,7 +13,7 @@ class ScModule_port_connection extends ScVerilog {
         assert(node.getId() == ASTMODULE_PORT_CONNECTION);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

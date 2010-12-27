@@ -12,7 +12,7 @@ class ScName_of_function extends ScVerilog {
         assert(node.getId() == ASTNAME_OF_FUNCTION);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

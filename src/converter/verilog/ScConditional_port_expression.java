@@ -14,7 +14,7 @@ class ScConditional_port_expression extends ScVerilog {
         assert(node.getId() == ASTCONDITIONAL_PORT_EXPRESSION);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

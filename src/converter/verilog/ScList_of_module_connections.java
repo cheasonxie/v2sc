@@ -13,7 +13,7 @@ class ScList_of_module_connections extends ScVerilog {
         assert(node.getId() == ASTLIST_OF_MODULE_CONNECTIONS);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

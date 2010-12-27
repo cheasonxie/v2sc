@@ -12,7 +12,7 @@ class ScOutput_terminal_name extends ScVerilog {
         assert(node.getId() == ASTOUTPUT_TERMINAL_NAME);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

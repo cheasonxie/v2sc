@@ -12,7 +12,7 @@ class ScEdge_control_specifier extends ScVerilog {
         assert(node.getId() == ASTEDGE_CONTROL_SPECIFIER);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

@@ -13,7 +13,7 @@ class ScPort_expression extends ScVerilog {
         assert(node.getId() == ASTPORT_EXPRESSION);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

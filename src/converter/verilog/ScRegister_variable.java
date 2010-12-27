@@ -13,7 +13,7 @@ class ScRegister_variable extends ScVerilog {
         assert(node.getId() == ASTREGISTER_VARIABLE);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

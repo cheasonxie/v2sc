@@ -12,7 +12,7 @@ class ScBinary_operator extends ScVerilog {
         assert(node.getId() == ASTBINARY_OPERATOR);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

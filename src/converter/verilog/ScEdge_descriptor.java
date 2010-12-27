@@ -17,7 +17,7 @@ class ScEdge_descriptor extends ScVerilog {
         assert(node.getId() == ASTEDGE_DESCRIPTOR);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

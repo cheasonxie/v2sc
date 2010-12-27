@@ -19,7 +19,7 @@ class ScPrimary extends ScVerilog {
         assert(node.getId() == ASTPRIMARY);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

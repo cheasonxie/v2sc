@@ -12,7 +12,7 @@ class ScSpecify_block extends ScVerilog {
         assert(node.getId() == ASTSPECIFY_BLOCK);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

@@ -12,7 +12,7 @@ class ScList_of_ports extends ScVerilog {
         assert(node.getId() == ASTLIST_OF_PORTS);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

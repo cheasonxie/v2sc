@@ -17,7 +17,7 @@ class ScModule extends ScVerilog {
         assert(node.getId() == ASTMODULE);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

@@ -12,7 +12,7 @@ class ScSystem_identifier extends ScVerilog {
         assert(node.getId() == ASTSYSTEM_IDENTIFIER);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

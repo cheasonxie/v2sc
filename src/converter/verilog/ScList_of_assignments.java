@@ -12,7 +12,7 @@ class ScList_of_assignments extends ScVerilog {
         assert(node.getId() == ASTLIST_OF_ASSIGNMENTS);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

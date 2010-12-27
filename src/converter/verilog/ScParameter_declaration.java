@@ -12,7 +12,7 @@ class ScParameter_declaration extends ScVerilog {
         assert(node.getId() == ASTPARAMETER_DECLARATION);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

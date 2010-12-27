@@ -14,7 +14,7 @@ class ScNet_declaration extends ScVerilog {
         assert(node.getId() == ASTNET_DECLARATION);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

@@ -19,7 +19,7 @@ class ScEdge_sensitive_path_declaration extends ScVerilog {
         assert(node.getId() == ASTEDGE_SENSITIVE_PATH_DECLARATION);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

@@ -35,7 +35,7 @@ class ScStatement extends ScVerilog {
         assert(node.getId() == ASTSTATEMENT);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

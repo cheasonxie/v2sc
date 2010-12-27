@@ -13,7 +13,7 @@ class ScEdge extends ScVerilog {
         assert(node.getId() == ASTEDGE);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

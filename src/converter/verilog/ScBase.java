@@ -12,7 +12,7 @@ class ScBase extends ScVerilog {
         assert(node.getId() == ASTBASE);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

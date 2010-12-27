@@ -13,7 +13,7 @@ class ScSystem_task_enable extends ScVerilog {
         assert(node.getId() == ASTSYSTEM_TASK_ENABLE);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

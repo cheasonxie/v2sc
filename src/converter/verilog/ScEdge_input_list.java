@@ -12,7 +12,7 @@ class ScEdge_input_list extends ScVerilog {
         assert(node.getId() == ASTEDGE_INPUT_LIST);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

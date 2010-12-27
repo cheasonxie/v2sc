@@ -14,7 +14,7 @@ class ScRange_or_type extends ScVerilog {
         assert(node.getId() == ASTRANGE_OR_TYPE);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

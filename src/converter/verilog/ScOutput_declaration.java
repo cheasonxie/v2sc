@@ -12,7 +12,7 @@ class ScOutput_declaration extends ScVerilog {
         assert(node.getId() == ASTOUTPUT_DECLARATION);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

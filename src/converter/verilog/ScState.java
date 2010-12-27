@@ -12,7 +12,7 @@ class ScState extends ScVerilog {
         assert(node.getId() == ASTSTATE);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

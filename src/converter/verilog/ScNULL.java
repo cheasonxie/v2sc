@@ -13,7 +13,7 @@ class ScNULL extends ScVerilog {
         assert(node.getId() == ASTNULL);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

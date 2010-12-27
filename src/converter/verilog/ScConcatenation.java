@@ -12,7 +12,7 @@ class ScConcatenation extends ScVerilog {
         assert(node.getId() == ASTCONCATENATION);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

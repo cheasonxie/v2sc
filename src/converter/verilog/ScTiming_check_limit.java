@@ -12,7 +12,7 @@ class ScTiming_check_limit extends ScVerilog {
         assert(node.getId() == ASTTIMING_CHECK_LIMIT);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

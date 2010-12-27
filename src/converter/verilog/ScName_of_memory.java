@@ -12,7 +12,7 @@ class ScName_of_memory extends ScVerilog {
         assert(node.getId() == ASTNAME_OF_MEMORY);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

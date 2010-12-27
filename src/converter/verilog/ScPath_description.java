@@ -13,7 +13,7 @@ class ScPath_description extends ScVerilog {
         assert(node.getId() == ASTPATH_DESCRIPTION);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

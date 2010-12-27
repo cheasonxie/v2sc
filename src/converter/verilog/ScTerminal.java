@@ -13,7 +13,7 @@ class ScTerminal extends ScVerilog {
         assert(node.getId() == ASTTERMINAL);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

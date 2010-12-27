@@ -12,7 +12,7 @@ class ScPath_delay_expression extends ScVerilog {
         assert(node.getId() == ASTPATH_DELAY_EXPRESSION);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

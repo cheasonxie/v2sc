@@ -12,7 +12,7 @@ class ScInitial_statement extends ScVerilog {
         assert(node.getId() == ASTINITIAL_STATEMENT);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

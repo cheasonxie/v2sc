@@ -12,7 +12,7 @@ class ScTable_definition extends ScVerilog {
         assert(node.getId() == ASTTABLE_DEFINITION);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

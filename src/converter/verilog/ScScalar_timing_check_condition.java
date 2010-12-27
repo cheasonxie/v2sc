@@ -17,7 +17,7 @@ class ScScalar_timing_check_condition extends ScVerilog {
         assert(node.getId() == ASTSCALAR_TIMING_CHECK_CONDITION);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

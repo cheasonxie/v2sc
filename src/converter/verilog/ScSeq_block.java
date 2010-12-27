@@ -13,7 +13,7 @@ class ScSeq_block extends ScVerilog {
         assert(node.getId() == ASTSEQ_BLOCK);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

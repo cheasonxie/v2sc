@@ -12,7 +12,7 @@ class ScSequential_entry extends ScVerilog {
         assert(node.getId() == ASTSEQUENTIAL_ENTRY);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

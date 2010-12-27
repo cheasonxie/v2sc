@@ -12,7 +12,7 @@ class ScStrength1 extends ScVerilog {
         assert(node.getId() == ASTSTRENGTH1);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

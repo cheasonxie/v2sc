@@ -13,7 +13,7 @@ class ScStatement_or_null extends ScVerilog {
         assert(node.getId() == ASTSTATEMENT_OR_NULL);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

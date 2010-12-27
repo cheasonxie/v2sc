@@ -14,7 +14,7 @@ class ScCase_item extends ScVerilog {
         assert(node.getId() == ASTCASE_ITEM);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

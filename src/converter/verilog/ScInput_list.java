@@ -13,7 +13,7 @@ class ScInput_list extends ScVerilog {
         assert(node.getId() == ASTINPUT_LIST);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

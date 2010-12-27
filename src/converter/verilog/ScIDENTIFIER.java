@@ -13,7 +13,7 @@ class ScIdentifier extends ScVerilog {
         assert(node.getId() == ASTidentifier);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }
@@ -31,13 +31,13 @@ class ScIdentifier extends ScVerilog {
  *     printable ASCII character. An escaped identifier ends with white space. The <br>
  *     leading backslash character is <b>not</b> considered to be part of the identifier. 
  */
-class ScIDENTIFIER extends ScVerilog {
-    public ScIDENTIFIER(ASTNode node) {
+class ScIDENTIFIER0 extends ScVerilog {
+    public ScIDENTIFIER0(ASTNode node) {
         super(node);
         assert(node.getId() == ASTIDENTIFIER);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

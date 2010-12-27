@@ -17,7 +17,7 @@ class ScSpecify_item extends ScVerilog {
         assert(node.getId() == ASTSPECIFY_ITEM);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

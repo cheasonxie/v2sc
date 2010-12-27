@@ -13,7 +13,7 @@ class ScDecimal_number extends ScVerilog {
         assert(node.getId() == ASTDECIMAL_NUMBER);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

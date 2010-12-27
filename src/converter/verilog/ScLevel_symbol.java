@@ -12,7 +12,7 @@ class ScLevel_symbol extends ScVerilog {
         assert(node.getId() == ASTLEVEL_SYMBOL);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

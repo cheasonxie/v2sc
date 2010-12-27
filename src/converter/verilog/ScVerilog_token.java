@@ -10,7 +10,7 @@ class ScVerilog_token extends ScVerilog {
         assert(node.getId() == ASTVERILOG_TOKEN);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

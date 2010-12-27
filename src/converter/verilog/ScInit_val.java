@@ -21,7 +21,7 @@ class ScInit_val extends ScVerilog {
         assert(node.getId() == ASTINIT_VAL);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

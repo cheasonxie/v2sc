@@ -13,7 +13,7 @@ class ScGatetype extends ScVerilog {
         assert(node.getId() == ASTGATETYPE);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }

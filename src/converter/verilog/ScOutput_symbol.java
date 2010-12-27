@@ -12,7 +12,7 @@ class ScOutput_symbol extends ScVerilog {
         assert(node.getId() == ASTOUTPUT_SYMBOL);
     }
 
-    public String ScString() {
+    public String scString() {
         String ret = "";
         return ret;
     }
