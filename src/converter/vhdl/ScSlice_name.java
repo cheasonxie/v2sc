@@ -37,7 +37,9 @@ class ScSlice_name extends ScVhdl {
         String ret = "";
         if(!curNode.isDescendantOf(ASTEXPRESSION)
             && !curNode.isDescendantOf(ASTTARGET)
-            && !curNode.isDescendantOf(ASTPORT_MAP_ASPECT)) {
+            && !curNode.isDescendantOf(ASTPORT_MAP_ASPECT)
+            && !curNode.isDescendantOf(ASTPROCEDURE_CALL)
+            && !curNode.isDescendantOf(ASTFUNCTION_CALL)) {
             ret += getReplaceType(prefix.scString(), range.getRange());
         }else {
             ret += prefix.scString() + ".range(";
