@@ -214,7 +214,7 @@ public class extratVerilog {
                     str += "        assert(node.getId() == AST" + astArray.get(i).name + ");\r\n";
                 str += "    }\r\n\r\n";
                 
-                str += "    public String ScString() {\r\n";
+                str += "    public String scString() {\r\n";
                 str += "        String ret = \"\";\r\n";
                 str += "        return ret;\r\n";
                 str += "    }\r\n";
