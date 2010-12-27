@@ -119,7 +119,7 @@ public interface VerilogASTConstants
     static final int ASTSCALAR_EXPRESSION = 114;
     static final int ASTSCALAR_TIMING_CHECK_CONDITION = 115;
     static final int ASTSDPD = 116;
-    static final int ASTSDPD_CONDITIONAL_EXPRESSSION = 117;
+    static final int ASTSDPD_CONDITIONAL_EXPRESSION = 117;
     static final int ASTSEQ_BLOCK = 118;
     static final int ASTSEQUENTIAL_ENTRY = 119;
     static final int ASTSOURCE_TEXT = 120;

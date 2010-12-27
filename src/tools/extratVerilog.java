@@ -2,6 +2,7 @@ package tools;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -16,7 +17,8 @@ public class extratVerilog {
     public static void main(String[] args)
     {
         //test_astconstants(args);
-        test_html(args);
+        //test_html(args);    // parser
+        test_html_converter(args);    // converter
     }
     
     static class AstNode
@@ -149,6 +151,79 @@ public class extratVerilog {
             writer.write(str);
             writer.flush();
             writer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    static void writeConverterClass(String dir, ArrayList<AstNode> astArray)
+    {
+        if(astArray == null)
+            return;
+        
+        boolean idenCreated = false;
+        BufferedWriter writer;
+        try {
+            for(int i = 0; i < astArray.size(); i++) {
+                
+                String className = astArray.get(i).name;
+                className = Character.toUpperCase(className.charAt(0)) + className.substring(1);
+                className = "Sc" + className;
+                
+                String filePath = dir + "\\" + className + ".java";
+                String str = "";
+                
+                boolean isIdentifier = astArray.get(i).name.equalsIgnoreCase("identifier");
+                File f = new File(filePath);
+                if(!isIdentifier || !idenCreated) {
+                    writer = new BufferedWriter(new FileWriter(filePath));
+                    if(isIdentifier)
+                        idenCreated = true;
+                }else {
+                    // identifier differ from IDENTIFIER, 
+                    // we put them in one file
+                    writer = new BufferedWriter(new FileWriter(filePath, true));
+                }
+                
+                f.setWritable(true);
+                if(f.length() == 0) {
+                    str += "package converter.verilog;\r\n";
+                    str += "\r\n";
+                    str += "import parser.verilog.ASTNode;\r\n";
+                }
+                
+                str += "\r\n";
+                str += "/**\r\n";
+                for(int j = 0; j < astArray.get(i).content.size(); j++) {
+                    String tmp = addBold(astArray.get(i).content.get(j));
+                    str += " * " + parseBNF(astArray, tmp);
+                    if(j < astArray.get(i).content.size() - 1)
+                        str += "<br>";
+                    str += "\r\n";
+                }
+                str += " */\r\n";
+                
+                str += "class " + className;
+                str += " extends ScVerilog {\r\n";
+                
+                str += "    public " + className + "(ASTNode node) {\r\n";
+                str += "        super(node);\r\n";
+                if(!isIdentifier)
+                    str += "        assert(node.getId() == AST" + astArray.get(i).name.toUpperCase() + ");\r\n";
+                else
+                    str += "        assert(node.getId() == AST" + astArray.get(i).name + ");\r\n";
+                str += "    }\r\n\r\n";
+                
+                str += "    public String ScString() {\r\n";
+                str += "        String ret = \"\";\r\n";
+                str += "        return ret;\r\n";
+                str += "    }\r\n";
+                
+                str += "}\r\n";
+                writer.write(str);
+                writer.flush();
+                writer.close();
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -361,6 +436,73 @@ public class extratVerilog {
         }
     }
     
+    static void test_html_converter(String[] args)
+    {
+        /**
+         * <A name="REF1"></A><B><A href="#REF1">&lt;source_text&gt;</A></B>
+         *     ::= &lt;<A href="#REF2">description</A>&gt;*
+         *
+         * <A name="REF2"></A><B><A href="#REF2">&lt;description&gt;</A></B>
+         *     ::= &lt;<A href="#REF3">module</A>&gt;
+         *     ||= &lt;<A href="#REF12">UDP</A>&gt;
+         */
+        String validLine = "<A name=\"REF[a-zA-Z0-9</>_= \"]+<A href=\"#REF[a-zA-Z0-9&;.:</>_= \"]+";
+        
+        String str = "<A name=\"REF1\"></A><B><A href=\"#REF1\">&lt;source_text&gt;</A></B>";
+        if(str.matches(validLine))
+            System.out.println("match!");
+        else
+            System.out.println("not match!");
+        
+        String str1 = "<H2><A name=\"REF0\"></A>1. Source Text</H2>";
+        if(str1.matches(validLine))
+            System.out.println("match!");
+        else
+            System.out.println("not match!");
+        String dir = System.getProperty("user.dir");
+        ArrayList<AstNode> astArray = new ArrayList<AstNode>();
+        try {
+            BufferedReader reader = new BufferedReader(
+                    new FileReader(dir + "\\src\\verilog_syntax.htm"));
+            String line = reader.readLine();
+            while(line != null) {
+                if(line.matches(validLine)) {
+                    String name = getAstName(line);
+                    if(getIndex(astArray, name) >= 0 || name.indexOf("comment") >= 0) {
+                        line = reader.readLine();
+                        continue;
+                    }
+                    AstNode newNode = new AstNode();
+                    newNode.name = name;
+                    newNode.content.add(removeUnused(line));
+                    while(true) {
+                        line = reader.readLine();
+                        if(line == null || line.matches(validLine) || line.isEmpty()) {
+                            break;
+                        }
+                        String tmp = removeUnused(line);
+                        newNode.content.add(tmp);
+                    }
+                    astArray.add(newNode);
+                }else {
+                    line = reader.readLine();
+                }
+            }
+            
+            AstNode newNode = new AstNode();
+            newNode.name = "verilog_token";
+            astArray.add(newNode);
+            
+            Collections.sort(astArray, new SortByName());
+            writeConverterClass(dir + "\\src\\converter\\verilog", astArray);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    
     static int getIndex(ArrayList<AstNode> astArray, String name)
     {
         int ret = -1;
@@ -422,7 +564,8 @@ public class extratVerilog {
     {
         String ret = str;
         String oldStr = str;
-        str = str.toUpperCase();
+        if(str.indexOf("identifier") < 0)
+            str = str.toUpperCase();
         int index;
         String tmp = "";
         String tmp1 = "", tmp2;

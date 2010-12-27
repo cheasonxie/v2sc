@@ -2961,7 +2961,7 @@ public class VerilogParser implements IParser, VerilogTokenConstants,
      *     ||= unary_operator  expression  
      */
     void sdpd_conditional_expression(IASTNode p, Token endToken) throws ParserException {
-        ASTNode node = new ASTNode(p, ASTSDPD_CONDITIONAL_EXPRESSSION);
+        ASTNode node = new ASTNode(p, ASTSDPD_CONDITIONAL_EXPRESSION);
         openNodeScope(node);
         if(is_unary_operator()) {
             unary_operator(node, endToken);
