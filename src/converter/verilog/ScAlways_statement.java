@@ -11,8 +11,17 @@ class ScAlways_statement extends ScVerilog {
     public ScAlways_statement(ASTNode node) {
         super(node);
         assert(node.getId() == ASTALWAYS_STATEMENT);
-        ASTNode c = (ASTNode)curNode.getChild(0);
-        statement = new ScStatement(c);
+        for(int i = 0; i < curNode.getChildrenNum(); i++) {
+            ASTNode c = (ASTNode)curNode.getChild(i);
+            switch(c.getId())
+            {
+            case ASTSTATEMENT:
+                statement = new ScStatement(c);
+                break;
+            default:
+                break;
+            }
+        }
     }
 
     public String scString() {

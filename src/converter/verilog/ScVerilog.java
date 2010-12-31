@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import common.MyDebug;
 import converter.CommentManager;
-import converter.ScConstants;
 
 import parser.CommentBlock;
 import parser.IParser;

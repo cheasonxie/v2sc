@@ -3,15 +3,16 @@ package converter.verilog;
 import java.util.ArrayList;
 
 import converter.IScFile;
-
 import parser.IParser;
 import parser.verilog.ASTNode;
+
 
 /**
  *  source_text  <br>
  *     ::= { description } 
  */
 class ScSource_text extends ScVerilog implements IScFile {
+    ArrayList<ScDescription> descs = new ArrayList<ScDescription>();
     public ScSource_text(IParser parser) {
         this(parser, false);
     }
@@ -29,10 +30,27 @@ class ScSource_text extends ScVerilog implements IScFile {
     public ScSource_text(IParser parser, boolean dividual) {
         super(parser);
         convDividual = dividual;
+        assert(curNode.getId() == ASTSOURCE_TEXT);
+        for(int i = 0; i < curNode.getChildrenNum(); i++) {
+            ASTNode c = (ASTNode)curNode.getChild(i);
+            ScDescription desc = null;
+            switch(c.getId())
+            {
+            case ASTDESCRIPTION:
+                desc = new ScDescription(c);
+                descs.add(desc);
+                break;
+            default:
+                break;
+            }
+        }
     }
 
     public String scString() {
         String ret = "";
+        for(int i = 0; i < descs.size(); i++) {
+            ret += descs.toString() + "\r\n";
+        }
         return ret;
     }
 
