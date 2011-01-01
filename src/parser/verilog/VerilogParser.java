@@ -2463,12 +2463,16 @@ public class VerilogParser implements IParser, VerilogTokenConstants,
 
     /**
      * parameter_declaration <br>
-     *     ::= <b>parameter</b>  list_of_param_assignments  ; 
+     *     ::= <b>parameter</b> [ range ] list_of_param_assignments  ; 
      */
     void parameter_declaration(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTPARAMETER_DECLARATION);
         openNodeScope(node);
         consumeToken(PARAMETER);
+        if(tokenMgr.getNextTokenKind() == LSQUARE_BRACKET) {
+            Token tmpToken = findTokenInBlock(RSQUARE_BRACKET, endToken);
+            range(node, tmpToken);
+        }
         endToken = findTokenInBlock(SEMICOLON, endToken);
         list_of_param_assignments(node, endToken);
         consumeToken(SEMICOLON);

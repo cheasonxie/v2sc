@@ -76,12 +76,14 @@ public interface ScConstants
     static final int tabSize = 4;
     
     // time scale
-    static final int SC_NS = 0;
-    static final int SC_US = 1;
-    static final int SC_MS = 2;
-    static final int SC_S  = 3;
+    static final int SC_FS = 0;
+    static final int SC_PS = 1;
+    static final int SC_NS = 2;
+    static final int SC_US = 3;
+    static final int SC_MS = 4;
+    static final int SC_S  = 5;
     static final String[] scTimeScale = 
     {
-        "SC_NS", "SC_US", "SC_MS", "SC_S"
+        "SC_FS", "SC_PS", "SC_NS", "SC_US", "SC_MS", "SC_S"
     };
 }

@@ -122,7 +122,7 @@ public interface ScVhdlConstants extends ScConstants
     //vhdl time scale
     static final String[] vhdlTimeScale = 
     {
-        "ps", "ns", "us", "ms", "s",
+        "fs", "ps", "ns", "us", "ms", "s",
     };
 }
 
