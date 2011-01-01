@@ -68,57 +68,61 @@ class ScCommonDeclaration extends ScVhdl {
                 strType = "sc_uint_base";
             }
         }
+          
+        String temp = "";
         
         if(curNode.isDescendantOf(ASTPORT_LIST)) {
             if(mode != null) {
                 if(mode.scString().equalsIgnoreCase(PORT_IN)) {
-                    ret += "sc_in<";
+                    temp += "sc_in<";
                 }else if(mode.scString().equalsIgnoreCase(PORT_OUT)) {
-                    ret += "sc_out<";
+                    temp += "sc_out<";
                 }else if(mode.scString().equalsIgnoreCase(PORT_INOUT)) {
-                    ret += "sc_inout<";
+                    temp += "sc_inout<";
                 }else {
                     warning("token" + mode.scString() + " ignored");
                 }
             }
-            ret += strType;
+            temp += strType;
             if(strType.endsWith(">")) {
-                ret += " ";  // avoid double '>'
+                temp += " ";  // avoid double '>'
             }
-            ret += "> ";
+            temp += "> ";
         }else if(curNode.getId() == ASTSIGNAL_DECLARATION) {
-            ret += "sc_signal<";
-            ret += strType;
+            temp += "sc_signal<";
+            temp += strType;
             if(strType.endsWith(">")) {
-                ret += " ";  // avoid double '>'
+                temp += " ";  // avoid double '>'
             }
-            ret += "> ";
+            temp += "> ";
         }else if(curNode.isDescendantOf(ASTSUBPROGRAM_SPECIFICATION)
                 && mode != null) {
             // procedure
             if(mode.scString().equalsIgnoreCase(PORT_IN) 
                     && curNode.getId() != ASTINTERFACE_CONSTANT_DECLARATION) {
-                ret += "const ";
+                temp += "const ";
             }
             
             if(curNode.firstTokenImage().equalsIgnoreCase(tokenImage[SIGNAL])) {
-                ret += "sc_signal<";
-                ret += strType;
+                temp += "sc_signal<";
+                temp += strType;
                 if(strType.endsWith(">")) {
-                    ret += " ";  // avoid double '>'
+                    temp += " ";  // avoid double '>'
                 }
-                ret += "> ";
+                temp += "> ";
             }else {
-                ret += strType + " ";
+                temp += strType + " ";
             }
             
             if(mode.scString().equalsIgnoreCase(PORT_OUT)
                     || mode.scString().equalsIgnoreCase(PORT_INOUT)) {
-                ret += "&";
+                temp += "&";
             }
         }else {
-            ret += strType + " ";
+            temp += strType + " ";
         }
+        
+        ret += temp;
         
         ArrayList<ScIdentifier> items = idList.getItems();
         for(int i = 0; i < items.size(); i++) {
@@ -135,19 +139,7 @@ class ScCommonDeclaration extends ScVhdl {
             if(i < items.size() - 1) {
                 ret += ", ";
                 if(curNode.isDescendantOf(ASTSUBPROGRAM_SPECIFICATION)) {
-                    if(mode != null) {
-                        if(mode.scString().equalsIgnoreCase(PORT_IN)) {
-                            ret += "const ";
-                        }
-                        ret += strType + " ";
-                        
-                        if(mode.scString().equalsIgnoreCase(PORT_OUT)
-                                || mode.scString().equalsIgnoreCase(PORT_INOUT)) {
-                            ret += "&";
-                        }
-                    }else {
-                        ret += strType + " ";
-                    }
+                    ret += temp;
                 }
             }
         }
