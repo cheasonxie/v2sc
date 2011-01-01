@@ -4,7 +4,7 @@ import parser.verilog.ASTNode;
 
 /**
  *  parameter_declaration  <br>
- *     ::= <b>parameter</b> <b>[</b> range <b>]</b> list_of_param_assignments  ; 
+ *     ::= <b>parameter</b> [ range ] list_of_param_assignments  ; 
  */
 class ScParameter_declaration extends ScVerilog {
     ScList_of_param_assignments params = null;

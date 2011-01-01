@@ -4,7 +4,7 @@ import parser.verilog.ASTNode;
 
 /**
  *  input_declaration  <br>
- *     ::= <b>input</b> <b>[</b> range <b>]</b>  list_of_variables  ; 
+ *     ::= <b>input</b> [ range ]  list_of_variables  ; 
  */
 class ScInput_declaration extends ScVerilog {
     ScList_of_variables vars = null;

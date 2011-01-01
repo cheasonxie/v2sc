@@ -8,9 +8,11 @@ import parser.verilog.ASTNode;
  *     <b>nmos</b> <b>rnmos</b> <b>pmos</b> <b>rpmos</b> <b>cmos</b> <b>rcmos</b> <b>tran</b> <b>rtran</b> <b>tranif0</b> <b>rtranif0</b> <b>tranif1</b> <b>rtranif1</b> 
  */
 class ScGatetype extends ScVerilog {
+    String image = "";
     public ScGatetype(ASTNode node) {
         super(node);
         assert(node.getId() == ASTGATETYPE);
+        image = node.firstTokenImage();
     }
 
     public String scString() {

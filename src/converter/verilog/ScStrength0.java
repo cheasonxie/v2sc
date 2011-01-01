@@ -7,9 +7,11 @@ import parser.verilog.ASTNode;
  *     <b>supply0</b> <b>strong0</b> <b>pull0</b> <b>weak0</b> <b>highz0</b> 
  */
 class ScStrength0 extends ScVerilog {
+    String image = "";
     public ScStrength0(ASTNode node) {
         super(node);
         assert(node.getId() == ASTSTRENGTH0);
+        image = node.firstTokenImage();
     }
 
     public String scString() {

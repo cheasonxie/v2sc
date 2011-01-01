@@ -3,27 +3,26 @@ package converter.verilog;
 import parser.verilog.ASTNode;
 
 /**
- *  parameter_override  <br>
- *     ::= <b>defparam</b>  list_of_param_assignments  ; 
+ *   ->  name_of_event  ;
  */
-class ScParameter_override extends ScVerilog {
-    ScList_of_param_assignments param = null;
-    public ScParameter_override(ASTNode node) {
-        super(node);
-        assert(node.getId() == ASTPARAMETER_OVERRIDE);
+class ScEvent_trigger_statement extends ScVerilog {
+    ScName_of_event name = null;
+    public ScEvent_trigger_statement(ASTNode node) {
+        super(node, true);
+        assert(node.getId() == ASTEVENT_TRIGGER_STATEMENT);
         for(int i = 0; i < curNode.getChildrenNum(); i++) {
             ASTNode c = (ASTNode)curNode.getChild(i);
             switch(c.getId())
             {
-            case ASTLIST_OF_PARAM_ASSIGNMENTS:
-                param = new ScList_of_param_assignments(c);
+            case ASTNAME_OF_EVENT:
+                name = new ScName_of_event(c);
                 break;
             default:
                 break;
             }
         }
     }
-
+    
     public String scString() {
         String ret = "";
         return ret;

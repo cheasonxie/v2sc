@@ -1,5 +1,7 @@
 package converter.verilog;
 
+import java.util.ArrayList;
+
 import parser.verilog.ASTNode;
 
 /**
@@ -8,13 +10,31 @@ import parser.verilog.ASTNode;
  *     (Note: the period may <b>not</b> be preceded <b>or</b> followed by a space.) 
  */
 class ScIdentifier extends ScVerilog {
+    ArrayList<ScIDENTIFIER0> idens = new ArrayList<ScIDENTIFIER0>();
     public ScIdentifier(ASTNode node) {
         super(node);
         assert(node.getId() == ASTidentifier);
+        for(int i = 0; i < curNode.getChildrenNum(); i++) {
+            ASTNode c = (ASTNode)curNode.getChild(i);
+            ScIDENTIFIER0 id = null;
+            switch(c.getId())
+            {
+            case ASTIDENTIFIER:
+                id = new ScIDENTIFIER0(c);
+                idens.add(id);
+                break;
+            default:
+                break;
+            }
+        }
     }
 
     public String scString() {
         String ret = "";
+        ret =idens.get(0).scString();
+        for(int i = 1; i < idens.size(); i++) {
+            ret += "." + idens.get(i).scString();
+        }
         return ret;
     }
 }
@@ -32,13 +52,14 @@ class ScIdentifier extends ScVerilog {
  *     leading backslash character is <b>not</b> considered to be part of the identifier. 
  */
 class ScIDENTIFIER0 extends ScVerilog {
+    String image = "";
     public ScIDENTIFIER0(ASTNode node) {
         super(node);
         assert(node.getId() == ASTIDENTIFIER);
+        image = node.firstTokenImage();
     }
 
     public String scString() {
-        String ret = "";
-        return ret;
+        return image;
     }
 }

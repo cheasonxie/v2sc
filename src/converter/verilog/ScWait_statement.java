@@ -1,26 +1,25 @@
 package converter.verilog;
 
-import java.util.ArrayList;
-
 import parser.verilog.ASTNode;
 
 /**
- *  parameter_value_assignment  <br>
- *     ::= # (  expression  {, expression } ) 
+ *   <b>wait</b> (  expression  )  statement_or_null
  */
-class ScParameter_value_assignment extends ScVerilog {
-    ArrayList<ScExpression> exps = new ArrayList<ScExpression>();
-    public ScParameter_value_assignment(ASTNode node) {
-        super(node);
-        assert(node.getId() == ASTPARAMETER_VALUE_ASSIGNMENT);
+class ScWait_statement extends ScVerilog {
+    ScExpression exp = null;
+    ScStatement_or_null statement = null;
+    public ScWait_statement(ASTNode node) {
+        super(node, true);
+        assert(node.getId() == ASTWAIT_STATEMENT);
         for(int i = 0; i < curNode.getChildrenNum(); i++) {
             ASTNode c = (ASTNode)curNode.getChild(i);
-            ScExpression exp = null;
             switch(c.getId())
             {
+            case ASTSTATEMENT_OR_NULL:
+                statement = new ScStatement_or_null(c);
+                break;
             case ASTEXPRESSION:
                 exp = new ScExpression(c);
-                exps.add(exp);
                 break;
             default:
                 break;
@@ -30,6 +29,8 @@ class ScParameter_value_assignment extends ScVerilog {
 
     public String scString() {
         String ret = "";
+        ret += "wait(" + exp.toString() + ")\r\n";
+        ret += statement.toString();
         return ret;
     }
 }

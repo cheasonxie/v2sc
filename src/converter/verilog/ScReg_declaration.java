@@ -4,7 +4,7 @@ import parser.verilog.ASTNode;
 
 /**
  *  reg_declaration  <br>
- *     ::= <b>reg</b> <b>[</b> range <b>]</b>  list_of_register_variables  ; 
+ *     ::= <b>reg</b> [ range ]  list_of_register_variables  ; 
  */
 class ScReg_declaration extends ScVerilog {
     ScList_of_register_variables vars = null;

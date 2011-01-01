@@ -3,29 +3,28 @@ package converter.verilog;
 import parser.verilog.ASTNode;
 
 /**
- *  name_of_instance  <br>
- *     ::=  IDENTIFIER [ range ] 
+ *   <b>assign</b>  assignment  ;
  */
-class ScName_of_instance extends SimpleName {
-    ScRange range = null;
-    public ScName_of_instance(ASTNode node) {
-        super(node);
-        assert(node.getId() == ASTNAME_OF_INSTANCE);
+class ScAssign_assignment extends ScVerilog {
+    ScAssignment assign = null;
+    public ScAssign_assignment(ASTNode node) {
+        super(node, true);
+        assert(node.getId() == ASTASSIGN_ASSIGNMENT);
         for(int i = 0; i < curNode.getChildrenNum(); i++) {
             ASTNode c = (ASTNode)curNode.getChild(i);
             switch(c.getId())
             {
-            case ASTRANGE:
-                range = new ScRange(c);
+            case ASTASSIGN_ASSIGNMENT:
+                assign = new ScAssignment(c);
                 break;
             default:
                 break;
             }
         }
     }
-
+    
     public String scString() {
-        String ret = "";
+        String ret = assign.scString() + ";\r\n";
         return ret;
     }
 }
