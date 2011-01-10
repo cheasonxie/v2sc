@@ -193,6 +193,8 @@ public interface VerilogTokenConstants
     static final int compiler_directive = 204;
     static final int level_symbol_array = 205;
     
+    static final int MACRO_DEFINE = 206;
+    
     /** Literal token values. */
     static final String[] tokenImage =
     {

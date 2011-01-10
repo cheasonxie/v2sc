@@ -373,8 +373,7 @@ public class VerilogTokenManager extends TokenManager implements VerilogTokenCon
                 ret = ret.substring(1);
                 ASTNode node = parser.getMacroContent(ret);
                 if(node == null) {
-                    throw new ParserException(newOneToken(ret, curColumn), 
-                            "macro \"" + ret + "\" not defined");
+                    throw new SymbolNotFoundException(newOneToken(ret, curColumn));
                 }
                 
                 // the first token is `define
@@ -382,14 +381,17 @@ public class VerilogTokenManager extends TokenManager implements VerilogTokenCon
                 // content start from the third token
                 Token token = node.getFirstToken().next.next;
                 Token lToken = node.getLastToken();
+                Token prev = null;
                 if(token != lToken) {
                     while(token != null) {
                         Token newToken = newOneToken(token.image, curColumn);
                         newToken.endColumn = column;
                         newToken.kind = token.kind;
-                        newToken.prev = lastToken;
-                        lastToken.next = newToken;
-                        lastToken = newToken;
+                        newToken.prev = prev;
+                        newToken.special = true;
+                        if(prev != null)
+                        	prev.next = newToken;
+                        //lastToken = newToken;
                         if(token == lToken)
                             break;
                         

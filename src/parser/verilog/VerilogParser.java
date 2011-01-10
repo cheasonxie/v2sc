@@ -19,11 +19,14 @@ import parser.Token;
 public class VerilogParser implements IParser, VerilogTokenConstants, 
           VerilogASTConstants, SystemConstants, CompilerDirectives
 {
-    
     protected VerilogTokenManager tokenMgr = null;
     protected ASTNode curNode = null;       // current parsing node
     protected ASTNode lastNode = null;      // last parsed node
     protected ASTNode sourceText = null;   // source text node
+    
+    protected VerilogArrayList<SymbolTable> extSymbolTable = new VerilogArrayList<SymbolTable>();
+    protected SymbolTable curSymbolTable = null;
+    protected LibraryManager libMgr = LibraryManager.getInstance();
     
     protected HashMap<String, ASTNode> defineMap = null;
     
@@ -38,6 +41,7 @@ public class VerilogParser implements IParser, VerilogTokenConstants,
      */
     public VerilogParser(boolean parseSymbol) {
         this.parseSymbol = parseSymbol;
+        curSymbolTable = new LocalSymbolTable(null, "VerilogFile");
     }
     
     /**
@@ -46,6 +50,8 @@ public class VerilogParser implements IParser, VerilogTokenConstants,
      */
     void startBlock() {
         //TODO:add here
+    	SymbolTable newTab = new LocalSymbolTable(curSymbolTable, curNode.getName());
+        curSymbolTable = newTab;
     }
     
     /**
@@ -54,11 +60,13 @@ public class VerilogParser implements IParser, VerilogTokenConstants,
      */
     void endBlock() {
       //TODO:add here
+    	curSymbolTable = curSymbolTable.getParent();
     }
     
     void openNodeScope(ASTNode n) throws ParserException  {
         curNode = n;
         n.setFirstToken(tokenMgr.getNextToken());
+        curNode.setSymbolTable(curSymbolTable);
     }
     
     void closeNodeScope(ASTNode n) throws ParserException  {
@@ -1100,6 +1108,7 @@ public class VerilogParser implements IParser, VerilogTokenConstants,
         }
         consumeToken(SEMICOLON);
         closeNodeScope(node);
+        SymbolParser.parseVariableKind(node, this);
     }
 
     /**
@@ -1203,16 +1212,20 @@ public class VerilogParser implements IParser, VerilogTokenConstants,
         
         Token tmpToken = findTokenInBlock(SEMICOLON, endToken);
         name_of_function(node, tmpToken);
+        
+        startBlock();
         consumeToken(SEMICOLON);
         while(is_tf_declaration()) {
             tmpToken = findTokenInBlock(SEMICOLON, endToken);
             tf_declaration(node, tmpToken);
         }
         
-        statement(node, endToken);
+        statement(node, endToken);        
+        endBlock();
         
         consumeToken(ENDFUNCTION);
         closeNodeScope(node);
+        SymbolParser.parseSubProgramKind(node, this);
     }
 
     /**
@@ -1415,6 +1428,7 @@ public class VerilogParser implements IParser, VerilogTokenConstants,
         list_of_variables(node, endToken);
         consumeToken(SEMICOLON);
         closeNodeScope(node);
+        SymbolParser.parseVariableKind(node, this);
     }
 
     /**
@@ -1432,6 +1446,7 @@ public class VerilogParser implements IParser, VerilogTokenConstants,
         list_of_variables(node, endToken);
         consumeToken(SEMICOLON);
         closeNodeScope(node);
+        SymbolParser.parseVariableKind(node, this);
     }
 
     /**
@@ -1475,6 +1490,7 @@ public class VerilogParser implements IParser, VerilogTokenConstants,
         list_of_register_variables(node, endToken);
         consumeToken(SEMICOLON);
         closeNodeScope(node);
+        SymbolParser.parseVariableKind(node, this);
     }
 
     /**
@@ -1801,18 +1817,28 @@ public class VerilogParser implements IParser, VerilogTokenConstants,
         if(tmpToken == null)
             tmpToken = findTokenInBlock(SEMICOLON, endToken);
         name_of_module(node, tmpToken);
+        String name = node.getLastChild().firstTokenImage();
         
-        tmpToken = findTokenInBlock(SEMICOLON, endToken);
-        if(tokenMgr.getNextTokenKind() == LPARENTHESIS) {
-            list_of_ports(node, tmpToken);
+        if(!parseSymbol) {
+	        startBlock();
+	        tmpToken = findTokenInBlock(SEMICOLON, endToken);
+	        if(tokenMgr.getNextTokenKind() == LPARENTHESIS) {
+	            list_of_ports(node, tmpToken);
+	        }
+	        
+	        consumeToken(SEMICOLON);
+	        while(tokenMgr.getNextTokenKind() != ENDMODULE) {
+	            module_item(node, endToken);
+	        }
+	        endBlock();
+	        consumeToken(ENDMODULE);
+        }else {
+        	tokenMgr.setCurrentToken(endToken);
         }
         
-        consumeToken(SEMICOLON);
-        while(tokenMgr.getNextTokenKind() != ENDMODULE) {
-            module_item(node, endToken);
-        }
-        consumeToken(ENDMODULE);
         closeNodeScope(node);
+        
+        curSymbolTable.addSymbol(new Symbol(name, kind));
     }
 
     /**
@@ -2266,6 +2292,7 @@ public class VerilogParser implements IParser, VerilogTokenConstants,
         }
         consumeToken(SEMICOLON);
         closeNodeScope(node);
+        SymbolParser.parseVariableKind(node, this);
     }
 
     /**
@@ -2374,6 +2401,7 @@ public class VerilogParser implements IParser, VerilogTokenConstants,
         list_of_variables(node, endToken);
         consumeToken(SEMICOLON);
         closeNodeScope(node);
+        SymbolParser.parseVariableKind(node, this);
     }
 
     /**
@@ -2467,6 +2495,7 @@ public class VerilogParser implements IParser, VerilogTokenConstants,
      */
     void parameter_declaration(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTPARAMETER_DECLARATION);
+        
         openNodeScope(node);
         consumeToken(PARAMETER);
         if(tokenMgr.getNextTokenKind() == LSQUARE_BRACKET) {
@@ -2477,6 +2506,7 @@ public class VerilogParser implements IParser, VerilogTokenConstants,
         list_of_param_assignments(node, endToken);
         consumeToken(SEMICOLON);
         closeNodeScope(node);
+        SymbolParser.parseVariableKind(node, this);
     }
 
     /**
@@ -2491,6 +2521,7 @@ public class VerilogParser implements IParser, VerilogTokenConstants,
         list_of_param_assignments(node, endToken);
         consumeToken(SEMICOLON);
         closeNodeScope(node);
+        SymbolParser.parseVariableKind(node, this);
     }
 
     /**
@@ -2812,6 +2843,7 @@ public class VerilogParser implements IParser, VerilogTokenConstants,
         list_of_variables(node, endToken);
         consumeToken(SEMICOLON);
         closeNodeScope(node);
+        SymbolParser.parseVariableKind(node, this);
     }
 
     /**
@@ -2820,21 +2852,24 @@ public class VerilogParser implements IParser, VerilogTokenConstants,
      */
     void reg_declaration(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTREG_DECLARATION);
+        
         openNodeScope(node);
         consumeToken(REG);
         endToken = findTokenInBlock(SEMICOLON, endToken);
         if(tokenMgr.getNextTokenKind() == LSQUARE_BRACKET) {
             range(node, endToken);
         }
+        
         list_of_register_variables(node, endToken);
         consumeToken(SEMICOLON);
         closeNodeScope(node);
+        SymbolParser.parseVariableKind(node, this);
     }
 
     /**
      * register_variable <br>
      *     ::=  name_of_register  <br>
-     *     ||=  name_of_memory  <b>[</b>  constant_expression  :  constant_expression  <b>]</b> 
+     *     ||=  name_of_memory  range 
      */
     void register_variable(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTREGISTER_VARIABLE);
@@ -2842,15 +2877,9 @@ public class VerilogParser implements IParser, VerilogTokenConstants,
         Token tmpToken = findTokenInBlock(LSQUARE_BRACKET, endToken);
         if(tmpToken != null) {
             name_of_memory(node, tmpToken);
-            consumeToken(LSQUARE_BRACKET);
-            endToken = findTokenInBlock(RSQUARE_BRACKET, endToken);
-            tmpToken = findTokenInBlock(COLON, endToken);
-            constant_expression(node, tmpToken);
-            consumeToken(COLON);
-            constant_expression(node, endToken);
-            consumeToken(RSQUARE_BRACKET);
+            range(node, endToken);
         }else {
-            name_of_register(node, tmpToken);
+            name_of_register(node, endToken);
         }
         closeNodeScope(node);
     }
@@ -2987,6 +3016,7 @@ public class VerilogParser implements IParser, VerilogTokenConstants,
         ASTNode node = new ASTNode(p, ASTSEQ_BLOCK);
         openNodeScope(node);
         consumeToken(BEGIN);
+        startBlock();
         while(is_compiler_directives()) {
             compiler_directives(p, endToken);
         }
@@ -3013,6 +3043,7 @@ public class VerilogParser implements IParser, VerilogTokenConstants,
         while(is_compiler_directives()) {
             compiler_directives(p, endToken);
         }
+        endBlock();
         consumeToken(END);
         closeNodeScope(node);
     }
@@ -3061,10 +3092,12 @@ public class VerilogParser implements IParser, VerilogTokenConstants,
         ASTNode node = new ASTNode(p, ASTSPECIFY_BLOCK);
         openNodeScope(node);
         consumeToken(SPECIFY);
+        startBlock();
         endToken = findTokenInBlock(ENDSPECIFY, endToken);
         while(tokenMgr.getNextTokenKind() != ENDSPECIFY) {
             specify_item(node, endToken);
         }
+        endBlock();
         consumeToken(ENDSPECIFY);
         closeNodeScope(node);
     }
@@ -3587,13 +3620,16 @@ public class VerilogParser implements IParser, VerilogTokenConstants,
         endToken = findTokenInBlock(ENDTASK, endToken);
         Token tmpToken = findTokenInBlock(SEMICOLON, endToken);
         name_of_task(node, tmpToken);
+        startBlock();
         consumeToken(SEMICOLON);
         while(is_tf_declaration()) {
             tf_declaration(node, endToken);
         }
         statement_or_null(node, endToken);
+        endBlock();
         consumeToken(ENDTASK);
         closeNodeScope(node);
+        SymbolParser.parseSubProgramKind(node, this);
     }
 
     /**
@@ -3697,6 +3733,7 @@ public class VerilogParser implements IParser, VerilogTokenConstants,
         list_of_register_variables(node, endToken);
         consumeToken(SEMICOLON);
         closeNodeScope(node);
+        SymbolParser.parseVariableKind(node, this);
     }
 
     /**
@@ -3782,34 +3819,42 @@ public class VerilogParser implements IParser, VerilogTokenConstants,
         
         Token tmpToken = findTokenInBlock(LPARENTHESIS, endToken);
         name_of_udp(node, tmpToken);
+        String name = node.getLastChild().firstTokenImage();
         
-        consumeToken(LPARENTHESIS);
-        Token tmpToken1 = findTokenInBlock(RPARENTHESIS, endToken);
-        while(true) {
-            tmpToken = findTokenInBlock(COMMA, tmpToken1);
-            if(tmpToken == null)
-                tmpToken = tmpToken1;
-            terminal(node, tmpToken);
-            if(tokenMgr.getNextTokenKind() != COMMA) {
-                break;
-            }
-            consumeToken(COMMA);
+        if(!parseSymbol) {
+	        startBlock();
+	        consumeToken(LPARENTHESIS);
+	        Token tmpToken1 = findTokenInBlock(RPARENTHESIS, endToken);
+	        while(true) {
+	            tmpToken = findTokenInBlock(COMMA, tmpToken1);
+	            if(tmpToken == null)
+	                tmpToken = tmpToken1;
+	            terminal(node, tmpToken);
+	            if(tokenMgr.getNextTokenKind() != COMMA) {
+	                break;
+	            }
+	            consumeToken(COMMA);
+	        }
+	        consumeToken(RPARENTHESIS);
+	        consumeToken(SEMICOLON);
+	        
+	        while(is_udp_declaration()) {
+	            udp_declaration(node, endToken);
+	        }
+	        
+	        if(tokenMgr.getNextTokenKind() == INITIAL) {
+	            udp_initial_statement(node, endToken);
+	        }
+	        
+	        table_definition(node, endToken);
+	        endBlock();
+	        
+	        consumeToken(ENDPRIMITIVE);
+        }else {
+        	tokenMgr.setCurrentToken(endToken);
         }
-        consumeToken(RPARENTHESIS);
-        consumeToken(SEMICOLON);
-        
-        while(is_udp_declaration()) {
-            udp_declaration(node, endToken);
-        }
-        
-        if(tokenMgr.getNextTokenKind() == INITIAL) {
-            udp_initial_statement(node, endToken);
-        }
-        
-        table_definition(node, endToken);
-        consumeToken(ENDPRIMITIVE);
-        
         closeNodeScope(node);
+        curSymbolTable.addSymbol(new Symbol(name, PRIMITIVE));
     }
 
     /**
@@ -4238,6 +4283,9 @@ public class VerilogParser implements IParser, VerilogTokenConstants,
 
         defineMap.put(name, node);
         closeNodeScope(node);
+        
+        Symbol sym = new Symbol(name, MACRO_DEFINE, value.trim());
+        curSymbolTable.addSymbol(sym);
     }
     
     void cd_ifdef(IASTNode p, Token endToken) throws ParserException {
@@ -4250,6 +4298,7 @@ public class VerilogParser implements IParser, VerilogTokenConstants,
         closeNodeScope(node);
     }
     
+    //TODO: check whether the included file exist
     void cd_include(IASTNode p, Token endToken) throws ParserException {
         ASTNode node = new ASTNode(p, ASTCD_INCLUDE);
         openNodeScope(node);
@@ -4257,6 +4306,10 @@ public class VerilogParser implements IParser, VerilogTokenConstants,
         tokenMgr.toNextToken();
         new ASTtoken(node, tokenMgr.getNextToken().image);
         tokenMgr.toNextToken();
+        
+        //if(!libMgr.isTableExist(node.getLastChild().firstTokenImage())){
+        //	throw new SymbolNotFoundException(tokenMgr.getCurrentToken());
+        //}
         closeNodeScope(node);
     }
     
@@ -4307,19 +4360,6 @@ public class VerilogParser implements IParser, VerilogTokenConstants,
     }
 
     @Override
-    public ISymbol getSymbol(IASTNode node, String name) {
-        if(node == null) {
-            MyDebug.printFileLine("null parameter");
-            return null;
-        }
-        if(tokenMgr == null) {
-            MyDebug.printFileLine("you must parse the file by calling parse() firstly");
-            return null;
-        }
-        return null;
-    }
-
-    @Override
     public IASTNode parse(String path) throws ParserException {
         try {
             BufferedReader stream = new BufferedReader(new FileReader(path));
@@ -4339,7 +4379,7 @@ public class VerilogParser implements IParser, VerilogTokenConstants,
     }
 
     @Override
-    public ISymbol getSymbol(IASTNode node, String[] names) {
+    public ISymbol getSymbol(IASTNode node, String name) {
         if(node == null) {
             MyDebug.printFileLine("null parameter");
             return null;
@@ -4348,21 +4388,93 @@ public class VerilogParser implements IParser, VerilogTokenConstants,
             MyDebug.printFileLine("you must parse the file by calling parse() firstly");
             return null;
         }
+        
+        if(((ASTNode)node).getSymbolTable() == null) {
+            //MyDebug.printFileLine("symbol table is null!");
+            return null;
+        }
+        
+        ISymbol sym = ((ASTNode)node).getSymbolTable().getSymbol(name);
+        if(sym != null) {
+            return sym;
+        }
+        
+        for(int i = 0; i < extSymbolTable.size(); i++) {
+            if((sym = extSymbolTable.get(i).getSymbol(name)) != null) {
+                return sym;
+            }
+        }
         return null;
     }
+    
+    protected Symbol getNamesSymbol(SymbolTable curTab, String[] names) {
+        Symbol sym = null;
+        if(curTab == null || names == null || names.length == 0) {
+            MyDebug.printFileLine("VhdlParser.getNamesSymbol: null pointer");
+            return null;
+        }
 
+        
+        for(int i = 0; i < names.length; i++)
+        {
+            if(curTab == null) {
+                return null;
+            }
+            
+            sym = (Symbol)curTab.getSymbol(names[i]);
+            if(sym == null) {
+                return null;
+            }
+            
+            if(i < names.length - 1) {
+                if((curTab = curTab.getTableOfSymbol(sym.type)) == null) {
+                    return null;
+                }
+                curTab = curTab.getChildTable(sym.type);
+            }
+        }
+            
+        return sym;
+    }
+    
+    @Override
+    public ISymbol getSymbol(IASTNode node, String[] names)
+    {
+        if(node == null || names == null) {
+            MyDebug.printFileLine("null parameter");
+            return null;
+        }
+        if(tokenMgr == null) {
+            MyDebug.printFileLine("you must parse the file by calling parse() firstly");
+            return null;
+        }
+        
+        Symbol ret = getNamesSymbol(((ASTNode)node).getSymbolTable(), names);
+        if(ret != null)
+            return ret;
+        
+        for(int i = 0; i < extSymbolTable.size(); i++) {
+            if((ret = getNamesSymbol(extSymbolTable.get(i), names)) != null) {
+                return ret;
+            }
+        }
+        return null;
+    }
+    
     @Override
     public ISymbolTable getTableOfSymbol(IASTNode node, String name)
     {
-        if(node == null) {
-            MyDebug.printFileLine("null parameter");
-            return null;
+        SymbolTable ret = ((ASTNode)node).getSymbolTable().getTableOfSymbol(name);
+        if(ret != null) {
+            return ret;
         }
-        if(tokenMgr == null) {
-            MyDebug.printFileLine("you must parse the file by calling parse() firstly");
-            return null;
+        
+        for(int i = 0; i < extSymbolTable.size(); i++) {
+            ret = extSymbolTable.get(i).getTableOfSymbol(name);
+            if(ret != null) {
+                return ret;
+            }
         }
         return null;
     }
-
 }

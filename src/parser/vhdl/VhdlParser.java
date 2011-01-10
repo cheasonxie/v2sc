@@ -7771,6 +7771,5 @@ public class VhdlParser implements IParser, VhdlTokenConstants, VhdlASTConstants
         tokenMgr = new VhdlTokenManager(stream, parseSymbol);
         return design_file();
     }
-
 }
 

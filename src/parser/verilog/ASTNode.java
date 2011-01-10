@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import parser.IASTNode;
 import parser.INameObject;
 import parser.Token;
+import parser.verilog.SymbolTable;
 
 public class ASTNode implements IASTNode
 {
@@ -14,6 +15,7 @@ public class ASTNode implements IASTNode
     protected int id;
     protected Token first_token = null;
     protected Token last_token = null;
+    protected SymbolTable symTab = null;
     
     public ASTNode(IASTNode p, int id) {
         parent = p;
@@ -87,6 +89,12 @@ public class ASTNode implements IASTNode
         return null;
     }
     
+    public ASTNode getLastChild() {
+    	if(children.size() == 0)
+    		return null;
+    	return (ASTNode)children.get(children.size() - 1);
+    }
+    
     /**
      * search descendant recursive to find the first specified ASTNode
      */
@@ -158,6 +166,14 @@ public class ASTNode implements IASTNode
     @Override
     public boolean equals(INameObject other) {
         return (other == this);
+    }
+    
+    public SymbolTable getSymbolTable() {
+        return symTab;
+    }
+    
+    public void setSymbolTable(SymbolTable tab) {
+        symTab = tab;
     }
 }
 
