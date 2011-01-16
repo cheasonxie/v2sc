@@ -73,4 +73,10 @@ class ScConcurrent_statement extends ScVhdl implements IScStatementBlock {
     {
         return item.getInitCode();
     }
+    
+    protected void setStatementPart(ScArchitecture_statement_part st) {
+        if(item instanceof ScConcurrent_signal_assignment_statement) {
+            ((ScConcurrent_signal_assignment_statement)item).setStatementPart(st);
+        }
+    }
 }

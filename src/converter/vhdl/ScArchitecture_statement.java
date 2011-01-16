@@ -46,4 +46,10 @@ class ScArchitecture_statement extends ScVhdl implements IScStatementBlock {
     {
         return statement.getInitCode();
     }
+    
+    protected void setStatementPart(ScArchitecture_statement_part st) {
+        if(statement instanceof ScConcurrent_statement) {
+          ((ScConcurrent_statement)statement).setStatementPart(st);
+        }
+    }
 }

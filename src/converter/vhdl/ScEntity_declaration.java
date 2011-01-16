@@ -187,7 +187,7 @@ class ScEntity_declaration extends ScCommonIdentifier implements IScStatementBlo
             int i = len - 1;
             while(i >= 0 && Character.isDigit(ret.charAt(i))) i--;
             assert(i >= 0);
-            int num = 0;
+            int num = -1;
             if(i < len - 1)
                 num = Integer.parseInt(ret.substring(i+1));
             ret = ret.substring(0, i+1) + (num+1);

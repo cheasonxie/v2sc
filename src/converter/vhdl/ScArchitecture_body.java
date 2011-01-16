@@ -24,13 +24,11 @@ class ScArchitecture_body extends ScCommonIdentifier implements IScStatementBloc
     ScArchitecture_declarative_part declarative_part = null;
     ScArchitecture_statement_part statement_part = null;
     
-    ArrayList<ScVhdl> signalAssignments = new ArrayList<ScVhdl>();
-    String assProcessName = "process_comp_assignment";
     public ScArchitecture_body(ASTNode node) {
         super(node, true);
         assert(node.getId() == ASTARCHITECTURE_BODY);
         int i, j;
-                
+
         for(i = 0; i < node.getChildrenNum(); i++) {
             ASTNode c = (ASTNode)node.getChild(i);
             int id = c.getId();
@@ -79,9 +77,6 @@ class ScArchitecture_body extends ScCommonIdentifier implements IScStatementBloc
     {
         String ret = "";
         ret += addLF(declarative_part.getDeclaration());
-        if(signalAssignments.size() > 0) {
-            ret += addLF(intent() + "void " + assProcessName + "();");
-        }
         ret += addLF(statement_part.getDeclaration());
         return ret;
     }
@@ -91,16 +86,6 @@ class ScArchitecture_body extends ScCommonIdentifier implements IScStatementBloc
     {
         String ret = "";
         ret += addLF(declarative_part.getImplements());
-        
-        if(signalAssignments.size() > 0) {
-            ret += intent() + "void " + assProcessName + "()\r\n";
-            ret += startIntentBraceBlock();
-            for(int i = 0; i < signalAssignments.size(); i++) {
-                ret += addLF(signalAssignments.get(i).toString());
-            }
-            ret += endIntentBraceBlock();
-        }
-        
         ret += addLF(statement_part.getImplements());
         return ret;
     }
@@ -110,67 +95,8 @@ class ScArchitecture_body extends ScCommonIdentifier implements IScStatementBloc
     {
         String ret = "";
         ret += addLF(declarative_part.getInitCode());
-        if(signalAssignments.size() > 0) {
-            ret += intent() + "SC_METHOD(" + assProcessName + ");\r\n";
-            ret += intent() + "sensitive";
-            ArrayList<String> senList = getAssignmentSensitiveList();
-            for(int i = 0; i < senList.size(); i++) {
-                ret += " << " + senList.get(i);
-            }
-            ret += ";\r\n";
-        }
         ret += addLF(statement_part.getInitCode());
         return ret;
-    }
-    
-    private ArrayList<String> getAssignmentSensitiveList() {
-        ArrayList<String> senList = new ArrayList<String>();
-        for(int i = 0; i < signalAssignments.size(); i++) {
-            ScConcurrent_signal_assignment_statement ass = 
-                (ScConcurrent_signal_assignment_statement)signalAssignments.get(i);
-            ScVhdl sv = null;
-            if(ass.signal_assignment instanceof ScConditional_signal_assignment) {
-                sv = ((ScConditional_signal_assignment)ass.signal_assignment).waveforms;
-
-            }else {
-                // ScSelected_signal_assignment
-                sv = ((ScSelected_signal_assignment)ass.signal_assignment).selected_waveforms;
-            }
-            
-            Token tkn = sv.curNode.getFirstToken();
-            Symbol sym;
-            while(tkn != sv.curNode.getLastToken()) {
-                sym = (Symbol)parser.getSymbol(curNode, tkn.image);
-                if(sym != null && (sym.kind == SIGNAL || sym.kind == PORT)) {
-                    int k = 0;
-                    for(k = 0; k < senList.size(); k++) {
-                        if(tkn.image.equalsIgnoreCase(senList.get(k))) {
-                            break;
-                        }
-                    }
-                    if(k >= senList.size())
-                        senList.add(tkn.image);
-                }
-                tkn = tkn.next;
-            }
-            
-            sym = (Symbol)parser.getSymbol(curNode, tkn.image);
-            if(sym != null && (sym.kind == SIGNAL || sym.kind == PORT)) {
-                int k = 0;
-                for(k = 0; k < senList.size(); k++) {
-                    if(tkn.image.equalsIgnoreCase(senList.get(k))) {
-                        break;
-                    }
-                }
-                if(k >= senList.size())
-                    senList.add(tkn.image);
-            }
-        }
-        return senList;
-    }
-    
-    protected void addSignalAssignment(ScVhdl ass) {
-        signalAssignments.add(ass);
     }
 }
 
