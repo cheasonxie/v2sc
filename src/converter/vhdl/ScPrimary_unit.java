@@ -20,7 +20,7 @@ class ScPrimary_unit extends ScVhdl implements IScStatementBlock {
         switch(c.getId())
         {
         case ASTENTITY_DECLARATION:
-        	curEntity = new ScEntity_declaration(c);
+            curEntity = new ScEntity_declaration(c);
             declaration = curEntity;
             break;
         case ASTCONFIGURATION_DECLARATION:

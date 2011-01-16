@@ -161,11 +161,11 @@ public abstract class SymbolTable implements ISymbolTable, INameObject
     }
     
     public int getSymbolNum() {
-    	ISymbol[] syms = getAllSymbols();
-    	if(syms == null)
-    		return 0;
-    	else
-    		return syms.length;
+        ISymbol[] syms = getAllSymbols();
+        if(syms == null)
+            return 0;
+        else
+            return syms.length;
     }
    
     public abstract SymbolTable getTableOfSymbol(String name);

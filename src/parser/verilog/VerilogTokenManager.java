@@ -390,7 +390,7 @@ public class VerilogTokenManager extends TokenManager implements VerilogTokenCon
                         newToken.prev = prev;
                         newToken.special = true;
                         if(prev != null)
-                        	prev.next = newToken;
+                            prev.next = newToken;
                         //lastToken = newToken;
                         if(token == lToken)
                             break;

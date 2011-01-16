@@ -5,11 +5,11 @@ import parser.verilog.ASTNode;
 /**
  *  register_variable  <br>
  *     ::=  name_of_register  <br>
- *     ||=  name_of_memory  <b>[</b>  constant_expression  :  constant_expression  <b>]</b> 
+ *     ||=  name_of_memory  range 
  */
 class ScRegister_variable extends ScVerilog {
     ScVerilog name = null;
-    ScConstant_expression exp1 = null, exp2 = null;
+    ScRange range;
     public ScRegister_variable(ASTNode node) {
         super(node);
         assert(node.getId() == ASTREGISTER_VARIABLE);
@@ -23,12 +23,8 @@ class ScRegister_variable extends ScVerilog {
             case ASTNAME_OF_MEMORY:
                 name = new ScName_of_memory(c);
                 break;
-            case ASTCONSTANT_EXPRESSION:
-                if(exp1 == null) {
-                    exp1 = new ScConstant_expression(c);
-                }else {
-                    exp2 = new ScConstant_expression(c);
-                }
+            case ASTRANGE:
+                range = new ScRange(c);
                 break;
             default:
                 break;

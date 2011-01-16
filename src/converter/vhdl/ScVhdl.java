@@ -655,11 +655,11 @@ public class ScVhdl implements ScVhdlConstants, VhdlTokenConstants,
      */
     static String addMethodName(String name)
     {
-    	if(curEntity != null) {
-    		return curEntity.addProcessName(name);
-    	} else {
-    		return name;
-    	}
+        if(curEntity != null) {
+            return curEntity.addProcessName(name);
+        } else {
+            return name;
+        }
     }
 }
 

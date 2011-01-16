@@ -33,6 +33,8 @@ class ScConcurrent_signal_assignment_statement extends ScCommonIdentifier implem
         }
         if(identifier.isEmpty())
             identifier = String.format("line%d", node.getFirstToken().beginLine);
+        assert(curEntity != null);
+        curEntity.body.addSignalAssignment(this);
     }
 
     public String scString() {
@@ -52,6 +54,6 @@ class ScConcurrent_signal_assignment_statement extends ScCommonIdentifier implem
     @Override
     public String getInitCode()
     {
-        return toString();
+        return "";
     }
 }

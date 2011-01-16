@@ -50,7 +50,7 @@ public class VerilogParser implements IParser, VerilogTokenConstants,
      */
     void startBlock() {
         //TODO:add here
-    	SymbolTable newTab = new LocalSymbolTable(curSymbolTable, curNode.getName());
+        SymbolTable newTab = new LocalSymbolTable(curSymbolTable, curNode.getName());
         curSymbolTable = newTab;
     }
     
@@ -60,7 +60,7 @@ public class VerilogParser implements IParser, VerilogTokenConstants,
      */
     void endBlock() {
       //TODO:add here
-    	curSymbolTable = curSymbolTable.getParent();
+        curSymbolTable = curSymbolTable.getParent();
     }
     
     void openNodeScope(ASTNode n) throws ParserException  {
@@ -1820,20 +1820,20 @@ public class VerilogParser implements IParser, VerilogTokenConstants,
         String name = node.getLastChild().firstTokenImage();
         
         if(!parseSymbol) {
-	        startBlock();
-	        tmpToken = findTokenInBlock(SEMICOLON, endToken);
-	        if(tokenMgr.getNextTokenKind() == LPARENTHESIS) {
-	            list_of_ports(node, tmpToken);
-	        }
-	        
-	        consumeToken(SEMICOLON);
-	        while(tokenMgr.getNextTokenKind() != ENDMODULE) {
-	            module_item(node, endToken);
-	        }
-	        endBlock();
-	        consumeToken(ENDMODULE);
+            startBlock();
+            tmpToken = findTokenInBlock(SEMICOLON, endToken);
+            if(tokenMgr.getNextTokenKind() == LPARENTHESIS) {
+                list_of_ports(node, tmpToken);
+            }
+            
+            consumeToken(SEMICOLON);
+            while(tokenMgr.getNextTokenKind() != ENDMODULE) {
+                module_item(node, endToken);
+            }
+            endBlock();
+            consumeToken(ENDMODULE);
         }else {
-        	tokenMgr.setCurrentToken(endToken);
+            tokenMgr.setCurrentToken(endToken);
         }
         
         closeNodeScope(node);
@@ -3822,36 +3822,36 @@ public class VerilogParser implements IParser, VerilogTokenConstants,
         String name = node.getLastChild().firstTokenImage();
         
         if(!parseSymbol) {
-	        startBlock();
-	        consumeToken(LPARENTHESIS);
-	        Token tmpToken1 = findTokenInBlock(RPARENTHESIS, endToken);
-	        while(true) {
-	            tmpToken = findTokenInBlock(COMMA, tmpToken1);
-	            if(tmpToken == null)
-	                tmpToken = tmpToken1;
-	            terminal(node, tmpToken);
-	            if(tokenMgr.getNextTokenKind() != COMMA) {
-	                break;
-	            }
-	            consumeToken(COMMA);
-	        }
-	        consumeToken(RPARENTHESIS);
-	        consumeToken(SEMICOLON);
-	        
-	        while(is_udp_declaration()) {
-	            udp_declaration(node, endToken);
-	        }
-	        
-	        if(tokenMgr.getNextTokenKind() == INITIAL) {
-	            udp_initial_statement(node, endToken);
-	        }
-	        
-	        table_definition(node, endToken);
-	        endBlock();
-	        
-	        consumeToken(ENDPRIMITIVE);
+            startBlock();
+            consumeToken(LPARENTHESIS);
+            Token tmpToken1 = findTokenInBlock(RPARENTHESIS, endToken);
+            while(true) {
+                tmpToken = findTokenInBlock(COMMA, tmpToken1);
+                if(tmpToken == null)
+                    tmpToken = tmpToken1;
+                terminal(node, tmpToken);
+                if(tokenMgr.getNextTokenKind() != COMMA) {
+                    break;
+                }
+                consumeToken(COMMA);
+            }
+            consumeToken(RPARENTHESIS);
+            consumeToken(SEMICOLON);
+            
+            while(is_udp_declaration()) {
+                udp_declaration(node, endToken);
+            }
+            
+            if(tokenMgr.getNextTokenKind() == INITIAL) {
+                udp_initial_statement(node, endToken);
+            }
+            
+            table_definition(node, endToken);
+            endBlock();
+            
+            consumeToken(ENDPRIMITIVE);
         }else {
-        	tokenMgr.setCurrentToken(endToken);
+            tokenMgr.setCurrentToken(endToken);
         }
         closeNodeScope(node);
         curSymbolTable.addSymbol(new Symbol(name, PRIMITIVE));
@@ -4308,7 +4308,7 @@ public class VerilogParser implements IParser, VerilogTokenConstants,
         tokenMgr.toNextToken();
         
         //if(!libMgr.isTableExist(node.getLastChild().firstTokenImage())){
-        //	throw new SymbolNotFoundException(tokenMgr.getCurrentToken());
+        //    throw new SymbolNotFoundException(tokenMgr.getCurrentToken());
         //}
         closeNodeScope(node);
     }

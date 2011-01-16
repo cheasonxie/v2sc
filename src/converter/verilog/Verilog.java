@@ -1,7 +1,6 @@
 package converter.verilog;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
 
@@ -10,13 +9,14 @@ import common.MyDebug;
 
 import parser.IParser;
 import parser.ParserException;
+import parser.verilog.LibraryManager;
 import parser.verilog.VerilogParser;
 import converter.hdlConverter;
 import converter.verilog.ScSource_text;
 
 public class Verilog extends hdlConverter
 {
-static final int MAX_FILE_SIZE = 200*1024;
+static final int MAX_FILE_SIZE = 500*1024;
     
     @Override
     public void convertFile(String srcPath, String dstPath)
@@ -146,13 +146,13 @@ static final int MAX_FILE_SIZE = 200*1024;
     @Override
     public void convertDir(String srcDir, String dstDir)
     {
-        FileList list = new FileList(srcDir, IParser.EXT_VHDL);
+        FileList list = new FileList(srcDir, IParser.EXT_VERILOG);
         srcDir = srcDir.toLowerCase();
         dstDir = dstDir.toLowerCase();
         for(int i = 0; i < list.getFileNum(); i++) {
             String filePath = list.getFile(i);
             filePath = filePath.toLowerCase();
-            int index = filePath.lastIndexOf(IParser.EXT_VHDL);
+            int index = filePath.lastIndexOf(IParser.EXT_VERILOG);
             int index2 = filePath.indexOf(srcDir);
             String name = filePath;
             if(index >= 0 && index2 >= 0) {
@@ -162,9 +162,6 @@ static final int MAX_FILE_SIZE = 200*1024;
             String dstPath = dstDir + "\\" + name;
             try {
                 convertFile(filePath, dstPath);
-                //MyDebug.printFileLine("parsing file:" + filePath);
-                //VhdlParser parser = new VhdlParser(false);
-                //parser.parse(filePath);
             } catch (Exception e) {
                 StackTraceElement[] stackEle = e.getStackTrace();
                 System.err.println("stackEle.length:" + stackEle.length);
@@ -179,5 +176,6 @@ static final int MAX_FILE_SIZE = 200*1024;
 
     public void addLibary(String srcDir, String libName)
     {
+        LibraryManager.getInstance().addDir(srcDir);
     }
 }

@@ -130,7 +130,7 @@ public class Symbol implements ISymbol, Cloneable
                 return false;
             ret = (kind == oth.kind && type.equalsIgnoreCase(oth.type));
             //String msg = "two functions: " + name + ", have the same name, " +
-            //		"but they are not overload";
+            //"but they are not overload";
             if(!ret) {
                 //System.err.println(msg);
                 return false;

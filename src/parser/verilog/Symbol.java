@@ -116,35 +116,35 @@ public class Symbol implements ISymbol, Cloneable
     }
     
     public void setRangeByNode(IASTNode rangeNode) {
-    	range = getRange(rangeNode);
+        range = getRange(rangeNode);
     }
     
     public void setArrayRange(IASTNode rangeNode) {
-    	arrayRange = getRange(rangeNode);
+        arrayRange = getRange(rangeNode);
     }
     
     private String[] getRange(IASTNode rangeNode) {
-    	if(rangeNode == null || rangeNode.getId() != VerilogASTConstants.ASTRANGE) {
-    		return null;
-    	}
-    	
-    	String[] ran = new String[2];
-    	
-    	/* constant_expression  :  constant_expression */
-    	for(int i = 0; i < 2; i++) {
-	    	ASTNode c = (ASTNode)rangeNode.getChild(0);
-	    	Token tkn = c.getFirstToken();
-	    	ran[i] = "";
-	    	while(tkn != c.getLastToken() && tkn != null) {
-	    		ran[i] += tkn.image;
-	    		tkn = tkn.next;
-	    	}
-	    	
-	    	if(tkn != null) {
-	    		ran[0] += tkn.image;
-	    	}
-    	}
-    	return ran;
+        if(rangeNode == null || rangeNode.getId() != VerilogASTConstants.ASTRANGE) {
+            return null;
+        }
+        
+        String[] ran = new String[2];
+        
+        /* constant_expression  :  constant_expression */
+        for(int i = 0; i < 2; i++) {
+            ASTNode c = (ASTNode)rangeNode.getChild(0);
+            Token tkn = c.getFirstToken();
+            ran[i] = "";
+            while(tkn != c.getLastToken() && tkn != null) {
+                ran[i] += tkn.image;
+                tkn = tkn.next;
+            }
+            
+            if(tkn != null) {
+                ran[0] += tkn.image;
+            }
+        }
+        return ran;
     }
 
     @Override

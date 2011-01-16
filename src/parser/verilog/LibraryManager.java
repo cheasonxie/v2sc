@@ -138,7 +138,7 @@ public class LibraryManager
      * delete all symbol in database
      */
     public boolean deleteAll() {
-    	VerilogDataBase db = new VerilogDataBase();
+        VerilogDataBase db = new VerilogDataBase();
         db.init();
         db.beginTransaction();
         db.clearAllTables();
@@ -168,7 +168,7 @@ public class LibraryManager
      * write specified table to database from memory
      */
     private boolean writeTable(String tabName) {
-    	VerilogDataBase db = new VerilogDataBase();
+        VerilogDataBase db = new VerilogDataBase();
         db.init();
         db.beginTransaction();
         
@@ -194,32 +194,32 @@ public class LibraryManager
         // the first scan files which not include others
         // the second scan other files
         for(int k = 0; k < 2; k++) {
-	        for(int i = 0; i < list.getFileNum(); i++) {
-	            String path = list.getFile(i);
-	            String tabName = getFileName(path);
-	            
-	            if(symbolMap.get(tabName) != null)
-	                continue;	// table has been added
-	
-	            try {
-	                //MyDebug.printFileLine("index:" + i + ", file:" + path);
-	                VerilogParser parser = new VerilogParser(true);
-	                ASTNode sourceText = (ASTNode)parser.parse(path);
-	                addTable(tabName, sourceText.getSymbolTable());
-	                sourceText = null;
-	                parser = null;
-	                System.gc();
-	                writeTable(tabName);
-	            }catch (SymbolNotFoundException e) {
-	            	continue;
-	            }catch (Exception e) {
-	                StackTraceElement[] stackEle = e.getStackTrace();
-	                MyDebug.printFileLine("stackEle.length:" + stackEle.length);
-	                //if(stackEle.length > 7) {
-	                    MyDebug.printStackTrace(e);
-	                //}
-	            }
-	        }
+            for(int i = 0; i < list.getFileNum(); i++) {
+                String path = list.getFile(i);
+                String tabName = getFileName(path);
+                
+                if(symbolMap.get(tabName) != null)
+                    continue;    // table has been added
+    
+                try {
+                    //MyDebug.printFileLine("index:" + i + ", file:" + path);
+                    VerilogParser parser = new VerilogParser(true);
+                    ASTNode sourceText = (ASTNode)parser.parse(path);
+                    addTable(tabName, sourceText.getSymbolTable());
+                    sourceText = null;
+                    parser = null;
+                    System.gc();
+                    writeTable(tabName);
+                }catch (SymbolNotFoundException e) {
+                    continue;
+                }catch (Exception e) {
+                    StackTraceElement[] stackEle = e.getStackTrace();
+                    MyDebug.printFileLine("stackEle.length:" + stackEle.length);
+                    //if(stackEle.length > 7) {
+                        MyDebug.printStackTrace(e);
+                    //}
+                }
+            }
         }
         return true;
     }
@@ -242,9 +242,9 @@ public class LibraryManager
            }
            
            for(int i = 0; i < syms.size(); i++) {
-        	   if(syms.get(i).equals(symName)) {
-        		   return tabName;
-        	   }
+               if(syms.get(i).equals(symName)) {
+                   return tabName;
+               }
            }
         }
         

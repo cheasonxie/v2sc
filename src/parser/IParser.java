@@ -20,36 +20,36 @@ public interface IParser
     /**
      * parse file
      */
-	public IASTNode parse(String path) throws ParserException;
-	
+    public IASTNode parse(String path) throws ParserException;
+    
     /**
      * parse buffer
      */
-	public IASTNode parse(Reader reader) throws ParserException;
-	
-	/**
-	 * get comment blocks in parsed file
-	 */
-	public CommentBlock[] getComment();
-	
-	/** 
-	 * get root node of ast
-	 */
-	public IASTNode getRoot();
-	
-	/**
-	 * get symbol in symbol table or library 
-	 */
-	public ISymbol getSymbol(IASTNode node, String name);
-	
-	/**
-	 * get symbol in symbol table or library(including child table) 
-	 */
-	public ISymbol getSymbol(IASTNode node, String[] names);
-	
-	/**
-	 * get symbol table which actually contains the symbol of specified name
-	 */
-	public ISymbolTable getTableOfSymbol(IASTNode node, String name);
+    public IASTNode parse(Reader reader) throws ParserException;
+    
+    /**
+     * get comment blocks in parsed file
+     */
+    public CommentBlock[] getComment();
+    
+    /** 
+     * get root node of ast
+     */
+    public IASTNode getRoot();
+    
+    /**
+     * get symbol in symbol table or library 
+     */
+    public ISymbol getSymbol(IASTNode node, String name);
+    
+    /**
+     * get symbol in symbol table or library(including child table) 
+     */
+    public ISymbol getSymbol(IASTNode node, String[] names);
+    
+    /**
+     * get symbol table which actually contains the symbol of specified name
+     */
+    public ISymbolTable getTableOfSymbol(IASTNode node, String name);
 }
 

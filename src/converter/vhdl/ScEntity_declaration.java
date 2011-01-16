@@ -165,34 +165,34 @@ class ScEntity_declaration extends ScCommonIdentifier implements IScStatementBlo
         return ret;
     }
     
-    private boolean isNameExist(String name)
+    protected boolean isProcessNameExist(String name)
     {
-    	for(int i = 0; i < processNameArray.size(); i++)
-    	{
-    		if(processNameArray.get(i).equals(name))
-    			return true;
-    	}
-    	return false;
+        for(int i = 0; i < processNameArray.size(); i++)
+        {
+            if(processNameArray.get(i).equals(name))
+                return true;
+        }
+        return false;
     }
     
     protected String addProcessName(String name)
     {
-    	if(name == null || name.isEmpty())
-    		return "";
-    	
-    	String ret = name;
-    	while(isNameExist(ret))
-    	{
-    		int len = ret.length();
-    		int i = len - 1;
-    		while(i >= 0 && Character.isDigit(ret.charAt(i))) i--;
-    		assert(i >= 0);
-    		int num = 0;
-    		if(i < len - 1)
-    		    num = Integer.parseInt(ret.substring(i+1));
-    		ret = ret.substring(0, i+1) + (num+1);
-    	}
-    	processNameArray.add(ret);
-    	return ret;
+        if(name == null || name.isEmpty())
+            return "";
+        
+        String ret = name;
+        while(isProcessNameExist(ret))
+        {
+            int len = ret.length();
+            int i = len - 1;
+            while(i >= 0 && Character.isDigit(ret.charAt(i))) i--;
+            assert(i >= 0);
+            int num = 0;
+            if(i < len - 1)
+                num = Integer.parseInt(ret.substring(i+1));
+            ret = ret.substring(0, i+1) + (num+1);
+        }
+        processNameArray.add(ret);
+        return ret;
     }
 }

@@ -90,9 +90,9 @@ public class ASTNode implements IASTNode
     }
     
     public ASTNode getLastChild() {
-    	if(children.size() == 0)
-    		return null;
-    	return (ASTNode)children.get(children.size() - 1);
+        if(children.size() == 0)
+            return null;
+        return (ASTNode)children.get(children.size() - 1);
     }
     
     /**
