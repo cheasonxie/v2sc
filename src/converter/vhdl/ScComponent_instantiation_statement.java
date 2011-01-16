@@ -15,6 +15,8 @@ class ScComponent_instantiation_statement extends ScCommonIdentifier implements 
     ScInstantiated_unit instantiated_unit = null;
     ScGeneric_map_aspect generic_map = null;
     ScPort_map_aspect port_map = null;
+    
+    String processName = "process";
     public ScComponent_instantiation_statement(ASTNode node) {
         super(node, true);
         assert(node.getId() == ASTCOMPONENT_INSTANTIATION_STATEMENT);
@@ -40,10 +42,11 @@ class ScComponent_instantiation_statement extends ScCommonIdentifier implements 
         }
         if(identifier.isEmpty())
             identifier = String.format("line%d", node.getFirstToken().beginLine);
+        processName = addMethodName("process_comp_" + identifier);
     }
 
     private String getName() {
-        return "process_comp_" + identifier;
+        return processName;
     }
     
     private String getSpec(boolean individual) {

@@ -24,6 +24,7 @@ public class ScVhdl implements ScVhdlConstants, VhdlTokenConstants,
     protected static int curLevel = 0;    // intent level
     
     protected static String className = "entity"; // current entity or package name
+    protected static ScEntity_declaration curEntity = null; // current entity
     
     /** whether create .cpp&.h or .h only */
     protected static final boolean individual = true;
@@ -646,6 +647,19 @@ public class ScVhdl implements ScVhdlConstants, VhdlTokenConstants,
      */
     static String getBit_value(String str) {
         return getBased_integer(str);
+    }
+    
+    
+    /**
+     * add one process name to current entity
+     */
+    static String addMethodName(String name)
+    {
+    	if(curEntity != null) {
+    		return curEntity.addProcessName(name);
+    	} else {
+    		return name;
+    	}
     }
 }
 

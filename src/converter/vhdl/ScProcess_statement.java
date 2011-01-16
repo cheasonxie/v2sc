@@ -17,6 +17,8 @@ class ScProcess_statement extends ScCommonIdentifier implements IScStatementBloc
     ScSensitivity_list sensitivity_list = null;
     ScProcess_declarative_part declarative_part = null;
     ScProcess_statement_part statement_part = null;
+    
+    String processName = "process";
     public ScProcess_statement(ASTNode node) {
         super(node, true);
         assert(node.getId() == ASTPROCESS_STATEMENT);
@@ -43,10 +45,11 @@ class ScProcess_statement extends ScCommonIdentifier implements IScStatementBloc
         if(identifier.isEmpty()) {
             identifier = String.format("line%d", node.getFirstToken().beginLine);
         }
+        processName = addMethodName("process_" + identifier);
     }
     
     private String getName() {
-        return "process_" + identifier;
+        return processName;
     }
     
     private String getSpec(boolean individual) {

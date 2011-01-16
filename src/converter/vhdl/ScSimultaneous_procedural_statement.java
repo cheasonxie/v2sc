@@ -16,6 +16,8 @@ import parser.vhdl.ASTNode;
 class ScSimultaneous_procedural_statement extends ScCommonIdentifier implements IScStatementBlock {
     ScProcedural_declarative_part declarative_part = null;
     ScProcedural_statement_part statement_part = null;
+    
+    String processName = "process";
     public ScSimultaneous_procedural_statement(ASTNode node) {
         super(node, true);
         assert(node.getId() == ASTSIMULTANEOUS_PROCEDURAL_STATEMENT);
@@ -38,10 +40,11 @@ class ScSimultaneous_procedural_statement extends ScCommonIdentifier implements 
         }
         if(identifier.isEmpty())
             identifier = String.format("line%d", node.getFirstToken().beginLine);
+        processName = addMethodName("process_procedural_" + identifier);
     }
     
     private String getName() {
-        return "process_procedural_" + identifier;
+        return processName;
     }
     
     private String getSpec() {

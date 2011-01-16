@@ -15,11 +15,13 @@ class ScPrimary_unit extends ScVhdl implements IScStatementBlock {
     public ScPrimary_unit(ASTNode node) {
         super(node);
         assert(node.getId() == ASTPRIMARY_UNIT);
+        curEntity = null;
         ASTNode c = (ASTNode)node.getChild(0);
         switch(c.getId())
         {
         case ASTENTITY_DECLARATION:
-            declaration = new ScEntity_declaration(c);
+        	curEntity = new ScEntity_declaration(c);
+            declaration = curEntity;
             break;
         case ASTCONFIGURATION_DECLARATION:
             declaration = new ScConfiguration_declaration(c);

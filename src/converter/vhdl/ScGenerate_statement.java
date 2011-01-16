@@ -17,6 +17,8 @@ class ScGenerate_statement extends ScCommonIdentifier implements IScStatementBlo
     ScGeneration_scheme scheme = null;
     ScBlock_declarative_part declarative_part = null;
     ScArchitecture_statement_part statement_part = null;
+    
+    String processName = "process";
     public ScGenerate_statement(ASTNode node) {
         super(node, true);
         assert(node.getId() == ASTGENERATE_STATEMENT);
@@ -44,10 +46,11 @@ class ScGenerate_statement extends ScCommonIdentifier implements IScStatementBlo
             identifier = String.format("line%d", node.getFirstToken().beginLine);
         
         setStatementParam();
+        processName = addMethodName("process_generate_" + identifier);
     }
 
     private String getName() {
-        return "process_generate_" + identifier;
+        return processName;
     }
     
     private void setStatementParam() {

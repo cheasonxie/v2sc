@@ -18,6 +18,9 @@ class ScBlock_statement extends ScCommonIdentifier implements IScStatementBlock 
     ScBlock_header header = null;
     ScBlock_declarative_part declarative_part = null;
     ScBlock_statement_part statement_part = null;
+    
+    String processName = "process";
+    
     public ScBlock_statement(ASTNode node) {
         super(node, true);
         assert(node.getId() == ASTBLOCK_STATEMENT);
@@ -43,11 +46,14 @@ class ScBlock_statement extends ScCommonIdentifier implements IScStatementBlock 
         }
         if(identifier.isEmpty())
             identifier = String.format("line%d", node.getFirstToken().beginLine);
+        processName = addMethodName("process_block_" + identifier);
     }
     
+    
     private String getName() {
-        return "process_block_" + identifier;
+        return processName;
     }
+    
     private String getSpec(boolean individual) {
         String ret = intent() + "void ";
         if(individual)
