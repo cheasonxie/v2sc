@@ -49,7 +49,17 @@ class ScCase_statement_alternative extends ScVhdl {
                 ret += intent() + "default:\r\n";
                 isOthers = true;
             }else {
-                ret += intent() + "case " + item.scString();
+            	String tmp = item.scString();
+            	if(tmp.charAt(0) == '\"') {
+            		try {
+            			String tmp1 = tmp.substring(1, tmp.length()-1);
+            			tmp1 = String.format("0x%x", Integer.parseInt(tmp1, 2));
+            			tmp1 += "/*" + tmp + "*/";
+            			tmp = tmp1;
+            		} catch(NumberFormatException e) {
+            		}
+            	}
+                ret += intent() + "case " + tmp;
                 ret += ":\r\n";
             }
         }

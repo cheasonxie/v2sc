@@ -13,14 +13,15 @@ import parser.vhdl.ASTNode;
  *   </ul> <b>end</b> <b>case</b> [ <i>case_</i>label ] ; </ul>
  */
 class ScCase_statement extends ScVhdl {
-    ScVhdl expression = null;
-    ArrayList<ScVhdl> statement_alt = new ArrayList<ScVhdl>();
+	ScExpression expression = null;
+    ArrayList<ScCase_statement_alternative> statement_alt = 
+    			new ArrayList<ScCase_statement_alternative>();
     public ScCase_statement(ASTNode node) {
         super(node, true);
         assert(node.getId() == ASTCASE_STATEMENT);
         for(int i = 0; i < node.getChildrenNum(); i++) {
             ASTNode c = (ASTNode)node.getChild(i);
-            ScVhdl newNode = null;
+            ScCase_statement_alternative newNode = null;
             switch(c.getId())
             {
             case ASTEXPRESSION:
@@ -39,8 +40,7 @@ class ScCase_statement extends ScVhdl {
     private boolean hasRange() {
         boolean ret = false;
         for(int i = 0; i < statement_alt.size(); i++) {
-            ScCase_statement_alternative alt = 
-                (ScCase_statement_alternative)statement_alt.get(i);
+            ScCase_statement_alternative alt = statement_alt.get(i);
             ScChoices choices = alt.getChoices();
             if(choices.hasRange()) {
                 ret = true;
@@ -55,8 +55,7 @@ class ScCase_statement extends ScVhdl {
         String val = expression.scString();
         if(hasRange()) {
             for(int i = 0; i < statement_alt.size(); i++) {
-                ScCase_statement_alternative alt = 
-                    (ScCase_statement_alternative)statement_alt.get(i);
+                ScCase_statement_alternative alt = statement_alt.get(i);
                 ScChoices choices = alt.getChoices();
                 ArrayList<ScChoice> items = choices.getItems();
                 String tmp = "";
