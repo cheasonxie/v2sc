@@ -276,16 +276,34 @@ public class ScVhdl implements ScVhdlConstants, VhdlTokenConstants,
         String from = range[0];
         String dir = range[1];
         String to = range[2];
+        String min = from;
         String max = to;
-        if (dir.equalsIgnoreCase(RANGE_DOWNTO))
+        if (dir.equalsIgnoreCase(RANGE_DOWNTO)) {
+        	min = to;
             max = from;
+        }
+        
+        if(!min.equals("0")) {
+        	if(Character.isDigit(min.charAt(0)) && Character.isDigit(max.charAt(0))) {
+        		try {
+        			max = String.format("%d", Integer.parseInt(max) - Integer.parseInt(min) + 1);
+        		} catch(NumberFormatException e) {
+        			max = max + "-" + min + "+1";
+        		}
+        	} else {
+        		max = max + "-" + min + "+1";
+        	}
+        	max += "/*" + from + " " + dir + " " + to + "*/";
+        } else {
+        	max = addOne(max);
+        }
         
         
         // check whether max is valid
         if(ret.equals(scType[SC_UINT]))
-            ret += encloseBracket(addOne(max), "<>");
+            ret += encloseBracket(max, "<>");
         else
-            ret += encloseBracket(addOne(max), "[]");
+            ret += encloseBracket(max, "[]");
         
         return ret;
     }
