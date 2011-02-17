@@ -42,12 +42,10 @@ class ScCase_statement_alternative extends ScVhdl {
     public String scString() {
         String ret = "";
         ArrayList<ScChoice> items = choices.getItems();
-        boolean isOthers = false;
         for(int i = 0; i < items.size(); i++) {
             ScChoice item = items.get(i);
             if(item.isOthers()){
                 ret += intent() + "default:\r\n";
-                isOthers = true;
             }else {
             	String tmp = item.scString();
             	if(tmp.charAt(0) == '\"') {
@@ -64,13 +62,9 @@ class ScCase_statement_alternative extends ScVhdl {
             }
         }
         startIntentBlock();
-        String tmp = statementsString(); 
-        if(isOthers || seq_statements.items.size() > 0) {
-            ret += tmp;
-            ret += intent() + "break;\r\n";
-        }else {
-            //ret += "\r\n";
-        }
+        ret += statementsString();
+        ret += intent() + "break;\r\n";
+
         endIntentBlock();
         return ret;
     }

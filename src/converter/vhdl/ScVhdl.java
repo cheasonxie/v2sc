@@ -284,7 +284,7 @@ public class ScVhdl implements ScVhdlConstants, VhdlTokenConstants,
         }
         
         if(!min.equals("0")) {
-        	/*if(Character.isDigit(min.charAt(0)) && Character.isDigit(max.charAt(0))) {
+        	if(Character.isDigit(min.charAt(0)) && Character.isDigit(max.charAt(0))) {
         		try {
         			max = String.format("%d", Integer.parseInt(max) - Integer.parseInt(min) + 1);
         		} catch(NumberFormatException e) {
@@ -292,8 +292,8 @@ public class ScVhdl implements ScVhdlConstants, VhdlTokenConstants,
         		}
         	} else {
         		max = max + "-" + min + "+1";
-        	}*/
-        	max = addOne(max);
+        	}
+        	/*max = addOne(max);*/
         	max += "/*" + from + " " + dir + " " + to + "*/";
         } else {
         	max = addOne(max);
