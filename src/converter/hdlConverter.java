@@ -15,6 +15,7 @@ public abstract class hdlConverter implements ScConstants
     static public final int T_NONE = 0;
     static public final int T_VHDL = 1;
     static public final int T_VERILOG = 2;
+    static public final int T_DIR = 3;
     
     String[] m_hdlFileContents = null;
     protected PrintStream m_targetFileBuff = null;
