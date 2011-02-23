@@ -79,18 +79,16 @@ class ScGeneric_map_aspect extends ScVhdl {
         int maxIndex = -1;
         for(i = 0; i < syms.length; i++) {
             String value = null;
-            if(i < elements.size()) {
-                for(int j = 0; j < elements.size(); j++) {
-                    if(elements.get(j).formal_part != null) {
-                        String genName = elements.get(j).formal_part.scString();
-                        if(genName.equalsIgnoreCase(syms[i].name)) {
-                            value = elements.get(j).actual_part.scString();
-                            break;
-                        }
-                    }else {
-                        value = elements.get(i).actual_part.scString();
+            for(int j = 0; j < elements.size(); j++) {
+                if(elements.get(j).formal_part != null) {
+                    String genName = elements.get(j).formal_part.scString();
+                    if(genName.equalsIgnoreCase(syms[i].name)) {
+                        value = elements.get(j).actual_part.scString();
                         break;
                     }
+                }else if(i < elements.size()) {
+                    value = elements.get(i).actual_part.scString();
+                    break;
                 }
             }
             genMap.put(syms[i].name, value);

@@ -3,6 +3,7 @@ package parser.vhdl;
 import java.util.ArrayList;
 
 import common.MyDebug;
+import converter.vhdl.ScVhdl;
 
 import parser.Token;
 
@@ -56,6 +57,9 @@ public class SymbolParser implements VhdlTokenConstants, VhdlASTConstants, IVhdl
         sym.typeRange = getTypeRange(tNode, parser);
         if(eNode != null) {
             sym.value = eNode.firstTokenImage();
+            if(eNode.first_token.kind == based_literal) {
+                sym.value = getBaseLiteralValue(sym.value);
+            }
         }
         
         for(int i = 0; i < iNode.getChildrenNum(); i++) {
@@ -236,6 +240,58 @@ public class SymbolParser implements VhdlTokenConstants, VhdlASTConstants, IVhdl
         sym.value = value;
         sym.name = node.getName();
         node.getSymbolTable().addSymbol(sym);
+    }
+    
+    /**
+     * @see ScBased_literal
+     * @param image
+     * @return
+     */
+    private static String getBaseLiteralValue(String image) {
+        String ret = image;
+        int index = image.indexOf('#');
+        if(index < 0) {
+            return image;
+        }
+        
+        String base = "10";
+        String based_integer = "0";
+        String fract_based_integer = "";
+        String exponent = "";
+        
+        base = ScVhdl.getBase(image.substring(0, index));
+        int index1 = image.indexOf('.', index+1);
+        int index2 = image.indexOf('#', index+1);
+        if(index1 > 0) {
+            based_integer = ScVhdl.getBased_integer(image.substring(index+1, index1));
+            if(index2 > 0) {
+                fract_based_integer = ScVhdl.getBased_integer(image.substring(index1+1, index2));
+            }else {
+                fract_based_integer = ScVhdl.getBased_integer(image.substring(index1+1));
+            }
+        }else if(index2 > 0) {
+            based_integer = ScVhdl.getBased_integer(image.substring(index+1, index2));
+            if(index2 < image.length() - 1)
+                exponent = ScVhdl.getExponent(image.substring(index2+1));
+        }
+        
+        ret = "";
+        int radix = Integer.parseInt(base);
+        if(radix == 16) {
+            ret += "0x";
+            ret += based_integer;
+            if(!fract_based_integer.isEmpty()) {
+                ret += "." + fract_based_integer;
+            }
+        }else {
+            ret += Integer.parseInt(based_integer, radix);
+            if(!fract_based_integer.isEmpty()) {
+                ret += "." + Integer.parseInt(fract_based_integer, radix);
+            }
+        }
+        ret += exponent;
+            
+        return ret;
     }
     
     

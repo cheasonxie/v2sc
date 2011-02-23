@@ -1,14 +1,9 @@
 package converter.vhdl;
 
-import java.util.ArrayList;
-
 import common.MyDebug;
 
 import converter.IScStatementBlock;
-import parser.ISymbol;
-import parser.Token;
 import parser.vhdl.ASTNode;
-import parser.vhdl.Symbol;
 
 
 /**

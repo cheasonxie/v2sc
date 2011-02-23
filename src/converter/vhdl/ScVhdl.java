@@ -602,7 +602,7 @@ public class ScVhdl implements ScVhdlConstants, VhdlTokenConstants,
      * <dl> base ::=
      *   <dd> integer
      */
-    static String getBase(String str) {
+    static public String getBase(String str) {
         return getInteger(str);
     }
 
@@ -626,7 +626,7 @@ public class ScVhdl implements ScVhdlConstants, VhdlTokenConstants,
      * <dl> based_integer ::=
      *   <dd> extended_digit { [underline ] extended_digit }
      */
-    static String getBased_integer(String str) {
+    static public String getBased_integer(String str) {
         return getInteger(str);
     }
     
@@ -634,7 +634,7 @@ public class ScVhdl implements ScVhdlConstants, VhdlTokenConstants,
      * <dl> exponent ::=
      *   <dd> e [ + ] integer | e - integer
      */
-    static String getExponent(String str) {
+    static public String getExponent(String str) {
         return str;     //TODO vhdl is the same as c language?
     }
 
