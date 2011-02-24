@@ -101,7 +101,7 @@ class ScGeneric_map_aspect extends ScVhdl {
             if(value == null)
                 value = syms[i].value;
             ret += value;
-            if(i < genMap.size() - 1)
+            if(i < maxIndex)
                 ret += ", ";
         }
         
