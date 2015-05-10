@@ -1,0 +1,2 @@
+convert vhdl or verilog to systemc.
+There are some excellent CPU hardware models, such as Lenon3 are written by VHDL. Using this tool, you can convert these models to SystemC, and modify them to other CPU architecture.
